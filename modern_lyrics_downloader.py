@@ -98,6 +98,10 @@ import dsd_converter
 import subsample_delay
 import mastering_limiter
 import album_art_studio
+import audio_deesser
+import midside_processor
+import audio_watermark
+import cue_markers
 
 APP_VERSION = "2.1.0"
 GITHUB_REPO = "Sandeep2062/Sonance"
@@ -1484,6 +1488,100 @@ class LyricsAPI:
         return album_art_studio.scan_and_manage_artwork(
             target_path=target_path, action=action, export_companion=export_companion
         )
+
+    # ------------------ Phase 24: Multiband Dynamic De-Esser Studio ------------------
+    def deess_audio_track(
+        self,
+        input_path: str,
+        output_path: Optional[str] = None,
+        sibilance_freq_hz: float = 6500.0,
+        threshold_dbfs: float = -18.0,
+        max_reduction_db: float = -9.0,
+        listen_sibilance: bool = False,
+    ) -> Dict[str, Any]:
+        """Dynamically attenuates harsh vocal sibilance and harsh frequencies."""
+        return audio_deesser.process_deesser(
+            input_path=input_path,
+            output_path=output_path,
+            sibilance_freq_hz=sibilance_freq_hz,
+            threshold_dbfs=threshold_dbfs,
+            max_reduction_db=max_reduction_db,
+            listen_sibilance=listen_sibilance,
+        )
+
+    # ------------------ Phase 24: M/S Spatial Width & Monomaker Studio ------------------
+    def process_midside_spatial(
+        self,
+        input_path: str,
+        output_path: Optional[str] = None,
+        width_percent: float = 125.0,
+        monomaker_hz: float = 120.0,
+        mid_gain_db: float = 0.0,
+        side_gain_db: float = 0.0,
+        side_air_db: float = 0.0,
+    ) -> Dict[str, Any]:
+        """Applies Mid/Side stereo widening, elliptical low-end mono filter, and high-frequency air."""
+        return midside_processor.process_midside(
+            input_path=input_path,
+            output_path=output_path,
+            width_percent=width_percent,
+            monomaker_hz=monomaker_hz,
+            mid_gain_db=mid_gain_db,
+            side_gain_db=side_gain_db,
+            side_air_db=side_air_db,
+        )
+
+    # ------------------ Phase 24: Lossless Audio Watermark Studio ------------------
+    def manage_audio_watermark(
+        self,
+        input_path: str,
+        payload_text: str = "",
+        action: str = "detect",
+        output_path: Optional[str] = None,
+        strength_db: float = -65.0,
+    ) -> Dict[str, Any]:
+        """Embeds or forensically detects inaudible ultrasonic FSK and RIFF chunk watermarks."""
+        if action == "embed":
+            return audio_watermark.embed_watermark(
+                input_path=input_path,
+                payload_text=payload_text,
+                output_path=output_path,
+                strength_db=strength_db,
+            )
+        else:
+            return audio_watermark.detect_watermark(input_path=input_path)
+
+    # ------------------ Phase 24: Broadcast Cue Marker & Chapter Studio ------------------
+    def manage_cue_markers(
+        self,
+        input_path: str,
+        timestamps_text: Optional[str] = None,
+        export_cue_path: Optional[str] = None,
+        output_path: Optional[str] = None,
+    ) -> Dict[str, Any]:
+        """Imports timestamps, embeds sample-accurate cue markers into WAV/FLAC, or exports CUE sheets."""
+        if timestamps_text and timestamps_text.strip():
+            markers = cue_markers.parse_timestamp_text(timestamps_text.strip())
+            if export_cue_path:
+                cue_str = cue_markers.export_cue_sheet(markers, input_path)
+                with open(export_cue_path, "w", encoding="utf-8") as f:
+                    f.write(cue_str)
+            out_file = output_path or input_path
+            return cue_markers.write_cue_markers(input_path, markers, output_path=out_file)
+        elif export_cue_path:
+            res = cue_markers.read_cue_markers(input_path)
+            markers = res.get("markers", [])
+            cue_str = cue_markers.export_cue_sheet(markers, input_path)
+            with open(export_cue_path, "w", encoding="utf-8") as f:
+                f.write(cue_str)
+            return {
+                "success": True,
+                "exported_cue": export_cue_path,
+                "marker_count": len(markers),
+                "markers": markers,
+            }
+        else:
+            return cue_markers.read_cue_markers(input_path)
 
     def _save_last_folder(self, folder: str):
         try:

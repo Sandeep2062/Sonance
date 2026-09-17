@@ -387,6 +387,30 @@ Examples:
       help="Album art optimizer, cover normalizer & bloat reducer: --album-art <file_or_dir> [--extract] [--strip]",
   )
   parser.add_argument(
+      "--deess",
+      nargs="+",
+      metavar="PARAM",
+      help="Dynamic multiband de-esser & sibilance tamer: --deess <audio_file> [output_file] [--freq 6500] [--threshold -18] [--reduction -9] [--listen]",
+  )
+  parser.add_argument(
+      "--midside",
+      nargs="+",
+      metavar="PARAM",
+      help="Mid/Side spatial width & elliptical bass monomaker: --midside <audio_file> [output_file] [--width 125] [--monomaker 120] [--mid 0] [--side 0] [--air 0]",
+  )
+  parser.add_argument(
+      "--watermark",
+      nargs="+",
+      metavar="PARAM",
+      help="Lossless ultrasonic audio watermark studio: --watermark <audio_file> [--embed <text>] [--detect] [--output <out_file>] [--strength -65]",
+  )
+  parser.add_argument(
+      "--markers",
+      nargs="+",
+      metavar="PARAM",
+      help="Broadcast cue markers & podcast chapter studio: --markers <audio_file> [--import-timestamps <text_or_file>] [--export-cue <cue_file>] [--output <out_file>]",
+  )
+  parser.add_argument(
       "--version",
       action="version",
       version=f"Sonance v{modern_lyrics_downloader.APP_VERSION}",
@@ -1803,6 +1827,170 @@ Examples:
     print(f"[*] Scanning album artwork ({act.upper()} mode): {tgt}...")
     res = album_art_studio.scan_and_manage_artwork(tgt, action=act, export_companion=do_extract)
     print(album_art_studio.format_art_card(res))
+    return
+
+  if args.deess:
+    import audio_deesser
+    de_params = list(args.deess) + list(unknown)
+    inp = de_params[0]
+    out = None
+    freq = 6500.0
+    thresh = -18.0
+    reduc = -9.0
+    listen = False
+    idx = 1
+    while idx < len(de_params):
+      arg = de_params[idx]
+      if arg in ("--freq", "--frequency") and idx + 1 < len(de_params):
+        freq = float(de_params[idx + 1])
+        idx += 2
+      elif arg in ("--threshold", "--thresh") and idx + 1 < len(de_params):
+        thresh = float(de_params[idx + 1])
+        idx += 2
+      elif arg in ("--reduction", "--max-reduction") and idx + 1 < len(de_params):
+        reduc = float(de_params[idx + 1])
+        idx += 2
+      elif arg in ("--listen", "--audition"):
+        listen = True
+        idx += 1
+      elif arg in ("--output", "--out") and idx + 1 < len(de_params):
+        out = de_params[idx + 1]
+        idx += 2
+      elif not arg.startswith("--") and out is None:
+        out = arg
+        idx += 1
+      else:
+        idx += 1
+    print(f"[*] Applying dynamic vocal de-esser ({freq} Hz, Threshold: {thresh} dBFS): {inp}...")
+    res = audio_deesser.process_deesser(
+        inp, output_path=out, sibilance_freq_hz=freq, threshold_dbfs=thresh, max_reduction_db=reduc, listen_sibilance=listen
+    )
+    print(audio_deesser.format_deesser_card(res))
+    return
+
+  if args.midside:
+    import midside_processor
+    ms_params = list(args.midside) + list(unknown)
+    inp = ms_params[0]
+    out = None
+    width = 125.0
+    mono_hz = 120.0
+    mid_g = 0.0
+    side_g = 0.0
+    side_air = 0.0
+    idx = 1
+    while idx < len(ms_params):
+      arg = ms_params[idx]
+      if arg in ("--width", "-w") and idx + 1 < len(ms_params):
+        width = float(ms_params[idx + 1])
+        idx += 2
+      elif arg in ("--monomaker", "--mono") and idx + 1 < len(ms_params):
+        mono_hz = float(ms_params[idx + 1])
+        idx += 2
+      elif arg in ("--mid-gain", "--mid") and idx + 1 < len(ms_params):
+        mid_g = float(ms_params[idx + 1])
+        idx += 2
+      elif arg in ("--side-gain", "--side") and idx + 1 < len(ms_params):
+        side_g = float(ms_params[idx + 1])
+        idx += 2
+      elif arg in ("--side-air", "--air") and idx + 1 < len(ms_params):
+        side_air = float(ms_params[idx + 1])
+        idx += 2
+      elif arg in ("--output", "--out") and idx + 1 < len(ms_params):
+        out = ms_params[idx + 1]
+        idx += 2
+      elif not arg.startswith("--") and out is None:
+        out = arg
+        idx += 1
+      else:
+        idx += 1
+    print(f"[*] Processing Mid/Side spatial width ({width}%, Monomaker: {mono_hz} Hz): {inp}...")
+    res = midside_processor.process_midside(
+        inp, output_path=out, width_percent=width, monomaker_hz=mono_hz, mid_gain_db=mid_g, side_gain_db=side_g, side_air_db=side_air
+    )
+    print(midside_processor.format_midside_card(res))
+    return
+
+  if args.watermark:
+    import audio_watermark
+    wm_params = list(args.watermark) + list(unknown)
+    inp = wm_params[0]
+    out = None
+    payload = None
+    do_detect = False
+    strength = -65.0
+    idx = 1
+    while idx < len(wm_params):
+      arg = wm_params[idx]
+      if arg in ("--embed", "-e") and idx + 1 < len(wm_params):
+        payload = wm_params[idx + 1]
+        idx += 2
+      elif arg in ("--detect", "-d"):
+        do_detect = True
+        idx += 1
+      elif arg in ("--output", "--out") and idx + 1 < len(wm_params):
+        out = wm_params[idx + 1]
+        idx += 2
+      elif arg in ("--strength", "-s") and idx + 1 < len(wm_params):
+        strength = float(wm_params[idx + 1])
+        idx += 2
+      else:
+        idx += 1
+    if payload:
+      print(f"[*] Embedding ultrasonic audio watermark ({strength} dBFS): {inp}...")
+      res = audio_watermark.embed_watermark(inp, payload, output_path=out, strength_db=strength)
+      print(audio_watermark.format_watermark_card(res))
+    else:
+      print(f"[*] Forensically detecting audio watermark: {inp}...")
+      res = audio_watermark.detect_watermark(inp)
+      print(audio_watermark.format_watermark_card(res))
+    return
+
+  if args.markers:
+    import cue_markers
+    cm_params = list(args.markers) + list(unknown)
+    inp = cm_params[0]
+    out = None
+    ts_text = None
+    export_cue = None
+    idx = 1
+    while idx < len(cm_params):
+      arg = cm_params[idx]
+      if arg in ("--import-timestamps", "--timestamps", "-i") and idx + 1 < len(cm_params):
+        ts_text = cm_params[idx + 1]
+        idx += 2
+      elif arg in ("--export-cue", "--cue") and idx + 1 < len(cm_params):
+        export_cue = cm_params[idx + 1]
+        idx += 2
+      elif arg in ("--output", "--out") and idx + 1 < len(cm_params):
+        out = cm_params[idx + 1]
+        idx += 2
+      else:
+        idx += 1
+    if ts_text:
+      if os.path.isfile(ts_text):
+        with open(ts_text, "r", encoding="utf-8") as f:
+          ts_text = f.read()
+      markers = cue_markers.parse_timestamp_text(ts_text)
+      print(f"[*] Importing {len(markers)} timestamps into: {inp}...")
+      if export_cue:
+        cue_str = cue_markers.export_cue_sheet(markers, inp)
+        with open(export_cue, "w", encoding="utf-8") as f:
+          f.write(cue_str)
+        print(f"[+] Exported CUE sheet to: {export_cue}")
+      res = cue_markers.write_cue_markers(inp, markers, output_path=out or inp)
+      print(cue_markers.format_markers_card(res))
+    elif export_cue:
+      res = cue_markers.read_cue_markers(inp)
+      markers = res.get("markers", [])
+      cue_str = cue_markers.export_cue_sheet(markers, inp)
+      with open(export_cue, "w", encoding="utf-8") as f:
+        f.write(cue_str)
+      print(f"[+] Exported {len(markers)} markers to CUE sheet: {export_cue}")
+    else:
+      print(f"[*] Reading cue points & chapter markers: {inp}...")
+      res = cue_markers.read_cue_markers(inp)
+      print(cue_markers.format_markers_card(res))
     return
 
   if args.classic:

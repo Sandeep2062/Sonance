@@ -1231,6 +1231,18 @@
       <button class="btn btn-secondary" onclick="openAlbumArtModal()" style="padding:5px 9px; font-size:11px;" id="albumArtHeaderBtn" title="Album Art Optimizer, Cover Normalizer & Bloat Reducer">
         🖼️ Art Studio
       </button>
+      <button class="btn btn-secondary" onclick="openDeesserModal()" style="padding:5px 9px; font-size:11px;" id="deesserHeaderBtn" title="Multiband Dynamic De-Esser & Vocal Sibilance Tamer">
+        🗣️ De-Esser
+      </button>
+      <button class="btn btn-secondary" onclick="openMidSideModal()" style="padding:5px 9px; font-size:11px;" id="midSideHeaderBtn" title="Mid-Side Spatial Width & Elliptical Bass Monomaker Studio">
+        ↔️ Mid-Side
+      </button>
+      <button class="btn btn-secondary" onclick="openWatermarkModal()" style="padding:5px 9px; font-size:11px;" id="watermarkHeaderBtn" title="Lossless Audio Watermark & Forensic Fingerprint Studio">
+        🔒 Watermark
+      </button>
+      <button class="btn btn-secondary" onclick="openCueMarkersModal()" style="padding:5px 9px; font-size:11px;" id="cueMarkersHeaderBtn" title="Broadcast Audio Cue Markers & Podcast Chapter Studio">
+        📑 Cue Markers
+      </button>
       <button class="btn btn-secondary" onclick="openLrcStudioModal()" style="padding:5px 9px; font-size:11px;" id="lrcStudioHeaderBtn" title="Interactive LRC Studio & Live Time-Stamper">
         ✍️ LRC Studio
       </button>
@@ -5947,6 +5959,240 @@
     </div>
   </div>
 
+  <!-- Phase 24: Multiband Dynamic De-Esser & Vocal Sibilance Tamer Modal -->
+  <div class="modal-backdrop" id="deesserModal" style="display:none;">
+    <div class="modal-card" style="width:720px; max-width:95vw; background:#161926; border:1px solid var(--border); border-radius:12px; box-shadow:0 12px 36px rgba(0,0,0,0.7); overflow:hidden;">
+      <div style="padding:16px 20px; background:#121520; border-bottom:1px solid var(--border); display:flex; justify-content:space-between; align-items:center;">
+        <div class="modal-title" style="font-size:14px; font-weight:700; display:flex; align-items:center; gap:8px;">
+          <span>🗣️</span>
+          <span>Multiband Dynamic De-Esser &amp; Vocal Sibilance Tamer</span>
+        </div>
+        <button onclick="closeDeesserModal()" style="background:none; border:none; color:var(--text-muted); font-size:16px; cursor:pointer;">✕</button>
+      </div>
+
+      <div style="padding:20px; max-height:75vh; overflow-y:auto; display:flex; flex-direction:column; gap:16px;">
+        <div style="font-size:11px; color:var(--text-dim); line-height:1.5;">
+          Dynamic split-band de-esser targeting harsh vocal sibilance (4.0 kHz - 9.0 kHz) caused by vocal microphones, compressed streaming codecs, and harsh consonants ('s', 'sh', 't', 'ch'). Employs an ultra-fast 1ms RMS sidechain envelope with adaptive recovery to tame piercing transients while preserving top-end acoustic sparkle.
+        </div>
+
+        <div>
+          <label style="font-size:11px; font-weight:600; color:var(--text-muted); display:block; margin-bottom:6px;">Target Audio File:</label>
+          <div style="display:flex; gap:8px;">
+            <input type="text" id="deesserTargetInput" class="search-input" style="width:100%; font-size:11px;" placeholder="Path to audio file (WAV, FLAC, MP3)...">
+            <button class="btn btn-secondary" onclick="loadActiveTrackForDeesser()" style="font-size:11px; padding:6px 12px; white-space:nowrap;">Active Track</button>
+          </div>
+        </div>
+
+        <div style="display:grid; grid-template-columns:1fr 1fr 1fr; gap:12px;">
+          <div>
+            <label style="font-size:11px; font-weight:600; color:var(--text-muted); display:block; margin-bottom:6px;">Sibilance Center: <span id="deesserFreqVal" style="color:var(--emerald);">6500</span> Hz</label>
+            <input type="range" id="deesserFreqSlider" min="4000" max="9000" step="100" value="6500" style="width:100%;" oninput="document.getElementById('deesserFreqVal').innerText = this.value">
+          </div>
+          <div>
+            <label style="font-size:11px; font-weight:600; color:var(--text-muted); display:block; margin-bottom:6px;">Sidechain Threshold: <span id="deesserThreshVal" style="color:var(--emerald);">-18</span> dBFS</label>
+            <input type="range" id="deesserThreshSlider" min="-36" max="-6" step="1" value="-18" style="width:100%;" oninput="document.getElementById('deesserThreshVal').innerText = this.value">
+          </div>
+          <div>
+            <label style="font-size:11px; font-weight:600; color:var(--text-muted); display:block; margin-bottom:6px;">Max Reduction: <span id="deesserReducVal" style="color:var(--emerald);">-9</span> dB</label>
+            <input type="range" id="deesserReducSlider" min="-24" max="-3" step="1" value="-9" style="width:100%;" oninput="document.getElementById('deesserReducVal').innerText = this.value">
+          </div>
+        </div>
+
+        <div style="display:flex; align-items:center; gap:8px;">
+          <input type="checkbox" id="deesserListenCheck" style="accent-color:var(--emerald); cursor:pointer;">
+          <label for="deesserListenCheck" style="font-size:11px; color:var(--text-muted); cursor:pointer;">
+            Listen Sibilance (Audition mode: isolates extracted harsh sibilant bursts to dial in threshold)
+          </label>
+        </div>
+
+        <div style="display:flex; justify-content:space-between; align-items:center; margin-top:4px;">
+          <span id="deesserStatusText" style="font-size:11px; color:var(--text-dim);">Ready to de-ess vocal audio</span>
+          <button class="btn btn-primary" onclick="runDeesserAction()" id="processDeesserBtn" style="font-size:12px; padding:7px 18px;">
+            🗣️ Process De-Esser
+          </button>
+        </div>
+
+        <div id="deesserOutputCard" style="background:#0b0d14; border:1px solid var(--border); border-radius:8px; padding:12px; font-family:monospace; font-size:11px; line-height:1.45; color:var(--cyan); min-height:80px; white-space:pre-wrap; overflow-x:auto;">Select audio file and click Process De-Esser.</div>
+      </div>
+
+      <div style="padding:10px 16px; background:#121520; border-top:1px solid var(--border); display:flex; justify-content:space-between; align-items:center;">
+        <span style="font-size:10px; color:var(--text-dim);">Exports 24-bit PCM WAV with dynamic multiband attenuation</span>
+        <button class="btn btn-secondary" onclick="closeDeesserModal()">Close</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Phase 24: Mid/Side Spatial Width & Elliptical Bass Monomaker Modal -->
+  <div class="modal-backdrop" id="midSideModal" style="display:none;">
+    <div class="modal-card" style="width:720px; max-width:95vw; background:#161926; border:1px solid var(--border); border-radius:12px; box-shadow:0 12px 36px rgba(0,0,0,0.7); overflow:hidden;">
+      <div style="padding:16px 20px; background:#121520; border-bottom:1px solid var(--border); display:flex; justify-content:space-between; align-items:center;">
+        <div class="modal-title" style="font-size:14px; font-weight:700; display:flex; align-items:center; gap:8px;">
+          <span>↔️</span>
+          <span>Mid/Side Spatial Width &amp; Elliptical Bass Monomaker</span>
+        </div>
+        <button onclick="closeMidSideModal()" style="background:none; border:none; color:var(--text-muted); font-size:16px; cursor:pointer;">✕</button>
+      </div>
+
+      <div style="padding:20px; max-height:75vh; overflow-y:auto; display:flex; flex-direction:column; gap:16px;">
+        <div style="font-size:11px; color:var(--text-dim); line-height:1.5;">
+          Orthogonal Mid/Side matrix transformer (M = [L+R]/&radic;2, S = [L-R]/&radic;2). Includes an Elliptical Bass Monomaker filter (Butterworth high-pass on Side channel) to prevent phase cancellation on subwoofers and vinyl cuts, plus high-frequency air excitation (&gt;10 kHz) to widen acoustic ambience without shifting lead vocals.
+        </div>
+
+        <div>
+          <label style="font-size:11px; font-weight:600; color:var(--text-muted); display:block; margin-bottom:6px;">Target Stereo Audio File:</label>
+          <div style="display:flex; gap:8px;">
+            <input type="text" id="midSideTargetInput" class="search-input" style="width:100%; font-size:11px;" placeholder="Path to stereo audio file (WAV, FLAC, MP3)...">
+            <button class="btn btn-secondary" onclick="loadActiveTrackForMidSide()" style="font-size:11px; padding:6px 12px; white-space:nowrap;">Active Track</button>
+          </div>
+        </div>
+
+        <div style="display:grid; grid-template-columns:1fr 1fr 1fr; gap:12px;">
+          <div>
+            <label style="font-size:11px; font-weight:600; color:var(--text-muted); display:block; margin-bottom:6px;">Stereo Width: <span id="midSideWidthVal" style="color:var(--emerald);">125</span>%</label>
+            <input type="range" id="midSideWidthSlider" min="0" max="200" step="5" value="125" style="width:100%;" oninput="document.getElementById('midSideWidthVal').innerText = this.value">
+          </div>
+          <div>
+            <label style="font-size:11px; font-weight:600; color:var(--text-muted); display:block; margin-bottom:6px;">Bass Monomaker: <span id="midSideMonoVal" style="color:var(--emerald);">120</span> Hz</label>
+            <input type="range" id="midSideMonoSlider" min="60" max="300" step="10" value="120" style="width:100%;" oninput="document.getElementById('midSideMonoVal').innerText = this.value">
+          </div>
+          <div>
+            <label style="font-size:11px; font-weight:600; color:var(--text-muted); display:block; margin-bottom:6px;">Side Air Sparkle: <span id="midSideAirVal" style="color:var(--emerald);">+1.5</span> dB</label>
+            <input type="range" id="midSideAirSlider" min="0.0" max="6.0" step="0.5" value="1.5" style="width:100%;" oninput="document.getElementById('midSideAirVal').innerText = '+' + this.value">
+          </div>
+        </div>
+
+        <div style="display:flex; justify-content:space-between; align-items:center; margin-top:4px;">
+          <span id="midSideStatusText" style="font-size:11px; color:var(--text-dim);">Ready for Mid/Side spatial processing</span>
+          <button class="btn btn-primary" onclick="runMidSideAction()" id="processMidSideBtn" style="font-size:12px; padding:7px 18px;">
+            ↔️ Process Spatial Width
+          </button>
+        </div>
+
+        <div id="midSideOutputCard" style="background:#0b0d14; border:1px solid var(--border); border-radius:8px; padding:12px; font-family:monospace; font-size:11px; line-height:1.45; color:var(--cyan); min-height:80px; white-space:pre-wrap; overflow-x:auto;">Select audio file and click Process Spatial Width.</div>
+      </div>
+
+      <div style="padding:10px 16px; background:#121520; border-top:1px solid var(--border); display:flex; justify-content:space-between; align-items:center;">
+        <span style="font-size:10px; color:var(--text-dim);">Monitors inter-channel correlation (r) and side-to-mid ratio</span>
+        <button class="btn btn-secondary" onclick="closeMidSideModal()">Close</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Phase 24: Lossless Audio Watermark & Forensic Fingerprint Modal -->
+  <div class="modal-backdrop" id="watermarkModal" style="display:none;">
+    <div class="modal-card" style="width:720px; max-width:95vw; background:#161926; border:1px solid var(--border); border-radius:12px; box-shadow:0 12px 36px rgba(0,0,0,0.7); overflow:hidden;">
+      <div style="padding:16px 20px; background:#121520; border-bottom:1px solid var(--border); display:flex; justify-content:space-between; align-items:center;">
+        <div class="modal-title" style="font-size:14px; font-weight:700; display:flex; align-items:center; gap:8px;">
+          <span>🔒</span>
+          <span>Lossless Audio Watermark &amp; Forensic Fingerprint Studio</span>
+        </div>
+        <button onclick="closeWatermarkModal()" style="background:none; border:none; color:var(--text-muted); font-size:16px; cursor:pointer;">✕</button>
+      </div>
+
+      <div style="padding:20px; max-height:75vh; overflow-y:auto; display:flex; flex-direction:column; gap:16px;">
+        <div style="font-size:11px; color:var(--text-dim); line-height:1.5;">
+          Forensically embeds and detects inaudible psychoacoustic high-frequency FSK watermarks (18-20 kHz at -65 dBFS) and RIFF container metadata chunks. Embeds ISRC identifiers, copyright tokens, or cryptographic ownership signatures without audible loss or degradation.
+        </div>
+
+        <div>
+          <label style="font-size:11px; font-weight:600; color:var(--text-muted); display:block; margin-bottom:6px;">Target Audio File:</label>
+          <div style="display:flex; gap:8px;">
+            <input type="text" id="watermarkTargetInput" class="search-input" style="width:100%; font-size:11px;" placeholder="Path to audio file (WAV, FLAC)...">
+            <button class="btn btn-secondary" onclick="loadActiveTrackForWatermark()" style="font-size:11px; padding:6px 12px; white-space:nowrap;">Active Track</button>
+          </div>
+        </div>
+
+        <div style="display:grid; grid-template-columns:1fr 1fr; gap:12px;">
+          <div>
+            <label style="font-size:11px; font-weight:600; color:var(--text-muted); display:block; margin-bottom:6px;">Action Mode:</label>
+            <select id="watermarkActionSelect" class="search-input" style="width:100%; font-size:11px;" onchange="toggleWatermarkFields()">
+              <option value="detect" selected>Forensic Detection &amp; Verification (Scan existing watermark)</option>
+              <option value="embed">Embed New Watermark (Acoustic ultrasonic + RIFF chunk)</option>
+            </select>
+          </div>
+          <div id="watermarkStrengthDiv" style="display:none;">
+            <label style="font-size:11px; font-weight:600; color:var(--text-muted); display:block; margin-bottom:6px;">Watermark Amplitude: <span id="watermarkStrengthVal" style="color:var(--emerald);">-65</span> dBFS</label>
+            <input type="range" id="watermarkStrengthSlider" min="-75" max="-50" step="1" value="-65" style="width:100%;" oninput="document.getElementById('watermarkStrengthVal').innerText = this.value">
+          </div>
+        </div>
+
+        <div id="watermarkPayloadDiv" style="display:none;">
+          <label style="font-size:11px; font-weight:600; color:var(--text-muted); display:block; margin-bottom:6px;">Watermark Payload (ISRC, Copyright, or Ownership Token):</label>
+          <input type="text" id="watermarkPayloadInput" class="search-input" style="width:100%; font-size:11px;" placeholder="e.g. ISRC:US-SND-26-00001 (C) 2026 Sonance Audio">
+        </div>
+
+        <div style="display:flex; justify-content:space-between; align-items:center; margin-top:4px;">
+          <span id="watermarkStatusText" style="font-size:11px; color:var(--text-dim);">Ready to detect audio watermark</span>
+          <button class="btn btn-primary" onclick="runWatermarkAction()" id="processWatermarkBtn" style="font-size:12px; padding:7px 18px;">
+            🔒 Run Watermark Scan
+          </button>
+        </div>
+
+        <div id="watermarkOutputCard" style="background:#0b0d14; border:1px solid var(--border); border-radius:8px; padding:12px; font-family:monospace; font-size:11px; line-height:1.45; color:var(--cyan); min-height:80px; white-space:pre-wrap; overflow-x:auto;">Select audio file and click Run Watermark Scan.</div>
+      </div>
+
+      <div style="padding:10px 16px; background:#121520; border-top:1px solid var(--border); display:flex; justify-content:space-between; align-items:center;">
+        <span style="font-size:10px; color:var(--text-dim);">CRC-16 data integrity validation with multi-layer forensic detection</span>
+        <button class="btn btn-secondary" onclick="closeWatermarkModal()">Close</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Phase 24: Broadcast Audio Cue Markers & Podcast Chapter Studio Modal -->
+  <div class="modal-backdrop" id="cueMarkersModal" style="display:none;">
+    <div class="modal-card" style="width:720px; max-width:95vw; background:#161926; border:1px solid var(--border); border-radius:12px; box-shadow:0 12px 36px rgba(0,0,0,0.7); overflow:hidden;">
+      <div style="padding:16px 20px; background:#121520; border-bottom:1px solid var(--border); display:flex; justify-content:space-between; align-items:center;">
+        <div class="modal-title" style="font-size:14px; font-weight:700; display:flex; align-items:center; gap:8px;">
+          <span>📑</span>
+          <span>Broadcast Audio Cue Markers &amp; Podcast Chapter Studio</span>
+        </div>
+        <button onclick="closeCueMarkersModal()" style="background:none; border:none; color:var(--text-muted); font-size:16px; cursor:pointer;">✕</button>
+      </div>
+
+      <div style="padding:20px; max-height:75vh; overflow-y:auto; display:flex; flex-direction:column; gap:16px;">
+        <div style="font-size:11px; color:var(--text-dim); line-height:1.5;">
+          Reads, embeds, and exports broadcast-standard audio cue points and timeline chapter markers. Supports WAV ('cue ' &amp; 'adtl' chunks), FLAC (Vorbis CHAPTERxxx), and generates Red Book / EBU .CUE sheet files (75 frames/sec) directly from YouTube, SoundCloud, or podcast timestamp descriptions.
+        </div>
+
+        <div>
+          <label style="font-size:11px; font-weight:600; color:var(--text-muted); display:block; margin-bottom:6px;">Target Audio File:</label>
+          <div style="display:flex; gap:8px;">
+            <input type="text" id="cueMarkersTargetInput" class="search-input" style="width:100%; font-size:11px;" placeholder="Path to audio file (WAV, FLAC)...">
+            <button class="btn btn-secondary" onclick="loadActiveTrackForCueMarkers()" style="font-size:11px; padding:6px 12px; white-space:nowrap;">Active Track</button>
+          </div>
+        </div>
+
+        <div>
+          <label style="font-size:11px; font-weight:600; color:var(--text-muted); display:block; margin-bottom:6px;">Action Mode:</label>
+          <select id="cueMarkersActionSelect" class="search-input" style="width:100%; font-size:11px;" onchange="toggleCueMarkersFields()">
+            <option value="read" selected>Read &amp; Display Timeline Markers (Inspect existing cues &amp; chapters)</option>
+            <option value="import">Import Timestamps &amp; Embed Markers (Write into WAV/FLAC)</option>
+            <option value="export_cue">Export to Industry-Standard .CUE Sheet</option>
+          </select>
+        </div>
+
+        <div id="cueMarkersTimestampsDiv" style="display:none;">
+          <label style="font-size:11px; font-weight:600; color:var(--text-muted); display:block; margin-bottom:6px;">Paste YouTube / SoundCloud / Podcast Timestamps:</label>
+          <textarea id="cueMarkersTimestampsInput" class="search-input" style="width:100%; height:100px; font-family:monospace; font-size:11px; resize:vertical;" placeholder="00:00 Intro &amp; Welcome&#10;02:15 Topic 1: Dynamic De-Essing&#10;07:30 Topic 2: Mid-Side Matrix Width&#10;14:00 Outro &amp; Credits"></textarea>
+        </div>
+
+        <div style="display:flex; justify-content:space-between; align-items:center; margin-top:4px;">
+          <span id="cueMarkersStatusText" style="font-size:11px; color:var(--text-dim);">Ready to read timeline markers</span>
+          <button class="btn btn-primary" onclick="runCueMarkersAction()" id="processCueMarkersBtn" style="font-size:12px; padding:7px 18px;">
+            📑 Process Cue Markers
+          </button>
+        </div>
+
+        <div id="cueMarkersOutputCard" style="background:#0b0d14; border:1px solid var(--border); border-radius:8px; padding:12px; font-family:monospace; font-size:11px; line-height:1.45; color:var(--cyan); min-height:80px; white-space:pre-wrap; overflow-x:auto;">Select audio file and click Process Cue Markers.</div>
+      </div>
+
+      <div style="padding:10px 16px; background:#121520; border-top:1px solid var(--border); display:flex; justify-content:space-between; align-items:center;">
+        <span style="font-size:10px; color:var(--text-dim);">Red Book 75 fps sample-accurate indexing with lossless container rewriting</span>
+        <button class="btn btn-secondary" onclick="closeCueMarkersModal()">Close</button>
+      </div>
+    </div>
+  </div>
+
   <!-- Podcast & Long Mix Bookmark Resumption Toast (Phase 10) -->
   <div id="podcastResumeToast" style="display:none; position:fixed; bottom:85px; right:20px; z-index:9999; background:#131722; border:1px solid var(--border); box-shadow:0 8px 24px rgba(0,0,0,0.6); border-radius:10px; padding:10px 14px; align-items:center; gap:10px; backdrop-filter:blur(10px);">
     <span style="font-size:16px;">⏱️</span>
@@ -8943,6 +9189,10 @@
         closePhaseAlignModal();
         closeMasterLimiterModal();
         closeAlbumArtModal();
+        closeDeesserModal();
+        closeMidSideModal();
+        closeWatermarkModal();
+        closeCueMarkersModal();
         dismissPodcastResumeToast();
         const popup = document.getElementById('speedStudioPopup');
         if (popup) popup.style.display = 'none';
@@ -15218,6 +15468,416 @@
           if (btn) {
             btn.disabled = false;
             btn.innerText = '🖼️ Run Art Studio Action';
+          }
+          if (out) out.innerText = '✕ Error: ' + (err.message || err);
+        });
+      }
+    }
+
+    // ------------------ Phase 24: Multiband Dynamic De-Esser Studio ------------------
+    function openDeesserModal() {
+      const modal = document.getElementById('deesserModal');
+      if (modal) modal.style.display = 'flex';
+      const input = document.getElementById('deesserTargetInput');
+      if (input && !input.value && currentTrack && currentTrack.file_path) {
+        input.value = currentTrack.file_path;
+      }
+    }
+
+    function closeDeesserModal() {
+      const modal = document.getElementById('deesserModal');
+      if (modal) modal.style.display = 'none';
+    }
+
+    function loadActiveTrackForDeesser() {
+      const input = document.getElementById('deesserTargetInput');
+      if (currentTrack && currentTrack.file_path) {
+        if (input) input.value = currentTrack.file_path;
+        showToast('Loaded active track for De-Esser.');
+      } else {
+        showToast('No active audio track playing.', true);
+      }
+    }
+
+    function runDeesserAction() {
+      const inp = document.getElementById('deesserTargetInput')?.value?.trim();
+      const freq = parseFloat(document.getElementById('deesserFreqSlider')?.value || '6500');
+      const thresh = parseFloat(document.getElementById('deesserThreshSlider')?.value || '-18');
+      const reduc = parseFloat(document.getElementById('deesserReducSlider')?.value || '-9');
+      const listen = document.getElementById('deesserListenCheck')?.checked || false;
+      const btn = document.getElementById('processDeesserBtn');
+      const st = document.getElementById('deesserStatusText');
+      const out = document.getElementById('deesserOutputCard');
+
+      if (!inp) {
+        showToast('Please specify an audio file to de-ess.', true);
+        return;
+      }
+
+      if (btn) {
+        btn.disabled = true;
+        btn.innerText = '⏳ Processing De-Esser...';
+      }
+      if (st) {
+        st.innerText = `Filtering sibilance at ${freq} Hz (Threshold: ${thresh} dBFS)...`;
+        st.style.color = 'var(--cyan)';
+      }
+
+      if (window.pywebview && window.pywebview.api && window.pywebview.api.deess_audio_track) {
+        window.pywebview.api.deess_audio_track(inp, null, freq, thresh, reduc, listen).then(res => {
+          if (btn) {
+            btn.disabled = false;
+            btn.innerText = '🗣️ Process De-Esser';
+          }
+          if (res && res.success) {
+            if (st) {
+              st.innerText = '✓ De-essing completed successfully!';
+              st.style.color = 'var(--emerald)';
+            }
+            let card = `MULTIBAND DYNAMIC DE-ESSER & SIBILANCE TAMER\n`;
+            card += `Input Track    : ${res.input_file}\n`;
+            card += `Sibilance Zone : ${res.sibilance_freq_hz} Hz (Bandpass Q=1.5)\n`;
+            card += `Threshold      : ${res.threshold_dbfs} dBFS | Max Reduction: ${res.max_reduction_db} dB\n`;
+            card += `Events Tamed   : ${res.events_tamed} harsh sibilant bursts mitigated\n`;
+            card += `Max Reduction  : -${res.max_attenuation_db.toFixed(1)} dB (Peak: ${res.peak_dbfs.toFixed(1)} dBFS)\n`;
+            card += `Master Output  : ${res.output_path}\n`;
+            if (out) out.innerText = card;
+          } else {
+            if (st) {
+              st.innerText = '✕ De-esser failed: ' + (res ? res.error : 'Unknown');
+              st.style.color = 'var(--rose)';
+            }
+          }
+        }).catch(err => {
+          if (btn) {
+            btn.disabled = false;
+            btn.innerText = '🗣️ Process De-Esser';
+          }
+          if (out) out.innerText = '✕ Error: ' + (err.message || err);
+        });
+      }
+    }
+
+    // ------------------ Phase 24: Mid/Side Spatial Width & Monomaker Studio ------------------
+    function openMidSideModal() {
+      const modal = document.getElementById('midSideModal');
+      if (modal) modal.style.display = 'flex';
+      const input = document.getElementById('midSideTargetInput');
+      if (input && !input.value && currentTrack && currentTrack.file_path) {
+        input.value = currentTrack.file_path;
+      }
+    }
+
+    function closeMidSideModal() {
+      const modal = document.getElementById('midSideModal');
+      if (modal) modal.style.display = 'none';
+    }
+
+    function loadActiveTrackForMidSide() {
+      const input = document.getElementById('midSideTargetInput');
+      if (currentTrack && currentTrack.file_path) {
+        if (input) input.value = currentTrack.file_path;
+        showToast('Loaded active track for Mid/Side processor.');
+      } else {
+        showToast('No active audio track playing.', true);
+      }
+    }
+
+    function runMidSideAction() {
+      const inp = document.getElementById('midSideTargetInput')?.value?.trim();
+      const width = parseFloat(document.getElementById('midSideWidthSlider')?.value || '125');
+      const mono = parseFloat(document.getElementById('midSideMonoSlider')?.value || '120');
+      const air = parseFloat(document.getElementById('midSideAirSlider')?.value || '1.5');
+      const btn = document.getElementById('processMidSideBtn');
+      const st = document.getElementById('midSideStatusText');
+      const out = document.getElementById('midSideOutputCard');
+
+      if (!inp) {
+        showToast('Please specify a stereo audio file.', true);
+        return;
+      }
+
+      if (btn) {
+        btn.disabled = true;
+        btn.innerText = '⏳ Processing Mid/Side...';
+      }
+      if (st) {
+        st.innerText = `Transforming M/S matrix (Width: ${width}%, Monomaker: ${mono} Hz)...`;
+        st.style.color = 'var(--cyan)';
+      }
+
+      if (window.pywebview && window.pywebview.api && window.pywebview.api.process_midside_spatial) {
+        window.pywebview.api.process_midside_spatial(inp, null, width, mono, 0.0, 0.0, air).then(res => {
+          if (btn) {
+            btn.disabled = false;
+            btn.innerText = '↔️ Process Spatial Width';
+          }
+          if (res && res.success) {
+            if (st) {
+              st.innerText = '✓ Spatial processing complete!';
+              st.style.color = 'var(--emerald)';
+            }
+            let card = `MID/SIDE SPATIAL WIDTH & BASS MONOMAKER STUDIO\n`;
+            card += `Input Track    : ${res.input_file}\n`;
+            card += `Stereo Width   : ${res.width_percent}%\n`;
+            card += `Bass Monomaker : Side High-Passed at ${res.monomaker_hz} Hz\n`;
+            card += `Side Air Boost : +${res.side_air_db} dB (>10 kHz)\n`;
+            card += `Correlation (r): ${res.corr_in} -> ${res.corr_out} (Side/Mid: ${res.side_to_mid_db} dB)\n`;
+            card += `Output Peak    : ${res.peak_dbfs.toFixed(1)} dBFS\n`;
+            card += `Master Output  : ${res.output_path}\n`;
+            if (out) out.innerText = card;
+          } else {
+            if (st) {
+              st.innerText = '✕ Mid/Side failed: ' + (res ? res.error : 'Unknown');
+              st.style.color = 'var(--rose)';
+            }
+          }
+        }).catch(err => {
+          if (btn) {
+            btn.disabled = false;
+            btn.innerText = '↔️ Process Spatial Width';
+          }
+          if (out) out.innerText = '✕ Error: ' + (err.message || err);
+        });
+      }
+    }
+
+    // ------------------ Phase 24: Lossless Audio Watermark Studio ------------------
+    function openWatermarkModal() {
+      const modal = document.getElementById('watermarkModal');
+      if (modal) modal.style.display = 'flex';
+      const input = document.getElementById('watermarkTargetInput');
+      if (input && !input.value && currentTrack && currentTrack.file_path) {
+        input.value = currentTrack.file_path;
+      }
+    }
+
+    function closeWatermarkModal() {
+      const modal = document.getElementById('watermarkModal');
+      if (modal) modal.style.display = 'none';
+    }
+
+    function loadActiveTrackForWatermark() {
+      const input = document.getElementById('watermarkTargetInput');
+      if (currentTrack && currentTrack.file_path) {
+        if (input) input.value = currentTrack.file_path;
+        showToast('Loaded active track for Watermark Studio.');
+      } else {
+        showToast('No active audio track playing.', true);
+      }
+    }
+
+    function toggleWatermarkFields() {
+      const act = document.getElementById('watermarkActionSelect')?.value || 'detect';
+      const payloadDiv = document.getElementById('watermarkPayloadDiv');
+      const strengthDiv = document.getElementById('watermarkStrengthDiv');
+      const btn = document.getElementById('processWatermarkBtn');
+      const st = document.getElementById('watermarkStatusText');
+
+      if (act === 'embed') {
+        if (payloadDiv) payloadDiv.style.display = 'block';
+        if (strengthDiv) strengthDiv.style.display = 'block';
+        if (btn) btn.innerText = '🔒 Embed Watermark';
+        if (st) st.innerText = 'Ready to embed ultrasonic watermark';
+      } else {
+        if (payloadDiv) payloadDiv.style.display = 'none';
+        if (strengthDiv) strengthDiv.style.display = 'none';
+        if (btn) btn.innerText = '🔒 Run Watermark Scan';
+        if (st) st.innerText = 'Ready to detect audio watermark';
+      }
+    }
+
+    function runWatermarkAction() {
+      const inp = document.getElementById('watermarkTargetInput')?.value?.trim();
+      const act = document.getElementById('watermarkActionSelect')?.value || 'detect';
+      const payload = document.getElementById('watermarkPayloadInput')?.value?.trim() || '';
+      const strength = parseFloat(document.getElementById('watermarkStrengthSlider')?.value || '-65');
+      const btn = document.getElementById('processWatermarkBtn');
+      const st = document.getElementById('watermarkStatusText');
+      const out = document.getElementById('watermarkOutputCard');
+
+      if (!inp) {
+        showToast('Please specify an audio file.', true);
+        return;
+      }
+      if (act === 'embed' && !payload) {
+        showToast('Please enter watermark payload text to embed.', true);
+        return;
+      }
+
+      if (btn) {
+        btn.disabled = true;
+        btn.innerText = act === 'embed' ? '⏳ Embedding Watermark...' : '⏳ Scanning Forensic Watermark...';
+      }
+      if (st) {
+        st.innerText = act === 'embed' ? `Synthesizing ultrasonic FSK bursts (${strength} dBFS)...` : 'Demodulating carrier frequencies and reading RIFF chunks...';
+        st.style.color = 'var(--cyan)';
+      }
+
+      if (window.pywebview && window.pywebview.api && window.pywebview.api.manage_audio_watermark) {
+        window.pywebview.api.manage_audio_watermark(inp, payload, act, null, strength).then(res => {
+          if (btn) {
+            btn.disabled = false;
+            btn.innerText = act === 'embed' ? '🔒 Embed Watermark' : '🔒 Run Watermark Scan';
+          }
+          if (res) {
+            if (act === 'embed') {
+              if (st) {
+                st.innerText = '✓ Watermark embedded successfully!';
+                st.style.color = 'var(--emerald)';
+              }
+              let card = `AUDIO WATERMARK EMBEDDING SUMMARY\n`;
+              card += `Input Track   : ${res.input_path}\n`;
+              card += `Output Track  : ${res.output_path}\n`;
+              card += `Payload       : ${res.payload}\n`;
+              card += `Strength      : ${res.strength_db} dBFS (Inaudible)\n`;
+              card += `Carrier Band  : ${res.carrier_band_hz}\n`;
+              card += `Bursts Count  : ${res.bursts_embedded} embedded bursts\n`;
+              card += `Sample Rate   : ${res.sample_rate} Hz (24-bit PCM)\n`;
+              if (out) out.innerText = card;
+            } else {
+              const detected = res.detected;
+              if (st) {
+                st.innerText = detected ? '✓ Watermark verified!' : '[-] No watermark found';
+                st.style.color = detected ? 'var(--emerald)' : 'var(--amber)';
+              }
+              let card = `FORENSIC WATERMARK DETECTION REPORT\n`;
+              card += `Status        : ${detected ? '[+] WATERMARK VERIFIED' : '[-] NO WATERMARK DETECTED'}\n`;
+              if (detected) {
+                card += `Payload       : ${res.payload}\n`;
+                card += `Confidence    : ${res.confidence_pct}%\n`;
+                card += `Method        : ${res.detection_method}\n`;
+                card += `Signal FSK    : ${res.signal_fsk_present ? '[+] Confirmed' : '[-] Absent'}\n`;
+                card += `RIFF Chunk    : ${res.riff_chunk_present ? '[+] Confirmed' : '[-] Absent'}\n`;
+              }
+              card += `Duration      : ${res.duration_sec}s @ ${res.sample_rate} Hz\n`;
+              if (out) out.innerText = card;
+            }
+          }
+        }).catch(err => {
+          if (btn) {
+            btn.disabled = false;
+            btn.innerText = act === 'embed' ? '🔒 Embed Watermark' : '🔒 Run Watermark Scan';
+          }
+          if (out) out.innerText = '✕ Error: ' + (err.message || err);
+        });
+      }
+    }
+
+    // ------------------ Phase 24: Broadcast Audio Cue Markers & Podcast Chapter Studio ------------------
+    function openCueMarkersModal() {
+      const modal = document.getElementById('cueMarkersModal');
+      if (modal) modal.style.display = 'flex';
+      const input = document.getElementById('cueMarkersTargetInput');
+      if (input && !input.value && currentTrack && currentTrack.file_path) {
+        input.value = currentTrack.file_path;
+      }
+    }
+
+    function closeCueMarkersModal() {
+      const modal = document.getElementById('cueMarkersModal');
+      if (modal) modal.style.display = 'none';
+    }
+
+    function loadActiveTrackForCueMarkers() {
+      const input = document.getElementById('cueMarkersTargetInput');
+      if (currentTrack && currentTrack.file_path) {
+        if (input) input.value = currentTrack.file_path;
+        showToast('Loaded active track for Cue Markers.');
+      } else {
+        showToast('No active audio track playing.', true);
+      }
+    }
+
+    function toggleCueMarkersFields() {
+      const act = document.getElementById('cueMarkersActionSelect')?.value || 'read';
+      const tsDiv = document.getElementById('cueMarkersTimestampsDiv');
+      const btn = document.getElementById('processCueMarkersBtn');
+      const st = document.getElementById('cueMarkersStatusText');
+
+      if (act === 'import') {
+        if (tsDiv) tsDiv.style.display = 'block';
+        if (btn) btn.innerText = '📑 Import & Embed Markers';
+        if (st) st.innerText = 'Ready to parse timestamps & embed';
+      } else if (act === 'export_cue') {
+        if (tsDiv) tsDiv.style.display = 'none';
+        if (btn) btn.innerText = '📑 Export .CUE Sheet';
+        if (st) st.innerText = 'Ready to generate Red Book CUE file';
+      } else {
+        if (tsDiv) tsDiv.style.display = 'none';
+        if (btn) btn.innerText = '📑 Read Cue Markers';
+        if (st) st.innerText = 'Ready to read timeline markers';
+      }
+    }
+
+    function runCueMarkersAction() {
+      const inp = document.getElementById('cueMarkersTargetInput')?.value?.trim();
+      const act = document.getElementById('cueMarkersActionSelect')?.value || 'read';
+      const tsText = document.getElementById('cueMarkersTimestampsInput')?.value?.trim() || '';
+      const btn = document.getElementById('processCueMarkersBtn');
+      const st = document.getElementById('cueMarkersStatusText');
+      const out = document.getElementById('cueMarkersOutputCard');
+
+      if (!inp) {
+        showToast('Please specify an audio file.', true);
+        return;
+      }
+      if (act === 'import' && !tsText) {
+        showToast('Please paste timestamps to import.', true);
+        return;
+      }
+
+      if (btn) {
+        btn.disabled = true;
+        btn.innerText = '⏳ Processing Markers...';
+      }
+      if (st) {
+        st.innerText = 'Parsing and syncing timeline markers...';
+        st.style.color = 'var(--cyan)';
+      }
+
+      let exportCuePath = null;
+      if (act === 'export_cue') {
+        exportCuePath = inp.replace(/\.[^/.]+$/, "") + ".cue";
+      }
+
+      if (window.pywebview && window.pywebview.api && window.pywebview.api.manage_cue_markers) {
+        window.pywebview.api.manage_cue_markers(inp, act === 'import' ? tsText : null, exportCuePath).then(res => {
+          if (btn) {
+            btn.disabled = false;
+            btn.innerText = act === 'import' ? '📑 Import & Embed Markers' : (act === 'export_cue' ? '📑 Export .CUE Sheet' : '📑 Read Cue Markers');
+          }
+          if (res) {
+            if (st) {
+              st.innerText = '✓ Cue markers processed successfully!';
+              st.style.color = 'var(--emerald)';
+            }
+            const markers = res.markers || [];
+            let card = `AUDIO CUE MARKERS & CHAPTER TIMELINE\n`;
+            card += `Target File : ${res.file_path || res.input_path || inp}\n`;
+            card += `Found       : ${markers.length} cue markers / chapters\n`;
+            if (res.exported_cue) {
+              card += `Exported CUE: ${res.exported_cue}\n`;
+            }
+            card += `--------------------------------------------------------\n`;
+            card += `#    TIME       CUE (MM:SS:FF)   CHAPTER TITLE\n`;
+            card += `--------------------------------------------------------\n`;
+            if (markers.length === 0) {
+              card += `  (No cue markers or chapter tags present)\n`;
+            } else {
+              markers.forEach(mk => {
+                const cid = String(mk.id || 1).padStart(2, '0');
+                const tStr = (mk.time_str || '00:00').padEnd(10, ' ');
+                const cueT = (mk.cue_time || '00:00:00').padEnd(16, ' ');
+                card += `${cid}   ${tStr} ${cueT} ${mk.label || 'Untitled'}\n`;
+              });
+            }
+            if (out) out.innerText = card;
+          }
+        }).catch(err => {
+          if (btn) {
+            btn.disabled = false;
+            btn.innerText = '📑 Process Cue Markers';
           }
           if (out) out.innerText = '✕ Error: ' + (err.message || err);
         });
