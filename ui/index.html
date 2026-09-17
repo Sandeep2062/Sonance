@@ -1159,6 +1159,18 @@
       <button class="btn btn-secondary" onclick="openLyricsAggregatorModal()" style="padding:5px 9px; font-size:11px;" id="lyricsAggregatorHeaderBtn" title="Multi-Source Synced Lyrics Search & Batch Fetcher">
         🌐 Lyrics Fetch
       </button>
+      <button class="btn btn-secondary" onclick="openAudioInspectorModal()" style="padding:5px 9px; font-size:11px;" id="audioInspectorHeaderBtn" title="Hi-Res Bitstream Inspector & Encoder Forensics">
+        🔬 Inspector
+      </button>
+      <button class="btn btn-secondary" onclick="openAudioRestorerModal()" style="padding:5px 9px; font-size:11px;" id="audioRestorerHeaderBtn" title="Analog Vinyl & Tape Audio Restorer (De-Click/De-Hum)">
+        🧹 Restorer
+      </button>
+      <button class="btn btn-secondary" onclick="openLibraryMigratorModal()" style="padding:5px 9px; font-size:11px;" id="libraryMigratorHeaderBtn" title="Cross-Platform iTunes & MusicBee Library Migrator">
+        📦 Migrator
+      </button>
+      <button class="btn btn-secondary" onclick="openLyricsTranslatorModal()" style="padding:5px 9px; font-size:11px;" id="lyricsTranslatorHeaderBtn" title="Dual-Language Synchronized Lyrics Translator">
+        🌐 Translate
+      </button>
       <button class="btn btn-secondary" onclick="openLrcStudioModal()" style="padding:5px 9px; font-size:11px;" id="lrcStudioHeaderBtn" title="Interactive LRC Studio & Live Time-Stamper">
         ✍️ LRC Studio
       </button>
@@ -4123,6 +4135,306 @@
       <div style="padding:10px 16px; background:#121520; border-top:1px solid var(--border); display:flex; justify-content:space-between; align-items:center;">
         <span style="font-size:10px; color:var(--text-dim);">Millisecond-accurate timestamp ranking and Kana/Hangul phonetic transcription</span>
         <button class="btn btn-secondary" onclick="closeLyricsAggregatorModal()">Close</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Phase 18: Hi-Res Audio Stream Inspector Modal -->
+  <div class="modal-backdrop" id="audioInspectorModal" style="display:none;">
+    <div class="modal-box" style="width:680px; max-width:92vw; display:flex; flex-direction:column; max-height:88vh;">
+      <div class="modal-header">
+        <div style="display:flex; align-items:center; gap:8px;">
+          <span style="font-size:18px;">🔬</span>
+          <div>
+            <div style="font-weight:700; font-size:14px; color:#fff;">Hi-Res Bitstream Inspector & Container Forensics</div>
+            <div style="font-size:10px; color:var(--text-dim);">Deep container metrics, compression ratio savings vs raw PCM, encoder toolchain, and padding analysis</div>
+          </div>
+        </div>
+        <button onclick="closeAudioInspectorModal()" style="background:none; border:none; color:var(--text-muted); cursor:pointer; font-size:16px;">✕</button>
+      </div>
+
+      <div class="modal-body" style="padding:16px; display:flex; flex-direction:column; gap:12px; overflow-y:auto;">
+        <div style="background:#121522; border:1px solid var(--border); border-radius:8px; padding:12px; display:flex; justify-content:space-between; align-items:center;">
+          <div>
+            <div style="font-size:10px; color:var(--text-dim); text-transform:uppercase;">Target Audio Track</div>
+            <div id="audioInspectorFileName" style="font-weight:700; font-size:13px; color:#fff; max-width:420px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;">--</div>
+          </div>
+          <button class="btn btn-primary" onclick="runInspectStreamAction()" id="inspectAudioStreamBtn" style="font-size:11px; padding:6px 14px;">
+            🔍 Inspect Stream
+          </button>
+        </div>
+
+        <div style="display:grid; grid-template-columns:repeat(4, 1fr); gap:8px; text-align:center;">
+          <div style="background:#10131d; border:1px solid var(--border); border-radius:8px; padding:10px;">
+            <div style="font-size:9px; color:var(--text-dim); text-transform:uppercase;">Container / Format</div>
+            <div id="inspectorFormatVal" style="font-size:14px; font-weight:800; color:var(--cyan); margin-top:2px;">--</div>
+          </div>
+          <div style="background:#10131d; border:1px solid var(--border); border-radius:8px; padding:10px;">
+            <div style="font-size:9px; color:var(--text-dim); text-transform:uppercase;">Resolution</div>
+            <div id="inspectorResolutionVal" style="font-size:13px; font-weight:800; color:var(--emerald); margin-top:2px;">--</div>
+          </div>
+          <div style="background:#10131d; border:1px solid var(--border); border-radius:8px; padding:10px;">
+            <div style="font-size:9px; color:var(--text-dim); text-transform:uppercase;">Bitrate & Mode</div>
+            <div id="inspectorBitrateVal" style="font-size:13px; font-weight:800; color:#fff; margin-top:2px;">--</div>
+          </div>
+          <div style="background:#10131d; border:1px solid var(--border); border-radius:8px; padding:10px;">
+            <div style="font-size:9px; color:var(--text-dim); text-transform:uppercase;">Compression Ratio</div>
+            <div id="inspectorCompressionVal" style="font-size:13px; font-weight:800; color:var(--amber); margin-top:2px;">--</div>
+          </div>
+        </div>
+
+        <div style="background:#10131d; border:1px solid var(--border); border-radius:8px; padding:12px; display:flex; flex-direction:column; gap:8px; font-size:11px;">
+          <div style="display:flex; justify-content:space-between; border-bottom:1px solid rgba(255,255,255,0.05); padding-bottom:4px;">
+            <span style="color:var(--text-dim);">Encoder Signature:</span>
+            <span id="inspectorEncoderVal" style="font-weight:700; color:#fff;">--</span>
+          </div>
+          <div style="display:flex; justify-content:space-between; border-bottom:1px solid rgba(255,255,255,0.05); padding-bottom:4px;">
+            <span style="color:var(--text-dim);">Uncompressed PCM Size:</span>
+            <span id="inspectorPcmSizeVal" style="font-family:monospace; color:var(--cyan);">--</span>
+          </div>
+          <div style="display:flex; justify-content:space-between; border-bottom:1px solid rgba(255,255,255,0.05); padding-bottom:4px;">
+            <span style="color:var(--text-dim);">Storage Space Saved:</span>
+            <span id="inspectorSpaceSavedVal" style="font-weight:700; color:var(--emerald);">--</span>
+          </div>
+          <div style="display:flex; justify-content:space-between;">
+            <span style="color:var(--text-dim);">Metadata / Padding Overhead:</span>
+            <span id="inspectorPaddingVal" style="font-family:monospace; color:#94a3b8;">--</span>
+          </div>
+        </div>
+
+        <div>
+          <label style="font-size:11px; color:var(--text-dim); display:block; margin-bottom:4px;">ASCII Forensic Specsheet:</label>
+          <pre id="inspectorSpecsheetText" style="background:#0b0d14; border:1px solid var(--border); border-radius:6px; padding:10px; font-family:monospace; font-size:10px; color:#38bdf8; overflow-x:auto; max-height:140px;">Select a track and click 'Inspect Stream' to view full technical specsheet.</pre>
+        </div>
+      </div>
+
+      <div style="padding:10px 16px; background:#121520; border-top:1px solid var(--border); display:flex; justify-content:space-between; align-items:center;">
+        <span style="font-size:10px; color:var(--text-dim);">RIFF / FLAC / MPEG LAME container inspection standard</span>
+        <button class="btn btn-secondary" onclick="closeAudioInspectorModal()">Close</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Phase 18: Analog Audio Restorer (De-Clicker / De-Hisser) Modal -->
+  <div class="modal-backdrop" id="audioRestorerModal" style="display:none;">
+    <div class="modal-box" style="width:680px; max-width:92vw; display:flex; flex-direction:column; max-height:88vh;">
+      <div class="modal-header">
+        <div style="display:flex; align-items:center; gap:8px;">
+          <span style="font-size:18px;">🧹</span>
+          <div>
+            <div style="font-weight:700; font-size:14px; color:#fff;">Analog Vinyl & Tape Audio Restoration Studio</div>
+            <div style="font-size:10px; color:var(--text-dim);">Remove vinyl clicks/pops with cubic spline repair, filter AC ground hum, and attenuate tape hiss</div>
+          </div>
+        </div>
+        <button onclick="closeAudioRestorerModal()" style="background:none; border:none; color:var(--text-muted); cursor:pointer; font-size:16px;">✕</button>
+      </div>
+
+      <div class="modal-body" style="padding:16px; display:flex; flex-direction:column; gap:12px; overflow-y:auto;">
+        <div style="background:#121522; border:1px solid var(--border); border-radius:8px; padding:12px; display:flex; justify-content:space-between; align-items:center;">
+          <div>
+            <div style="font-size:10px; color:var(--text-dim); text-transform:uppercase;">Source Track to Restore</div>
+            <div id="restorerSourceTitle" style="font-weight:700; font-size:13px; color:#fff; max-width:420px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;">--</div>
+          </div>
+          <span id="restorerDurationBadge" style="font-size:10px; color:var(--cyan); font-family:monospace;">--</span>
+        </div>
+
+        <!-- DSP Modules Grid -->
+        <div style="display:grid; grid-template-columns:1fr 1fr; gap:10px;">
+          <div style="background:#10131d; border:1px solid var(--border); border-radius:8px; padding:10px; display:flex; justify-content:space-between; align-items:center;">
+            <div>
+              <div style="font-size:11px; font-weight:700; color:#fff;">Impulsive De-Clicker</div>
+              <div style="font-size:10px; color:var(--text-dim);">Cubic spline repair for vinyl scratches & dust pops</div>
+            </div>
+            <input type="checkbox" id="restorerDeclickToggle" checked style="accent-color:var(--emerald);">
+          </div>
+
+          <div style="background:#10131d; border:1px solid var(--border); border-radius:8px; padding:10px; display:flex; justify-content:space-between; align-items:center;">
+            <div>
+              <div style="font-size:11px; font-weight:700; color:#fff;">Turntable Subsonic Rumble</div>
+              <div style="font-size:10px; color:var(--text-dim);">18 Hz 24dB/oct high-pass motor filter</div>
+            </div>
+            <input type="checkbox" id="restorerRumbleToggle" checked style="accent-color:var(--emerald);">
+          </div>
+
+          <div style="background:#10131d; border:1px solid var(--border); border-radius:8px; padding:10px; display:flex; justify-content:space-between; align-items:center;">
+            <div>
+              <div style="font-size:11px; font-weight:700; color:#fff;">AC Ground Hum Notch</div>
+              <div style="font-size:10px; color:var(--text-dim);">High-Q notch for 50Hz/60Hz mains loop</div>
+            </div>
+            <select id="restorerDehumSelect" class="search-input" style="font-size:10px; padding:4px 6px;">
+              <option value="60" selected>60 Hz (Americas/JP-West)</option>
+              <option value="50">50 Hz (Europe/Asia/JP-East)</option>
+              <option value="0">Off (Disable De-Hum)</option>
+            </select>
+          </div>
+
+          <div style="background:#10131d; border:1px solid var(--border); border-radius:8px; padding:10px; display:flex; justify-content:space-between; align-items:center;">
+            <div>
+              <div style="font-size:11px; font-weight:700; color:#fff;">Tape Hiss Reducer</div>
+              <div style="font-size:10px; color:var(--text-dim);">&gt;7 kHz downward spectral expansion gate</div>
+            </div>
+            <input type="checkbox" id="restorerDehissToggle" checked style="accent-color:var(--emerald);">
+          </div>
+        </div>
+
+        <div style="display:flex; justify-content:space-between; align-items:center; margin-top:4px;">
+          <span id="restorerStatusText" style="font-size:11px; color:var(--text-dim);">Configured for non-destructive analog restoration.</span>
+          <button class="btn btn-primary" onclick="runRestoreAudioAction()" id="startRestoreAudioBtn" style="font-size:11px; padding:7px 18px;">
+            ⚡ Restore & Export Audio
+          </button>
+        </div>
+      </div>
+
+      <div style="padding:10px 16px; background:#121520; border-top:1px solid var(--border); display:flex; justify-content:space-between; align-items:center;">
+        <span style="font-size:10px; color:var(--text-dim);">Cubic Hermite polynomial transient reconstruction</span>
+        <button class="btn btn-secondary" onclick="closeAudioRestorerModal()">Close</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Phase 18: Cross-Platform Library Migrator Modal -->
+  <div class="modal-backdrop" id="libraryMigratorModal" style="display:none;">
+    <div class="modal-box" style="width:680px; max-width:92vw; display:flex; flex-direction:column; max-height:88vh;">
+      <div class="modal-header">
+        <div style="display:flex; align-items:center; gap:8px;">
+          <span style="font-size:18px;">📦</span>
+          <div>
+            <div style="font-weight:700; font-size:14px; color:#fff;">Cross-Platform Library & Playlist Migrator</div>
+            <div style="font-size:10px; color:var(--text-dim);">Migrate playlists, star ratings, and play history from iTunes, Apple Music, and MusicBee XML</div>
+          </div>
+        </div>
+        <button onclick="closeLibraryMigratorModal()" style="background:none; border:none; color:var(--text-muted); cursor:pointer; font-size:16px;">✕</button>
+      </div>
+
+      <div class="modal-body" style="padding:16px; display:flex; flex-direction:column; gap:12px; overflow-y:auto;">
+        <div>
+          <label style="font-size:11px; color:var(--text-dim); display:block; margin-bottom:4px;">Source Library XML File Path (iTunes or MusicBee):</label>
+          <div style="display:flex; gap:8px;">
+            <input type="text" id="migratorXmlPathInput" class="search-input" style="flex:1; font-size:11px; padding:6px 8px;" placeholder="e.g. C:\Users\Name\Music\iTunes\iTunes Music Library.xml">
+            <button class="btn btn-primary" onclick="runAnalyzeLibraryMigrationAction()" id="analyzeMigrationBtn" style="font-size:11px; padding:6px 14px;">
+              🔍 Analyze XML
+            </button>
+          </div>
+        </div>
+
+        <div>
+          <label style="font-size:11px; color:var(--text-dim); display:block; margin-bottom:4px;">Destination Music Directory (for Fuzzy Path Reconciliation):</label>
+          <input type="text" id="migratorTargetDirInput" class="search-input" style="width:100%; font-size:11px; padding:6px 8px;" placeholder="Active music folder used if empty">
+        </div>
+
+        <!-- Migration Analysis Cards -->
+        <div style="display:grid; grid-template-columns:repeat(4, 1fr); gap:8px; text-align:center;">
+          <div style="background:#10131d; border:1px solid var(--border); border-radius:8px; padding:10px;">
+            <div style="font-size:9px; color:var(--text-dim); text-transform:uppercase;">Tracks In XML</div>
+            <div id="migratorTotalTracksVal" style="font-size:14px; font-weight:800; color:#fff; margin-top:2px;">--</div>
+          </div>
+          <div style="background:#10131d; border:1px solid var(--border); border-radius:8px; padding:10px;">
+            <div style="font-size:9px; color:var(--text-dim); text-transform:uppercase;">Matched On Disk</div>
+            <div id="migratorMatchedVal" style="font-size:14px; font-weight:800; color:var(--emerald); margin-top:2px;">--</div>
+          </div>
+          <div style="background:#10131d; border:1px solid var(--border); border-radius:8px; padding:10px;">
+            <div style="font-size:9px; color:var(--text-dim); text-transform:uppercase;">Missing Tracks</div>
+            <div id="migratorMissingVal" style="font-size:14px; font-weight:800; color:var(--rose); margin-top:2px;">--</div>
+          </div>
+          <div style="background:#10131d; border:1px solid var(--border); border-radius:8px; padding:10px;">
+            <div style="font-size:9px; color:var(--text-dim); text-transform:uppercase;">Playlists Found</div>
+            <div id="migratorPlaylistsVal" style="font-size:14px; font-weight:800; color:var(--cyan); margin-top:2px;">--</div>
+          </div>
+        </div>
+
+        <div id="migratorPlaylistListContainer" style="display:none; flex-direction:column; gap:6px;">
+          <div style="display:flex; justify-content:space-between; align-items:center;">
+            <div style="font-size:11px; font-weight:700; color:var(--text-muted);">Discovered Playlists:</div>
+            <button class="btn btn-secondary" onclick="runExportMigratedPlaylistsAction()" id="exportPlaylistsBtn" style="font-size:10px; padding:3px 10px;">
+              💾 Export All to .M3U8
+            </button>
+          </div>
+          <div id="migratorPlaylistChips" style="background:#10131d; border:1px solid var(--border); border-radius:6px; padding:8px; max-height:120px; overflow-y:auto; display:flex; flex-direction:column; gap:4px; font-size:11px;">
+            <!-- Playlist items -->
+          </div>
+        </div>
+      </div>
+
+      <div style="padding:10px 16px; background:#121520; border-top:1px solid var(--border); display:flex; justify-content:space-between; align-items:center;">
+        <span style="font-size:10px; color:var(--text-dim);">Fuzzy 2-level directory reconciliation preserving 5-star ratings</span>
+        <button class="btn btn-secondary" onclick="closeLibraryMigratorModal()">Close</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Phase 18: Dual-Language Synchronized Lyrics Translator Modal -->
+  <div class="modal-backdrop" id="lyricsTranslatorModal" style="display:none;">
+    <div class="modal-box" style="width:680px; max-width:92vw; display:flex; flex-direction:column; max-height:88vh;">
+      <div class="modal-header">
+        <div style="display:flex; align-items:center; gap:8px;">
+          <span style="font-size:18px;">🌐</span>
+          <div>
+            <div style="font-weight:700; font-size:14px; color:#fff;">Dual-Language Synchronized Lyrics Translator</div>
+            <div style="font-size:10px; color:var(--text-dim);">Translate synchronized lyrics into 50+ languages preserving timestamps for bilingual subtitles</div>
+          </div>
+        </div>
+        <button onclick="closeLyricsTranslatorModal()" style="background:none; border:none; color:var(--text-muted); cursor:pointer; font-size:16px;">✕</button>
+      </div>
+
+      <div class="modal-body" style="padding:16px; display:flex; flex-direction:column; gap:12px; overflow-y:auto;">
+        <div style="display:grid; grid-template-columns:1fr 1fr; gap:12px;">
+          <div>
+            <label style="font-size:11px; color:var(--text-dim); display:block; margin-bottom:4px;">Target Translation Language:</label>
+            <select id="lyricsTargetLangSelect" class="search-input" style="width:100%; font-size:11px; padding:6px 8px;">
+              <option value="es" selected>Spanish (Español)</option>
+              <option value="en">English</option>
+              <option value="fr">French (Français)</option>
+              <option value="de">German (Deutsch)</option>
+              <option value="ja">Japanese (日本語)</option>
+              <option value="ko">Korean (한국어)</option>
+              <option value="zh-CN">Chinese Simplified (简体中文)</option>
+              <option value="it">Italian (Italiano)</option>
+              <option value="pt">Portuguese (Português)</option>
+              <option value="ru">Russian (Русский)</option>
+              <option value="hi">Hindi (हिन्दी)</option>
+              <option value="ar">Arabic (العربية)</option>
+              <option value="ne">Nepali (नेपाली)</option>
+            </select>
+          </div>
+
+          <div style="background:#121522; border:1px solid var(--border); border-radius:8px; padding:10px; display:flex; justify-content:space-between; align-items:center;">
+            <div>
+              <div style="font-size:11px; font-weight:700; color:#fff;">Bilingual Dual-Line Output</div>
+              <div style="font-size:10px; color:var(--text-dim);">Keeps original line above translated subtitle</div>
+            </div>
+            <input type="checkbox" id="lyricsDualFormatToggle" checked style="accent-color:var(--emerald);">
+          </div>
+        </div>
+
+        <div>
+          <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:4px;">
+            <label style="font-size:11px; color:var(--text-dim);">Source Synchronized Lyrics (LRC):</label>
+            <button class="btn btn-secondary" onclick="loadActiveLyricsForTranslation()" style="font-size:10px; padding:2px 8px;">Load Active Track Lyrics</button>
+          </div>
+          <textarea id="translatorSourceLrc" class="search-input" style="width:100%; height:95px; font-family:monospace; font-size:10px; padding:6px; line-height:1.4;" placeholder="Paste standard [mm:ss.xx] LRC lyrics here..."></textarea>
+        </div>
+
+        <div style="display:flex; justify-content:space-between; align-items:center;">
+          <span id="translatorStatusText" style="font-size:11px; color:var(--text-dim);">Ready to translate synchronized lyrics.</span>
+          <button class="btn btn-primary" onclick="runTranslateLyricsAction()" id="startTranslateLyricsBtn" style="font-size:11px; padding:6px 16px;">
+            🌐 Translate Lyrics
+          </button>
+        </div>
+
+        <div>
+          <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:4px;">
+            <label style="font-size:11px; color:var(--text-dim);">Translated Bilingual Preview:</label>
+            <button class="btn btn-secondary" onclick="saveTranslatedLrcAction()" id="saveTranslatedLrcBtn" style="font-size:10px; padding:2px 8px;">
+              💾 Save Companion .LRC
+            </button>
+          </div>
+          <textarea id="translatorOutputLrc" class="search-input" style="width:100%; height:110px; font-family:monospace; font-size:10px; padding:6px; line-height:1.4; color:var(--cyan); background:#0b0d14;" placeholder="Translated LRC will appear here..."></textarea>
+        </div>
+      </div>
+
+      <div style="padding:10px 16px; background:#121520; border-top:1px solid var(--border); display:flex; justify-content:space-between; align-items:center;">
+        <span style="font-size:10px; color:var(--text-dim);">Maintains millisecond timestamp precision and line cadence</span>
+        <button class="btn btn-secondary" onclick="closeLyricsTranslatorModal()">Close</button>
       </div>
     </div>
   </div>
@@ -7099,6 +7411,10 @@
         closeFlacVerifyModal();
         closeDjAutoMixModal();
         closeLyricsAggregatorModal();
+        closeAudioInspectorModal();
+        closeAudioRestorerModal();
+        closeLibraryMigratorModal();
+        closeLyricsTranslatorModal();
         dismissPodcastResumeToast();
         const popup = document.getElementById('speedStudioPopup');
         if (popup) popup.style.display = 'none';
@@ -10880,6 +11196,391 @@
             btn.innerText = '⚡ Batch Download for Folder';
           }
           alert('✕ Error: ' + (err.message || err));
+        });
+      }
+    }
+
+    // =========================================================================
+    // Phase 18: Audio Inspector, Audio Restorer, Library Migrator, Lyrics Translator
+    // =========================================================================
+
+    // --- 1. Hi-Res Audio Stream Inspector ---
+    function openAudioInspectorModal() {
+      const modal = document.getElementById('audioInspectorModal');
+      if (!modal) return;
+
+      const track = (playingTrackIndex !== null) ? libraryTracks.find(t => t.index === playingTrackIndex)
+                  : (selectedTrackIndex !== null) ? libraryTracks.find(t => t.index === selectedTrackIndex) : null;
+      const fnEl = document.getElementById('audioInspectorFileName');
+      if (fnEl) {
+        fnEl.innerText = track && track.path ? track.path : 'No active audio track selected';
+      }
+
+      if (track && track.path) {
+        runInspectStreamAction();
+      }
+
+      modal.style.display = 'flex';
+    }
+
+    function closeAudioInspectorModal() {
+      const modal = document.getElementById('audioInspectorModal');
+      if (modal) modal.style.display = 'none';
+    }
+
+    function runInspectStreamAction() {
+      const track = (playingTrackIndex !== null) ? libraryTracks.find(t => t.index === playingTrackIndex)
+                  : (selectedTrackIndex !== null) ? libraryTracks.find(t => t.index === selectedTrackIndex) : null;
+      if (!track || !track.path) {
+        alert('Please play or select an audio track first.');
+        return;
+      }
+
+      const btn = document.getElementById('inspectAudioStreamBtn');
+      const origText = btn ? btn.innerText : '';
+      if (btn) {
+        btn.disabled = true;
+        btn.innerText = '⏳ Inspecting...';
+      }
+
+      if (window.pywebview && window.pywebview.api && window.pywebview.api.inspect_audio_stream) {
+        window.pywebview.api.inspect_audio_stream(track.path).then(res => {
+          if (btn) {
+            btn.disabled = false;
+            btn.innerText = origText;
+          }
+
+          if (res && res.success) {
+            const fmtEl = document.getElementById('inspectorFormatVal');
+            const resEl = document.getElementById('inspectorResolutionVal');
+            const bitEl = document.getElementById('inspectorBitrateVal');
+            const compEl = document.getElementById('inspectorCompressionVal');
+            const encEl = document.getElementById('inspectorEncoderVal');
+            const pcmEl = document.getElementById('inspectorPcmSizeVal');
+            const savedEl = document.getElementById('inspectorSpaceSavedVal');
+            const padEl = document.getElementById('inspectorPaddingVal');
+            const specEl = document.getElementById('inspectorSpecsheetText');
+
+            if (fmtEl) fmtEl.innerText = `${res.format} (${res.filesize_mb} MB)`;
+            if (resEl) resEl.innerText = `${res.bits_per_sample}-bit / ${(res.sample_rate / 1000).toFixed(1)}k`;
+            if (bitEl) bitEl.innerText = `${res.bitrate_kbps > 0 ? res.bitrate_kbps + ' kbps' : 'Lossless'} (${res.bitrate_mode || 'VBR'})`;
+            if (compEl) compEl.innerText = `${res.compression_ratio || '1.0'}:1 (${res.space_saved_pct || 0}% saved)`;
+            if (encEl) encEl.innerText = res.encoder || 'Standard Encoder';
+            if (pcmEl) pcmEl.innerText = `${((res.uncompressed_pcm_bytes || 0) / (1024 * 1024)).toFixed(2)} MB (${res.formatted_duration || '--'})`;
+            if (savedEl) savedEl.innerText = `${res.space_saved_pct || 0}% Storage Reduction vs Raw PCM`;
+            if (padEl) padEl.innerText = `${res.padding_bytes || 0} bytes (${res.padding_overhead_pct || 0}% overhead)`;
+
+            if (specEl) {
+              specEl.innerText = res.technical_summary || JSON.stringify(res, null, 2);
+            }
+          } else {
+            alert('✕ Stream inspection failed: ' + (res ? res.error : 'Unknown error'));
+          }
+        }).catch(err => {
+          if (btn) {
+            btn.disabled = false;
+            btn.innerText = origText;
+          }
+          alert('✕ Error: ' + (err.message || err));
+        });
+      }
+    }
+
+    // --- 2. Analog Audio Restoration Studio ---
+    function openAudioRestorerModal() {
+      const modal = document.getElementById('audioRestorerModal');
+      if (!modal) return;
+
+      const track = (playingTrackIndex !== null) ? libraryTracks.find(t => t.index === playingTrackIndex)
+                  : (selectedTrackIndex !== null) ? libraryTracks.find(t => t.index === selectedTrackIndex) : null;
+      const titleEl = document.getElementById('restorerSourceTitle');
+      const durEl = document.getElementById('restorerDurationBadge');
+
+      if (titleEl) {
+        titleEl.innerText = track ? `${track.artist || 'Unknown'} - ${track.title || 'Track'} (${track.path || ''})` : 'No track selected';
+      }
+      if (durEl) {
+        durEl.innerText = track && track.duration ? (typeof formatDuration === 'function' ? formatDuration(track.duration) : track.duration + 's') : '--';
+      }
+
+      modal.style.display = 'flex';
+    }
+
+    function closeAudioRestorerModal() {
+      const modal = document.getElementById('audioRestorerModal');
+      if (modal) modal.style.display = 'none';
+    }
+
+    function runRestoreAudioAction() {
+      const track = (playingTrackIndex !== null) ? libraryTracks.find(t => t.index === playingTrackIndex)
+                  : (selectedTrackIndex !== null) ? libraryTracks.find(t => t.index === selectedTrackIndex) : null;
+      if (!track || !track.path) {
+        alert('Please select or play an audio track first.');
+        return;
+      }
+
+      const declick = document.getElementById('restorerDeclickToggle').checked;
+      const rumble = document.getElementById('restorerRumbleToggle').checked;
+      const dehumVal = parseFloat(document.getElementById('restorerDehumSelect').value) || null;
+      const dehiss = document.getElementById('restorerDehissToggle').checked;
+
+      const btn = document.getElementById('startRestoreAudioBtn');
+      const statusText = document.getElementById('restorerStatusText');
+
+      if (btn) {
+        btn.disabled = true;
+        btn.innerText = '⏳ Restoring Audio...';
+      }
+      if (statusText) {
+        statusText.innerText = 'Applying impulse de-clicking, 18Hz rumble filter, and notch de-hum...';
+        statusText.style.color = 'var(--cyan)';
+      }
+
+      if (window.pywebview && window.pywebview.api && window.pywebview.api.restore_analog_audio) {
+        window.pywebview.api.restore_analog_audio(track.path, null, declick, dehumVal, rumble, dehiss).then(res => {
+          if (btn) {
+            btn.disabled = false;
+            btn.innerText = '⚡ Restore & Export Audio';
+          }
+
+          if (res && res.success) {
+            if (statusText) {
+              statusText.innerText = `✓ Restored: ${res.clicks_repaired} clicks removed -> ${res.output_file}`;
+              statusText.style.color = 'var(--emerald)';
+            }
+            alert(`✓ Analog Audio Restoration Complete!\n\nOutput: ${res.output_file}\nClicks Repaired: ${res.clicks_repaired}\nDuration: ${res.duration_sec}s\nRumble Filtered: ${res.rumble_filtered ? 'Yes (18 Hz)' : 'No'}\nDe-Hum: ${res.dehum_applied ? res.hum_frequency : 'Off'}\nDe-Hiss: ${res.dehiss_applied ? 'Yes (>7 kHz)' : 'Off'}`);
+          } else {
+            if (statusText) {
+              statusText.innerText = '✕ Restoration failed: ' + (res ? res.error : 'Unknown');
+              statusText.style.color = 'var(--rose)';
+            }
+            alert('✕ Audio Restoration error: ' + (res ? res.error : 'Unknown error'));
+          }
+        }).catch(err => {
+          if (btn) {
+            btn.disabled = false;
+            btn.innerText = '⚡ Restore & Export Audio';
+          }
+          alert('✕ Error: ' + (err.message || err));
+        });
+      }
+    }
+
+    // --- 3. Cross-Platform Library Migrator ---
+    let migratorCachedResult = null;
+
+    function openLibraryMigratorModal() {
+      const modal = document.getElementById('libraryMigratorModal');
+      if (!modal) return;
+
+      const folder = document.getElementById('currentFolderText').innerText;
+      const targetIn = document.getElementById('migratorTargetDirInput');
+      if (folder && folder !== 'No folder selected' && targetIn && !targetIn.value) {
+        targetIn.value = folder;
+      }
+
+      modal.style.display = 'flex';
+    }
+
+    function closeLibraryMigratorModal() {
+      const modal = document.getElementById('libraryMigratorModal');
+      if (modal) modal.style.display = 'none';
+    }
+
+    function runAnalyzeLibraryMigrationAction() {
+      const xmlPath = (document.getElementById('migratorXmlPathInput').value || '').trim();
+      if (!xmlPath) {
+        alert('Please specify the path to iTunes Music Library.xml or MusicBee XML.');
+        return;
+      }
+
+      const targetDir = (document.getElementById('migratorTargetDirInput').value || '').trim() || null;
+      const btn = document.getElementById('analyzeMigrationBtn');
+
+      if (btn) {
+        btn.disabled = true;
+        btn.innerText = '⏳ Parsing...';
+      }
+
+      if (window.pywebview && window.pywebview.api && window.pywebview.api.migrate_music_library) {
+        window.pywebview.api.migrate_music_library(xmlPath, targetDir, null).then(res => {
+          if (btn) {
+            btn.disabled = false;
+            btn.innerText = '🔍 Analyze XML';
+          }
+
+          if (res && res.success) {
+            migratorCachedResult = res;
+            document.getElementById('migratorTotalTracksVal').innerText = res.total_tracks || 0;
+            document.getElementById('migratorMatchedVal').innerText = `${res.matched_on_disk || 0} (${res.match_percentage || 0}%)`;
+            document.getElementById('migratorMissingVal').innerText = res.missing_on_disk || 0;
+            document.getElementById('migratorPlaylistsVal').innerText = res.total_playlists || 0;
+
+            const listContainer = document.getElementById('migratorPlaylistListContainer');
+            const chipsEl = document.getElementById('migratorPlaylistChips');
+
+            if (res.playlists && res.playlists.length > 0 && listContainer && chipsEl) {
+              listContainer.style.display = 'flex';
+              chipsEl.innerHTML = res.playlists.map(p => `
+                <div style="display:flex; justify-content:space-between; background:rgba(255,255,255,0.03); padding:4px 8px; border-radius:4px;">
+                  <span style="color:#fff; font-weight:700;">${escapeHtml(p.name)}</span>
+                  <span style="color:var(--text-dim);">${p.track_count} tracks (${p.matched_count} matched)</span>
+                </div>
+              `).join('');
+            }
+            alert(`✓ Library XML Analyzed Successfully!\n\nTotal Tracks: ${res.total_tracks}\nMatched on Disk: ${res.matched_on_disk} (${res.match_percentage}%)\nPlaylists Found: ${res.total_playlists}\n5-Star Tracks: ${res.favorites_count}`);
+          } else {
+            alert('✕ Library analysis failed: ' + (res ? res.error : 'Unknown'));
+          }
+        }).catch(err => {
+          if (btn) {
+            btn.disabled = false;
+            btn.innerText = '🔍 Analyze XML';
+          }
+          alert('✕ Error: ' + (err.message || err));
+        });
+      }
+    }
+
+    function runExportMigratedPlaylistsAction() {
+      if (!migratorCachedResult) {
+        alert('Please analyze an XML library file first.');
+        return;
+      }
+
+      const xmlPath = (document.getElementById('migratorXmlPathInput').value || '').trim();
+      const targetDir = (document.getElementById('migratorTargetDirInput').value || '').trim() || null;
+      const outDir = targetDir ? `${targetDir}/Migrated_Playlists` : 'Migrated_Playlists';
+      const btn = document.getElementById('exportPlaylistsBtn');
+
+      if (btn) {
+        btn.disabled = true;
+        btn.innerText = '⏳ Exporting...';
+      }
+
+      if (window.pywebview && window.pywebview.api && window.pywebview.api.migrate_music_library) {
+        window.pywebview.api.migrate_music_library(xmlPath, targetDir, outDir).then(res => {
+          if (btn) {
+            btn.disabled = false;
+            btn.innerText = '💾 Export All to .M3U8';
+          }
+
+          if (res && res.success) {
+            const count = res.exported_playlist_files ? res.exported_playlist_files.length : 0;
+            alert(`✓ Playlists Exported Successfully!\n\nExported ${count} playlist files to:\n${outDir}`);
+          } else {
+            alert('✕ Playlist export failed: ' + (res ? res.error : 'Unknown'));
+          }
+        }).catch(err => {
+          if (btn) {
+            btn.disabled = false;
+            btn.innerText = '💾 Export All to .M3U8';
+          }
+          alert('✕ Error: ' + (err.message || err));
+        });
+      }
+    }
+
+    // --- 4. Dual-Language Synchronized Lyrics Translator ---
+    let translatedLrcCache = '';
+
+    function openLyricsTranslatorModal() {
+      const modal = document.getElementById('lyricsTranslatorModal');
+      if (!modal) return;
+      loadActiveLyricsForTranslation();
+      modal.style.display = 'flex';
+    }
+
+    function closeLyricsTranslatorModal() {
+      const modal = document.getElementById('lyricsTranslatorModal');
+      if (modal) modal.style.display = 'none';
+    }
+
+    function loadActiveLyricsForTranslation() {
+      if (currentLyrics && currentLyrics.length > 0) {
+        const text = currentLyrics.map(l => `[${typeof formatDuration === 'function' ? formatDuration(l.time) : '00:00.00'}] ${l.text}`).join('\n');
+        const area = document.getElementById('translatorSourceLrc');
+        if (area) area.value = text;
+      }
+    }
+
+    function runTranslateLyricsAction() {
+      const lrcContent = (document.getElementById('translatorSourceLrc').value || '').trim();
+      if (!lrcContent) {
+        alert('Please paste or load synchronized LRC lyrics first.');
+        return;
+      }
+
+      const targetLang = document.getElementById('lyricsTargetLangSelect').value || 'es';
+      const dual = document.getElementById('lyricsDualFormatToggle').checked;
+      const btn = document.getElementById('startTranslateLyricsBtn');
+      const statusText = document.getElementById('translatorStatusText');
+
+      if (btn) {
+        btn.disabled = true;
+        btn.innerText = '⏳ Translating...';
+      }
+      if (statusText) {
+        statusText.innerText = `Translating lyrics to ${targetLang.toUpperCase()} preserving millisecond timestamps...`;
+        statusText.style.color = 'var(--cyan)';
+      }
+
+      if (window.pywebview && window.pywebview.api && window.pywebview.api.translate_synced_lyrics) {
+        window.pywebview.api.translate_synced_lyrics(lrcContent, targetLang, dual, null).then(res => {
+          if (btn) {
+            btn.disabled = false;
+            btn.innerText = '🌐 Translate Lyrics';
+          }
+
+          if (res && res.success) {
+            translatedLrcCache = res.translated_lyrics || '';
+            const outArea = document.getElementById('translatorOutputLrc');
+            if (outArea) outArea.value = translatedLrcCache;
+
+            if (statusText) {
+              statusText.innerText = `✓ Translated ${res.total_lines_translated} lines to ${res.language_name}!`;
+              statusText.style.color = 'var(--emerald)';
+            }
+          } else {
+            if (statusText) {
+              statusText.innerText = '✕ Translation failed: ' + (res ? res.error : 'Unknown');
+              statusText.style.color = 'var(--rose)';
+            }
+            alert('✕ Lyrics Translation error: ' + (res ? res.error : 'Unknown error'));
+          }
+        }).catch(err => {
+          if (btn) {
+            btn.disabled = false;
+            btn.innerText = '🌐 Translate Lyrics';
+          }
+          alert('✕ Error: ' + (err.message || err));
+        });
+      }
+    }
+
+    function saveTranslatedLrcAction() {
+      const content = translatedLrcCache || (document.getElementById('translatorOutputLrc').value || '').trim();
+      if (!content) {
+        alert('Please run translation first to generate bilingual lyrics.');
+        return;
+      }
+
+      const track = (playingTrackIndex !== null) ? libraryTracks.find(t => t.index === playingTrackIndex)
+                  : (selectedTrackIndex !== null) ? libraryTracks.find(t => t.index === selectedTrackIndex) : null;
+      if (!track || !track.path) {
+        alert('Please select or play an audio file to save companion .lrc.');
+        return;
+      }
+
+      const lastDot = track.path.lastIndexOf('.');
+      const lang = document.getElementById('lyricsTargetLangSelect').value || 'es';
+      const outPath = (lastDot > 0 ? track.path.substring(0, lastDot) : track.path) + `.${lang}.lrc`;
+
+      if (window.pywebview && window.pywebview.api && window.pywebview.api.translate_synced_lyrics) {
+        window.pywebview.api.translate_synced_lyrics(document.getElementById('translatorSourceLrc').value, lang, document.getElementById('lyricsDualFormatToggle').checked, outPath).then(res => {
+          alert(`✓ Bilingual Translated LRC Saved!\n\nFile: ${outPath}`);
+        }).catch(err => {
+          alert('✕ Error saving companion LRC: ' + (err.message || err));
         });
       }
     }

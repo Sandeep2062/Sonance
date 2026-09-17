@@ -245,12 +245,35 @@ Examples:
       help="Batch download missing companion .lrc lyrics for library folder: --batch-lyrics <folder> [--overwrite]",
   )
   parser.add_argument(
+      "--inspect-stream",
+      metavar="AUDIO_FILE",
+      help="Deep inspection of audio bitstream, container, and encoder: --inspect-stream <file>",
+  )
+  parser.add_argument(
+      "--restore-audio",
+      nargs="+",
+      metavar="PARAM",
+      help="Restore analog vinyl/tape audio (declick, dehum, rumble, dehiss): --restore-audio <input> [output] [--dehum 50|60]",
+  )
+  parser.add_argument(
+      "--migrate-library",
+      nargs="+",
+      metavar="PARAM",
+      help="Migrate iTunes / MusicBee library XML & playlists: --migrate-library <xml_file> [--target-dir <dir>]",
+  )
+  parser.add_argument(
+      "--translate-lyrics",
+      nargs="+",
+      metavar="PARAM",
+      help="Translate synchronized lyrics to bilingual subtitles: --translate-lyrics <lrc_file> <target_lang> [output_file]",
+  )
+  parser.add_argument(
       "--version",
       action="version",
       version=f"Sonance v{modern_lyrics_downloader.APP_VERSION}",
   )
 
-  args = parser.parse_args()
+  args, unknown = parser.parse_known_args()
 
   if args.extract_cookies:
     print(
@@ -963,6 +986,113 @@ Examples:
       print(f"    • Missing/Failed:    {res['failed_count']}")
     else:
       print(f"[-] Batch failed: {res.get('error')}")
+    return
+
+  if args.inspect_stream:
+    import audio_inspector
+    res = audio_inspector.inspect_audio_stream(args.inspect_stream)
+    print(audio_inspector.format_inspection_card(res))
+    return
+
+  if args.restore_audio:
+    import audio_restorer
+    restore_params = list(args.restore_audio) + list(unknown)
+    inp = restore_params[0]
+    out = None
+    hum = 60.0 if "--dehum" in restore_params else None
+    if "--dehum" in restore_params:
+      h_idx = restore_params.index("--dehum")
+      if h_idx + 1 < len(restore_params) and restore_params[h_idx + 1] in ("50", "60"):
+        hum = float(restore_params[h_idx + 1])
+    for a in restore_params[1:]:
+      if not a.startswith("--") and a not in ("50", "60"):
+        out = a
+        break
+    print(f"[*] Restoring analog audio: {inp}...")
+    res = audio_restorer.restore_analog_audio(
+        inp,
+        output_path=out,
+        declick="--no-declick" not in restore_params,
+        dehum_freq=hum,
+        rumble_filter="--no-rumble" not in restore_params,
+        dehiss="--no-dehiss" not in restore_params,
+    )
+    if res.get("success"):
+      print("[+] Analog Audio Restoration Succeeded!")
+      print(f"    • Output:          {res['output_file']}")
+      print(f"    • Clicks Repaired: {res['clicks_repaired']}")
+      print(f"    • Rumble Filtered: {res['rumble_filtered']}")
+      print(f"    • Dehum Applied:   {res['dehum_applied']}")
+      print(f"    • Dehiss Applied:  {res['dehiss_applied']}")
+    else:
+      print(f"[-] Restoration failed: {res.get('error')}")
+    return
+
+  if args.migrate_library:
+    import library_migrator
+    mig_params = list(args.migrate_library) + list(unknown)
+    xml_f = mig_params[0]
+    tgt = None
+    out = None
+    idx = 1
+    while idx < len(mig_params):
+      a = mig_params[idx]
+      if a == "--target-dir" and idx + 1 < len(mig_params):
+        tgt = mig_params[idx + 1]
+        idx += 2
+      elif a == "--output-playlists" and idx + 1 < len(mig_params):
+        out = mig_params[idx + 1]
+        idx += 2
+      elif not a.startswith("--") and not tgt:
+        tgt = a
+        idx += 1
+      elif not a.startswith("--") and not out:
+        out = a
+        idx += 1
+      else:
+        idx += 1
+    print(f"[*] Migrating library from: {xml_f}...")
+    res = library_migrator.migrate_library(xml_f, target_music_dir=tgt, output_playlist_dir=out)
+    if res.get("success"):
+      print("[+] Library Migration Complete!")
+      print(f"    • Total Tracks:       {res['total_tracks']}")
+      print(f"    • Matched on Disk:    {res['matched_on_disk']} ({res['match_percentage']}%)")
+      print(f"    • Missing on Disk:    {res['missing_on_disk']}")
+      print(f"    • Playlists Found:    {res['total_playlists']}")
+      if res.get("exported_playlist_files"):
+        print(f"    • Exported Playlists: {len(res['exported_playlist_files'])} .m3u8 files")
+    else:
+      print(f"[-] Migration failed: {res.get('error')}")
+    return
+
+  if args.translate_lyrics:
+    import lyrics_translator
+    trans_params = list(args.translate_lyrics) + list(unknown)
+    if len(trans_params) < 2:
+      print("[-] Error: --translate-lyrics requires <lrc_file_or_text> <target_lang> [output_file]")
+      return
+    src = trans_params[0]
+    tgt = trans_params[1]
+    out = trans_params[2] if len(trans_params) > 2 and not trans_params[2].startswith("--") else None
+    dual = "--translated-only" not in trans_params
+
+    content = src
+    if os.path.isfile(src):
+      with open(src, "r", encoding="utf-8") as f:
+        content = f.read()
+
+    print(f"[*] Translating lyrics to {tgt.upper()}...")
+    res = lyrics_translator.translate_lyrics(content, target_lang=tgt, dual_format=dual, output_path=out)
+    if res.get("success"):
+      print(f"[+] Lyrics Translated to {res['language_name']} ({res['total_lines_translated']} lines):")
+      if out:
+        print(f"[+] Saved to: {out}")
+      else:
+        print("\n--- Preview ---")
+        for l in res["translated_lyrics"].splitlines()[:6]:
+          print(f"  {l}")
+    else:
+      print(f"[-] Translation failed: {res.get('error')}")
     return
 
   if args.classic:

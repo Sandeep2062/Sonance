@@ -74,6 +74,10 @@ import headphone_autoeq
 import flac_verifier
 import dj_automix
 import lyrics_aggregator
+import audio_inspector
+import audio_restorer
+import library_migrator
+import lyrics_translator
 
 APP_VERSION = "2.1.0"
 GITHUB_REPO = "Sandeep2062/Sonance"
@@ -1084,6 +1088,65 @@ class LyricsAPI:
     def batch_download_missing_lyrics(self, folder_path: str, overwrite: bool = False) -> Dict[str, Any]:
         """Batch downloads missing .lrc files for all tracks in a folder."""
         return lyrics_aggregator.batch_download_folder_lyrics(folder_path, overwrite=overwrite)
+
+    # ------------------ Phase 18: Hi-Res Audio Stream Inspector -----------------
+    def inspect_audio_stream(self, file_path: str) -> Dict[str, Any]:
+        """Performs deep bitstream and container forensics on an audio file."""
+        return audio_inspector.inspect_audio_stream(file_path)
+
+    # ------------------ Phase 18: Analog Vinyl & Tape Audio Restorer ------------
+    def restore_analog_audio(
+        self,
+        input_path: str,
+        output_path: Optional[str] = None,
+        declick: bool = True,
+        dehum_freq: Optional[float] = 60.0,
+        rumble_filter: bool = True,
+        dehiss: bool = True,
+    ) -> Dict[str, Any]:
+        """Restores analog audio with de-clicking, ground hum notch, rumble filter, and de-hiss."""
+        return audio_restorer.restore_analog_audio(
+            input_path,
+            output_path=output_path,
+            declick=declick,
+            dehum_freq=dehum_freq,
+            rumble_filter=rumble_filter,
+            dehiss=dehiss,
+        )
+
+    # ------------------ Phase 18: Cross-Platform Library Migrator ---------------
+    def migrate_music_library(
+        self,
+        xml_path: str,
+        target_music_dir: Optional[str] = None,
+        output_playlist_dir: Optional[str] = None,
+    ) -> Dict[str, Any]:
+        """Migrates iTunes / Apple Music library XML with fuzzy path reconciliation."""
+        return library_migrator.migrate_library(
+            xml_path,
+            target_music_dir=target_music_dir,
+            output_playlist_dir=output_playlist_dir,
+        )
+
+    # ------------------ Phase 18: Dual-Language Lyrics Translator ---------------
+    def translate_synced_lyrics(
+        self,
+        lyrics_content: str,
+        target_language: str = "es",
+        dual_format: bool = True,
+        output_file: Optional[str] = None,
+    ) -> Dict[str, Any]:
+        """Translates synced lyrics preserving timestamps into bilingual subtitles."""
+        return lyrics_translator.translate_lyrics(
+            lyrics_content,
+            target_lang=target_language,
+            dual_format=dual_format,
+            output_path=output_file,
+        )
+
+    def get_supported_translation_languages(self) -> Dict[str, str]:
+        """Returns supported target language codes and names."""
+        return lyrics_translator.get_supported_languages()
 
     def _save_last_folder(self, folder: str):
         try:
