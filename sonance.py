@@ -460,6 +460,19 @@ Examples:
       help="Stereo ping-pong & multi-tap tape echo studio: --echo <audio_file> [output_file] [--delay 375] [--feedback 45] [--damping 3800] [--flutter 0.12] [--drive 1.3] [--mix 35] [--no-ping-pong]",
   )
   parser.add_argument(
+      "--package-release",
+      "--audit-release",
+      nargs="*",
+      metavar="PARAM",
+      help="Universal workstation release packager & manifest auditor: --package-release [--zip] [--verify-only] [--out-dir <dir>]",
+  )
+  parser.add_argument(
+      "--generate-manual",
+      nargs="*",
+      metavar="PARAM",
+      help="Offline audiophile guide & workstation handbook generator: --generate-manual [output_path] [--open]",
+  )
+  parser.add_argument(
       "--version",
       action="version",
       version=f"Sonance v{modern_lyrics_downloader.APP_VERSION}",
@@ -2448,6 +2461,101 @@ Examples:
     print(f"Out Peak/RMS  : {res['out_peak_dbfs']:.2f} dBFS / {res['out_rms_dbfs']:.2f} dBFS")
     print(f"Duration      : {res['duration_sec']:.2f}s @ {res['sample_rate']} Hz")
     print("=" * 60)
+    return
+
+  if args.package_release is not None:
+    import release_packager
+    pkg_params = list(args.package_release) + list(unknown)
+    create_zip = False
+    verify_only = False
+    out_dir = None
+
+    idx = 0
+    while idx < len(pkg_params):
+      arg = pkg_params[idx]
+      if arg == "--zip":
+        create_zip = True
+        idx += 1
+      elif arg in ["--verify-only", "--audit-only"]:
+        verify_only = True
+        idx += 1
+      elif arg == "--out-dir" and idx + 1 < len(pkg_params):
+        out_dir = pkg_params[idx + 1]
+        idx += 2
+      else:
+        idx += 1
+
+    print("=" * 70)
+    print("  SONANCE AUDIOPHILE WORKSTATION v2.7.0")
+    print("  Phase 27 Grand Finale: Universal Release Packaging & Manifest Auditor")
+    print("=" * 70)
+    print("[*] Auditing all 27 phase engines and computing manifests...")
+
+    res = release_packager.audit_and_package(
+        output_dir=out_dir,
+        create_zip=create_zip,
+        verify_only=verify_only
+    )
+
+    audit = res["audit"]
+    print(f"[+] Total Modules Audited : {audit['total_modules']}")
+    print(f"[+] Modules Passed        : {audit['passed_count']}")
+    print(f"[+] Modules Failed        : {audit['failed_count']}")
+    print(f"[+] Overall Integrity     : {audit['integrity_percent']:.1f}%")
+
+    if audit["failed"]:
+      print("\n[-] Module Integrity Warnings:")
+      for f in audit["failed"]:
+        print(f"    - {f['module']}: {f['error']}")
+
+    if not verify_only and res.get("manifests"):
+      print("\n[+] Cryptographic Manifests:")
+      print(f"    - SHA-256 Manifest : {res['manifests']['sha256sum']}")
+      print(f"    - MD5 Manifest     : {res['manifests']['md5sum']}")
+      print(f"    - JSON Metadata    : {res['manifests']['manifest']}")
+      print(f"[+] Repository Scope   : {res['total_files']} files ({res['total_bytes_formatted']})")
+
+      if res.get("zip_package"):
+        print(f"[+] Distribution Bundle: {res['zip_package']}")
+
+    print("=" * 70)
+    print("  RELEASE OPERATION COMPLETE")
+    print("=" * 70)
+    return
+
+  if args.generate_manual is not None:
+    import docs_generator
+    man_params = list(args.generate_manual) + list(unknown)
+    out_path = None
+    open_browser = False
+
+    idx = 0
+    while idx < len(man_params):
+      arg = man_params[idx]
+      if arg == "--open":
+        open_browser = True
+        idx += 1
+      elif not arg.startswith("-") and out_path is None:
+        out_path = arg
+        idx += 1
+      else:
+        idx += 1
+
+    print("=" * 70)
+    print("  SONANCE AUDIOPHILE WORKSTATION v2.7.0")
+    print("  Phase 27 Grand Finale: Offline Audiophile Guide & Workstation Manual")
+    print("=" * 70)
+    print("[*] Generating standalone interactive manual for all 27 phases...")
+
+    res = docs_generator.generate_offline_manual(output_path=out_path)
+    print(f"[+] Manual Generated Successfully: {res['output_path']}")
+    print(f"[+] Handbook Scope : {res['total_phases']} Phases Documented ({res['file_size_formatted']})")
+    print("=" * 70)
+
+    if open_browser:
+      print("[*] Launching manual in default web browser...")
+      import webbrowser
+      webbrowser.open(f"file://{os.path.abspath(res['output_path'])}")
     return
 
   if args.classic:

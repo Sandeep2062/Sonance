@@ -110,8 +110,10 @@ import transient_shaper
 import binaural_virtualizer
 import audio_noisegate
 import tape_echo_delay
+import release_packager
+import docs_generator
 
-APP_VERSION = "2.1.0"
+APP_VERSION = "2.7.0"
 GITHUB_REPO = "Sandeep2062/Sonance"
 APP_DIR = Path(__file__).parent.resolve()
 UI_PATH = APP_DIR / "ui" / "index.html"
@@ -1762,6 +1764,34 @@ class LyricsAPI:
             dry_wet_pct=dry_wet_pct,
             ping_pong=ping_pong,
         )
+
+    # ------------------ Phase 27: Universal Release Packager & Offline Manual ------------------
+    def package_workstation_release(
+        self,
+        create_zip: bool = False,
+        verify_only: bool = False,
+    ) -> Dict[str, Any]:
+        """Audits codebase across all 27 phases, computes cryptographic manifests, and optionally creates distribution zip."""
+        return release_packager.audit_and_package(
+            create_zip=create_zip,
+            verify_only=verify_only,
+        )
+
+    def generate_workstation_manual(
+        self,
+        output_path: Optional[str] = None,
+    ) -> Dict[str, Any]:
+        """Generates the interactive single-file offline workstation manual and DSP handbook."""
+        return docs_generator.generate_offline_manual(output_path=output_path)
+
+    def open_offline_manual(self) -> Dict[str, Any]:
+        """Opens the offline manual in the default web browser."""
+        manual_path = docs_generator.DEFAULT_MANUAL_PATH
+        if not manual_path.exists():
+            docs_generator.generate_offline_manual()
+        import webbrowser
+        webbrowser.open(f"file://{os.path.abspath(manual_path)}")
+        return {"success": True, "path": str(manual_path)}
 
     def _save_last_folder(self, folder: str):
         try:

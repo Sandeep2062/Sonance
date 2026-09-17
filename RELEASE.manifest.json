@@ -1,0 +1,888 @@
+{
+  "project": "Sonance Audiophile Workstation",
+  "version": "2.7.0",
+  "phase": "Phase 27 (Grand Finale Release)",
+  "timestamp": "2026-09-17 15:53:47 UTC",
+  "audit": {
+    "total_modules_audited": 42,
+    "passed_count": 42,
+    "failed_count": 0,
+    "integrity_percent": "100.0%"
+  },
+  "summary": {
+    "total_files": 123,
+    "total_bytes": 2450945,
+    "total_bytes_formatted": "2.34 MB",
+    "categories": {
+      "asset": 24,
+      "docs": 3,
+      "config": 2,
+      "core": 61,
+      "dsp": 23,
+      "ui": 10
+    }
+  },
+  "files": [
+    {
+      "path": "LICENSE",
+      "size": 2509,
+      "sha256": "93bf6e6a9af78bf4718a0baa6b19d7b8c2fe4c396cc0a62905cbcd1eb6d45adc",
+      "md5": "c91e9febb271f1cc4bb2a7982eaf4bf5",
+      "category": "asset"
+    },
+    {
+      "path": "README.md",
+      "size": 49374,
+      "sha256": "b24af63cafc27f0621b5d995ab236b34922f7a8440098524339e8819b1468a50",
+      "md5": "ba8c06cebf140a8a15a7f4b0e72d8c14",
+      "category": "docs"
+    },
+    {
+      "path": "RELEASE.manifest.json",
+      "size": 29735,
+      "sha256": "0c8ce90a387db811e137d998f4e3ebaec381770716d1c7e9d5956d9d8c66c3a3",
+      "md5": "48e3e53d474401e344b80098c42a9441",
+      "category": "config"
+    },
+    {
+      "path": "RELEASE.md5sum",
+      "size": 6975,
+      "sha256": "33ae5b0b01ed0cb7efa539227c55f5c154916bc2d77282d0bc400cd8bbda6413",
+      "md5": "1f6b6de30efa5735cb29d4996f9d279c",
+      "category": "asset"
+    },
+    {
+      "path": "RELEASE.sha256sum",
+      "size": 10911,
+      "sha256": "8dd8641d99eda9a610f824d0af894bb96580d684af69b40f44c925687f77513e",
+      "md5": "c8bd17585a2d4c7ec2a99e09d6f717de",
+      "category": "asset"
+    },
+    {
+      "path": "ab_looper.py",
+      "size": 10318,
+      "sha256": "c69fe10d3810463daa0350e3354e7868fa0ec67205e481bb0a29c14166754167",
+      "md5": "ab710a6799edb8263d64702507aecd40",
+      "category": "core"
+    },
+    {
+      "path": "accuraterip_verifier.py",
+      "size": 14153,
+      "sha256": "b202470b6fe2d63d32e7310981835ff0ebdeea80f3458691ef5ba91816835a7a",
+      "md5": "13ee5e3bfff751c2d33798214f86df06",
+      "category": "core"
+    },
+    {
+      "path": "album_art_studio.py",
+      "size": 11544,
+      "sha256": "b7e04eb67132ab57fef45e04af68e3295eac01f2cbb7a4320145d4ae0a404795",
+      "md5": "34e223dcbdaa6d440786496058fde5b8",
+      "category": "core"
+    },
+    {
+      "path": "album_packer.py",
+      "size": 8437,
+      "sha256": "c8a883ea0af4e577e445cd35e2400356d31310d551a5ede056d021068e49c079",
+      "md5": "2a52448be371fe8049ae4033db4cc1d5",
+      "category": "core"
+    },
+    {
+      "path": "analog_tape_emulator.py",
+      "size": 14317,
+      "sha256": "ab5a516dc671ba40eaebd8620b64c141cb5b7dd7ecddd0737ee9ff5d7e288748",
+      "md5": "7140ab71fbaf347a6c60c1f011419249",
+      "category": "dsp"
+    },
+    {
+      "path": "audio_8d_spatializer.py",
+      "size": 12375,
+      "sha256": "5fd4a3ab0dc1767363cbfb425197545c0c879f32d49f314a8ef1c6f95539800d",
+      "md5": "ab112557f65b108e0a38ff6b2d96be43",
+      "category": "dsp"
+    },
+    {
+      "path": "audio_auditor.py",
+      "size": 7898,
+      "sha256": "cd8c8c8ac7f56e75a87ce570c00bf5b408efce3baae2006ed99c4a0fa3565933",
+      "md5": "26c6c2197d46828b383049653e8415f6",
+      "category": "dsp"
+    },
+    {
+      "path": "audio_cutter.py",
+      "size": 5152,
+      "sha256": "322010cee5c8eb08f1b3c97e074a4e2173bb7083e2a646efb2d542d49460c85a",
+      "md5": "87159f874a2173fa9c9d6dade581ed72",
+      "category": "dsp"
+    },
+    {
+      "path": "audio_declipper.py",
+      "size": 12437,
+      "sha256": "1e41a5389a9fc1a604bd2317af6a9e4b6268b67216a12bf57ecfbbe17d3d39b0",
+      "md5": "e1b72cb2327ae6fb65987d11506f79d1",
+      "category": "dsp"
+    },
+    {
+      "path": "audio_dedup.py",
+      "size": 8211,
+      "sha256": "b1add60e5f271f17b7c6e3f9c32de5bd9becf97eaf804f0c54912fdece3c9ae8",
+      "md5": "b34245d4e5cb0a038bb165338fdba78b",
+      "category": "dsp"
+    },
+    {
+      "path": "audio_deesser.py",
+      "size": 11534,
+      "sha256": "e4ea1d819c247cb746f73e8353951d444cb81d495d2539923db6d5cc5b79a412",
+      "md5": "598c77e2bb1ba56547d1edfde3092d03",
+      "category": "dsp"
+    },
+    {
+      "path": "audio_fingerprint.py",
+      "size": 10532,
+      "sha256": "c6db721787007631faec318e82c3a32726f2401b56ad46f88b1cb3f82c891cda",
+      "md5": "348e84e3d7476b353fa3751785874ba9",
+      "category": "dsp"
+    },
+    {
+      "path": "audio_inspector.py",
+      "size": 13958,
+      "sha256": "c69c9b007fc8b694255beb2eaf45ec487ff5c6b2a98a80b9ca3eff6a05cd87eb",
+      "md5": "fd965ac8a5889226220c732b85398015",
+      "category": "dsp"
+    },
+    {
+      "path": "audio_noisegate.py",
+      "size": 12442,
+      "sha256": "f4abec90faa3a658ba7170ebbc2379fbe3788160b57eb6d43971c99e114c9269",
+      "md5": "9d27a5954ada89cbe8a3769bdc262d10",
+      "category": "dsp"
+    },
+    {
+      "path": "audio_resampler.py",
+      "size": 9684,
+      "sha256": "8375c3dbe9d58d43da52a892809c313624dcf861f7e19e908b0b28e78439ab39",
+      "md5": "ab6546ec16f5b89e8446eb83c3216475",
+      "category": "dsp"
+    },
+    {
+      "path": "audio_restorer.py",
+      "size": 13532,
+      "sha256": "c1a666dbbcbe0249460a8b906dec224963ecae138f92af9dd7b1f5b53a92acd9",
+      "md5": "f76d27c02f55a46d039d8cfeb7cacc82",
+      "category": "dsp"
+    },
+    {
+      "path": "audio_transcoder.py",
+      "size": 6215,
+      "sha256": "c3681240c2e3751368e8a5728c277c95e58f4f00a9097206aa7a67c980badaf2",
+      "md5": "4e21cf1c4ddd7a9d28dd91003ec2bcfe",
+      "category": "dsp"
+    },
+    {
+      "path": "audio_upsampler.py",
+      "size": 10714,
+      "sha256": "5bc017737226b086964203351b4ebc5eadf9f6ac47f9dcbc605d46fd1c4366aa",
+      "md5": "078c491b8c35aedf19e00f6e75f3b464",
+      "category": "dsp"
+    },
+    {
+      "path": "audio_watermark.py",
+      "size": 18870,
+      "sha256": "975b221fa351309eecc9dc4236e3f65c933b79ba9fd75173ed342b0518d8e930",
+      "md5": "31504e59a9df947f895be03c771ea36d",
+      "category": "dsp"
+    },
+    {
+      "path": "auto_dj.py",
+      "size": 5820,
+      "sha256": "5061e43f554ec26957688137420beb41fb5a1e290ffb48804d18dfe9cf241f28",
+      "md5": "23e108eaa57271e9e49caaf4f01726fc",
+      "category": "core"
+    },
+    {
+      "path": "binaural_virtualizer.py",
+      "size": 12397,
+      "sha256": "9af904672c1bb5d6e6a189653dbbc6537392f0971ca66bb21e4efac051b00124",
+      "md5": "2e31c1eb5d3afa213b53f962e6edbf9b",
+      "category": "dsp"
+    },
+    {
+      "path": "cache_manager.py",
+      "size": 2375,
+      "sha256": "13772f6f4f1dea256dbfe1bca3c20cad668be89a62cfe841d7ebeca2d2c3a110",
+      "md5": "de6b617fefb8d12127561254d3283ef2",
+      "category": "core"
+    },
+    {
+      "path": "cd_ripper.py",
+      "size": 8203,
+      "sha256": "4cfb9b100e82d4b87c3c5d253070b86593a2ec12c80a5fda5534ce978d036427",
+      "md5": "e1ea21ad228ca50f51d1ccf48998c7c7",
+      "category": "core"
+    },
+    {
+      "path": "chord_studio.py",
+      "size": 10999,
+      "sha256": "10bf3c1007773a8b38eb20952ff7833ef9722c74b2e2fc088189135f8ff00fdb",
+      "md5": "feb2a5fb4806aac001948db62ed9e7f9",
+      "category": "core"
+    },
+    {
+      "path": "cloud_streamer.py",
+      "size": 12475,
+      "sha256": "0b8c1b952a0af92ad935cf9e9bebf688b93a13e42808c5ad1bb8ab02f477dc6b",
+      "md5": "18a6c8a7f3b997b54c4e0699c48e6fb2",
+      "category": "core"
+    },
+    {
+      "path": "cookie_manager.py",
+      "size": 9204,
+      "sha256": "f5b20e88dc8b2fc0191697938fa7c41a24be0ce8381d48a83f3830506160eda4",
+      "md5": "5ce88098b9aadb1d1c40e4dcb3ebf980",
+      "category": "core"
+    },
+    {
+      "path": "cue_fixer.py",
+      "size": 10902,
+      "sha256": "f3ecab686b8c9cf9e9caa3d0aea546d33daf91bf794fe6f4e96627296b8b794a",
+      "md5": "30967ab70e6efa0f58fbba68335b2ada",
+      "category": "core"
+    },
+    {
+      "path": "cue_markers.py",
+      "size": 18713,
+      "sha256": "2829763aba8e535fa7c6b8605381439f525bfbd16e72ab11806a0a98c7ddc745",
+      "md5": "9b8fb0c19ed9fbb9997314bbfd5cf80d",
+      "category": "core"
+    },
+    {
+      "path": "cue_splitter.py",
+      "size": 12595,
+      "sha256": "89e74d1468fa983d01b657ed9797a0b40e2c778fad8bae24572ba8a629ad6daf",
+      "md5": "8af34cb0f62f930c91030feb783065df",
+      "category": "core"
+    },
+    {
+      "path": "dac_tester.py",
+      "size": 11159,
+      "sha256": "6c29db5653c2193e68e71f2dcf4afacada00eec01bc7179c30a8846166ed24da",
+      "md5": "55a3522e2df8f0f6a5bf34d116e33ad7",
+      "category": "core"
+    },
+    {
+      "path": "device_sync.py",
+      "size": 13205,
+      "sha256": "cc83d8c80247932e157efec3b797021a0424e83ab6b8ef3a33fbc85f25d30622",
+      "md5": "e9a57446bbba687e3c6dd96a2d8d4904",
+      "category": "core"
+    },
+    {
+      "path": "discography_scraper.py",
+      "size": 7155,
+      "sha256": "3399a7f9b83da23bd66545c28b0531c6d5e1c5d79ccb5d1f587ebadce9ec152e",
+      "md5": "11a7aa6b389a2a4d2cbb8fd959dbaee7",
+      "category": "core"
+    },
+    {
+      "path": "discord_rpc.py",
+      "size": 3980,
+      "sha256": "00acc614c2ac2cd0557d2064145555f2100f751511d87243712d8d8b91e328d8",
+      "md5": "9939d0b8ca88dbad0a66bebae85d146d",
+      "category": "core"
+    },
+    {
+      "path": "dj_automix.py",
+      "size": 12122,
+      "sha256": "9780629334f48468bd3d2f5e04bf11af62a92b7a96317dd536c03d11a40009f2",
+      "md5": "6c3bebd753d235ed65574fcd2a2ff632",
+      "category": "core"
+    },
+    {
+      "path": "dj_mixer.py",
+      "size": 14982,
+      "sha256": "aaa23007cfcbcb1154ea6e2e2cb6a6d9d70be09f0ae7f46ae89e326d0976f44a",
+      "md5": "d4a11fc832da7cc4c451fd3e0b8ad931",
+      "category": "core"
+    },
+    {
+      "path": "docs_generator.py",
+      "size": 52995,
+      "sha256": "13ba8e4134e789a178f31f64b93c07e63b6ac8e932b4be6e774b54739250a698",
+      "md5": "7b779bffec0b091f3839382c15111e09",
+      "category": "core"
+    },
+    {
+      "path": "downloader_engine.py",
+      "size": 20442,
+      "sha256": "63e8a64488021f068784ab5c9e4c4ec2ae3ee02b17a593ed16810a6311cd46d8",
+      "md5": "ec40665c8953c6399f0dc1a778196cf4",
+      "category": "core"
+    },
+    {
+      "path": "dr_meter.py",
+      "size": 15135,
+      "sha256": "ec6694c641d8faa58133c3bf45a093b7436b2100e759767c11399a301cd7d0db",
+      "md5": "def557fffaa457a30c72c3f33f37bbf1",
+      "category": "core"
+    },
+    {
+      "path": "dsd_converter.py",
+      "size": 13409,
+      "sha256": "1277959df2aab514035a58b5c6b62da8c86e835be953ce4d1dbdc3acaf8c4b79",
+      "md5": "7abe7f2069f8b48e485b8ad25aefa921",
+      "category": "core"
+    },
+    {
+      "path": "flac_verifier.py",
+      "size": 10882,
+      "sha256": "85a460859fdc61ceecd4cd30ebfca70353219a0dbed00a459766ead54810a916",
+      "md5": "a0a7561c2fcdd18e0fb28983ff9262b0",
+      "category": "core"
+    },
+    {
+      "path": "formant_shifter.py",
+      "size": 12692,
+      "sha256": "81c7ca472df298727b3db2ccb2334e6bca8477f3e220960107ff307ed039140a",
+      "md5": "4bce5e8f0b67bab7a836df55f40fbf47",
+      "category": "core"
+    },
+    {
+      "path": "headphone_autoeq.py",
+      "size": 10653,
+      "sha256": "a06678215ccaaf9ef47b95dbd69977c062b8f87b80a6e707252ebe4f7ababb64",
+      "md5": "0eb50f37fba3a4af9c534b6f7fe2bb30",
+      "category": "dsp"
+    },
+    {
+      "path": "library_doctor.py",
+      "size": 7200,
+      "sha256": "cee9454d8277caf7f45a88e7ab64979a060d25fc2910cef4daa75381fb8c335c",
+      "md5": "213951971a3d67fefdc5d52f066bea4c",
+      "category": "core"
+    },
+    {
+      "path": "library_migrator.py",
+      "size": 8868,
+      "sha256": "2b2af3ff179a86da4ef943dbc8da4c681594423d9e21b6483e7b2bde6a122171",
+      "md5": "96695a8e096eb4b7a437def50baa476e",
+      "category": "core"
+    },
+    {
+      "path": "library_organizer.py",
+      "size": 8814,
+      "sha256": "7453de343b967209278d2433d6f9a872ed16629b4ecd8271665b2dffde481ed7",
+      "md5": "696a7234334e2eb67d968f9ed224a71d",
+      "category": "core"
+    },
+    {
+      "path": "listening_stats.py",
+      "size": 5855,
+      "sha256": "904bf3acbdbf127b859fd6d33a612d48400c0b859f0abf4a28cebf03854b8ecf",
+      "md5": "11e412b315b6d621ef7b09d4874c358b",
+      "category": "core"
+    },
+    {
+      "path": "loudness_scanner.py",
+      "size": 9914,
+      "sha256": "ee637602e0b65771018af710fa96377a22d7f0ecbdcfe776b2a81fe7b42eb2d9",
+      "md5": "c23892d3d07297e6ef744dcc474de02c",
+      "category": "core"
+    },
+    {
+      "path": "loudness_war_studio.py",
+      "size": 13590,
+      "sha256": "e1f157ea1a69d59e6a3dad6fa84e605b8640b523baeafb04030ce1a2802fb261",
+      "md5": "ae72a9f5b702b8242f6c58f9120a672c",
+      "category": "core"
+    },
+    {
+      "path": "lrc_to_ass_converter.py",
+      "size": 16711,
+      "sha256": "c7cda1986284e165737fb59f12fb3b5b85d5bbdc9ceb2ace586ca8f53e59b5eb",
+      "md5": "b1d9099474acf0f95fe40d64250732dc",
+      "category": "core"
+    },
+    {
+      "path": "lyrics_aggregator.py",
+      "size": 12142,
+      "sha256": "ba82d13cbf361c534c3fd97196830d25744134229a14f407958232b018d25a11",
+      "md5": "8e7a173518a88043f5a05de7f665102a",
+      "category": "core"
+    },
+    {
+      "path": "lyrics_creator.py",
+      "size": 8343,
+      "sha256": "34310d75d3604c012f74e4b80cf2a2aef9f282e456cddd41cba04567d6c5f2a6",
+      "md5": "a22b926315c21ea22a481a4b1354db81",
+      "category": "core"
+    },
+    {
+      "path": "lyrics_downloader_ultimate.py",
+      "size": 91960,
+      "sha256": "de23d3d71c84f3a74eacc8359139fb8bafb9408e3df929d734662166fd147f39",
+      "md5": "369f0927ab7e0e50ed97d255e57ecf18",
+      "category": "core"
+    },
+    {
+      "path": "lyrics_engine.py",
+      "size": 21431,
+      "sha256": "afd74153d0e309532134ae38a8d48ac3013b0248a9197312e9a38119888cda7e",
+      "md5": "fe0b9128edf1e7222b0b69d2adf9b77d",
+      "category": "core"
+    },
+    {
+      "path": "lyrics_gui_config.json",
+      "size": 514,
+      "sha256": "990dc52123ac1e15736ef23be581c6d86cd130eb04964045fec18d08eea7d0ef",
+      "md5": "97cbe39545c64971d1822d8cadb2d028",
+      "category": "ui"
+    },
+    {
+      "path": "lyrics_retimer.py",
+      "size": 5796,
+      "sha256": "0df4029f733adc582b3f5811ac92ca68ce25a026bc63ac1a22f8bcc240941b8c",
+      "md5": "26661bc57e10bbadf62d671ac130254a",
+      "category": "core"
+    },
+    {
+      "path": "lyrics_translation.py",
+      "size": 6410,
+      "sha256": "148c79475576b8e0e454005095c3c5aac5df5fbe26ed68278edba84a832eb384",
+      "md5": "92ea579fe705fecdc3933c40ce192090",
+      "category": "core"
+    },
+    {
+      "path": "lyrics_translator.py",
+      "size": 8970,
+      "sha256": "aa9efb5e412795ab8eafa3116cdb957a3eb8386fff5aa48341d3eb54f8228cdd",
+      "md5": "a3fecf8f257531c317292a76445978bb",
+      "category": "core"
+    },
+    {
+      "path": "lyrics_video_maker.py",
+      "size": 15326,
+      "sha256": "a5be7301be30fa9ab8fe01b8b11b981bc89118acc67c2f66595d9dfb91d06c7f",
+      "md5": "c5d08f6f024d593c7bb5ca91e41ee547",
+      "category": "core"
+    },
+    {
+      "path": "mastering_limiter.py",
+      "size": 12044,
+      "sha256": "922a214445e06dfb66d3bc28406ec9f7e787201fbc9ad6fb97f2aa06d4299eba",
+      "md5": "f8bb0f537fe8021d5f527cb314980afd",
+      "category": "dsp"
+    },
+    {
+      "path": "midside_processor.py",
+      "size": 12144,
+      "sha256": "2ad1bf9cd2f9150ef0ad419e0a1fa8ff846393cc7702ee6c70ce523b1ff050ab",
+      "md5": "f7a776a17008d6e7bab9f4e0aba90574",
+      "category": "core"
+    },
+    {
+      "path": "modern_lyrics_downloader.py",
+      "size": 79397,
+      "sha256": "d8ba44042641f3810176523375b3c8e745b95596a35dc745ba9b389102f982dd",
+      "md5": "e1d12c2f80dc075f50948cafab1095ef",
+      "category": "core"
+    },
+    {
+      "path": "parametric_eq.py",
+      "size": 12115,
+      "sha256": "801e7f03f5c07ef6070c146589a4c010e27085a8c5482fa97d0c0aafca663c52",
+      "md5": "f795908c8054a1d9a6895c6671a3e0d3",
+      "category": "dsp"
+    },
+    {
+      "path": "phase_correlation.py",
+      "size": 10230,
+      "sha256": "67e25b496fb35bfc7c02b2d759940b8948e0bb358b27cf89201ad1aa8ab3a4d9",
+      "md5": "cdf72cc2081ee1e1941450ee52285d59",
+      "category": "core"
+    },
+    {
+      "path": "pitch_shifter.py",
+      "size": 8949,
+      "sha256": "b8871d90c475f2fe51f24396be7fa8d2b8f83b4a08f9832f7a47de23067aa163",
+      "md5": "06f86c0563bfa985ad13a6a29c806272",
+      "category": "core"
+    },
+    {
+      "path": "playlist_converter.py",
+      "size": 16835,
+      "sha256": "65aeb1cfa2e03263402572882431cfe5e1792b17a588f4c38ba20b47e4673a25",
+      "md5": "f3ea2545221d6455520d4a35ae22f9ac",
+      "category": "core"
+    },
+    {
+      "path": "playlist_doctor.py",
+      "size": 15733,
+      "sha256": "1db3dd656bafce71100289e1355338085adef5c308ca3d72c2db87806f83178c",
+      "md5": "bf793615391d7b86c2c1b322d9cad98b",
+      "category": "core"
+    },
+    {
+      "path": "playlist_manager.py",
+      "size": 3264,
+      "sha256": "4627bc3e9719285e39e9871faaa6692c5fada036d7bf47ca4469c96880c57b4f",
+      "md5": "c4da8655ef2e5cf66efed9bd6a6c1c35",
+      "category": "core"
+    },
+    {
+      "path": "pubspec.yaml",
+      "size": 1132,
+      "sha256": "1b190cff6775773e48719f4ab87af34f62043f116b2fed1836253b7e6d74549b",
+      "md5": "aa152e188c28efe0dd89b502d0d8d56a",
+      "category": "config"
+    },
+    {
+      "path": "release_packager.py",
+      "size": 16506,
+      "sha256": "4311b7ccecd353fc1768810c79f43a3e49a6fef254c83a53e77fc2e8e5f0e556",
+      "md5": "8255ec887a915a02ac68e4b154780851",
+      "category": "core"
+    },
+    {
+      "path": "remote_server.py",
+      "size": 16640,
+      "sha256": "8b002c1da06cde03a3e4817fe5469d5e6a9226a930a3618e9b5b2a1f46cdceb1",
+      "md5": "07c1bdc11a0f17dd876504a6c0a280b8",
+      "category": "core"
+    },
+    {
+      "path": "replaygain_normalizer.py",
+      "size": 19138,
+      "sha256": "71d0ed1256e41e0a229303997175a675eba3477aaf0ef425bc95285fb6966365",
+      "md5": "78550b5f662dc40e8202e4da92b3e218",
+      "category": "core"
+    },
+    {
+      "path": "requirements.txt",
+      "size": 139,
+      "sha256": "2184322789e191188408b526b46227ee933da4648e5fa4c090bcce1bb95c2a81",
+      "md5": "63c211ecbba321a043f5a81db96100fd",
+      "category": "ui"
+    },
+    {
+      "path": "room_eq.py",
+      "size": 6022,
+      "sha256": "749461d3590ed9cd7aea1b502cb2de639a91cf5c1c03770b8f32c25efec97aa4",
+      "md5": "041291316f69cb465b809937ad59f7ca",
+      "category": "dsp"
+    },
+    {
+      "path": "room_ir_synthesizer.py",
+      "size": 16814,
+      "sha256": "0d850034ceea27385219bd4d7335621572f57be7f93fbc169a30e49cc624b61a",
+      "md5": "0f13661c1bb64a6e68bcb737e8b6737b",
+      "category": "core"
+    },
+    {
+      "path": "scrobbler.py",
+      "size": 12569,
+      "sha256": "a68b9bc3c8b61faff3aac4e89fe91c8de43f50602228dcf096f71b55b6228147",
+      "md5": "3764c39bb9ce2ffdb75f0c9f0980b2ff",
+      "category": "core"
+    },
+    {
+      "path": "smart_playlists.py",
+      "size": 7174,
+      "sha256": "b7e101d48bea8b934f6c6d30c2776229173561d1d95cc7f49bf3d16ff67f3b32",
+      "md5": "1ef6784cb008fddc3aaf7c232694dd6d",
+      "category": "core"
+    },
+    {
+      "path": "sonance.py",
+      "size": 96879,
+      "sha256": "44b5f99abc3376b5b9792daf8157d1829cc685094f4410fc6d73dfedea5a3bc7",
+      "md5": "1fbcbd0245cf79d95a8da1a4f17be98c",
+      "category": "core"
+    },
+    {
+      "path": "spectrum_analyzer.py",
+      "size": 12725,
+      "sha256": "02758c79a9f146960ca7f356473ecf9ac48702861a08e12de42c32f6b3637fad",
+      "md5": "64152f73eb2dcc564a243ff437b449bb",
+      "category": "core"
+    },
+    {
+      "path": "stems_remixer.py",
+      "size": 13754,
+      "sha256": "06d904151e23cce5908578a7d37c5a04a5c086f1f901adfe83edf51963108783",
+      "md5": "d86743a03d3aeb9ecffb846b1ee8bb76",
+      "category": "dsp"
+    },
+    {
+      "path": "subsample_delay.py",
+      "size": 13440,
+      "sha256": "40f65cfa1588d45e53131e8960e2cefd15b615ad55fa520d0e6fa1974a71df02",
+      "md5": "a94612c6e981e864b9a9c97bc7022d72",
+      "category": "core"
+    },
+    {
+      "path": "tag_editor.py",
+      "size": 13796,
+      "sha256": "dcf55c66ea55c7528753693e9e844e0315d1f441ca87170a87c3c27e1a02b3e8",
+      "md5": "cb0aeb64e000fe94bf3c0793104c751c",
+      "category": "core"
+    },
+    {
+      "path": "tape_echo_delay.py",
+      "size": 12270,
+      "sha256": "92b79e71d395f6fa6a7a5dfc4a298113a0019a8beaaa049821be16c1a2e90b5c",
+      "md5": "4e3ffd60c4025dda2d62c40530c00fa7",
+      "category": "dsp"
+    },
+    {
+      "path": "track_splitter.py",
+      "size": 12664,
+      "sha256": "35bda08d6f0ac2d9531bb59ea04996f0dde871ec1354b55d9753b8168ccf179a",
+      "md5": "bb3c819823eb9d490a2274cd9efa37d8",
+      "category": "core"
+    },
+    {
+      "path": "transient_shaper.py",
+      "size": 10568,
+      "sha256": "847d3807ae53631ba61f32f78eba1b05fa3d9a4ac0076c95f8d12687c0080a9f",
+      "md5": "99cc1a1c487630279356d8007e4b5f05",
+      "category": "dsp"
+    },
+    {
+      "path": "vocal_separator.py",
+      "size": 9909,
+      "sha256": "75bc7327b909f1f4750d38bdabbccbe51ca5f061a4ff8ab8149283da5e02fcad",
+      "md5": "f556a85509e74dc9939f9867db6cf4bf",
+      "category": "core"
+    },
+    {
+      "path": "word_aligner.py",
+      "size": 10034,
+      "sha256": "a94e13d48314c3cc4ab692729eaeab47d51ac7323455632b05b82d669c7f2712",
+      "md5": "30b0f49941a77bd0b0f345ade0577285",
+      "category": "core"
+    },
+    {
+      "path": "word_karaoke.py",
+      "size": 8528,
+      "sha256": "cbb4bed5b47e60faef632703b44a41967d9ca2b3226b8f82f1dd110d192fc07d",
+      "md5": "f9c1ca4136be9b93a6ebc0b5b767dafc",
+      "category": "core"
+    },
+    {
+      "path": "android/app/src/main/AndroidManifest.xml",
+      "size": 1648,
+      "sha256": "923a27a0d8c6d031bae41bdc8190fe25b58822dde60476337c0fd06030e51054",
+      "md5": "88b4e8a514b1c0e2f8a9e321c7a9cad1",
+      "category": "asset"
+    },
+    {
+      "path": "lib/app.dart",
+      "size": 406,
+      "sha256": "a56c962c0c6df3c9c9dadbd9e19e9b4e6462c0c245b7484e2fd0b72e2c74cbbd",
+      "md5": "19d9797570d50db29948e3490d4f9d3c",
+      "category": "asset"
+    },
+    {
+      "path": "lib/main.dart",
+      "size": 252,
+      "sha256": "9e24ce749f59a0fa1a5d6c47b21a7414e1d5f33c6526b6c615eebc897fc7c782",
+      "md5": "f56fb3b34d7d2d0342021bb6a78e4a7f",
+      "category": "asset"
+    },
+    {
+      "path": "lib/core/models/lyrics.dart",
+      "size": 2558,
+      "sha256": "4e74d8d2010256b82c5fe68aebad454769abc5976150f285a4087b661e710221",
+      "md5": "6ec9cb65714c0509e7c35a762c58ccf7",
+      "category": "asset"
+    },
+    {
+      "path": "lib/core/models/track.dart",
+      "size": 2782,
+      "sha256": "30bbd62a97f47293ee4d0ce1e97c87c2b801f48e4fa5986b688d487fcc8b5b07",
+      "md5": "e52e693cba61680b5169e042b3b90d27",
+      "category": "asset"
+    },
+    {
+      "path": "lib/core/services/cookie_service.dart",
+      "size": 1618,
+      "sha256": "484d8d5dddc75c6a41f319f080af5abadc8ba57751f4d36e3e754a02af3a510d",
+      "md5": "c208d3886e26054a2151f71026703fbe",
+      "category": "asset"
+    },
+    {
+      "path": "lib/core/services/deezer_service.dart",
+      "size": 2592,
+      "sha256": "0467787a99604b1b4cc2d553416e5d7e840f17c36e36dade0f63391bc4e2fda9",
+      "md5": "a6f7d2998ba3f9ebd42525fc6b9704be",
+      "category": "asset"
+    },
+    {
+      "path": "lib/core/services/equalizer_service.dart",
+      "size": 1127,
+      "sha256": "17bf698a9805d76daf35135f5b7cfdb32c1525bc2b2007c34f05c97e941c827a",
+      "md5": "3f9cf49d8bdbd1bf42eb3566d5aa2da3",
+      "category": "asset"
+    },
+    {
+      "path": "lib/core/services/qobuz_service.dart",
+      "size": 2561,
+      "sha256": "adb016ade92acc8d054eeeba7a1fa3a4016a1189a745541aab5b08fd2474e8f4",
+      "md5": "dd049a81d4a79bd4b7a0fb532366c657",
+      "category": "asset"
+    },
+    {
+      "path": "lib/core/services/scrobbler_service.dart",
+      "size": 8323,
+      "sha256": "254654260aa871ecd247917be13f598368286ae87364c097febfefa6d3bd02c7",
+      "md5": "34a1dcdede59cb19c063d28d11fd51e9",
+      "category": "asset"
+    },
+    {
+      "path": "lib/core/services/spotify_importer.dart",
+      "size": 2889,
+      "sha256": "638bc9e062f9ef5ff7fe9d1ec11bc9593ea1da5a82f123647df697cebaebe245",
+      "md5": "a0dde177364ae2c86f49da8916ffc31d",
+      "category": "asset"
+    },
+    {
+      "path": "lib/core/services/tag_service.dart",
+      "size": 3559,
+      "sha256": "86d78c2edb36c9558e7585414ba27e1938ebae05855a0240616e2b0a64b2d063",
+      "md5": "34cc9351d4182bd17b275b70b25990e7",
+      "category": "asset"
+    },
+    {
+      "path": "lib/core/services/update_service.dart",
+      "size": 6546,
+      "sha256": "7170e00d353d2f32351195d2311efe6a041b86b73d3cc29620cc745a4e620711",
+      "md5": "82f3ca8240b04257034fb69459878998",
+      "category": "asset"
+    },
+    {
+      "path": "lib/core/theme/app_theme.dart",
+      "size": 1230,
+      "sha256": "e0e365ed457f163ec2a52dbef69b6b8040e49fe27c8b072b0485b225eb1ab445",
+      "md5": "413d519112ccb69ff760fb8bba6dd335",
+      "category": "asset"
+    },
+    {
+      "path": "lib/features/auth/auth_provider.dart",
+      "size": 4012,
+      "sha256": "e8df1cc45afca99cb355f1c43f2570a24d9b0c0c4a211ace6b7074b25f141a2a",
+      "md5": "840961dd9c05d9ec23bd4e8f9bf15fa7",
+      "category": "asset"
+    },
+    {
+      "path": "lib/features/downloader/download_queue_provider.dart",
+      "size": 5534,
+      "sha256": "332608436f3a354b0f6e552bb0b185fdbcf9ad53eaed3f0a0da0186f0cb64d0a",
+      "md5": "ec5f8fb1e29739a834c4ea38fdcdef9d",
+      "category": "asset"
+    },
+    {
+      "path": "lib/features/lyrics/lyrics_engine.dart",
+      "size": 6893,
+      "sha256": "21a00458c3f410580910c5c3b392fa031c94947e3c534ad8e25789938d4f798e",
+      "md5": "6243b04dbfb4f302d3b120619460b017",
+      "category": "asset"
+    },
+    {
+      "path": "lib/features/player/player_provider.dart",
+      "size": 2845,
+      "sha256": "f145490e6d9ec97ba358541bc935c1d1722bb8d7a5f06a3f047aed9eacaa49dc",
+      "md5": "a087fa32a2dda5fb3542ab8e7ef8310e",
+      "category": "asset"
+    },
+    {
+      "path": "lib/features/playlists/playlist_provider.dart",
+      "size": 2983,
+      "sha256": "14517cb50ea2076693d18596ec9e78210857f8442a8fddcacf992ab6f1f98789",
+      "md5": "2369bdd83ea82952dc2716aade189d05",
+      "category": "asset"
+    },
+    {
+      "path": "lib/features/search/search_provider.dart",
+      "size": 3446,
+      "sha256": "7a58ee700ea349eadad74ba92ae4d7a9edb6d537a15ad78b940df89b87dfbf8c",
+      "md5": "57ed0f7f9b405c9bb5f44a9df31645ac",
+      "category": "asset"
+    },
+    {
+      "path": "lib/ui/home_screen.dart",
+      "size": 5237,
+      "sha256": "60713497db6bc21dc146ac40c541a5a22d081461281c26287dbbb3d892e3ed91",
+      "md5": "c6feced66762bd72cb1d9cce8a8be4de",
+      "category": "ui"
+    },
+    {
+      "path": "lib/ui/views/local_view.dart",
+      "size": 6753,
+      "sha256": "5d967a9a5ec997f1e8c9a678d8e64804a559e55bfaccecfdae4f59f4b1216f67",
+      "md5": "ba381111226995a7309163076d59c55f",
+      "category": "ui"
+    },
+    {
+      "path": "lib/ui/views/lyrics_view.dart",
+      "size": 3512,
+      "sha256": "c198318a3a999bddb6950009634e0834ecd6bc34bb4bba1629f47b242983c347",
+      "md5": "46842525a01b7645aefcbe4897ff0084",
+      "category": "ui"
+    },
+    {
+      "path": "lib/ui/views/queue_view.dart",
+      "size": 6400,
+      "sha256": "8013767fa7d6040ef758e5073ebc385a1d6b550f2596ead0397283c2463aafbd",
+      "md5": "84969bf7185c49d6267887d8e1e5a74a",
+      "category": "ui"
+    },
+    {
+      "path": "lib/ui/views/search_view.dart",
+      "size": 9835,
+      "sha256": "d50bd24ef93624e626502febeb8674089dcb12e5326641c806d0d39a89fde985",
+      "md5": "83e4cb11c899d9fee48875c0d159d548",
+      "category": "ui"
+    },
+    {
+      "path": "lib/ui/views/settings_view.dart",
+      "size": 15630,
+      "sha256": "3537246a596b17800c77218f11e44138a8d74612255600553bc7254ed8978052",
+      "md5": "f9cf61965048228485e01f9b9ea23ea3",
+      "category": "ui"
+    },
+    {
+      "path": "linux/CMakeLists.txt",
+      "size": 330,
+      "sha256": "30740ca3ca73f11f43563c6a49de43d6994fe4f5c6aa1271df368578ddf4bc85",
+      "md5": "185955d82321a1941e6c163bc30174df",
+      "category": "docs"
+    },
+    {
+      "path": "macos/Runner/Info.plist",
+      "size": 1142,
+      "sha256": "965fd8482ef2128a4b4cf2b866b371e54e14e2cd0b6e5e95d73d414d3ad36c0c",
+      "md5": "fbdf3eb0788a5a1ce9c85491b5b21d53",
+      "category": "asset"
+    },
+    {
+      "path": "ui/index.html",
+      "size": 912905,
+      "sha256": "bb5d1089e5274200c128557c9fdf83d18dff6e0927a50a80fdced3833df457f0",
+      "md5": "edb7cc161013c8b5a018580256424906",
+      "category": "ui"
+    },
+    {
+      "path": "ui/manual.html",
+      "size": 87034,
+      "sha256": "4c81c563e6b1be15d846cd1a63d8c6fdee042eeec035ba0ac4449039d9f1e0f5",
+      "md5": "d7abec1edef43b018e8216429496973f",
+      "category": "ui"
+    },
+    {
+      "path": "windows/CMakeLists.txt",
+      "size": 786,
+      "sha256": "6c7c8211d0433fec659862f95d4f3c734136bca9f24bc80b3d5bd143968c1b6a",
+      "md5": "f234b425504f6588d9eaac27fc57bbe2",
+      "category": "docs"
+    }
+  ]
+}
