@@ -89,6 +89,55 @@ class LyricsEngine {
     return true;
   }
 
+  /// NetEase Cloud Music lyrics provider for Asian and global tracks.
+  static Future<SyncedLyrics?> fetchNetEase({
+    required String title,
+    String? artist,
+  }) async {
+    try {
+      final q = artist != null ? '$artist $title' : title;
+      final searchUri = Uri.http('music.163.com', '/api/search/get/web', {
+        's': q,
+        'type': '1',
+        'limit': '1',
+      });
+
+      final searchRes = await http.get(searchUri).timeout(const Duration(seconds: 6));
+      if (searchRes.statusCode == 200) {
+        final data = jsonDecode(searchRes.body) as Map<String, dynamic>;
+        final songs = data['result']?['songs'] as List<dynamic>?;
+        if (songs != null && songs.isNotEmpty) {
+          final songId = songs.first['id'];
+          final lyricUri = Uri.http('music.163.com', '/api/song/lyric', {
+            'id': songId.toString(),
+            'lv': '1',
+            'kv': '1',
+            'tv': '-1',
+          });
+
+          final lyricRes = await http.get(lyricUri).timeout(const Duration(seconds: 6));
+          if (lyricRes.statusCode == 200) {
+            final lrcData = jsonDecode(lyricRes.body) as Map<String, dynamic>;
+            final lrcContent = lrcData['lrc']?['lyric'] as String?;
+            if (lrcContent != null && lrcContent.isNotEmpty) {
+              return SyncedLyrics.parse(lrcContent, provider: 'NetEase');
+            }
+          }
+        }
+      }
+    } catch (_) {}
+    return null;
+  }
+
+  /// Cleans track title noise like (Official Music Video), [Remastered], feat.
+  static String sanitizeTitle(String title) {
+    return title
+        .replaceAll(RegExp(r'\s*[\(\[](?:official\s*(?:video|audio|music\s*video)|remastered|remaster|\d{4}\s*remaster|deluxe|explicit|hd|hq|audio|visualizer)[\)\]]', caseSensitive: false), '')
+        .replaceAll(RegExp(r'\s*[\(\[]\s*(?:feat|ft)\.?\s+[^)\]]+[\)\]]', caseSensitive: false), '')
+        .replaceAll(RegExp(r'\s+(?:feat|ft)\.?\s+.*$', caseSensitive: false), '')
+        .trim();
+  }
+
   /// Removes Asian / CJK script lines to filter out bad transliterations.
   static String stripCjkLines(String content) {
     return content.split('\n').where((l) => !_cjkRegex.hasMatch(l)).join('\n');
@@ -101,7 +150,14 @@ class LyricsEngine {
     required String outputLrcPath,
     Duration? duration,
   }) async {
-    final lyrics = await fetchLrclib(title: title, artist: artist, duration: duration);
+    final cleanTitle = sanitizeTitle(title);
+
+    // 1. Try LRCLIB (Primary)
+    SyncedLyrics? lyrics = await fetchLrclib(title: cleanTitle, artist: artist, duration: duration);
+
+    // 2. Try NetEase (Fallback)
+    lyrics ??= await fetchNetEase(title: cleanTitle, artist: artist);
+
     if (lyrics != null && lyrics.hasLyrics) {
       final raw = lyrics.lines.map((l) {
         if (l.timestamp != null) {

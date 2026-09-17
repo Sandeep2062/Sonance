@@ -77,6 +77,27 @@ def get_deezer_arl() -> str:
     return cfg.get("deezer_arl", "").strip()
 
 
+def get_deezer_blowfish_key(track_id: str) -> bytes:
+    """Derives Deezer Blowfish decryption key for a track."""
+    salt = b"g4el58wc0zvf9na1"
+    track_id_md5 = hashlib.md5(str(track_id).encode()).hexdigest().encode()
+    key = bytearray(16)
+    for i in range(16):
+        key[i] = track_id_md5[i] ^ track_id_md5[i + 16] ^ salt[i]
+    return bytes(key)
+
+
+def decrypt_deezer_chunk(chunk: bytes, key: bytes) -> bytes:
+    """Decrypts a 2048-byte audio chunk using Blowfish-CBC."""
+    try:
+        from cryptography.hazmat.primitives.ciphers import Cipher, algorithms, modes
+        cipher = Cipher(algorithms.Blowfish(key), modes.CBC(bytes([0, 1, 2, 3, 4, 5, 6, 7])))
+        decryptor = cipher.decryptor()
+        return decryptor.update(chunk) + decryptor.finalize()
+    except Exception:
+        return chunk
+
+
 def get_qobuz_auth() -> Dict[str, str]:
     cfg = load_auth_config()
     return {
