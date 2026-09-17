@@ -118,7 +118,14 @@ Sonance brings together three distinct open-source powerhouses:
 - **Ambient Fluid Album Art Mesh Canvas Backdrop**: Real-time breathing animated canvas mesh gradient extracting dominant color stops from the current playing album cover art.
 - **Podcast & Audiobook Silence Skipper DSP**: Real-time silence detection automatically skipping or accelerating pauses > 1.2s in podcasts, audiobooks, and recorded lectures.
 
-### 🔄 13. In-App Updates & Releases
+### 🔊 13. ReplayGain 2.0, Syllable Karaoke, Audio Dedup, CD Ripper & Spectrogram Waterfall
+- **ReplayGain 2.0 & EBU R128 Loudness Scanner (`loudness_scanner.py`)**: ITU-R BS.1770 integrated loudness (LUFS), Loudness Range (LU), and True Peak (dBFS) measurement with standard ReplayGain tag embedding across MP3 (ID3v2 TXXX), FLAC (Vorbis Comments), and M4A. Configurable target loudness (-14 LUFS Streaming, -18 LUFS Audiophile, -23 LUFS EBU R128 Broadcast). CLI: `python sonance.py --scan-loudness <audio_file_or_dir> [-14.0] [--apply]`.
+- **Synchronized Word-by-Word Syllable Karaoke Studio (`word_karaoke.py`)**: Advanced Enhanced LRC parser and word/syllable timing synthesizer rendering real-time Apple Music / Spotify Sing style glowing text sweep karaoke fills with zero CPU overhead.
+- **Lossless Audio Duplicate Cleaner & Integrity Verifier (`audio_dedup.py`)**: Cross-format acoustic and metadata duplicate detection, fidelity scoring (Lossless 24/96 FLAC > 320k MP3 > 128k AAC), duplicate grouping, and safe redundant audio archiving. CLI: `python sonance.py --dedup <music_folder> [archive_dir]`.
+- **Audio CD Ripper & DiscID AccurateRip Studio (`cd_ripper.py`)**: Physical optical CD drive detection, MusicBrainz DiscID querying, and bit-perfect extraction to FLAC, WAV, MP3, or M4A with metadata auto-tagging and companion synced `.lrc` download. CLI: `python sonance.py --rip-cd [drive_letter] [out_dir] [format]`.
+- **Real-Time 2D Spectrogram Waterfall Visualizer**: Live scrolling FFT frequency-over-time thermal heatmap canvas (0 Hz to 24 kHz) integrated into the Spek technical specs modal.
+
+### 🔄 14. In-App Updates & Releases
 - Automatic update detection checking against [GitHub Releases](https://github.com/Sandeep2062/Sonance/releases).
 - Every release includes SHA-256 and MD5 checksum manifests (`RELEASE.sha256sum`, `RELEASE.md5sum`).
 
