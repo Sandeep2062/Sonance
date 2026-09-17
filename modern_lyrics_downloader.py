@@ -62,6 +62,10 @@ import vocal_separator
 import audio_auditor
 import dj_mixer
 import chord_studio
+import audio_resampler
+import pitch_shifter
+import library_organizer
+import album_packer
 
 APP_VERSION = "2.1.0"
 GITHUB_REPO = "Sandeep2062/Sonance"
@@ -960,6 +964,34 @@ class LyricsAPI:
     def get_chord_diagram(self, chord_name: str) -> Dict[str, Any]:
         """Returns guitar fretboard diagram and voicing for chord."""
         return chord_studio.get_chord_details(chord_name)
+
+    # ------------------ Phase 15: Audiophile Sinc Resampler & Dither ------------
+    def resample_audio_track(self, file_path: str, target_rate: int = 96000, target_bit_depth: int = 24, output_file: Optional[str] = None) -> Dict[str, Any]:
+        """Resamples audio track with polyphase sinc interpolation and TPDF noise-shaped dither."""
+        return audio_resampler.resample_audio_file(file_path, target_rate, target_bit_depth, output_file)
+
+    # ------------------ Phase 15: Vocal Pitch Transposer & Key Shifter ----------
+    def transpose_audio_pitch(self, file_path: str, semitones: float, output_file: Optional[str] = None) -> Dict[str, Any]:
+        """Transposes musical pitch (-6 to +6 semitones) without tempo changes."""
+        return pitch_shifter.shift_pitch_file(file_path, semitones, output_file)
+
+    # ------------------ Phase 15: Library Auto-Organizer & File Renamer ---------
+    def preview_library_organization(self, folder_path: str, pattern: str = library_organizer.DEFAULT_ORGANIZER_PATTERN) -> Dict[str, Any]:
+        """Generates a dry-run preview of library folder organization."""
+        return library_organizer.preview_library_organization(folder_path, pattern)
+
+    def execute_library_organization(self, folder_path: str, pattern: str = library_organizer.DEFAULT_ORGANIZER_PATTERN, copy_mode: bool = False) -> Dict[str, Any]:
+        """Executes tag-based library file renaming and directory restructuring."""
+        return library_organizer.execute_library_organization(folder_path, pattern, copy_mode=copy_mode)
+
+    # ------------------ Phase 15: Lossless Monolithic Album Packer --------------
+    def pack_album_to_monolithic(self, folder_path: str, output_flac: Optional[str] = None) -> Dict[str, Any]:
+        """Packs loose album tracks into a single monolithic FLAC with Red Book CUE sheet."""
+        return album_packer.pack_album(folder_path, output_flac)
+
+    def unpack_monolithic_album(self, album_file: str, cue_file: Optional[str] = None, output_dir: Optional[str] = None) -> Dict[str, Any]:
+        """Unpacks a monolithic album image into separate tagged tracks."""
+        return album_packer.unpack_album(album_file, cue_file, output_dir)
 
     def _save_last_folder(self, folder: str):
         try:

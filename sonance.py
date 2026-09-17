@@ -162,6 +162,36 @@ Examples:
       help="Analyze track BPM tempo, musical key, and Camelot DJ wheel mixing code",
   )
   parser.add_argument(
+      "--resample",
+      nargs="+",
+      metavar="PARAM",
+      help="Resample audio file: --resample <audio_file> <sample_rate> [bit_depth] [output_file]",
+  )
+  parser.add_argument(
+      "--pitch-shift",
+      nargs="+",
+      metavar="PARAM",
+      help="Transpose audio key: --pitch-shift <audio_file> <semitones> [output_file]",
+  )
+  parser.add_argument(
+      "--organize",
+      nargs="+",
+      metavar="PARAM",
+      help="Organize music library: --organize <folder> [--pattern \"<pattern>\"] [--execute] [--copy]",
+  )
+  parser.add_argument(
+      "--pack-album",
+      nargs="+",
+      metavar="PARAM",
+      help="Pack loose album tracks into monolithic FLAC: --pack-album <folder> [output_flac]",
+  )
+  parser.add_argument(
+      "--unpack-album",
+      nargs="+",
+      metavar="PARAM",
+      help="Unpack monolithic FLAC into individual tracks: --unpack-album <monolithic_flac> [output_dir]",
+  )
+  parser.add_argument(
       "--version",
       action="version",
       version=f"Sonance v{modern_lyrics_downloader.APP_VERSION}",
@@ -522,6 +552,91 @@ Examples:
         print(f"    • {k['camelot']} ({k['key']}) -> {k['relation']}")
     else:
       print(f"[-] Key analysis failed: {res.get('error')}")
+    return
+
+  if args.resample:
+    import audio_resampler
+    inp = args.resample[0]
+    rate = int(args.resample[1]) if len(args.resample) > 1 else 96000
+    bd = int(args.resample[2]) if len(args.resample) > 2 and args.resample[2] in ["16", "24", "32"] else 24
+    out = args.resample[3] if len(args.resample) > 3 else None
+    print(f"[*] Resampling {inp} to {rate} Hz ({bd}-bit)...")
+    res = audio_resampler.resample_audio_file(inp, rate, bd, out)
+    if res.get("success"):
+      print(f"[+] Resampled audio saved to: {res.get('output_file')} (Engine: {res.get('engine')})")
+    else:
+      print(f"[-] Resampling failed: {res.get('error')}")
+    return
+
+  if args.pitch_shift:
+    import pitch_shifter
+    inp = args.pitch_shift[0]
+    semi = float(args.pitch_shift[1]) if len(args.pitch_shift) > 1 else 0.0
+    out = args.pitch_shift[2] if len(args.pitch_shift) > 2 else None
+    print(f"[*] Shifting pitch for {inp} by {semi:+g} semitones...")
+    res = pitch_shifter.shift_pitch_file(inp, semi, out)
+    if res.get("success"):
+      print(f"[+] Transposed audio saved: {res.get('output_file')} (Shift ratio: {res.get('key_shift_ratio')})")
+    else:
+      print(f"[-] Pitch shift failed: {res.get('error')}")
+    return
+
+  if args.organize:
+    import library_organizer
+    folder = args.organize[0]
+    pat = library_organizer.DEFAULT_ORGANIZER_PATTERN
+    execute_flag = "--execute" in args.organize
+    copy_flag = "--copy" in args.organize
+    for i, a in enumerate(args.organize):
+      if a == "--pattern" and i + 1 < len(args.organize):
+        pat = args.organize[i + 1]
+
+    if not execute_flag:
+      print(f"[*] Previewing library organization for: {folder} (Pattern: {pat})...")
+      res = library_organizer.preview_library_organization(folder, pat)
+      if res.get("success"):
+        print(f"[+] Found {res.get('total_tracks')} tracks ({res.get('tracks_to_move')} to move, {res.get('unchanged_tracks')} unchanged):")
+        for item in res.get("preview_items", [])[:10]:
+          print(f"    • {item['filename']} -> {item['new_rel_path']}")
+        if len(res.get("preview_items", [])) > 10:
+          print(f"    ... and {len(res.get('preview_items', [])) - 10} more tracks.")
+        print("[*] To apply these changes on disk, run with --execute (or add --copy to preserve sources).")
+      else:
+        print(f"[-] Preview failed: {res.get('error')}")
+    else:
+      mode_str = "copying" if copy_flag else "moving"
+      print(f"[*] Organizing library tracks in {folder} ({mode_str})...")
+      res = library_organizer.execute_library_organization(folder, pat, copy_mode=copy_flag)
+      if res.get("success"):
+        print(f"[+] Successfully organized {res.get('success_count')} tracks (Mode: {res.get('mode')}).")
+      else:
+        print(f"[-] Organization failed: {res.get('error')}")
+    return
+
+  if args.pack_album:
+    import album_packer
+    folder = args.pack_album[0]
+    out = args.pack_album[1] if len(args.pack_album) > 1 else None
+    print(f"[*] Packing album from {folder} into monolithic FLAC/CUE...")
+    res = album_packer.pack_album(folder, out)
+    if res.get("success"):
+      print(f"[+] Successfully packed {res.get('total_tracks')} tracks:")
+      print(f"    • Master Audio: {res.get('output_audio')}")
+      print(f"    • CUE Sheet:    {res.get('output_cue')}")
+    else:
+      print(f"[-] Packing failed: {res.get('error')}")
+    return
+
+  if args.unpack_album:
+    import album_packer
+    alb_file = args.unpack_album[0]
+    out_d = args.unpack_album[1] if len(args.unpack_album) > 1 else None
+    print(f"[*] Unpacking monolithic album: {alb_file}...")
+    res = album_packer.unpack_album(alb_file, output_dir=out_d)
+    if res.get("success"):
+      print(f"[+] Successfully extracted {res.get('tracks_extracted')} tracks to: {res.get('output_dir')}")
+    else:
+      print(f"[-] Unpacking failed: {res.get('error')}")
     return
 
   if args.classic:

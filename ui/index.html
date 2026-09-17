@@ -1129,6 +1129,12 @@
       <button class="btn btn-secondary" onclick="openAuditorModal()" style="padding:5px 9px; font-size:11px;" id="auditorHeaderBtn" title="Lossless Audio Authenticity Auditor (Fake Lossless / Brickwall Cutoff)">
         🔬 Auditor
       </button>
+      <button class="btn btn-secondary" onclick="openOrganizerModal()" style="padding:5px 9px; font-size:11px;" id="organizerHeaderBtn" title="Library Auto-Organizer & Tag-Based File Renamer">
+        🗂️ Organize
+      </button>
+      <button class="btn btn-secondary" onclick="openPitchModal()" style="padding:5px 9px; font-size:11px;" id="pitchHeaderBtn" title="Karaoke Vocal Pitch Transposer & Key Shifter">
+        🎼 Transpose
+      </button>
       <button class="btn btn-secondary" onclick="openLrcStudioModal()" style="padding:5px 9px; font-size:11px;" id="lrcStudioHeaderBtn" title="Interactive LRC Studio & Live Time-Stamper">
         ✍️ LRC Studio
       </button>
@@ -3354,6 +3360,204 @@
       <div style="padding:8px 16px; background:#121520; border-top:1px solid var(--border); display:flex; justify-content:space-between; align-items:center;">
         <span style="font-size:10px; color:var(--text-dim);">Camelot Wheel: ±1 Step Energy · Relative Maj/Min Mood Shift</span>
         <button class="btn btn-secondary" onclick="closeDjMixerModal()" style="padding:4px 12px; font-size:11px;">Close</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Library Auto-Organizer & File Renamer Modal (Phase 15) -->
+  <div class="modal-backdrop" id="libraryOrganizerModal" style="display:none;">
+    <div class="modal-box" style="width:840px; max-width:95vw; max-height:88vh; display:flex; flex-direction:column;">
+      <div class="modal-header">
+        <div style="display:flex; align-items:center; gap:8px;">
+          <span style="font-size:18px;">🗂️</span>
+          <div>
+            <div style="font-weight:700; font-size:14px; color:#fff;">MusicBee-Grade Library Auto-Organizer</div>
+            <div style="font-size:10px; color:var(--text-dim);">Restructure and rename messy music folders using tags (%artist%, %album%, %track%, %title%)</div>
+          </div>
+        </div>
+        <button onclick="closeOrganizerModal()" style="background:none; border:none; color:var(--text-muted); cursor:pointer; font-size:16px;">✕</button>
+      </div>
+
+      <div class="modal-body" style="flex:1; display:flex; flex-direction:column; overflow-y:auto; padding:16px; gap:12px;">
+        <div style="background:#121522; border:1px solid var(--border); border-radius:8px; padding:12px; display:flex; flex-direction:column; gap:10px;">
+          <div style="display:flex; gap:8px; align-items:center;">
+            <div style="flex:1;">
+              <label style="font-size:11px; color:var(--text-dim); display:block; margin-bottom:4px;">Target Library Folder:</label>
+              <input type="text" id="organizerFolderInput" class="search-input" placeholder="Select a music folder to organize..." style="width:100%; font-size:11px; padding:6px 10px;">
+            </div>
+            <div style="align-self:flex-end;">
+              <button class="btn btn-secondary" onclick="useCurrentFolderForOrganizer()" style="font-size:11px; padding:6px 12px; white-space:nowrap;">📁 Use Active Folder</button>
+            </div>
+          </div>
+
+          <div style="display:grid; grid-template-columns:1fr 1fr; gap:10px;">
+            <div>
+              <label style="font-size:11px; color:var(--text-dim); display:block; margin-bottom:4px;">Pattern Presets:</label>
+              <select id="organizerPatternPreset" class="search-input" style="width:100%; font-size:11px; padding:6px 8px;" onchange="document.getElementById('organizerCustomPattern').value = this.value">
+                <option value="%artist%/[%year%] %album%/%track% - %title%">Standard: Artist/[Year] Album/Track - Title</option>
+                <option value="%artist%/%album%/%track% - %title%">Simple: Artist/Album/Track - Title</option>
+                <option value="%album_artist%/%album%/%track% - %title%">Album Artist: AlbumArtist/Album/Track - Title</option>
+                <option value="%genre%/%artist% - %title%">Genre: Genre/Artist - Title</option>
+              </select>
+            </div>
+
+            <div>
+              <label style="font-size:11px; color:var(--text-dim); display:block; margin-bottom:4px;">Operation Mode:</label>
+              <select id="organizerModeSelect" class="search-input" style="width:100%; font-size:11px; padding:6px 8px;">
+                <option value="move">Move & Restructure (Clean Source)</option>
+                <option value="copy">Copy & Restructure (Preserve Source)</option>
+              </select>
+            </div>
+          </div>
+
+          <div>
+            <label style="font-size:11px; color:var(--text-dim); display:block; margin-bottom:4px;">Custom Folder/Filename Pattern:</label>
+            <input type="text" id="organizerCustomPattern" class="search-input" value="%artist%/[%year%] %album%/%track% - %title%" style="width:100%; font-size:11px; padding:6px 10px; font-family:monospace;">
+          </div>
+
+          <div style="display:flex; justify-content:space-between; align-items:center; margin-top:4px;">
+            <span id="organizerStatusText" style="font-size:11px; color:var(--text-dim);">Companion .lrc lyrics and album cover artwork will be moved automatically.</span>
+            <div style="display:flex; gap:8px;">
+              <button class="btn btn-secondary" onclick="runOrganizerPreviewAction()" style="font-size:11px; padding:6px 14px;">
+                👁️ Preview Diff
+              </button>
+              <button class="btn btn-primary" id="organizerApplyBtn" onclick="runOrganizerApplyAction()" style="font-size:11px; padding:6px 16px;">
+                ⚡ Apply Organization
+              </button>
+            </div>
+          </div>
+        </div>
+
+        <!-- Preview Results Table -->
+        <div id="organizerPreviewSection" style="display:none; flex-direction:column; gap:8px;">
+          <div style="display:flex; justify-content:space-between; align-items:center; font-size:12px; font-weight:700; color:#fff;">
+            <span>Preview Organization Diff</span>
+            <span id="organizerSummaryBadge" class="quality-badge" style="background:rgba(16,185,129,0.15); color:var(--emerald); border-color:rgba(16,185,129,0.3);"></span>
+          </div>
+          <div id="organizerPreviewTable" style="max-height:320px; overflow-y:auto; border:1px solid var(--border); border-radius:6px; background:#0b0d14; font-size:11px;"></div>
+        </div>
+      </div>
+
+      <div style="padding:10px 16px; background:#121520; border-top:1px solid var(--border); display:flex; justify-content:space-between; align-items:center;">
+        <span style="font-size:10px; color:var(--text-dim);">Illegal character removal (< > : " / \ | ? *) · Companion .lrc auto-sync</span>
+        <button class="btn btn-secondary" onclick="closeOrganizerModal()">Close</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Karaoke Vocal Pitch Transposer & Key Shifter Modal (Phase 15) -->
+  <div class="modal-backdrop" id="pitchTransposeModal" style="display:none;">
+    <div class="modal-box" style="width:580px; max-width:92vw; display:flex; flex-direction:column;">
+      <div class="modal-header">
+        <div style="display:flex; align-items:center; gap:8px;">
+          <span style="font-size:18px;">🎼</span>
+          <div>
+            <div style="font-weight:700; font-size:14px; color:#fff;">Karaoke Vocal Pitch Transposer & Key Shifter</div>
+            <div style="font-size:10px; color:var(--text-dim);">Shift song key (±6 semitones) without tempo changes to fit your vocal pitch range</div>
+          </div>
+        </div>
+        <button onclick="closePitchModal()" style="background:none; border:none; color:var(--text-muted); cursor:pointer; font-size:16px;">✕</button>
+      </div>
+
+      <div class="modal-body" style="padding:16px; display:flex; flex-direction:column; gap:14px;">
+        <div style="background:#121522; border:1px solid var(--border); border-radius:8px; padding:12px;">
+          <div style="font-size:11px; color:var(--text-dim); margin-bottom:4px;">Active Track:</div>
+          <div id="pitchModalTrackTitle" style="font-weight:700; font-size:13px; color:#fff;">--</div>
+          <div id="pitchModalTrackArtist" style="font-size:11px; color:var(--text-dim);">--</div>
+        </div>
+
+        <div style="background:#121522; border:1px solid var(--border); border-radius:8px; padding:14px; text-align:center;">
+          <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:8px;">
+            <span style="font-size:11px; color:var(--text-dim);">Semitone Pitch Transposition:</span>
+            <span id="pitchSemitoneValue" style="font-size:18px; font-weight:800; color:var(--amber); font-family:monospace;">0 Semitones (Original Key)</span>
+          </div>
+          <input type="range" id="pitchSemitoneSlider" min="-6" max="6" step="1" value="0" style="width:100%; accent-color:var(--amber);" oninput="updatePitchSliderLabel(this.value)">
+          <div style="display:flex; justify-content:space-between; font-size:10px; color:var(--text-dim); margin-top:4px;">
+            <span>-6 (Lower)</span>
+            <span>-3</span>
+            <span>0 (Normal)</span>
+            <span>+3</span>
+            <span>+6 (Higher)</span>
+          </div>
+        </div>
+
+        <div style="display:flex; justify-content:space-between; align-items:center;">
+          <div id="pitchStatusText" style="font-size:11px; color:var(--text-dim);">Phase vocoder time-pitch invariance engine. Preserves audio duration.</div>
+          <button class="btn btn-primary" id="pitchExportBtn" onclick="runPitchExportAction()" style="font-size:11px; padding:7px 16px;">
+            ⚡ Export Transposed Track
+          </button>
+        </div>
+      </div>
+
+      <div style="padding:10px 16px; background:#121520; border-top:1px solid var(--border); display:flex; justify-content:space-between; align-items:center;">
+        <span style="font-size:10px; color:var(--text-dim);">Pure NumPy Phase Vocoder & FFmpeg asetrate/atempo pipeline</span>
+        <button class="btn btn-secondary" onclick="closePitchModal()">Close</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Audiophile Polyphase Sinc Resampler & Dither Modal (Phase 15) -->
+  <div class="modal-backdrop" id="resamplerModal" style="display:none;">
+    <div class="modal-box" style="width:620px; max-width:92vw; display:flex; flex-direction:column;">
+      <div class="modal-header">
+        <div style="display:flex; align-items:center; gap:8px;">
+          <span style="font-size:18px;">💎</span>
+          <div>
+            <div style="font-weight:700; font-size:14px; color:#fff;">Audiophile Polyphase Sinc Resampler Studio</div>
+            <div style="font-size:10px; color:var(--text-dim);">Studio-grade sample rate upsampling & TPDF dither noise-shaping for external DACs</div>
+          </div>
+        </div>
+        <button onclick="closeResamplerModal()" style="background:none; border:none; color:var(--text-muted); cursor:pointer; font-size:16px;">✕</button>
+      </div>
+
+      <div class="modal-body" style="padding:16px; display:flex; flex-direction:column; gap:12px;">
+        <div style="background:#121522; border:1px solid var(--border); border-radius:8px; padding:12px;">
+          <div style="font-size:11px; color:var(--text-dim); margin-bottom:4px;">Target Track:</div>
+          <div id="resampleModalTrackTitle" style="font-weight:700; font-size:13px; color:#fff;">--</div>
+        </div>
+
+        <div style="display:grid; grid-template-columns:1fr 1fr; gap:12px;">
+          <div>
+            <label style="font-size:11px; color:var(--text-dim); display:block; margin-bottom:4px;">Target Sample Rate:</label>
+            <select id="resampleRateSelect" class="search-input" style="width:100%; font-size:11px; padding:6px 8px;">
+              <option value="96000" selected>96.0 kHz (Hi-Res Studio Master)</option>
+              <option value="192000">192.0 kHz (Audiophile Ultra)</option>
+              <option value="88200">88.2 kHz (2x CD Exact Multiple)</option>
+              <option value="176400">176.4 kHz (4x CD Multiple)</option>
+              <option value="48000">48.0 kHz (Standard Broadcast)</option>
+              <option value="44100">44.1 kHz (Red Book CD)</option>
+            </select>
+          </div>
+
+          <div>
+            <label style="font-size:11px; color:var(--text-dim); display:block; margin-bottom:4px;">Target Bit Depth:</label>
+            <select id="resampleBitDepthSelect" class="search-input" style="width:100%; font-size:11px; padding:6px 8px;">
+              <option value="24" selected>24-bit True Studio Master</option>
+              <option value="16">16-bit Red Book CD (with TPDF Dither)</option>
+              <option value="32">32-bit Floating Point (Lossless Headroom)</option>
+            </select>
+          </div>
+        </div>
+
+        <div style="background:#121522; border:1px solid var(--border); border-radius:8px; padding:10px; display:flex; justify-content:space-between; align-items:center;">
+          <div>
+            <div style="font-size:11px; font-weight:700; color:#fff;">TPDF Dither & High-Pass Noise Shaping</div>
+            <div style="font-size:10px; color:var(--text-dim);">Eliminates quantization distortion, shifting residual noise above 18 kHz</div>
+          </div>
+          <input type="checkbox" id="resampleDitherToggle" checked style="accent-color:var(--emerald);">
+        </div>
+
+        <div style="display:flex; justify-content:space-between; align-items:center; margin-top:4px;">
+          <span id="resampleStatusText" style="font-size:11px; color:var(--text-dim);">Polyphase sinc interpolation preserves bandlimited Nyquist dynamics.</span>
+          <button class="btn btn-primary" id="startResampleBtn" onclick="runResampleAction()" style="font-size:11px; padding:7px 16px;">
+            ⚡ Resample & Export
+          </button>
+        </div>
+      </div>
+
+      <div style="padding:10px 16px; background:#121520; border-top:1px solid var(--border); display:flex; justify-content:space-between; align-items:center;">
+        <span style="font-size:10px; color:var(--text-dim);">32-tap Kaiser-windowed bandlimited sinc interpolation</span>
+        <button class="btn btn-secondary" onclick="closeResamplerModal()">Close</button>
       </div>
     </div>
   </div>
@@ -6310,6 +6514,9 @@
         closeAuditorModal();
         closeChordFretModal();
         closeDjMixerModal();
+        closeOrganizerModal();
+        closePitchModal();
+        closeResamplerModal();
         dismissPodcastResumeToast();
         const popup = document.getElementById('speedStudioPopup');
         if (popup) popup.style.display = 'none';
@@ -8924,6 +9131,274 @@
     function closeChordFretModal() {
       const modal = document.getElementById('chordFretModal');
       if (modal) modal.style.display = 'none';
+    }
+
+    // =========================================================================
+    // Phase 15: Library Auto-Organizer, Pitch Transposer & Sinc Resampler
+    // =========================================================================
+
+    // --- Library Auto-Organizer ---
+    function openOrganizerModal() {
+      const modal = document.getElementById('libraryOrganizerModal');
+      if (modal) modal.style.display = 'flex';
+      const input = document.getElementById('organizerFolderInput');
+      if (input && !input.value.trim()) {
+        useCurrentFolderForOrganizer();
+      }
+    }
+
+    function closeOrganizerModal() {
+      const modal = document.getElementById('libraryOrganizerModal');
+      if (modal) modal.style.display = 'none';
+    }
+
+    function useCurrentFolderForOrganizer() {
+      const folder = document.getElementById('currentFolderText').innerText;
+      const input = document.getElementById('organizerFolderInput');
+      if (folder && folder !== 'No folder selected' && input) {
+        input.value = folder;
+      }
+    }
+
+    function runOrganizerPreviewAction() {
+      const folder = (document.getElementById('organizerFolderInput').value || '').trim();
+      if (!folder) {
+        alert('Please specify a library folder to organize.');
+        return;
+      }
+
+      const pattern = document.getElementById('organizerCustomPattern').value.trim() || '%artist%/[%year%] %album%/%track% - %title%';
+      const section = document.getElementById('organizerPreviewSection');
+      const table = document.getElementById('organizerPreviewTable');
+      const badge = document.getElementById('organizerSummaryBadge');
+
+      table.innerHTML = '<div style="text-align:center; padding:30px; color:var(--cyan);">Scanning directory and compiling rename diff...</div>';
+      section.style.display = 'flex';
+
+      if (window.pywebview && window.pywebview.api && window.pywebview.api.preview_library_organization) {
+        window.pywebview.api.preview_library_organization(folder, pattern).then(res => {
+          if (res && res.success) {
+            badge.innerText = `${res.tracks_to_move} to move / ${res.total_tracks} tracks total`;
+            let html = `
+              <table style="width:100%; border-collapse:collapse; text-align:left;">
+                <thead style="background:#141724; color:var(--text-muted); font-size:10px; border-bottom:1px solid var(--border);">
+                  <tr>
+                    <th style="padding:8px;">Original Filename</th>
+                    <th style="padding:8px;">New Restructured Path</th>
+                    <th style="padding:8px; text-align:center;">LRC</th>
+                    <th style="padding:8px; text-align:center;">Status</th>
+                  </tr>
+                </thead>
+                <tbody>
+            `;
+
+            (res.preview_items || []).forEach(item => {
+              const isMove = item.status !== 'unchanged';
+              const statusColor = isMove ? 'var(--cyan)' : 'var(--text-dim)';
+              const statusLabel = isMove ? 'To Move' : 'Unchanged';
+              html += `
+                <tr style="border-bottom:1px solid rgba(255,255,255,0.04);">
+                  <td style="padding:6px 8px; color:var(--text-muted);">${escapeHtml(item.filename)}</td>
+                  <td style="padding:6px 8px; font-family:monospace; color:${isMove ? '#fff' : 'var(--text-dim)'};">${escapeHtml(item.new_rel_path)}</td>
+                  <td style="padding:6px 8px; text-align:center;">${item.has_lrc ? '✓' : '--'}</td>
+                  <td style="padding:6px 8px; text-align:center; color:${statusColor}; font-weight:600;">${statusLabel}</td>
+                </tr>
+              `;
+            });
+
+            html += '</tbody></table>';
+            table.innerHTML = html;
+          } else {
+            table.innerHTML = `<div style="padding:20px; color:var(--rose); text-align:center;">Error: ${(res ? res.error : 'Preview failed')}</div>`;
+          }
+        }).catch(err => {
+          table.innerHTML = `<div style="padding:20px; color:var(--rose); text-align:center;">Error: ${err.message || err}</div>`;
+        });
+      }
+    }
+
+    function runOrganizerApplyAction() {
+      const folder = (document.getElementById('organizerFolderInput').value || '').trim();
+      if (!folder) {
+        alert('Please specify a library folder to organize.');
+        return;
+      }
+
+      const pattern = document.getElementById('organizerCustomPattern').value.trim() || '%artist%/[%year%] %album%/%track% - %title%';
+      const copyMode = document.getElementById('organizerModeSelect').value === 'copy';
+      const btn = document.getElementById('organizerApplyBtn');
+      const status = document.getElementById('organizerStatusText');
+
+      if (!confirm(`Are you sure you want to ${copyMode ? 'copy' : 'move and rename'} files in:\n${folder}\n\nMatching .lrc lyrics will also be migrated.`)) {
+        return;
+      }
+
+      btn.disabled = true;
+      btn.innerHTML = '⏳ Organizing...';
+      status.innerText = 'Moving files and restructuring library directories...';
+
+      if (window.pywebview && window.pywebview.api && window.pywebview.api.execute_library_organization) {
+        window.pywebview.api.execute_library_organization(folder, pattern, copyMode).then(res => {
+          btn.disabled = false;
+          btn.innerHTML = '⚡ Apply Organization';
+
+          if (res && res.success) {
+            status.innerText = `✓ Successfully organized ${res.success_count} files!`;
+            status.style.color = 'var(--emerald)';
+            alert(`✓ Library Organization Complete!\n\n${res.success_count} tracks organized successfully in ${res.mode} mode.`);
+            scanLibrary(folder);
+            closeOrganizerModal();
+          } else {
+            status.innerText = `✕ Failed: ${(res ? res.error : 'Execution failed')}`;
+            status.style.color = 'var(--rose)';
+          }
+        }).catch(err => {
+          btn.disabled = false;
+          btn.innerHTML = '⚡ Apply Organization';
+          status.innerText = `✕ Error: ${err.message || err}`;
+          status.style.color = 'var(--rose)';
+        });
+      }
+    }
+
+    // --- Karaoke Vocal Pitch Transposer & Key Shifter ---
+    function openPitchModal() {
+      const modal = document.getElementById('pitchTransposeModal');
+      if (!modal) return;
+
+      const track = (playingTrackIndex !== null) ? libraryTracks.find(t => t.index === playingTrackIndex)
+                  : (selectedTrackIndex !== null) ? libraryTracks.find(t => t.index === selectedTrackIndex) : null;
+      if (track) {
+        document.getElementById('pitchModalTrackTitle').innerText = track.title || track.filename;
+        document.getElementById('pitchModalTrackArtist').innerText = `${track.artist || 'Unknown'} · ${track.album || ''}`;
+      } else {
+        document.getElementById('pitchModalTrackTitle').innerText = 'No track selected';
+        document.getElementById('pitchModalTrackArtist').innerText = 'Select or play a track from your library';
+      }
+
+      modal.style.display = 'flex';
+    }
+
+    function closePitchModal() {
+      const modal = document.getElementById('pitchTransposeModal');
+      if (modal) modal.style.display = 'none';
+    }
+
+    function updatePitchSliderLabel(val) {
+      const num = parseInt(val);
+      const label = document.getElementById('pitchSemitoneValue');
+      if (!label) return;
+
+      if (num === 0) {
+        label.innerText = '0 Semitones (Original Key)';
+        label.style.color = 'var(--text-main)';
+      } else if (num > 0) {
+        label.innerText = `+${num} Semitones (Higher Pitch)`;
+        label.style.color = 'var(--emerald)';
+      } else {
+        label.innerText = `${num} Semitones (Lower Pitch)`;
+        label.style.color = 'var(--cyan)';
+      }
+    }
+
+    function runPitchExportAction() {
+      const track = (playingTrackIndex !== null) ? libraryTracks.find(t => t.index === playingTrackIndex)
+                  : (selectedTrackIndex !== null) ? libraryTracks.find(t => t.index === selectedTrackIndex) : null;
+      if (!track || !track.path) {
+        alert('Please select or play an audio track first.');
+        return;
+      }
+
+      const semitones = parseFloat(document.getElementById('pitchSemitoneSlider').value || '0');
+      const btn = document.getElementById('pitchExportBtn');
+      const status = document.getElementById('pitchStatusText');
+
+      btn.disabled = true;
+      btn.innerHTML = '⏳ Transposing...';
+      status.innerText = 'Processing phase vocoder time-pitch invariant shift...';
+      status.style.color = 'var(--cyan)';
+
+      if (window.pywebview && window.pywebview.api && window.pywebview.api.transpose_audio_pitch) {
+        window.pywebview.api.transpose_audio_pitch(track.path, semitones).then(res => {
+          btn.disabled = false;
+          btn.innerHTML = '⚡ Export Transposed Track';
+
+          if (res && res.success) {
+            status.innerText = `✓ Transposed track saved to ${res.output_file}`;
+            status.style.color = 'var(--emerald)';
+            alert(`✓ Vocal Pitch Shift Complete!\n\nSemitones: ${res.semitones > 0 ? '+' : ''}${res.semitones}\nSaved: ${res.output_file}`);
+          } else {
+            status.innerText = `✕ Error: ${(res ? res.error : 'Pitch shift failed')}`;
+            status.style.color = 'var(--rose)';
+          }
+        }).catch(err => {
+          btn.disabled = false;
+          btn.innerHTML = '⚡ Export Transposed Track';
+          status.innerText = `✕ Error: ${err.message || err}`;
+          status.style.color = 'var(--rose)';
+        });
+      }
+    }
+
+    // --- Audiophile Polyphase Sinc Resampler ---
+    function openResamplerModal() {
+      const modal = document.getElementById('resamplerModal');
+      if (!modal) return;
+
+      const track = (playingTrackIndex !== null) ? libraryTracks.find(t => t.index === playingTrackIndex)
+                  : (selectedTrackIndex !== null) ? libraryTracks.find(t => t.index === selectedTrackIndex) : null;
+      if (track) {
+        document.getElementById('resampleModalTrackTitle').innerText = `${track.title || track.filename} (${track.quality || track.format})`;
+      } else {
+        document.getElementById('resampleModalTrackTitle').innerText = 'Select or play a track from your library first';
+      }
+
+      modal.style.display = 'flex';
+    }
+
+    function closeResamplerModal() {
+      const modal = document.getElementById('resamplerModal');
+      if (modal) modal.style.display = 'none';
+    }
+
+    function runResampleAction() {
+      const track = (playingTrackIndex !== null) ? libraryTracks.find(t => t.index === playingTrackIndex)
+                  : (selectedTrackIndex !== null) ? libraryTracks.find(t => t.index === selectedTrackIndex) : null;
+      if (!track || !track.path) {
+        alert('Please select or play an audio track first.');
+        return;
+      }
+
+      const rate = parseInt(document.getElementById('resampleRateSelect').value);
+      const bitDepth = parseInt(document.getElementById('resampleBitDepthSelect').value);
+      const btn = document.getElementById('startResampleBtn');
+      const status = document.getElementById('resampleStatusText');
+
+      btn.disabled = true;
+      btn.innerHTML = '⏳ Resampling...';
+      status.innerText = `Applying Kaiser-windowed polyphase sinc filter and TPDF dither to ${rate} Hz...`;
+      status.style.color = 'var(--cyan)';
+
+      if (window.pywebview && window.pywebview.api && window.pywebview.api.resample_audio_track) {
+        window.pywebview.api.resample_audio_track(track.path, rate, bitDepth).then(res => {
+          btn.disabled = false;
+          btn.innerHTML = '⚡ Resample & Export';
+
+          if (res && res.success) {
+            status.innerText = `✓ Resampled audio saved to ${res.output_file}`;
+            status.style.color = 'var(--emerald)';
+            alert(`✓ Audiophile Resampling Complete!\n\nTarget Rate: ${res.sample_rate} Hz\nBit Depth: ${res.bit_depth}-bit\nSaved: ${res.output_file}\nEngine: ${res.engine}`);
+          } else {
+            status.innerText = `✕ Error: ${(res ? res.error : 'Resampling failed')}`;
+            status.style.color = 'var(--rose)';
+          }
+        }).catch(err => {
+          btn.disabled = false;
+          btn.innerHTML = '⚡ Resample & Export';
+          status.innerText = `✕ Error: ${err.message || err}`;
+          status.style.color = 'var(--rose)';
+        });
+      }
     }
 
     // Auto-init Phase 11, 12 & 13 features on DOM ready
