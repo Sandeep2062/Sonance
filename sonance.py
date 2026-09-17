@@ -7,6 +7,7 @@ Copyright (C) 2024-2026 Sandeep Khadka — GPLv3 with Commons Clause
 https://github.com/Sandeep2062/Sonance
 """
 
+import os
 import sys
 import argparse
 
@@ -114,6 +115,23 @@ Examples:
       nargs="+",
       metavar="PARAM",
       help="Trim audio clip: --trim <audio_file> <start_sec> <end_sec> [output_format] [output_file]",
+  )
+  parser.add_argument(
+      "--scan-loudness",
+      nargs="+",
+      metavar="PARAM",
+      help="Analyze audio loudness & ReplayGain: --scan-loudness <file_or_dir> [--apply-tags] [--target-lufs <lufs>]",
+  )
+  parser.add_argument(
+      "--dedup",
+      metavar="FOLDER",
+      help="Detect cross-format audio duplicates and identify best lossless copies",
+  )
+  parser.add_argument(
+      "--rip-cd",
+      nargs="*",
+      metavar="PARAM",
+      help="Rip Audio CD tracks: --rip-cd [drive_letter] [output_dir] [format]",
   )
   parser.add_argument(
       "--version",
@@ -310,6 +328,79 @@ Examples:
       print(f"[+] Audio clip exported successfully: {res.get('output_path')} ({res.get('duration')}s)")
     else:
       print(f"[-] Audio trimming failed: {res.get('error')}")
+    return
+
+  if args.scan_loudness:
+    import loudness_scanner
+    target_path = args.scan_loudness[0]
+    apply_tags = "--apply-tags" in args.scan_loudness
+    target_lufs = -14.0
+    for i, p in enumerate(args.scan_loudness):
+      if p == "--target-lufs" and i + 1 < len(args.scan_loudness):
+        try:
+          target_lufs = float(args.scan_loudness[i + 1])
+        except ValueError:
+          pass
+
+    print(f"[*] Sonance Loudness & ReplayGain Scanner: {target_path} (Target: {target_lufs} LUFS)")
+    if os.path.isfile(target_path):
+      res = loudness_scanner.scan_file_loudness(target_path, target_lufs=target_lufs, apply_tags=apply_tags)
+      if res.get("success"):
+        print(f"[+] Integrated Loudness: {res['integrated_lufs']} LUFS | True Peak: {res['true_peak_dbfs']} dBFS")
+        print(f"    Recommended Track Gain: {res['track_gain_str']} (Peak ratio: {res['track_peak_ratio']})")
+        if apply_tags:
+          print(f"    Tags Applied: {'Yes' if res.get('tags_applied') else 'Failed'}")
+      else:
+        print(f"[-] Failed: {res.get('error')}")
+    elif os.path.isdir(target_path):
+      exts = (".mp3", ".flac", ".wav", ".m4a", ".ogg")
+      files = [os.path.join(target_path, f) for f in os.listdir(target_path) if f.lower().endswith(exts)]
+      res = loudness_scanner.scan_batch_loudness(files, target_lufs=target_lufs, apply_tags=apply_tags)
+      if res.get("success"):
+        print(f"[+] Processed {res['total_tracks']} tracks | Album Integrated Loudness: {res['album_integrated_lufs']} LUFS")
+        print(f"    Recommended Album Gain: {res['album_gain_str']} | Max True Peak Ratio: {res['album_peak_ratio']}")
+        for t in res.get("tracks", []):
+          print(f"    - {t['filename']}: {t['integrated_lufs']} LUFS -> Gain: {t['track_gain_str']}")
+        if apply_tags:
+          print(f"    [+] Successfully embedded ReplayGain tags into {res.get('tags_applied_count')} tracks.")
+      else:
+        print(f"[-] Failed: {res.get('error')}")
+    else:
+      print(f"[-] Path not found: {target_path}")
+    return
+
+  if args.dedup:
+    import audio_dedup
+    folder = args.dedup
+    print(f"[*] Scanning for cross-format audio duplicates in: {folder}...")
+    res = audio_dedup.scan_for_duplicates(folder)
+    if res.get("success"):
+      print(f"[+] Scanned {res['scanned_count']} tracks. Found {res['duplicate_groups_count']} duplicate groups ({res['total_redundant_files']} redundant files).")
+      print(f"    Potential space to reclaim: {res['potential_space_freed_mb']} MB\n")
+      for group in res.get("duplicate_sets", []):
+        k = group["keeper"]
+        print(f"  🎵 {group['song']}")
+        print(f"     ⭐ Best (Keeper): {k['filename']} [{k['format']} {k['bitrate']}k] Score: {k['quality_score']}")
+        for d in group["duplicates"]:
+          print(f"     🗑️ Duplicate:    {d['filename']} [{d['format']} {d['bitrate']}k] Score: {d['quality_score']}")
+        print()
+    else:
+      print(f"[-] Failed: {res.get('error')}")
+    return
+
+  if args.rip_cd is not None:
+    import cd_ripper
+    drive = args.rip_cd[0] if len(args.rip_cd) > 0 else "D:"
+    out_dir = args.rip_cd[1] if len(args.rip_cd) > 1 else None
+    fmt = args.rip_cd[2] if len(args.rip_cd) > 2 else "flac"
+    print(f"[*] Attempting to rip Audio CD from drive {drive} [{fmt.upper()}]...")
+    res = cd_ripper.rip_audio_cd(drive, output_dir=out_dir, output_format=fmt)
+    if res.get("success"):
+      print(f"[+] Success: {res.get('message')}")
+      for t in res.get("tracks", []):
+        print(f"    - Track {t.get('track')}: {t.get('file')}")
+    else:
+      print(f"[-] CD Rip: {res.get('error')}")
     return
 
   if args.classic:

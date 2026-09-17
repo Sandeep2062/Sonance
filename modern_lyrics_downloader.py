@@ -51,6 +51,10 @@ import audio_fingerprint
 import discography_scraper
 import cue_splitter
 import audio_cutter
+import loudness_scanner
+import word_karaoke
+import audio_dedup
+import cd_ripper
 
 APP_VERSION = "2.1.0"
 GITHUB_REPO = "Sandeep2062/Sonance"
@@ -850,6 +854,38 @@ class LyricsAPI:
         if result and len(result) > 0:
             return result[0]
         return ""
+
+    # ------------------ Phase 12: ReplayGain & Loudness Scanner -----------------
+    def scan_track_loudness(self, file_path: str, target_lufs: float = -14.0, apply_tags: bool = False) -> Dict[str, Any]:
+        """Scans single track loudness and calculates ReplayGain."""
+        return loudness_scanner.scan_file_loudness(file_path, target_lufs, apply_tags)
+
+    def scan_batch_loudness(self, file_paths: List[str], target_lufs: float = -14.0, apply_tags: bool = False) -> Dict[str, Any]:
+        """Scans batch of tracks and computes track/album ReplayGain."""
+        return loudness_scanner.scan_batch_loudness(file_paths, target_lufs, apply_tags)
+
+    # ------------------ Phase 12: Word-by-Word Syllable Karaoke -----------------
+    def parse_enhanced_lyrics(self, lrc_text: str) -> Dict[str, Any]:
+        """Parses Enhanced LRC or standard LRC into word-by-word syllable timing data."""
+        return word_karaoke.parse_enhanced_lrc(lrc_text)
+
+    # ------------------ Phase 12: Audio Duplicate Cleaner -----------------------
+    def scan_for_duplicates(self, folder_path: str) -> Dict[str, Any]:
+        """Scans folder for duplicate tracks matching across formats and bitrates."""
+        return audio_dedup.scan_for_duplicates(folder_path)
+
+    def archive_duplicates(self, duplicate_paths: List[str], archive_directory: str) -> Dict[str, Any]:
+        """Safely archives redundant duplicate tracks."""
+        return audio_dedup.archive_redundant_duplicates(duplicate_paths, archive_directory)
+
+    # ------------------ Phase 12: Audio CD Ripper -------------------------------
+    def detect_cd_drives(self) -> List[Dict[str, Any]]:
+        """Detects physical and virtual optical CD drives."""
+        return cd_ripper.detect_cd_drives()
+
+    def rip_audio_cd(self, drive_letter: str, output_dir: Optional[str] = None, output_format: str = "flac") -> Dict[str, Any]:
+        """Rips audio CD tracks into tagged audio files."""
+        return cd_ripper.rip_audio_cd(drive_letter, output_dir, output_format)
 
     def _save_last_folder(self, folder: str):
         try:
