@@ -83,6 +83,17 @@ Examples:
       help="List smart dynamic playlists and track counts for FOLDER",
   )
   parser.add_argument(
+      "--stats",
+      action="store_true",
+      help="Display local listening habits, top artists, and Sonance Wrapped stats",
+  )
+  parser.add_argument(
+      "--transcode",
+      nargs="+",
+      metavar="PARAM",
+      help="Batch convert audio files: --transcode <source> [output_dir] [format] [bitrate]",
+  )
+  parser.add_argument(
       "--version",
       action="version",
       version=f"Sonance v{modern_lyrics_downloader.APP_VERSION}",
@@ -162,6 +173,54 @@ Examples:
     for p in lists:
       print(f"  {p['icon']} {p['name']} ({p['count']} tracks)")
       print(f"     Description: {p['description']}")
+    return
+
+  if args.stats:
+    import listening_stats
+    st = listening_stats.get_listening_stats()
+    print("\n=== 🎵 Sonance Wrapped & Listening Stats ===")
+    print(f"  Total Tracks Played: {st['total_plays']}")
+    print(f"  Total Listening Time: {st['total_hours']} hours ({st['total_minutes']} mins)")
+    print(f"  Active Listening Days: {st['active_days']} (Streak: {st['current_streak']} days)")
+    
+    bd = st['format_breakdown']
+    print(f"\n  Audio Quality Breakdown:")
+    print(f"    - Lossless (FLAC/WAV/ALAC): {bd['lossless']}%")
+    print(f"    - High-Bitrate (320k MP3): {bd['mp3_320']}%")
+    print(f"    - Online Streams: {bd['streaming']}%")
+
+    if st['top_artists']:
+      print("\n  ⭐ Top 5 Artists:")
+      for i, a in enumerate(st['top_artists'], 1):
+        print(f"    {i}. {a['artist']} ({a['plays']} plays)")
+
+    if st['top_tracks']:
+      print("\n  🎧 Top 5 Tracks:")
+      for i, t in enumerate(st['top_tracks'][:5], 1):
+        print(f"    {i}. {t['track']} ({t['plays']} plays)")
+    print()
+    return
+
+  if args.transcode:
+    import audio_transcoder
+    src = args.transcode[0]
+    out = args.transcode[1] if len(args.transcode) > 1 else src
+    fmt = args.transcode[2] if len(args.transcode) > 2 else "mp3"
+    bitrate = args.transcode[3] if len(args.transcode) > 3 else "320k"
+
+    print(f"[*] Sonance Audio Batch Transcoder: {src} -> {out} [{fmt.upper()} {bitrate}]")
+    if os.path.isfile(src):
+      files = [src]
+    elif os.path.isdir(src):
+      exts = (".mp3", ".flac", ".wav", ".m4a", ".ogg")
+      files = [os.path.join(src, f) for f in os.listdir(src) if f.lower().endswith(exts)]
+    else:
+      print(f"[-] Source path not found: {src}")
+      return
+
+    print(f"[*] Converting {len(files)} audio tracks...")
+    res = audio_transcoder.batch_transcode(files, fmt, bitrate, out)
+    print(f"[+] Transcode Complete: {res['success_count']} succeeded, {res['fail_count']} failed.")
     return
 
   if args.classic:

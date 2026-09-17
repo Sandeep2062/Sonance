@@ -43,6 +43,9 @@ import auto_dj
 import library_doctor
 import remote_server
 import smart_playlists
+import lyrics_translation
+import audio_transcoder
+import listening_stats
 
 APP_VERSION = "2.1.0"
 GITHUB_REPO = "Sandeep2062/Sonance"
@@ -662,6 +665,52 @@ class LyricsAPI:
         """Exports smart playlist tracks to a standard .m3u8 file."""
         target = folder or self._current_folder
         return smart_playlists.export_smart_playlist_m3u8(playlist_id, target, output_path)
+
+    # ------------------ Phase 9: Multilingual Lyrics Studio ------------------
+    def enrich_lyrics_multilingual(self, lines: List[Dict[str, Any]], target_lang: str = "en") -> List[Dict[str, Any]]:
+        """Adds phonetic romanization (Romaji/Pinyin/Hangul) and translation to lyrics."""
+        return lyrics_translation.enrich_lyrics_with_phonetics(lines, target_lang)
+
+    # ------------------ Phase 9: Audio Batch Transcoder ------------------
+    def get_transcoder_formats(self) -> Dict[str, Any]:
+        """Returns supported audio export formats and bitrate presets."""
+        return {
+            "formats": audio_transcoder.SUPPORTED_OUTPUT_FORMATS,
+            "bitrates": audio_transcoder.DEFAULT_BITRATES,
+            "has_ffmpeg": bool(audio_transcoder.find_ffmpeg_executable()),
+        }
+
+    def transcode_audio_files(
+        self,
+        file_paths: List[str],
+        target_format: str = "mp3",
+        target_bitrate: str = "320k",
+        dest_dir: Optional[str] = None
+    ) -> Dict[str, Any]:
+        """Transcodes a batch of audio tracks while preserving tags and .lrc lyrics."""
+        return audio_transcoder.batch_transcode(file_paths, target_format, target_bitrate, dest_dir)
+
+    # ------------------ Phase 9: Listening Stats & Wrapped ------------------
+    def record_play_event(
+        self,
+        title: str,
+        artist: str,
+        album: str = "",
+        duration: float = 0.0,
+        format_name: str = "MP3",
+        quality: str = "320 kbps",
+        is_stream: bool = False
+    ) -> Dict[str, Any]:
+        """Records a completed track playback into local stats history."""
+        return listening_stats.record_playback_event(title, artist, album, duration, format_name, quality, is_stream)
+
+    def get_listening_stats(self) -> Dict[str, Any]:
+        """Computes local Wrapped listening statistics."""
+        return listening_stats.get_listening_stats()
+
+    def clear_listening_history(self) -> Dict[str, Any]:
+        """Resets local listening history."""
+        return listening_stats.clear_listening_history()
 
     def _save_last_folder(self, folder: str):
         try:

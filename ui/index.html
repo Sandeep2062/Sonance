@@ -1086,6 +1086,12 @@
       <button class="btn btn-secondary" onclick="openRemoteModal()" style="padding:5px 9px; font-size:11px;" id="remoteHeaderBtn" title="Wi-Fi Mobile Remote Controller & Cast">
         📲 Remote
       </button>
+      <button class="btn btn-secondary" onclick="openTranscoderModal()" style="padding:5px 9px; font-size:11px;" id="transcoderHeaderBtn" title="Batch Audio Transcoder & Converter">
+        🔄 Convert
+      </button>
+      <button class="btn btn-secondary" onclick="openListeningStatsModal()" style="padding:5px 9px; font-size:11px;" id="statsHeaderBtn" title="Sonance Wrapped & Listening Habits">
+        📊 Wrapped
+      </button>
       <button class="btn btn-secondary" onclick="openLibraryDoctorModal()" style="padding:5px 9px; font-size:11px;" title="Scan Library Health & Clean Duplicates">
         🩺 Doctor
       </button>
@@ -1725,7 +1731,8 @@
 
       <div class="scrubber-row">
         <span id="playerCurrentTime">0:00</span>
-        <div class="scrubber-bar" id="scrubberBar" onclick="handleScrubClick(event)">
+        <div class="scrubber-bar" id="scrubberBar" onclick="handleScrubClick(event)" style="position:relative; overflow:hidden;">
+          <canvas id="waveformCanvas" width="400" height="8" style="position:absolute; top:0; left:0; width:100%; height:100%; pointer-events:none; opacity:0.4;"></canvas>
           <div class="scrubber-fill" id="scrubberFill"></div>
         </div>
         <span id="playerTotalTime">0:00</span>
@@ -1733,6 +1740,7 @@
     </div>
 
     <div class="player-right">
+      <button class="btn btn-secondary" id="vocalReducerBtn" onclick="toggleVocalReducer()" style="padding:3px 7px; font-size:10px;" title="Karaoke Sing Mode: Dim center-channel lead vocals in real-time">🎤 Sing</button>
       <div style="position:relative; display:inline-block;">
         <button class="btn btn-secondary" id="speedStudioBtn" onclick="toggleSpeedStudioPopup()" style="padding:3px 7px; font-size:10px;" title="Playback Speed & Pitch DSP (Nightcore / Slowed+Reverb)">⚡ 1.0x</button>
         <div id="speedStudioPopup" style="display:none; position:absolute; bottom:38px; right:0; background:#181b26; border:1px solid var(--border); border-radius:10px; padding:10px; width:190px; box-shadow:0 12px 32px rgba(0,0,0,0.7); z-index:9999; font-size:11px;">
@@ -2273,6 +2281,146 @@
     </div>
   </div>
 
+  <!-- Batch Audio Transcoder Modal (Phase 9) -->
+  <div class="modal-backdrop" id="transcoderModal">
+    <div class="modal-box" style="max-width:540px;">
+      <div class="modal-header">
+        <div style="display:flex; align-items:center; gap:8px;">
+          <span style="font-size:18px;">🔄</span>
+          <div>
+            <div style="font-weight:700; font-size:14px;">Lossless & Hi-Res Batch Audio Transcoder</div>
+            <div style="font-size:10px; color:var(--text-dim);">Convert formats with full ID3v2.4 tags, album covers, and .lrc sync</div>
+          </div>
+        </div>
+        <button onclick="closeTranscoderModal()" style="background:none; border:none; color:var(--text-muted); cursor:pointer; font-size:16px;">✕</button>
+      </div>
+
+      <div class="modal-body">
+        <div style="margin-bottom:12px;">
+          <label style="font-size:11px; color:var(--text-muted); display:block; margin-bottom:4px;">Select Tracks to Convert:</label>
+          <select id="transcodeScopeSelect" class="search-input" style="width:100%; padding:6px 10px;">
+            <option value="all">All Tracks in Library</option>
+            <option value="selected">Currently Selected Track</option>
+            <option value="lossless">All Lossless Tracks (FLAC/WAV/ALAC)</option>
+          </select>
+        </div>
+
+        <div style="display:grid; grid-template-columns:1fr 1fr; gap:10px; margin-bottom:12px;">
+          <div>
+            <label style="font-size:11px; color:var(--text-muted); display:block; margin-bottom:4px;">Target Output Format:</label>
+            <select id="transcodeFormatSelect" class="search-input" style="width:100%; padding:6px 10px;" onchange="updateTranscodeBitrates()">
+              <option value="mp3">MP3 (MPEG-1 Audio Layer III)</option>
+              <option value="flac">FLAC (Free Lossless Audio Codec)</option>
+              <option value="wav">WAV (Uncompressed PCM)</option>
+              <option value="m4a">M4A (Apple AAC)</option>
+              <option value="ogg">OGG (Vorbis)</option>
+            </select>
+          </div>
+
+          <div>
+            <label style="font-size:11px; color:var(--text-muted); display:block; margin-bottom:4px;">Bitrate Preset:</label>
+            <select id="transcodeBitrateSelect" class="search-input" style="width:100%; padding:6px 10px;">
+              <option value="320k">320 kbps (Insane / Studio Quality)</option>
+              <option value="256k">256 kbps (Very High Quality)</option>
+              <option value="192k">192 kbps (Standard)</option>
+              <option value="128k">128 kbps (Portable / Mobile)</option>
+            </select>
+          </div>
+        </div>
+
+        <div style="margin-bottom:14px;">
+          <label style="font-size:11px; color:var(--text-muted); display:block; margin-bottom:4px;">Destination Folder:</label>
+          <div style="display:flex; gap:8px;">
+            <input type="text" id="transcodeDestDirInput" class="search-input" placeholder="Same as source (or custom output folder)..." style="flex:1; padding:6px 10px;">
+            <button class="btn btn-secondary" onclick="browseTranscodeDestDir()">Browse...</button>
+          </div>
+        </div>
+
+        <div id="transcodeStatusBox" style="background:#090d16; border:1px solid var(--border); border-radius:8px; padding:10px; font-size:11px; color:var(--text-dim); min-height:48px; max-height:100px; overflow-y:auto; margin-bottom:14px;">
+          Ready to convert audio tracks. All metadata, cover art, and lyrics will be preserved.
+        </div>
+
+        <div style="display:flex; justify-content:flex-end; gap:8px;">
+          <button class="btn btn-secondary" onclick="closeTranscoderModal()">Cancel</button>
+          <button class="btn btn-primary" id="startTranscodeBtn" onclick="executeBatchTranscode()">⚡ Start Batch Conversion</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Sonance Wrapped & Listening Stats Dashboard Modal (Phase 9) -->
+  <div class="modal-backdrop" id="listeningStatsModal">
+    <div class="modal-box" style="max-width:560px; background:radial-gradient(circle at top right, #1e1b4b 0%, #0d111a 75%);">
+      <div class="modal-header">
+        <div style="display:flex; align-items:center; gap:8px;">
+          <span style="font-size:18px;">📊</span>
+          <div>
+            <div style="font-weight:700; font-size:14px; color:#fff;">Sonance Wrapped · Listening Stats</div>
+            <div style="font-size:10px; color:var(--text-dim);">100% Private local playback habits and quality analysis</div>
+          </div>
+        </div>
+        <button onclick="closeListeningStatsModal()" style="background:none; border:none; color:var(--text-muted); cursor:pointer; font-size:16px;">✕</button>
+      </div>
+
+      <div class="modal-body">
+        <div style="display:grid; grid-template-columns:1fr 1fr 1fr; gap:10px; margin-bottom:16px;">
+          <div style="background:rgba(255,255,255,0.04); border:1px solid var(--border); border-radius:10px; padding:10px; text-align:center;">
+            <div style="font-size:10px; color:var(--text-dim); text-transform:uppercase;">Tracks Played</div>
+            <div style="font-size:1.4rem; font-weight:800; color:var(--emerald);" id="statsPlaysCount">0</div>
+          </div>
+          <div style="background:rgba(255,255,255,0.04); border:1px solid var(--border); border-radius:10px; padding:10px; text-align:center;">
+            <div style="font-size:10px; color:var(--text-dim); text-transform:uppercase;">Time Listened</div>
+            <div style="font-size:1.4rem; font-weight:800; color:var(--cyan);" id="statsHoursCount">0.0h</div>
+          </div>
+          <div style="background:rgba(255,255,255,0.04); border:1px solid var(--border); border-radius:10px; padding:10px; text-align:center;">
+            <div style="font-size:10px; color:var(--text-dim); text-transform:uppercase;">Streak</div>
+            <div style="font-size:1.4rem; font-weight:800; color:#ec4899;" id="statsStreakCount">0 days</div>
+          </div>
+        </div>
+
+        <div style="background:rgba(0,0,0,0.3); border:1px solid var(--border); border-radius:10px; padding:12px; margin-bottom:16px;">
+          <div style="font-size:11px; font-weight:700; margin-bottom:8px; display:flex; justify-content:space-between;">
+            <span>🎧 Audio Quality Breakdown</span>
+            <span id="statsLosslessPctLabel" style="color:var(--emerald);">0% Lossless</span>
+          </div>
+          <div style="display:flex; height:8px; border-radius:4px; overflow:hidden; background:rgba(255,255,255,0.1); margin-bottom:8px;">
+            <div id="statsBarLossless" style="width:0%; background:var(--emerald);" title="Lossless FLAC/WAV"></div>
+            <div id="statsBarMp3" style="width:0%; background:var(--cyan);" title="320 kbps MP3"></div>
+            <div id="statsBarStream" style="width:0%; background:#a855f7;" title="Online Streams"></div>
+          </div>
+          <div style="display:flex; justify-content:space-between; font-size:10px; color:var(--text-dim);">
+            <span><strong style="color:var(--emerald);">■</strong> Lossless FLAC</span>
+            <span><strong style="color:var(--cyan);">■</strong> 320k MP3</span>
+            <span><strong style="color:#a855f7);">■</strong> Online Stream</span>
+          </div>
+        </div>
+
+        <div style="display:grid; grid-template-columns:1fr 1fr; gap:12px; margin-bottom:16px;">
+          <div>
+            <div style="font-size:11px; font-weight:700; margin-bottom:6px; color:#fff;">⭐ Top Artists</div>
+            <div id="statsTopArtistsList" style="font-size:11px; display:flex; flex-direction:column; gap:4px; max-height:110px; overflow-y:auto;">
+              <div style="color:var(--text-dim);">No listening data yet</div>
+            </div>
+          </div>
+          <div>
+            <div style="font-size:11px; font-weight:700; margin-bottom:6px; color:#fff;">🎵 Top Tracks</div>
+            <div id="statsTopTracksList" style="font-size:11px; display:flex; flex-direction:column; gap:4px; max-height:110px; overflow-y:auto;">
+              <div style="color:var(--text-dim);">No listening data yet</div>
+            </div>
+          </div>
+        </div>
+
+        <div style="display:flex; justify-content:space-between; align-items:center;">
+          <button class="btn btn-secondary" onclick="clearStatsHistoryAction()" style="padding:5px 10px; font-size:10px; color:#f87171;">🗑️ Clear History</button>
+          <div style="display:flex; gap:8px;">
+            <button class="btn btn-secondary" onclick="exportWrappedSummary()">📤 Share / Copy Summary</button>
+            <button class="btn btn-primary" onclick="closeListeningStatsModal()">Done</button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
   <script>
     // State
     let libraryTracks = [];
@@ -2598,6 +2746,11 @@
       if (visTitle) visTitle.innerText = track.title || track.filename;
       if (visArtist) visArtist.innerText = `${track.artist || 'Unknown'} · ${track.album || ''}`;
 
+      // Phase 9: Draw dynamic audio waveform timeline
+      if (typeof drawWaveform === 'function') {
+        drawWaveform(track);
+      }
+
       renderFilteredTracklist();
     }
 
@@ -2765,7 +2918,7 @@
         }
       }
 
-      // Automatic Scrobble Submission (Last.fm & ListenBrainz after 50% or 4 min)
+      // Automatic Scrobble & Playback History Submission (after 50% or 4 min)
       if (!currentTrackScrobbled && dur >= 30 && (cur >= dur * 0.5 || cur >= 240)) {
         currentTrackScrobbled = true;
         const curTrack = (playingTrackIndex !== null) ? libraryTracks.find(t => t.index === playingTrackIndex) : null;
@@ -2777,6 +2930,17 @@
             Math.round(dur),
             Math.floor(trackStartTime / 1000)
           );
+          if (window.pywebview.api.record_play_event) {
+            window.pywebview.api.record_play_event(
+              curTrack.title || curTrack.filename,
+              curTrack.artist || 'Unknown',
+              curTrack.album || '',
+              Math.round(dur),
+              curTrack.format || 'MP3',
+              curTrack.quality || 'Standard',
+              !!curTrack.stream_url
+            );
+          }
         }
       }
     });
@@ -2843,6 +3007,17 @@
           lyricsLines = res.lines || [];
           document.getElementById('previewType').innerText = `State: ${res.state.toUpperCase()}`;
           renderLyricsPreview(lyricsLines);
+
+          // Phase 9: Enrich with multilingual romanization/translation if international
+          const fullLyricsText = lyricsLines.map(l => l.text).join(' ');
+          if (/[\u3040-\u30ff\u3400-\u4dbf\u4e00-\u9fff\uac00-\ud7af]/.test(fullLyricsText)) {
+            window.pywebview.api.enrich_lyrics_multilingual(lyricsLines).then(enriched => {
+              if (enriched && enriched.length > 0) {
+                lyricsLines = enriched;
+                renderLyricsPreview(lyricsLines);
+              }
+            });
+          }
         });
       }
       renderFilteredTracklist();
@@ -2858,10 +3033,14 @@
       let html = '';
       lines.forEach((l, i) => {
         const hasTs = l.timestamp !== '';
+        const sub = l.romanized || l.translation;
         html += `
           <div class="lyric-line" onclick="seekToLyric(${l.seconds})">
-            ${hasTs ? `<span class="lyric-ts">${l.timestamp}</span>` : ''}
-            <span>${escapeHtml(l.text)}</span>
+            <div style="display:flex; align-items:center; gap:8px;">
+              ${hasTs ? `<span class="lyric-ts">${l.timestamp}</span>` : ''}
+              <span>${escapeHtml(l.text)}</span>
+            </div>
+            ${sub ? `<div style="font-size:11px; color:#38bdf8; font-weight:500; margin-top:2px; padding-left:${hasTs ? '46px' : '0'}; opacity:0.85;">${escapeHtml(sub)}</div>` : ''}
           </div>
         `;
       });
@@ -2895,6 +3074,14 @@
     let currentEqGains = [0, 0, 0, 0, 0, 0, 0, 0, 0, 0];
     let dynamicsCompressor = null;
     let normalizerEnabled = localStorage.getItem('sonance_normalizer') !== 'false';
+    let dspStageNode = null;
+    let vocalReductionEnabled = false;
+    let vocalDirectGain = null;
+    let vocalReducedGain = null;
+    let vocalSplitter = null;
+    let vocalInverter = null;
+    let vocalSum = null;
+    let vocalMerger = null;
 
     // Web Audio API & Hardware Equalizer DSP
     function setupWebAudio() {
@@ -2936,12 +3123,42 @@
         dynamicsCompressor.attack.setValueAtTime(0.003, audioCtx.currentTime);
         dynamicsCompressor.release.setValueAtTime(0.25, audioCtx.currentTime);
 
+        dspStageNode = audioCtx.createGain();
+
         if (normalizerEnabled) {
           prev.connect(dynamicsCompressor);
-          dynamicsCompressor.connect(analyser);
+          dynamicsCompressor.connect(dspStageNode);
         } else {
-          prev.connect(analyser);
+          prev.connect(dspStageNode);
         }
+
+        // Phase 9: Karaoke Vocal Reducer DSP Sub-graph (OOPS - Out-of-Phase Stereo center vocal cancellation)
+        vocalDirectGain = audioCtx.createGain();
+        vocalReducedGain = audioCtx.createGain();
+        vocalDirectGain.gain.setValueAtTime(vocalReductionEnabled ? 0.0 : 1.0, audioCtx.currentTime);
+        vocalReducedGain.gain.setValueAtTime(vocalReductionEnabled ? 1.2 : 0.0, audioCtx.currentTime);
+
+        vocalSplitter = audioCtx.createChannelSplitter(2);
+        vocalInverter = audioCtx.createGain();
+        vocalInverter.gain.setValueAtTime(-1.0, audioCtx.currentTime);
+        vocalSum = audioCtx.createGain();
+        vocalSum.gain.setValueAtTime(0.5, audioCtx.currentTime);
+        vocalMerger = audioCtx.createChannelMerger(2);
+
+        // Direct path
+        dspStageNode.connect(vocalDirectGain);
+        vocalDirectGain.connect(analyser);
+
+        // Vocal cancellation path: L + (-1 * R) -> L&R
+        dspStageNode.connect(vocalSplitter);
+        vocalSplitter.connect(vocalSum, 0);       // Left channel (index 0)
+        vocalSplitter.connect(vocalInverter, 1);  // Right channel (index 1)
+        vocalInverter.connect(vocalSum);          // L - R
+        vocalSum.connect(vocalMerger, 0, 0);      // To Left output
+        vocalSum.connect(vocalMerger, 0, 1);      // To Right output
+        vocalMerger.connect(vocalReducedGain);
+        vocalReducedGain.connect(analyser);
+
         analyser.connect(audioCtx.destination);
 
         drawSpectrum();
@@ -4299,11 +4516,12 @@
         try {
           const lastFilter = eqFilters[eqFilters.length - 1];
           lastFilter.disconnect();
+          const targetNode = dspStageNode || analyser;
           if (normalizerEnabled) {
             lastFilter.connect(dynamicsCompressor);
-            dynamicsCompressor.connect(analyser);
+            dynamicsCompressor.connect(targetNode);
           } else {
-            lastFilter.connect(analyser);
+            lastFilter.connect(targetNode);
           }
         } catch (e) {
           console.error("Dynamics compressor routing error:", e);
@@ -4917,6 +5135,8 @@
         if (isMiniPlayerActive) toggleMiniPlayer(false);
         closeRemoteModal();
         closeLibraryDoctorModal();
+        closeTranscoderModal();
+        closeListeningStatsModal();
         const popup = document.getElementById('speedStudioPopup');
         if (popup) popup.style.display = 'none';
       }
@@ -4929,6 +5149,319 @@
         navigator.mediaSession.setActionHandler('previoustrack', () => playPreviousTrack());
         navigator.mediaSession.setActionHandler('nexttrack', () => playNextTrack());
       } catch (e) {}
+    }
+
+    // =========================================================================
+    // Phase 9: Karaoke Vocal Reducer DSP (OOPS - Center Channel Vocal Cancellation)
+    // =========================================================================
+    function toggleVocalReducer() {
+      setupWebAudio();
+      vocalReductionEnabled = !vocalReductionEnabled;
+      applyVocalReduction(vocalReductionEnabled);
+    }
+
+    function applyVocalReduction(enable) {
+      vocalReductionEnabled = enable;
+      const btn = document.getElementById('vocalReducerBtn');
+      if (btn) {
+        if (enable) {
+          btn.style.background = 'var(--emerald)';
+          btn.style.color = '#000';
+          btn.style.fontWeight = '700';
+          btn.style.boxShadow = '0 0 10px rgba(16, 185, 129, 0.4)';
+          btn.title = 'Karaoke Sing Mode: Active (Center vocals muted)';
+        } else {
+          btn.style.background = '';
+          btn.style.color = '';
+          btn.style.fontWeight = '';
+          btn.style.boxShadow = '';
+          btn.title = 'Karaoke Sing Mode: Dim center-channel lead vocals in real-time';
+        }
+      }
+
+      if (audioCtx && vocalDirectGain && vocalReducedGain) {
+        const t = audioCtx.currentTime;
+        if (enable) {
+          vocalDirectGain.gain.setValueAtTime(0.0, t);
+          vocalReducedGain.gain.setValueAtTime(1.2, t);
+        } else {
+          vocalDirectGain.gain.setValueAtTime(1.0, t);
+          vocalReducedGain.gain.setValueAtTime(0.0, t);
+        }
+      }
+    }
+
+    // =========================================================================
+    // Phase 9: Interactive Waveform Timeline (Scrubber Bar Waveform Visualizer)
+    // =========================================================================
+    function drawWaveform(track) {
+      const canvas = document.getElementById('waveformCanvas');
+      if (!canvas) return;
+      const ctx = canvas.getContext('2d');
+      const w = canvas.width;
+      const h = canvas.height;
+      ctx.clearRect(0, 0, w, h);
+
+      if (!track) return;
+
+      const trackKey = (track.title || track.filename || 'track') + (track.artist || '');
+      let hash = 0;
+      for (let i = 0; i < trackKey.length; i++) {
+        hash = ((hash << 5) - hash) + trackKey.charCodeAt(i);
+        hash |= 0;
+      }
+
+      const bars = 80;
+      const barWidth = w / bars;
+
+      for (let i = 0; i < bars; i++) {
+        const pos = i / bars;
+        const envelope = Math.sin(pos * Math.PI);
+        const noise = Math.abs(Math.sin((hash + i * 37) * 1.5));
+        const barHeight = Math.max(2, Math.min(h, (envelope * 0.65 + noise * 0.35) * h));
+        const y = (h - barHeight) / 2;
+
+        const grad = ctx.createLinearGradient(0, y, 0, y + barHeight);
+        grad.addColorStop(0, '#38bdf8');
+        grad.addColorStop(1, '#10b981');
+
+        ctx.fillStyle = grad;
+        ctx.fillRect(i * barWidth, y, Math.max(1, barWidth - 1), barHeight);
+      }
+    }
+
+    // =========================================================================
+    // Phase 9: Lossless & Hi-Res Batch Audio Transcoder Studio
+    // =========================================================================
+    function openTranscoderModal() {
+      const modal = document.getElementById('transcoderModal');
+      if (!modal) return;
+      modal.style.display = 'flex';
+      updateTranscodeBitrates();
+
+      const curTrack = (playingTrackIndex !== null) ? libraryTracks.find(t => t.index === playingTrackIndex) : null;
+      const scopeSelect = document.getElementById('transcodeScopeSelect');
+      if (scopeSelect && curTrack) {
+        scopeSelect.options[1].text = `Currently Playing: ${curTrack.title || curTrack.filename}`;
+      }
+
+      const statusBox = document.getElementById('transcodeStatusBox');
+      if (statusBox) {
+        statusBox.innerHTML = `Ready to convert audio tracks. Current library has ${libraryTracks.length} tracks.`;
+        statusBox.style.color = 'var(--text-dim)';
+      }
+    }
+
+    function closeTranscoderModal() {
+      const modal = document.getElementById('transcoderModal');
+      if (modal) modal.style.display = 'none';
+    }
+
+    function updateTranscodeBitrates() {
+      const fmt = document.getElementById('transcodeFormatSelect').value;
+      const bitrateSelect = document.getElementById('transcodeBitrateSelect');
+      if (!bitrateSelect) return;
+
+      if (fmt === 'flac' || fmt === 'wav') {
+        bitrateSelect.innerHTML = `<option value="lossless">Lossless / Original Bit-Depth (Default)</option>`;
+        bitrateSelect.disabled = true;
+      } else {
+        bitrateSelect.disabled = false;
+        bitrateSelect.innerHTML = `
+          <option value="320k">320 kbps (Insane / Studio Quality)</option>
+          <option value="256k">256 kbps (Very High Quality)</option>
+          <option value="192k">192 kbps (Standard Quality)</option>
+          <option value="128k">128 kbps (Portable / Mobile)</option>
+        `;
+      }
+    }
+
+    function browseTranscodeDestDir() {
+      if (window.pywebview && window.pywebview.api && window.pywebview.api.select_folder) {
+        window.pywebview.api.select_folder().then(folder => {
+          if (folder) {
+            document.getElementById('transcodeDestDirInput').value = folder;
+          }
+        });
+      }
+    }
+
+    function executeBatchTranscode() {
+      const scope = document.getElementById('transcodeScopeSelect').value;
+      const targetFormat = document.getElementById('transcodeFormatSelect').value;
+      const bitrate = document.getElementById('transcodeBitrateSelect').value;
+      const destDir = document.getElementById('transcodeDestDirInput').value.trim() || null;
+      const statusBox = document.getElementById('transcodeStatusBox');
+      const startBtn = document.getElementById('startTranscodeBtn');
+
+      let targetFiles = [];
+      if (scope === 'all') {
+        targetFiles = libraryTracks.map(t => t.path).filter(Boolean);
+      } else if (scope === 'selected') {
+        const cur = (playingTrackIndex !== null) ? libraryTracks.find(t => t.index === playingTrackIndex) : libraryTracks[0];
+        if (cur && cur.path) targetFiles = [cur.path];
+      } else if (scope === 'lossless') {
+        targetFiles = libraryTracks.filter(t => {
+          const fmt = (t.format || '').toLowerCase();
+          const ext = (t.path || '').toLowerCase();
+          return fmt === 'flac' || fmt === 'wav' || ext.endsWith('.flac') || ext.endsWith('.wav');
+        }).map(t => t.path).filter(Boolean);
+      }
+
+      if (targetFiles.length === 0) {
+        alert("No tracks found matching the chosen conversion scope.");
+        return;
+      }
+
+      if (!confirm(`Transcode ${targetFiles.length} track(s) to ${targetFormat.toUpperCase()} (${bitrate})?\n\nTags, cover art, and lyrics will be preserved.`)) {
+        return;
+      }
+
+      startBtn.disabled = true;
+      startBtn.innerText = '⏳ Converting...';
+      statusBox.innerHTML = `Converting ${targetFiles.length} file(s) to ${targetFormat.toUpperCase()}... Please wait.`;
+      statusBox.style.color = 'var(--cyan)';
+
+      if (window.pywebview && window.pywebview.api && window.pywebview.api.transcode_audio_files) {
+        window.pywebview.api.transcode_audio_files(targetFiles, targetFormat, bitrate, destDir).then(results => {
+          startBtn.disabled = false;
+          startBtn.innerText = '⚡ Start Batch Conversion';
+
+          const successCount = results.filter(r => r.success).length;
+          const failCount = results.length - successCount;
+
+          let html = `<strong>Transcoding Finished:</strong> ${successCount} succeeded, ${failCount} failed.<br>`;
+          results.forEach(r => {
+            if (r.success) {
+              html += `<div style="color:var(--emerald);">✓ ${escapeHtml(r.dest.split(/[/\\\\]/).pop())} (${r.duration}s)</div>`;
+            } else {
+              html += `<div style="color:#f87171;">✕ ${escapeHtml(r.source.split(/[/\\\\]/).pop())}: ${escapeHtml(r.error || 'Failed')}</div>`;
+            }
+          });
+          statusBox.innerHTML = html;
+        }).catch(err => {
+          startBtn.disabled = false;
+          startBtn.innerText = '⚡ Start Batch Conversion';
+          statusBox.innerHTML = `<span style="color:#f87171;">Error: ${escapeHtml(String(err))}</span>`;
+        });
+      } else {
+        startBtn.disabled = false;
+        startBtn.innerText = '⚡ Start Batch Conversion';
+        statusBox.innerHTML = 'Transcoder API not available in current window.';
+      }
+    }
+
+    // =========================================================================
+    // Phase 9: Listening Stats Studio & Sonance Wrapped
+    // =========================================================================
+    let cachedListeningStats = null;
+
+    function openListeningStatsModal() {
+      const modal = document.getElementById('listeningStatsModal');
+      if (!modal) return;
+      modal.style.display = 'flex';
+      loadListeningStats();
+    }
+
+    function closeListeningStatsModal() {
+      const modal = document.getElementById('listeningStatsModal');
+      if (modal) modal.style.display = 'none';
+    }
+
+    function loadListeningStats() {
+      if (window.pywebview && window.pywebview.api && window.pywebview.api.get_listening_stats) {
+        window.pywebview.api.get_listening_stats().then(data => {
+          cachedListeningStats = data;
+          renderListeningStatsUI(data);
+        }).catch(err => console.error("Error loading listening stats:", err));
+      }
+    }
+
+    function renderListeningStatsUI(stats) {
+      if (!stats) return;
+
+      const plays = document.getElementById('statsPlaysCount');
+      const hours = document.getElementById('statsHoursCount');
+      const streak = document.getElementById('statsStreakCount');
+      const lossPct = document.getElementById('statsLosslessPctLabel');
+
+      if (plays) plays.innerText = stats.total_plays || 0;
+      if (hours) hours.innerText = `${(stats.total_hours || 0).toFixed(1)}h`;
+      if (streak) streak.innerText = `${stats.listening_streak_days || 0} days`;
+      if (lossPct) lossPct.innerText = `${stats.lossless_percentage || 0}% Lossless`;
+
+      const barLossless = document.getElementById('statsBarLossless');
+      const barMp3 = document.getElementById('statsBarMp3');
+      const barStream = document.getElementById('statsBarStream');
+
+      const lossW = stats.lossless_percentage || 0;
+      const mp3W = stats.high_bitrate_percentage || 0;
+      const streamW = stats.streaming_percentage || 0;
+
+      if (barLossless) barLossless.style.width = `${lossW}%`;
+      if (barMp3) barMp3.style.width = `${mp3W}%`;
+      if (barStream) barStream.style.width = `${streamW}%`;
+
+      const artistsList = document.getElementById('statsTopArtistsList');
+      if (artistsList) {
+        if (!stats.top_artists || stats.top_artists.length === 0) {
+          artistsList.innerHTML = '<div style="color:var(--text-dim);">No listening data yet</div>';
+        } else {
+          artistsList.innerHTML = stats.top_artists.map((a, i) => `
+            <div style="display:flex; justify-content:space-between; align-items:center; background:rgba(255,255,255,0.03); padding:3px 6px; border-radius:4px;">
+              <span style="overflow:hidden; text-overflow:ellipsis; white-space:nowrap; max-width:180px;"><strong style="color:var(--cyan);">${i + 1}.</strong> ${escapeHtml(a.artist)}</span>
+              <span style="font-size:10px; color:var(--text-dim);">${a.plays} plays</span>
+            </div>
+          `).join('');
+        }
+      }
+
+      const tracksList = document.getElementById('statsTopTracksList');
+      if (tracksList) {
+        if (!stats.top_tracks || stats.top_tracks.length === 0) {
+          tracksList.innerHTML = '<div style="color:var(--text-dim);">No listening data yet</div>';
+        } else {
+          tracksList.innerHTML = stats.top_tracks.map((t, i) => `
+            <div style="display:flex; justify-content:space-between; align-items:center; background:rgba(255,255,255,0.03); padding:3px 6px; border-radius:4px;">
+              <span style="overflow:hidden; text-overflow:ellipsis; white-space:nowrap; max-width:180px;"><strong style="color:var(--emerald);">${i + 1}.</strong> ${escapeHtml(t.title)}</span>
+              <span style="font-size:10px; color:var(--text-dim);">${t.plays} plays</span>
+            </div>
+          `).join('');
+        }
+      }
+    }
+
+    function clearStatsHistoryAction() {
+      if (!confirm("Are you sure you want to permanently clear your local playback history? This cannot be undone.")) return;
+      if (window.pywebview && window.pywebview.api && window.pywebview.api.clear_listening_history) {
+        window.pywebview.api.clear_listening_history().then(() => {
+          loadListeningStats();
+        });
+      }
+    }
+
+    function exportWrappedSummary() {
+      if (!cachedListeningStats) return;
+      const s = cachedListeningStats;
+      const artists = (s.top_artists || []).slice(0, 3).map((a, idx) => `${idx + 1}. ${a.artist} (${a.plays} plays)`).join('\n');
+      const tracks = (s.top_tracks || []).slice(0, 3).map((t, idx) => `${idx + 1}. ${t.title} - ${t.artist}`).join('\n');
+
+      const text = `🎧 SONANCE WRAPPED REPORT\n` +
+        `━━━━━━━━━━━━━━━━━━━━━━━━━━━\n` +
+        `🎵 Total Plays: ${s.total_plays}\n` +
+        `⏱️ Hours Listened: ${(s.total_hours || 0).toFixed(1)} hrs\n` +
+        `🔥 Listening Streak: ${s.listening_streak_days} days\n` +
+        `💎 Lossless Quality: ${s.lossless_percentage}%\n\n` +
+        `👑 Top Artists:\n${artists || 'None'}\n\n` +
+        `🎶 Top Songs:\n${tracks || 'None'}\n` +
+        `━━━━━━━━━━━━━━━━━━━━━━━━━━━\n` +
+        `Exported from Sonance · Open-Source Music Studio`;
+
+      navigator.clipboard.writeText(text).then(() => {
+        alert("📋 Copied your Sonance Wrapped summary to clipboard!");
+      }).catch(() => {
+        prompt("Copy your Sonance Wrapped summary:", text);
+      });
     }
   </script>
 </body>
