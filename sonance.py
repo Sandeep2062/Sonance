@@ -134,6 +134,18 @@ Examples:
       help="Rip Audio CD tracks: --rip-cd [drive_letter] [output_dir] [format]",
   )
   parser.add_argument(
+      "--cloud-stream",
+      nargs="+",
+      metavar="PARAM",
+      help="Stream from Subsonic/Navidrome server: --cloud-stream <server_url> <username> [password]",
+  )
+  parser.add_argument(
+      "--convert-playlist",
+      nargs="+",
+      metavar="PARAM",
+      help="Convert playlist: --convert-playlist <input_file_or_url> [output_format] [output_file]",
+  )
+  parser.add_argument(
       "--version",
       action="version",
       version=f"Sonance v{modern_lyrics_downloader.APP_VERSION}",
@@ -401,6 +413,36 @@ Examples:
         print(f"    - Track {t.get('track')}: {t.get('file')}")
     else:
       print(f"[-] CD Rip: {res.get('error')}")
+    return
+
+  if args.cloud_stream:
+    import cloud_streamer
+    url = args.cloud_stream[0]
+    user = args.cloud_stream[1] if len(args.cloud_stream) > 1 else "admin"
+    pw = args.cloud_stream[2] if len(args.cloud_stream) > 2 else ""
+    print(f"[*] Connecting to Personal Cloud Music Server: {url} as '{user}'...")
+    res = cloud_streamer.test_connection(url, user, pw)
+    if res.get("success"):
+      print(f"[+] Connected to {res.get('type')} (Server v{res.get('server_version')}, API v{res.get('api_version')})")
+      artists_res = cloud_streamer.get_artists(url, user, pw)
+      if artists_res.get("success"):
+        print(f"    Total Artists Indexed: {artists_res.get('count')}")
+    else:
+      print(f"[-] Cloud connection failed: {res.get('error')}")
+    return
+
+  if args.convert_playlist:
+    import playlist_converter
+    inp = args.convert_playlist[0]
+    out_fmt = args.convert_playlist[1] if len(args.convert_playlist) > 1 else "m3u8"
+    out_file = args.convert_playlist[2] if len(args.convert_playlist) > 2 else None
+    print(f"[*] Converting playlist: {inp} -> {out_fmt.upper()}...")
+    res = playlist_converter.convert_playlist(inp, out_fmt, out_file)
+    if res.get("success"):
+      print(f"[+] Successfully converted {res.get('track_count')} tracks to {res.get('format')} playlist:")
+      print(f"    Saved: {res.get('output_file')}")
+    else:
+      print(f"[-] Playlist conversion failed: {res.get('error')}")
     return
 
   if args.classic:

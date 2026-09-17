@@ -55,6 +55,9 @@ import loudness_scanner
 import word_karaoke
 import audio_dedup
 import cd_ripper
+import cloud_streamer
+import room_eq
+import playlist_converter
 
 APP_VERSION = "2.1.0"
 GITHUB_REPO = "Sandeep2062/Sonance"
@@ -886,6 +889,45 @@ class LyricsAPI:
     def rip_audio_cd(self, drive_letter: str, output_dir: Optional[str] = None, output_format: str = "flac") -> Dict[str, Any]:
         """Rips audio CD tracks into tagged audio files."""
         return cd_ripper.rip_audio_cd(drive_letter, output_dir, output_format)
+
+    # ------------------ Phase 13: Subsonic Personal Cloud Streaming -------------
+    def test_subsonic_connection(self, server_url: str, username: str, password: str) -> Dict[str, Any]:
+        """Tests connection to a Subsonic / Navidrome / Jellyfin server."""
+        return cloud_streamer.test_connection(server_url, username, password)
+
+    def get_subsonic_artists(self, server_url: str, username: str, password: str, folder_id: Optional[str] = None) -> Dict[str, Any]:
+        """Retrieves artist directory from cloud server."""
+        return cloud_streamer.get_artists(server_url, username, password, folder_id)
+
+    def get_subsonic_artist_albums(self, server_url: str, username: str, password: str, artist_id: str) -> Dict[str, Any]:
+        """Retrieves artist albums from cloud server."""
+        return cloud_streamer.get_artist_albums(server_url, username, password, artist_id)
+
+    def get_subsonic_album_tracks(self, server_url: str, username: str, password: str, album_id: str) -> Dict[str, Any]:
+        """Retrieves album tracklist from cloud server."""
+        return cloud_streamer.get_album_tracks(server_url, username, password, album_id)
+
+    def search_subsonic_music(self, server_url: str, username: str, password: str, query: str) -> Dict[str, Any]:
+        """Searches personal cloud music collection."""
+        return cloud_streamer.search_cloud(server_url, username, password, query)
+
+    # ------------------ Phase 13: Room EQ Convolution DSP -----------------------
+    def get_room_ir_preset(self, preset: str = "abbey_studio") -> Dict[str, Any]:
+        """Returns base64-encoded impulse response WAV data URI for Web Audio ConvolverNode."""
+        return room_eq.get_ir_preset_data_uri(preset)
+
+    def load_custom_ir_wav(self, file_path: str) -> Dict[str, Any]:
+        """Loads and normalizes a custom impulse response WAV file."""
+        return room_eq.load_custom_ir_file(file_path)
+
+    # ------------------ Phase 13: Universal Playlist Converter ------------------
+    def parse_playlist_file(self, file_path_or_url: str) -> Dict[str, Any]:
+        """Parses M3U, PLS, WPL, XSPF, or Spotify playlist."""
+        return playlist_converter.parse_any_playlist(file_path_or_url)
+
+    def convert_playlist_file(self, input_path: str, output_format: str, output_path: Optional[str] = None) -> Dict[str, Any]:
+        """Converts playlist file to another format."""
+        return playlist_converter.convert_playlist(input_path, output_format, output_path)
 
     def _save_last_folder(self, folder: str):
         try:
