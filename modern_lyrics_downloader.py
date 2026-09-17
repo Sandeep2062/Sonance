@@ -2,7 +2,7 @@
 modern_lyrics_downloader.py - Sonance Modern Desktop Application (v2.1)
 
 Part of the Sonance project (https://github.com/Sandeep2062/Sonance)
-Copyright (c) 2024-2026 Sandeep Khadka — MIT License
+Copyright (c) 2024-2026 Sandeep Khadka — GPLv3 with Commons Clause
 
 Features:
 - Native Windows Desktop Window (powered by pywebview & Windows WebView2)
@@ -12,6 +12,9 @@ Features:
 - Full-Height Artist & Album Browser with Instant Search
 - Direct LRCLIB & Genius Integration
 - In-App GitHub Update Checker
+- 10-Band Studio Hardware Equalizer (DSP)
+- Discord Rich Presence Live Integration
+- User Playlists & Favorites Management
 """
 
 import os
@@ -31,6 +34,8 @@ import webview
 import lyrics_engine
 import downloader_engine
 import cookie_manager
+import playlist_manager
+import discord_rpc
 
 APP_VERSION = "2.1.0"
 GITHUB_REPO = "Sandeep2062/Sonance"
@@ -222,6 +227,8 @@ class LyricsAPI:
             return []
 
         self._current_folder = target_dir
+        fav_items = playlist_manager.get_favorites()
+        fav_ids = {t.get("id") or t.get("path") for t in fav_items}
         tracks = []
         idx = 0
         audio_exts = (".mp3", ".flac", ".m4a", ".ogg", ".wav")
@@ -266,7 +273,9 @@ class LyricsAPI:
                     stream_url = f"http://127.0.0.1:{STREAM_PORT}/stream?path={urllib.parse.quote(full_path)}"
                     cover_url = f"http://127.0.0.1:{STREAM_PORT}/cover?path={urllib.parse.quote(full_path)}"
 
+                    track_id = full_path
                     tracks.append({
+                        "id": track_id,
                         "index": idx,
                         "filename": f,
                         "path": full_path,
@@ -282,6 +291,7 @@ class LyricsAPI:
                         "state": state,
                         "stream_url": stream_url,
                         "cover_url": cover_url,
+                        "is_favorite": track_id in fav_ids,
                         "checked": False,
                     })
                     idx += 1
@@ -440,6 +450,67 @@ class LyricsAPI:
     def get_cookie_status(self) -> Dict[str, Any]:
         """Checks active cookies status for YouTube, Deezer, Spotify, Qobuz."""
         return cookie_manager.get_cookie_status()
+
+    # ------------------ Favorites & Playlists ------------------
+    def toggle_favorite(self, track_data: Dict[str, Any]) -> bool:
+        """Toggles a track in user favorites."""
+        if not track_data.get("id"):
+            track_data["id"] = track_data.get("path") or track_data.get("stream_url") or f"{track_data.get('artist')}_{track_data.get('title')}"
+        return playlist_manager.toggle_favorite(track_data)
+
+    def get_favorites(self) -> List[Dict[str, Any]]:
+        """Returns list of favorite tracks."""
+        return playlist_manager.get_favorites()
+
+    def create_playlist(self, name: str) -> bool:
+        """Creates a new user playlist."""
+        return playlist_manager.create_playlist(name)
+
+    def add_to_playlist(self, name: str, track_data: Dict[str, Any]) -> bool:
+        """Adds a track to a playlist."""
+        if not track_data.get("id"):
+            track_data["id"] = track_data.get("path") or track_data.get("stream_url") or f"{track_data.get('artist')}_{track_data.get('title')}"
+        return playlist_manager.add_track_to_playlist(name, track_data)
+
+    def get_all_playlists(self) -> Dict[str, List[Dict[str, Any]]]:
+        """Returns all custom playlists."""
+        return playlist_manager.get_all_playlists()
+
+    def export_playlist_m3u(self, name: str, out_path: str = "") -> bool:
+        """Exports a playlist to M3U file."""
+        if not out_path:
+            out_path = str(Path(self.get_download_dir()) / f"{name}.m3u")
+        return playlist_manager.export_playlist_m3u(name, out_path)
+
+    # ------------------ Discord Rich Presence ------------------
+    def update_discord_rpc(
+        self,
+        title: str,
+        artist: str,
+        album: str = "",
+        duration_sec: int = 0,
+        cover_url: Optional[str] = None,
+        is_playing: bool = True,
+    ):
+        """Updates Discord Rich Presence profile status."""
+        try:
+            discord_rpc.rpc_manager.update_activity(
+                title=title,
+                artist=artist,
+                album=album,
+                duration_sec=duration_sec,
+                cover_url=cover_url,
+                is_playing=is_playing,
+            )
+        except Exception:
+            pass
+
+    def clear_discord_rpc(self):
+        """Clears Discord Rich Presence."""
+        try:
+            discord_rpc.rpc_manager.clear_activity()
+        except Exception:
+            pass
 
     def _save_last_folder(self, folder: str):
         try:

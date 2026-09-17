@@ -1081,8 +1081,11 @@
       </button>
     </div>
 
-    <!-- Quick Spek & Update -->
+    <!-- Quick Equalizer, Spek & Update -->
     <div style="display:flex; align-items:center; gap:8px;">
+      <button class="btn btn-secondary" onclick="openEqualizerModal()" style="padding:5px 9px; font-size:11px;">
+        🎚️ Equalizer
+      </button>
       <button class="btn btn-secondary" onclick="openSpekModal()" style="padding:5px 9px; font-size:11px;">
         📊 Spek
       </button>
@@ -1118,7 +1121,22 @@
             <span>Plain Text</span>
             <span class="nav-badge" id="count-plain">0</span>
           </button>
+          <button class="nav-btn" id="filter-favorites" onclick="applyFilter('favorites')">
+            <span>❤️ Favorites</span>
+            <span class="nav-badge" id="count-favorites" style="background:rgba(236,72,153,0.15); color:#ec4899;">0</span>
+          </button>
         </nav>
+      </div>
+
+      <!-- Playlists Section -->
+      <div style="margin-top:10px; margin-bottom:4px;">
+        <div class="sidebar-section-title" style="display:flex; justify-content:space-between; align-items:center;">
+          <span>Playlists</span>
+          <button class="btn btn-secondary" onclick="promptCreatePlaylist()" style="padding:1px 6px; font-size:10px;" title="Create New Playlist">+ New</button>
+        </div>
+        <div id="sidebarPlaylistsList" style="max-height:85px; overflow-y:auto; font-size:11px; display:flex; flex-direction:column; gap:2px;">
+          <div style="font-size:10px; color:var(--text-dim); padding:2px 4px;">No playlists yet</div>
+        </div>
       </div>
 
       <!-- Full-Height Flex Artists & Albums Browser -->
@@ -1620,6 +1638,47 @@
     </div>
   </div>
 
+  <!-- 10-Band Studio Hardware Equalizer (DSP) Modal -->
+  <div class="modal-backdrop" id="equalizerModal">
+    <div class="modal-box" style="width:680px;">
+      <div class="modal-header">
+        <div style="font-weight:700; font-size:13px; display:flex; align-items:center; gap:8px;">
+          <span>🎚️ 10-Band Studio Hardware Equalizer (DSP)</span>
+          <span class="quality-badge lossless" id="eqStatusBadge">DSP Active</span>
+        </div>
+        <button onclick="closeEqualizerModal()" style="background:none; border:none; color:var(--text-muted); cursor:pointer; font-size:14px;">✕</button>
+      </div>
+      <div class="modal-body">
+        <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:12px;">
+          <div style="display:flex; align-items:center; gap:10px;">
+            <label style="font-size:12px; color:var(--text-muted);">Preset:</label>
+            <select id="eqPresetSelect" onchange="applyEqPreset(this.value)" style="background:#12151e; color:var(--text-white); border:1px solid var(--border); border-radius:6px; padding:4px 8px; font-size:12px;">
+              <option value="Flat">Flat</option>
+              <option value="Bass Boost">Bass Boost</option>
+              <option value="Rock">Rock</option>
+              <option value="Pop">Pop</option>
+              <option value="Jazz">Jazz</option>
+              <option value="Electronic">Electronic</option>
+              <option value="Classical">Classical</option>
+              <option value="Vocal Booster">Vocal Booster</option>
+              <option value="Custom" style="display:none;">Custom</option>
+            </select>
+          </div>
+          <button class="btn btn-secondary" onclick="resetEqualizer()" style="font-size:11px; padding:4px 8px;">Reset (0 dB)</button>
+        </div>
+
+        <div style="display:flex; justify-content:space-between; align-items:center; background:#0c0e14; border:1px solid var(--border); border-radius:8px; padding:16px 12px; height:200px;">
+          <div id="eqSlidersContainer" style="display:flex; justify-content:space-between; width:100%; height:100%; align-items:center;"></div>
+        </div>
+
+        <div style="display:flex; justify-content:space-between; align-items:center; margin-top:12px; font-size:11px; color:var(--text-muted);">
+          <span>Range: -12 dB to +12 dB | 10-Band Biquad Filter Studio DSP</span>
+          <button class="btn btn-primary" onclick="closeEqualizerModal()">Done</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
   <script>
     // State
     let libraryTracks = [];
@@ -1699,21 +1758,25 @@
 
     function renderUI() {
       // 1. Calculate stats
-      let missing = 0, synced = 0, plain = 0;
+      let missing = 0, synced = 0, plain = 0, favorites = 0;
       libraryTracks.forEach(t => {
         if (t.state === 'synced') synced++;
         else if (t.state === 'plain') plain++;
         else missing++;
+        if (t.is_favorite) favorites++;
       });
 
       document.getElementById('count-all').innerText = libraryTracks.length;
       document.getElementById('count-missing').innerText = missing;
       document.getElementById('count-synced').innerText = synced;
       document.getElementById('count-plain').innerText = plain;
+      const favBadge = document.getElementById('count-favorites');
+      if (favBadge) favBadge.innerText = favorites;
       document.getElementById('downloadMissingBtn').innerText = `⬇ Download Missing (${missing})`;
 
-      // 2. Render sidebar artists & albums
+      // 2. Render sidebar artists, albums & playlists
       renderBrowserList();
+      renderSidebarPlaylists();
 
       // 3. Render tracks
       renderFilteredTracklist();
@@ -1795,6 +1858,8 @@
         if (activeFilter === 'missing' && t.state !== 'none' && t.state !== 'missing') return false;
         if (activeFilter === 'synced' && t.state !== 'synced') return false;
         if (activeFilter === 'plain' && t.state !== 'plain') return false;
+        if (activeFilter === 'favorites' && !t.is_favorite) return false;
+        if (activeFilter.startsWith('playlist_') && !t.in_playlist_filter) return false;
 
         if (selectedArtist && t.artist !== selectedArtist) return false;
         if (selectedAlbum && t.album !== selectedAlbum) return false;
@@ -1843,6 +1908,9 @@
 
             <div style="display:flex; align-items:center; gap:8px;">
               <span class="pill ${pillClass}">● ${pillText}</span>
+              <button class="btn btn-secondary" style="padding:3px 7px; font-size:11px; ${t.is_favorite ? 'color:#ec4899;' : 'color:var(--text-muted);'}" title="Toggle Favorite" onclick="event.stopPropagation(); toggleTrackFavorite(${t.index})">
+                ${t.is_favorite ? '♥' : '♡'}
+              </button>
               <button class="btn btn-secondary" style="padding:3px 7px; font-size:10px;" onclick="event.stopPropagation(); downloadSingleTrack(${t.index})">
                 ${t.state === 'synced' ? 'Re-fetch' : 'Download'}
               </button>
@@ -1862,6 +1930,9 @@
       if (playingTrackIndex === index && !audio.paused) {
         audio.pause();
         document.getElementById('playPauseBtn').innerText = '▶';
+        if (window.pywebview && window.pywebview.api) {
+          window.pywebview.api.update_discord_rpc(track.title || track.filename, track.artist || 'Unknown', track.album || '', 0, track.cover_url || '', false);
+        }
         renderFilteredTracklist();
         return;
       }
@@ -1874,6 +1945,16 @@
       audio.play().then(() => {
         document.getElementById('playPauseBtn').innerText = '⏸';
         setupWebAudio();
+        if (window.pywebview && window.pywebview.api) {
+          window.pywebview.api.update_discord_rpc(
+            track.title || track.filename,
+            track.artist || 'Unknown',
+            track.album || 'Sonance Music',
+            track.duration ? Math.round(track.duration) : 0,
+            track.cover_url || '',
+            true
+          );
+        }
       }).catch(err => console.error("Playback error:", err));
 
       // Update player UI
@@ -1897,9 +1978,31 @@
       if (audio.paused) {
         audio.play();
         document.getElementById('playPauseBtn').innerText = '⏸';
+        const curTrack = libraryTracks.find(t => t.index === playingTrackIndex);
+        if (curTrack && window.pywebview && window.pywebview.api) {
+          window.pywebview.api.update_discord_rpc(
+            curTrack.title || curTrack.filename,
+            curTrack.artist || 'Unknown',
+            curTrack.album || 'Sonance Music',
+            curTrack.duration ? Math.round(curTrack.duration - audio.currentTime) : 0,
+            curTrack.cover_url || '',
+            true
+          );
+        }
       } else {
         audio.pause();
         document.getElementById('playPauseBtn').innerText = '▶';
+        const curTrack = libraryTracks.find(t => t.index === playingTrackIndex);
+        if (curTrack && window.pywebview && window.pywebview.api) {
+          window.pywebview.api.update_discord_rpc(
+            curTrack.title || curTrack.filename,
+            curTrack.artist || 'Unknown',
+            curTrack.album || 'Sonance Music',
+            0,
+            curTrack.cover_url || '',
+            false
+          );
+        }
       }
       renderFilteredTracklist();
     }
@@ -2022,7 +2125,23 @@
       }
     }
 
-    // Web Audio API Spectrum Visualizer
+    // ------------------ 10-Band Studio Equalizer (DSP) ------------------
+    const EQ_FREQUENCIES = [32, 64, 125, 250, 500, 1000, 2000, 4000, 8000, 16000];
+    const EQ_LABELS = ['32Hz', '64Hz', '125Hz', '250Hz', '500Hz', '1kHz', '2kHz', '4kHz', '8kHz', '16kHz'];
+    const EQ_PRESETS = {
+      'Flat': [0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+      'Bass Boost': [6, 5, 4, 2, 0, 0, 0, 0, 1, 2],
+      'Rock': [4, 3, 2, 0, -1, 1, 3, 4, 4, 3],
+      'Pop': [-1, 1, 3, 4, 3, 0, -1, -1, 2, 3],
+      'Jazz': [3, 2, 1, 2, -1, -1, 0, 1, 2, 3],
+      'Electronic': [4, 4, 2, 0, -2, 2, 1, 2, 4, 4],
+      'Classical': [4, 3, 2, 2, -1, -1, 0, 2, 3, 3],
+      'Vocal Booster': [-2, -2, -1, 1, 3, 4, 3, 1, 0, -1]
+    };
+    let eqFilters = [];
+    let currentEqGains = [0, 0, 0, 0, 0, 0, 0, 0, 0, 0];
+
+    // Web Audio API & Hardware Equalizer DSP
     function setupWebAudio() {
       if (audioCtx) return;
       try {
@@ -2030,11 +2149,194 @@
         analyser = audioCtx.createAnalyser();
         analyser.fftSize = 64;
         sourceNode = audioCtx.createMediaElementSource(audio);
-        sourceNode.connect(analyser);
+
+        // Build 10-Band Biquad Filter DSP chain
+        eqFilters = EQ_FREQUENCIES.map((freq, idx) => {
+          const filter = audioCtx.createBiquadFilter();
+          if (idx === 0) {
+            filter.type = 'lowshelf';
+          } else if (idx === EQ_FREQUENCIES.length - 1) {
+            filter.type = 'highshelf';
+          } else {
+            filter.type = 'peaking';
+            filter.Q.value = 1.4;
+          }
+          filter.frequency.value = freq;
+          filter.gain.value = currentEqGains[idx];
+          return filter;
+        });
+
+        // Link: sourceNode -> filter[0] -> ... -> filter[9] -> analyser -> destination
+        let prev = sourceNode;
+        eqFilters.forEach(f => {
+          prev.connect(f);
+          prev = f;
+        });
+        prev.connect(analyser);
         analyser.connect(audioCtx.destination);
+
         drawSpectrum();
       } catch (e) {
         console.log("Web Audio Context error:", e);
+      }
+    }
+
+    function buildEqSliders() {
+      const container = document.getElementById('eqSlidersContainer');
+      if (!container || container.children.length > 0) return;
+      container.innerHTML = EQ_FREQUENCIES.map((freq, idx) => `
+        <div style="display:flex; flex-direction:column; align-items:center; height:100%; justify-content:space-between; width:48px;">
+          <span id="eqVal-${idx}" style="font-size:10px; font-weight:700; color:var(--emerald);">${currentEqGains[idx] > 0 ? '+' : ''}${currentEqGains[idx]}dB</span>
+          <input 
+            type="range" 
+            id="eqSlider-${idx}" 
+            min="-12" 
+            max="12" 
+            step="0.5" 
+            value="${currentEqGains[idx]}" 
+            orient="vertical"
+            oninput="onEqSliderChange(${idx}, parseFloat(this.value))"
+            style="writing-mode: vertical-lr; direction: rtl; -webkit-appearance: slider-vertical; width: 14px; height: 110px; cursor: pointer; accent-color: var(--emerald);"
+          >
+          <span style="font-size:10px; color:var(--text-dim); margin-top:4px;">${EQ_LABELS[idx]}</span>
+        </div>
+      `).join('');
+    }
+
+    function onEqSliderChange(index, val) {
+      currentEqGains[index] = val;
+      const lbl = document.getElementById(`eqVal-${index}`);
+      if (lbl) lbl.innerText = `${val > 0 ? '+' : ''}${val}dB`;
+      if (eqFilters[index] && audioCtx) {
+        eqFilters[index].gain.setValueAtTime(val, audioCtx.currentTime);
+      }
+      document.getElementById('eqPresetSelect').value = 'Custom';
+    }
+
+    function applyEqPreset(presetName) {
+      const preset = EQ_PRESETS[presetName];
+      if (!preset) return;
+      currentEqGains = [...preset];
+      currentEqGains.forEach((val, idx) => {
+        const slider = document.getElementById(`eqSlider-${idx}`);
+        if (slider) slider.value = val;
+        const lbl = document.getElementById(`eqVal-${idx}`);
+        if (lbl) lbl.innerText = `${val > 0 ? '+' : ''}${val}dB`;
+        if (eqFilters[idx] && audioCtx) {
+          eqFilters[idx].gain.setValueAtTime(val, audioCtx.currentTime);
+        }
+      });
+    }
+
+    function resetEqualizer() {
+      applyEqPreset('Flat');
+      document.getElementById('eqPresetSelect').value = 'Flat';
+    }
+
+    function openEqualizerModal() {
+      buildEqSliders();
+      document.getElementById('equalizerModal').style.display = 'flex';
+    }
+
+    function closeEqualizerModal() {
+      document.getElementById('equalizerModal').style.display = 'none';
+    }
+
+    // ------------------ Favorites & Playlists Handlers ------------------
+    function toggleTrackFavorite(index) {
+      const track = libraryTracks.find(t => t.index === index);
+      if (!track) return;
+      if (window.pywebview && window.pywebview.api) {
+        window.pywebview.api.toggle_favorite({
+          id: track.path,
+          title: track.title,
+          artist: track.artist,
+          album: track.album,
+          duration: track.duration,
+          path: track.path,
+          stream_url: track.stream_url
+        }).then(isFav => {
+          track.is_favorite = isFav;
+          renderUI();
+        });
+      } else {
+        track.is_favorite = !track.is_favorite;
+        renderUI();
+      }
+    }
+
+    function toggleOnlineFavorite(idx) {
+      const item = searchResultsData[idx];
+      if (!item) return;
+      const trackData = {
+        id: item.stream_url || `${item.source}_${item.id || item.title}`,
+        title: item.title,
+        artist: item.artist,
+        album: item.album || '',
+        duration: item.duration || 0,
+        cover_url: item.cover_url || '',
+        stream_url: item.stream_url || item.preview_url || '',
+      };
+      if (window.pywebview && window.pywebview.api) {
+        window.pywebview.api.toggle_favorite(trackData).then(isFav => {
+          item.is_favorite = isFav;
+          const btn = document.getElementById(`onlineFavBtn-${idx}`);
+          if (btn) {
+            btn.innerText = isFav ? '♥' : '♡';
+            btn.style.color = isFav ? '#ec4899' : 'var(--text-muted)';
+          }
+        });
+      }
+    }
+
+    function renderSidebarPlaylists() {
+      const container = document.getElementById('sidebarPlaylistsList');
+      if (!container) return;
+      if (window.pywebview && window.pywebview.api) {
+        window.pywebview.api.get_all_playlists().then(pls => {
+          if (!pls || Object.keys(pls).length === 0) {
+            container.innerHTML = '<div style="font-size:10px; color:var(--text-dim); padding:2px 4px;">No playlists yet</div>';
+            return;
+          }
+          let html = '';
+          for (const [name, tracks] of Object.entries(pls)) {
+            html += `
+              <div style="display:flex; justify-content:space-between; align-items:center; padding:4px 6px; border-radius:4px; background:#12151e; margin-bottom:3px; cursor:pointer;" onclick="filterByPlaylist('${escapeHtml(name)}')">
+                <span style="overflow:hidden; text-overflow:ellipsis; white-space:nowrap; max-width:110px;">🎵 ${escapeHtml(name)}</span>
+                <span class="nav-badge">${tracks.length}</span>
+              </div>
+            `;
+          }
+          container.innerHTML = html;
+        });
+      }
+    }
+
+    function promptCreatePlaylist() {
+      const name = prompt("Enter new playlist name:");
+      if (!name || !name.trim()) return;
+      if (window.pywebview && window.pywebview.api) {
+        window.pywebview.api.create_playlist(name.trim()).then(ok => {
+          if (ok) {
+            renderSidebarPlaylists();
+          } else {
+            alert("Playlist name already exists or is invalid!");
+          }
+        });
+      }
+    }
+
+    function filterByPlaylist(playlistName) {
+      if (window.pywebview && window.pywebview.api) {
+        window.pywebview.api.get_all_playlists().then(pls => {
+          const tracks = pls[playlistName] || [];
+          const pathSet = new Set(tracks.map(t => t.id || t.path));
+          libraryTracks.forEach(t => {
+            t.in_playlist_filter = pathSet.has(t.path);
+          });
+          activeFilter = 'playlist_' + playlistName;
+          renderFilteredTracklist();
+        });
       }
     }
 
@@ -2233,8 +2535,9 @@
     // Utilities
     function applyFilter(f) {
       activeFilter = f;
-      ['all', 'missing', 'synced', 'plain'].forEach(x => {
-        document.getElementById('filter-' + x).classList.toggle('active', x === f);
+      ['all', 'missing', 'synced', 'plain', 'favorites'].forEach(x => {
+        const el = document.getElementById('filter-' + x);
+        if (el) el.classList.toggle('active', x === f);
       });
       renderFilteredTracklist();
     }
@@ -2268,10 +2571,10 @@
     function showAppView(view) {
       currentAppView = view;
       ['local', 'search', 'queue', 'settings'].forEach(v => {
-        const btn = document.getElementById('tab-btn-' + v);
         const el = document.getElementById('view-' + v);
-        if (btn) btn.classList.toggle('active', v === view);
+        const tab = document.getElementById('tab-btn-' + v);
         if (el) el.classList.toggle('active', v === view);
+        if (tab) tab.classList.toggle('active', v === view);
       });
       const folderControls = document.getElementById('headerFolderControls');
       if (folderControls) {
@@ -2284,8 +2587,9 @@
       }
     }
 
-    // ------------------ Online Catalog Search ------------------
+    // ------------------ Online Search & Catalog Streaming ------------------
     let searchResultsData = [];
+
     function executeOnlineSearch() {
       const q = document.getElementById('onlineSearchInput').value.trim();
       const source = document.getElementById('onlineSearchSource').value;
@@ -2317,6 +2621,9 @@
                 </div>
               </div>
               <div class="card-actions">
+                <button class="btn btn-secondary" id="onlineFavBtn-${idx}" style="padding:4px 8px; font-size:11px; ${item.is_favorite ? 'color:#ec4899;' : 'color:var(--text-muted);'}" title="Toggle Favorite" onclick="toggleOnlineFavorite(${idx})">
+                  ${item.is_favorite ? '♥' : '♡'}
+                </button>
                 ${item.preview_url ? `<button class="btn btn-secondary" style="padding:4px 8px; font-size:10px;" onclick="playOnlinePreview('${escapeHtml(item.preview_url)}', '${escapeHtml(item.title)}', '${escapeHtml(item.artist)}', '${escapeHtml(item.cover_url)}')">▶ Play</button>` : ''}
                 <button class="btn btn-primary" style="padding:4px 8px; font-size:10px;" onclick="queueOnlineDownload(${idx})">⬇ Download</button>
               </div>
@@ -2332,9 +2639,13 @@
     function playOnlinePreview(url, title, artist, cover) {
       if (!url) return;
       audio.src = url;
-      audio.play();
-      isPlaying = true;
-      document.getElementById('playPauseBtn').innerText = '⏸';
+      audio.play().then(() => {
+        document.getElementById('playPauseBtn').innerText = '⏸';
+        setupWebAudio();
+        if (window.pywebview && window.pywebview.api) {
+          window.pywebview.api.update_discord_rpc(title, artist, 'Stream Preview', 30, cover || '', true);
+        }
+      }).catch(err => console.error("Preview error:", err));
       document.getElementById('playerTitle').innerText = title;
       document.getElementById('playerArtist').innerText = artist;
       document.getElementById('playerQuality').innerText = 'Stream Preview';
