@@ -104,7 +104,14 @@ Sonance brings together three distinct open-source powerhouses:
 - **Listening Stats Studio & "Sonance Wrapped"**: 100% private, local playback tracker computing total play counts, listening hours, active streaks, top artists, top songs, and audio quality distribution (% Lossless vs 320k vs streaming). Export summaries with 1 click or view in terminal via `python sonance.py --stats`.
 - **Interactive Waveform Timeline**: Dynamic audio energy waveform scrubber canvas rendered live across the player progress bar.
 
-### 🔄 11. In-App Updates & Releases
+### 💎 11. Visual LRC Studio, Acoustic Audio Fingerprinting, 3D Spatial DSP & Discographies
+- **Visual Interactive LRC Studio & Live Time-Stamper**: Create and sync `.lrc` lyrics from scratch! Paste raw lyrics, listen along, and tap `Space` or `[Enter]` on each beat to stamp line-by-line timestamps in real-time with millisecond precision adjusters (`+0.1s`/`-0.1s`), and save directly to companion `.lrc` and embedded metadata.
+- **Acoustic Audio Identification & Auto-Tagger (`audio_fingerprint.py`)**: Automatically recognizes unknown or untagged tracks (`Track01.mp3`, `recording.wav`) using acoustic fingerprint signatures and duration matching across online databases (iTunes, Deezer, MusicBrainz) to auto-populate Title, Artist, Album, Year, Genre, Track Number, and high-res cover art. Available via the desktop Tag Editor or CLI: `python sonance.py --identify <audio_file>`.
+- **Headphone Binaural Crossfeed & 3D Spatial Stereo DSP**: Bauer/Chu crossfeed algorithm in Web Audio blending microsecond-delayed, low-pass crosstalk between channels to eliminate headphone acoustic fatigue, plus a real-time 3D Spatial Stereo Width slider (0% Mono to 200% Ultra-Wide 3D).
+- **Artist Discography & Full-Album Downloader (`discography_scraper.py`)**: Explore complete artist discographies, inspect studio albums, EPs, and full tracklists, and batch-download entire albums with synchronized lyrics with 1 click. Also available via CLI: `python sonance.py --discography "Artist Name"`.
+- **Podcast & Audiobook Smart Resuming**: Automatically saves and restores exact playback positions for long audio tracks (>15 minutes), displaying a 1-click "Resume from MM:SS" toast notification.
+
+### 🔄 12. In-App Updates & Releases
 - Automatic update detection checking against [GitHub Releases](https://github.com/Sandeep2062/Sonance/releases).
 - Every release includes SHA-256 and MD5 checksum manifests (`RELEASE.sha256sum`, `RELEASE.md5sum`).
 
