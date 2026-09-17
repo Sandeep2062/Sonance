@@ -125,7 +125,14 @@ Sonance brings together three distinct open-source powerhouses:
 - **Audio CD Ripper & DiscID AccurateRip Studio (`cd_ripper.py`)**: Physical optical CD drive detection, MusicBrainz DiscID querying, and bit-perfect extraction to FLAC, WAV, MP3, or M4A with metadata auto-tagging and companion synced `.lrc` download. CLI: `python sonance.py --rip-cd [drive_letter] [out_dir] [format]`.
 - **Real-Time 2D Spectrogram Waterfall Visualizer**: Live scrolling FFT frequency-over-time thermal heatmap canvas (0 Hz to 24 kHz) integrated into the Spek technical specs modal.
 
-### 🔄 14. In-App Updates & Releases
+### ☁️ 14. Subsonic Personal Cloud Streaming, Room EQ Convolution DSP & Universal Playlist Converter
+- **Subsonic / Navidrome / Jellyfin Personal Cloud Streaming (`cloud_streamer.py`)**: Connect Sonance directly to self-hosted personal music servers with Subsonic API token authentication. Browse remote artist directories, stream losslessly over HTTP with auto-matched synchronized `.lrc` lyrics, and query remote cloud libraries. CLI: `python sonance.py --cloud-stream <server_url> <username> [password]`.
+- **Acoustic Convolution IR Room Correction & Tube Preamp DSP (`room_eq.py`)**: Web Audio `ConvolverNode` engine loading real-world and synthesized acoustic Impulse Response (IR) profiles: *Abbey Studio Room* (early studio reflections), *Warm Vintage Tube Preamp* (even-order analog harmonic saturation), *Acoustic Concert Hall* (spatial diffusion), and *Audiophile Vinyl Curve* (stylus resonance). Supports custom `.wav` IR file loading with adjustable Wet/Dry mix.
+- **Psychoacoustic Sub-Bass Harmonic Synthesizer DSP**: MaxxBass-style virtual fundamental generator creating upper harmonics from sub-bass frequencies (<80 Hz) so deep bass notes are vividly heard on laptop speakers, small monitors, and earphones without cone distortion.
+- **Universal Multi-Format Playlist Converter (`playlist_converter.py`)**: Bidirectional playlist converter supporting `.m3u`, `.m3u8`, `.pls`, `.wpl` (Windows Media), `.xspf` (VLC/XML), and Spotify public playlist URL importing into local manifests or download queues. CLI: `python sonance.py --convert-playlist <input_file_or_url> [output_format] [output_file]`.
+- **Bit-Perfect DAC Stream Telemetry**: Live bottom bar telemetry displaying DAC resolution: `24-bit / 96.0 kHz Hi-Res Direct`, `16-bit / 44.1 kHz Lossless`, or `Cloud Stream Direct`.
+
+### 🔄 15. In-App Updates & Releases
 - Automatic update detection checking against [GitHub Releases](https://github.com/Sandeep2062/Sonance/releases).
 - Every release includes SHA-256 and MD5 checksum manifests (`RELEASE.sha256sum`, `RELEASE.md5sum`).
 
