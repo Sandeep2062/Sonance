@@ -339,6 +339,30 @@ Examples:
       help="Generate animated synchronized lyrics karaoke video: --lyrics-video <audio_file> [lrc_file] [output_video] [--resolution 1080p|720p]",
   )
   parser.add_argument(
+      "--upsample",
+      nargs="+",
+      metavar="PARAM",
+      help="Audiophile polyphase sinc upsampler: --upsample <audio_file> [output_file] [--rate 192000] [--filter linear|minimum]",
+  )
+  parser.add_argument(
+      "--fix-cue",
+      nargs="+",
+      metavar="PARAM",
+      help="Audit & repair broken CUE sheets: --fix-cue <cue_file> [target_audio] [--output <repaired_cue>]",
+  )
+  parser.add_argument(
+      "--synthesize-ir",
+      nargs="+",
+      metavar="PARAM",
+      help="Synthesize room acoustic impulse response (IR): --synthesize-ir [output_wav] [--preset studio|room|concert_hall|cathedral] [--rt60 1.5] [--sr 48000]",
+  )
+  parser.add_argument(
+      "--lrc-to-ass",
+      nargs="+",
+      metavar="PARAM",
+      help="Convert LRC to animated karaoke ASS subtitles: --lrc-to-ass <lrc_file> [output_ass] [--style karaoke|minimal|cinematic] [--color #FFD700] [--srt]",
+  )
+  parser.add_argument(
       "--version",
       action="version",
       version=f"Sonance v{modern_lyrics_downloader.APP_VERSION}",
@@ -1504,6 +1528,141 @@ Examples:
     print(f"[*] Generating synchronized lyrics karaoke video: {aud}...")
     res = lyrics_video_maker.generate_lyrics_video(aud, lrc_path=lrc, output_path=out, resolution=res_mode)
     print(lyrics_video_maker.format_video_card(res))
+    return
+
+  if args.upsample:
+    import audio_upsampler
+    us_params = list(args.upsample) + list(unknown)
+    inp = us_params[0]
+    out = None
+    rate = 192000
+    filt = "linear"
+    idx = 1
+    while idx < len(us_params):
+      arg = us_params[idx]
+      if arg in ("--rate", "--sr", "--sample-rate") and idx + 1 < len(us_params):
+        rate = int(us_params[idx + 1])
+        idx += 2
+      elif arg in ("--filter", "--phase") and idx + 1 < len(us_params):
+        filt = us_params[idx + 1]
+        idx += 2
+      elif arg in ("--output", "--out") and idx + 1 < len(us_params):
+        out = us_params[idx + 1]
+        idx += 2
+      elif not arg.startswith("--") and out is None:
+        out = arg
+        idx += 1
+      else:
+        idx += 1
+    print(f"[*] Upsampling audio with Whittaker-Shannon polyphase sinc filter ({filt.title()} Phase -> {rate} Hz): {inp}...")
+    res = audio_upsampler.upsample_audio(inp, target_sr=rate, output_path=out, filter_type=filt)
+    print(audio_upsampler.format_upsampler_card(res))
+    return
+
+  if args.fix_cue:
+    import cue_fixer
+    fc_params = list(args.fix_cue) + list(unknown)
+    cue_in = fc_params[0]
+    aud_in = None
+    out_cue = None
+    idx = 1
+    while idx < len(fc_params):
+      arg = fc_params[idx]
+      if arg in ("--audio", "--audio-target") and idx + 1 < len(fc_params):
+        aud_in = fc_params[idx + 1]
+        idx += 2
+      elif arg in ("--output", "--out") and idx + 1 < len(fc_params):
+        out_cue = fc_params[idx + 1]
+        idx += 2
+      elif not arg.startswith("--"):
+        if aud_in is None and not arg.endswith(".cue"):
+          aud_in = arg
+        elif out_cue is None:
+          out_cue = arg
+        idx += 1
+      else:
+        idx += 1
+    print(f"[*] Auditing and repairing CUE sheet: {cue_in}...")
+    res = cue_fixer.audit_and_fix_cue(cue_in, target_audio_file=aud_in, output_cue_path=out_cue)
+    print(cue_fixer.format_cue_card(res))
+    return
+
+  if args.synthesize_ir:
+    import room_ir_synthesizer
+    ir_params = list(args.synthesize_ir) + list(unknown)
+    out_f = None
+    preset = "room"
+    rt60 = None
+    sr = 48000
+    idx = 0
+    while idx < len(ir_params):
+      arg = ir_params[idx]
+      if arg in ("--preset", "--room") and idx + 1 < len(ir_params):
+        preset = ir_params[idx + 1]
+        idx += 2
+      elif arg in ("--rt60", "--decay") and idx + 1 < len(ir_params):
+        rt60 = float(ir_params[idx + 1])
+        idx += 2
+      elif arg in ("--sr", "--rate") and idx + 1 < len(ir_params):
+        sr = int(ir_params[idx + 1])
+        idx += 2
+      elif arg in ("--output", "--out") and idx + 1 < len(ir_params):
+        out_f = ir_params[idx + 1]
+        idx += 2
+      elif not arg.startswith("--") and out_f is None:
+        out_f = arg
+        idx += 1
+      else:
+        idx += 1
+    print(f"[*] Synthesizing room acoustic impulse response ({preset} preset, RT60={rt60 or 'auto'}s)...")
+    res = room_ir_synthesizer.synthesize_impulse_response(
+        room_preset=preset, rt60_sec=rt60, sample_rate=sr, output_path=out_f
+    )
+    print(room_ir_synthesizer.format_ir_card(res))
+    return
+
+  if args.lrc_to_ass:
+    import lrc_to_ass_converter
+    ass_params = list(args.lrc_to_ass) + list(unknown)
+    lrc_in = ass_params[0]
+    out_ass = None
+    style = "karaoke"
+    color = "#FFD700"
+    font = "Trebuchet MS"
+    do_srt = False
+    idx = 1
+    while idx < len(ass_params):
+      arg = ass_params[idx]
+      if arg in ("--style", "--preset") and idx + 1 < len(ass_params):
+        style = ass_params[idx + 1]
+        idx += 2
+      elif arg in ("--color", "--hex") and idx + 1 < len(ass_params):
+        color = ass_params[idx + 1]
+        idx += 2
+      elif arg in ("--font", "--typeface") and idx + 1 < len(ass_params):
+        font = ass_params[idx + 1]
+        idx += 2
+      elif arg == "--srt":
+        do_srt = True
+        idx += 1
+      elif arg in ("--output", "--out") and idx + 1 < len(ass_params):
+        out_ass = ass_params[idx + 1]
+        idx += 2
+      elif not arg.startswith("--") and out_ass is None:
+        out_ass = arg
+        idx += 1
+      else:
+        idx += 1
+    print(f"[*] Converting lyrics to broadcast karaoke ASS subtitles: {lrc_in}...")
+    res = lrc_to_ass_converter.convert_lrc_to_subtitles(
+        lrc_path=lrc_in,
+        output_path=out_ass,
+        style_preset=style,
+        primary_color_hex=color,
+        font_name=font,
+        export_srt=do_srt,
+    )
+    print(lrc_to_ass_converter.format_ass_card(res))
     return
 
   if args.classic:

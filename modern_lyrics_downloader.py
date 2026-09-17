@@ -90,6 +90,10 @@ import spectrum_analyzer
 import audio_declipper
 import track_splitter
 import lyrics_video_maker
+import audio_upsampler
+import cue_fixer
+import room_ir_synthesizer
+import lrc_to_ass_converter
 
 APP_VERSION = "2.1.0"
 GITHUB_REPO = "Sandeep2062/Sonance"
@@ -1360,6 +1364,62 @@ class LyricsAPI:
         """Generates synchronized lyrics karaoke video / interactive HTML5 presentation."""
         return lyrics_video_maker.generate_lyrics_video(
             audio_path, lrc_path=lrc_path, output_path=output_path, resolution=resolution
+        )
+
+    # ------------------ Phase 22: Sinc Upsampler & Apodizing Studio ------------------
+    def upsample_audio_track(
+        self,
+        input_path: str,
+        target_sr: int = 192000,
+        output_path: Optional[str] = None,
+        filter_type: str = "linear",
+    ) -> Dict[str, Any]:
+        """Upsamples audio using bandlimited Whittaker-Shannon polyphase sinc interpolation."""
+        return audio_upsampler.upsample_audio(
+            input_path, target_sr=target_sr, output_path=output_path, filter_type=filter_type
+        )
+
+    # ------------------ Phase 22: Smart CUE Sheet Doctor & Validator ------------------
+    def audit_and_fix_cue_sheet(
+        self,
+        cue_path: str,
+        target_audio: Optional[str] = None,
+        output_cue_path: Optional[str] = None,
+    ) -> Dict[str, Any]:
+        """Audits, heals missing FILE references, fixes sector frames, and re-encodes CUE to UTF-8."""
+        return cue_fixer.audit_and_fix_cue(
+            cue_path, target_audio_file=target_audio, output_cue_path=output_cue_path
+        )
+
+    # ------------------ Phase 22: Room Acoustic IR Synthesizer ------------------------
+    def generate_room_impulse_response(
+        self,
+        room_preset: str = "room",
+        rt60_sec: Optional[float] = None,
+        sample_rate: int = 48000,
+        output_path: Optional[str] = None,
+    ) -> Dict[str, Any]:
+        """Synthesizes calibrated stereo acoustic impulse response (WAV) using image-source model."""
+        return room_ir_synthesizer.synthesize_impulse_response(
+            room_preset=room_preset, rt60_sec=rt60_sec, sample_rate=sample_rate, output_path=output_path
+        )
+
+    # ------------------ Phase 22: Word-by-Word LRC to ASS Subtitle Converter ----------
+    def convert_lrc_to_ass_subtitles(
+        self,
+        lrc_path: str,
+        output_path: Optional[str] = None,
+        style_preset: str = "karaoke",
+        primary_color: str = "#FFD700",
+        export_srt: bool = False,
+    ) -> Dict[str, Any]:
+        """Converts LRC/ELRC into broadcast ASS karaoke subtitles with syllable wipe animation."""
+        return lrc_to_ass_converter.convert_lrc_to_subtitles(
+            lrc_path=lrc_path,
+            output_path=output_path,
+            style_preset=style_preset,
+            primary_color_hex=primary_color,
+            export_srt=export_srt,
         )
 
     def _save_last_folder(self, folder: str):

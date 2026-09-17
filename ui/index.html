@@ -1207,6 +1207,18 @@
       <button class="btn btn-secondary" onclick="openLyricsVideoModal()" style="padding:5px 9px; font-size:11px;" id="lyricsVideoHeaderBtn" title="Synchronized LRC Karaoke Video & Theater Generator">
         🎬 Video Karaoke
       </button>
+      <button class="btn btn-secondary" onclick="openUpsamplerModal()" style="padding:5px 9px; font-size:11px;" id="upsamplerHeaderBtn" title="Audiophile Polyphase Sinc Audio Upsampler & Apodizing Studio">
+        🚀 Upsampler
+      </button>
+      <button class="btn btn-secondary" onclick="openCueFixerModal()" style="padding:5px 9px; font-size:11px;" id="cueFixerHeaderBtn" title="Smart CUE Sheet Doctor, File Re-Aligner & Red Book Validator">
+        📄 CUE Doctor
+      </button>
+      <button class="btn btn-secondary" onclick="openRoomIrModal()" style="padding:5px 9px; font-size:11px;" id="roomIrHeaderBtn" title="Room Acoustic Impulse Response (IR) Generator & Reverb Synthesizer">
+        🏛️ Room IR
+      </button>
+      <button class="btn btn-secondary" onclick="openAssSubtitlesModal()" style="padding:5px 9px; font-size:11px;" id="assSubtitlesHeaderBtn" title="Word-by-Word LRC to Karaoke Subtitle Styler & ASS Converter">
+        🎨 ASS Subtitles
+      </button>
       <button class="btn btn-secondary" onclick="openLrcStudioModal()" style="padding:5px 9px; font-size:11px;" id="lrcStudioHeaderBtn" title="Interactive LRC Studio & Live Time-Stamper">
         ✍️ LRC Studio
       </button>
@@ -5420,6 +5432,271 @@
     </div>
   </div>
 
+  <!-- Phase 22: Audiophile Sinc Audio Upsampler & Apodizing Studio Modal -->
+  <div class="modal-backdrop" id="upsamplerModal" style="display:none;">
+    <div class="modal-card" style="width:720px; max-width:95vw; background:#161926; border:1px solid var(--border); border-radius:12px; box-shadow:0 12px 36px rgba(0,0,0,0.7); overflow:hidden;">
+      <div style="padding:16px 20px; background:#121520; border-bottom:1px solid var(--border); display:flex; justify-content:space-between; align-items:center;">
+        <div class="modal-title" style="font-size:14px; font-weight:700; display:flex; align-items:center; gap:8px;">
+          <span>🚀</span>
+          <span>Audiophile Sinc Audio Upsampler &amp; Apodizing Studio</span>
+        </div>
+        <button onclick="closeUpsamplerModal()" style="background:none; border:none; color:var(--text-muted); font-size:16px; cursor:pointer;">✕</button>
+      </div>
+
+      <div style="padding:20px; max-height:75vh; overflow-y:auto; display:flex; flex-direction:column; gap:16px;">
+        <div style="font-size:11px; color:var(--text-dim); line-height:1.5;">
+          Performs bandlimited Whittaker-Shannon polyphase sinc interpolation up to 192 kHz / 384 kHz ultra Hi-Res with Kaiser windowing (&gt;120 dB stopband rejection). Select Linear Phase for zero phase distortion, or Minimum Phase (apodizing) to eliminate pre-ringing transients.
+        </div>
+
+        <div>
+          <label style="font-size:11px; font-weight:600; color:var(--text-muted); display:block; margin-bottom:6px;">Target Audio File:</label>
+          <div style="display:flex; gap:8px;">
+            <input type="text" id="upsamplerTargetInput" class="search-input" style="width:100%; font-size:11px;" placeholder="Path to lossless WAV or FLAC track...">
+            <button class="btn btn-secondary" onclick="loadActiveTrackForUpsampler()" style="font-size:11px; padding:6px 12px; white-space:nowrap;">Active Track</button>
+          </div>
+        </div>
+
+        <div style="display:grid; grid-template-columns:1fr 1fr; gap:12px;">
+          <div>
+            <label style="font-size:11px; font-weight:600; color:var(--text-muted); display:block; margin-bottom:6px;">Target Sample Rate:</label>
+            <select id="upsamplerSrSelect" class="search-input" style="width:100%; font-size:11px;">
+              <option value="88200">88.2 kHz (2x / Studio Master)</option>
+              <option value="96000">96.0 kHz (Hi-Res Audio Standard)</option>
+              <option value="176400">176.4 kHz (4x / SACD Equivalent)</option>
+              <option value="192000" selected>192.0 kHz (Ultra Hi-Res Audiophile)</option>
+              <option value="384000">384.0 kHz (DXD / Master Reference)</option>
+            </select>
+          </div>
+
+          <div>
+            <label style="font-size:11px; font-weight:600; color:var(--text-muted); display:block; margin-bottom:6px;">Filter Phase Type:</label>
+            <select id="upsamplerFilterSelect" class="search-input" style="width:100%; font-size:11px;">
+              <option value="linear" selected>Linear Phase (Zero phase distortion, symmetrical)</option>
+              <option value="minimum">Minimum Phase (Apodizing, zero pre-ringing)</option>
+            </select>
+          </div>
+        </div>
+
+        <div>
+          <label style="font-size:11px; font-weight:600; color:var(--text-muted); display:block; margin-bottom:6px;">Output File (Optional, auto-generated if blank):</label>
+          <input type="text" id="upsamplerOutputInput" class="search-input" style="width:100%; font-size:11px;" placeholder="Custom output path...">
+        </div>
+
+        <div style="display:flex; justify-content:space-between; align-items:center; margin-top:4px;">
+          <span id="upsamplerStatusText" style="font-size:11px; color:var(--text-dim);">Ready to upsample audio</span>
+          <button class="btn btn-primary" onclick="runUpsampleAction()" id="processUpsamplerBtn" style="font-size:12px; padding:7px 18px;">
+            🚀 Upsample Audio
+          </button>
+        </div>
+
+        <div id="upsamplerOutputCard" style="background:#0b0d14; border:1px solid var(--border); border-radius:8px; padding:12px; font-family:monospace; font-size:11px; line-height:1.45; color:var(--emerald); min-height:80px; white-space:pre-wrap; overflow-x:auto;">Select track and click Upsample Audio to run sinc interpolation studio.</div>
+      </div>
+
+      <div style="padding:10px 16px; background:#121520; border-top:1px solid var(--border); display:flex; justify-content:space-between; align-items:center;">
+        <span style="font-size:10px; color:var(--text-dim);">Exports calibrated 24-bit PCM WAV master with normalized headroom</span>
+        <button class="btn btn-secondary" onclick="closeUpsamplerModal()">Close</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Phase 22: Smart CUE Sheet Doctor, File Re-Aligner & Red Book Validator Modal -->
+  <div class="modal-backdrop" id="cueFixerModal" style="display:none;">
+    <div class="modal-card" style="width:720px; max-width:95vw; background:#161926; border:1px solid var(--border); border-radius:12px; box-shadow:0 12px 36px rgba(0,0,0,0.7); overflow:hidden;">
+      <div style="padding:16px 20px; background:#121520; border-bottom:1px solid var(--border); display:flex; justify-content:space-between; align-items:center;">
+        <div class="modal-title" style="font-size:14px; font-weight:700; display:flex; align-items:center; gap:8px;">
+          <span>📄</span>
+          <span>Smart CUE Sheet Doctor &amp; Red Book Validator</span>
+        </div>
+        <button onclick="closeCueFixerModal()" style="background:none; border:none; color:var(--text-muted); font-size:16px; cursor:pointer;">✕</button>
+      </div>
+
+      <div style="padding:20px; max-height:75vh; overflow-y:auto; display:flex; flex-direction:column; gap:16px;">
+        <div style="font-size:11px; color:var(--text-dim); line-height:1.5;">
+          Audits broken or unplayable CUE sheets: heals missing or mismatched FILE references (e.g. .wav referenced when .flac is on disk), fixes illegal sector frames (&ge; 75), converts legacy encodings (Shift-JIS, CP1252, GBK) to UTF-8, and verifies Red Book index chronology.
+        </div>
+
+        <div>
+          <label style="font-size:11px; font-weight:600; color:var(--text-muted); display:block; margin-bottom:6px;">Target CUE Sheet (.cue):</label>
+          <input type="text" id="cueFixerTargetInput" class="search-input" style="width:100%; font-size:11px;" placeholder="Path to damaged or unplayable .cue file...">
+        </div>
+
+        <div>
+          <label style="font-size:11px; font-weight:600; color:var(--text-muted); display:block; margin-bottom:6px;">Target Audio File (Optional override/match):</label>
+          <input type="text" id="cueFixerAudioInput" class="search-input" style="width:100%; font-size:11px;" placeholder="Path to companion .flac, .wav, or .ape on disk...">
+        </div>
+
+        <div>
+          <label style="font-size:11px; font-weight:600; color:var(--text-muted); display:block; margin-bottom:6px;">Output Repaired CUE (Optional):</label>
+          <input type="text" id="cueFixerOutputInput" class="search-input" style="width:100%; font-size:11px;" placeholder="Custom output repaired .cue path...">
+        </div>
+
+        <div style="display:flex; justify-content:space-between; align-items:center; margin-top:4px;">
+          <span id="cueFixerStatusText" style="font-size:11px; color:var(--text-dim);">Ready to audit CUE sheet</span>
+          <button class="btn btn-primary" onclick="runCueFixerAction()" id="processCueFixerBtn" style="font-size:12px; padding:7px 18px;">
+            📄 Audit &amp; Fix CUE Sheet
+          </button>
+        </div>
+
+        <div id="cueFixerOutputCard" style="background:#0b0d14; border:1px solid var(--border); border-radius:8px; padding:12px; font-family:monospace; font-size:11px; line-height:1.45; color:var(--cyan); min-height:80px; white-space:pre-wrap; overflow-x:auto;">Select CUE file and click Audit &amp; Fix CUE Sheet.</div>
+      </div>
+
+      <div style="padding:10px 16px; background:#121520; border-top:1px solid var(--border); display:flex; justify-content:space-between; align-items:center;">
+        <span style="font-size:10px; color:var(--text-dim);">Guarantees Red Book sector standard &amp; UTF-8 compliance</span>
+        <button class="btn btn-secondary" onclick="closeCueFixerModal()">Close</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Phase 22: Room Acoustic Impulse Response (IR) Generator & Reverb Synthesizer Modal -->
+  <div class="modal-backdrop" id="roomIrModal" style="display:none;">
+    <div class="modal-card" style="width:720px; max-width:95vw; background:#161926; border:1px solid var(--border); border-radius:12px; box-shadow:0 12px 36px rgba(0,0,0,0.7); overflow:hidden;">
+      <div style="padding:16px 20px; background:#121520; border-bottom:1px solid var(--border); display:flex; justify-content:space-between; align-items:center;">
+        <div class="modal-title" style="font-size:14px; font-weight:700; display:flex; align-items:center; gap:8px;">
+          <span>🏛️</span>
+          <span>Room Acoustic IR Generator &amp; Reverb Synthesizer</span>
+        </div>
+        <button onclick="closeRoomIrModal()" style="background:none; border:none; color:var(--text-muted); font-size:16px; cursor:pointer;">✕</button>
+      </div>
+
+      <div style="padding:20px; max-height:75vh; overflow-y:auto; display:flex; flex-direction:column; gap:16px;">
+        <div style="font-size:11px; color:var(--text-dim); line-height:1.5;">
+          Synthesizes studio-grade room acoustic impulse response (WAV) files using 3D image-source reflection physics, diffuse stochastic decay tails, and atmospheric absorption. Fully compatible with Sonance's convolution engine and third-party IR loaders.
+        </div>
+
+        <div style="display:grid; grid-template-columns:1fr 1fr; gap:12px;">
+          <div>
+            <label style="font-size:11px; font-weight:600; color:var(--text-muted); display:block; margin-bottom:6px;">Acoustic Space Preset:</label>
+            <select id="roomIrPresetSelect" class="search-input" style="width:100%; font-size:11px;">
+              <option value="studio">Recording Studio Control Room (0.32s RT60)</option>
+              <option value="room" selected>Living Room / Chamber (0.65s RT60)</option>
+              <option value="concert_hall">Symphonic Concert Hall (1.95s RT60)</option>
+              <option value="cathedral">Stone Gothic Cathedral (3.80s RT60)</option>
+              <option value="plate">EMT Vintage Steel Plate Reverb (2.20s RT60)</option>
+            </select>
+          </div>
+
+          <div>
+            <label style="font-size:11px; font-weight:600; color:var(--text-muted); display:block; margin-bottom:6px;">Custom RT60 (sec, optional override):</label>
+            <input type="number" id="roomIrRt60Input" class="search-input" style="width:100%; font-size:11px;" placeholder="Leave empty for preset default" step="0.05" min="0.1" max="10.0">
+          </div>
+        </div>
+
+        <div style="display:grid; grid-template-columns:1fr 1fr; gap:12px;">
+          <div>
+            <label style="font-size:11px; font-weight:600; color:var(--text-muted); display:block; margin-bottom:6px;">Sample Rate:</label>
+            <select id="roomIrSrSelect" class="search-input" style="width:100%; font-size:11px;">
+              <option value="48000" selected>48000 Hz (Standard DAW / Video)</option>
+              <option value="44100">44100 Hz (CD Audio Standard)</option>
+              <option value="96000">96000 Hz (Hi-Res Audio)</option>
+            </select>
+          </div>
+
+          <div>
+            <label style="font-size:11px; font-weight:600; color:var(--text-muted); display:block; margin-bottom:6px;">Bit Depth:</label>
+            <select id="roomIrBitDepthSelect" class="search-input" style="width:100%; font-size:11px;">
+              <option value="24" selected>24-bit PCM WAV (Studio Master)</option>
+              <option value="16">16-bit PCM WAV (Standard)</option>
+            </select>
+          </div>
+        </div>
+
+        <div>
+          <label style="font-size:11px; font-weight:600; color:var(--text-muted); display:block; margin-bottom:6px;">Output WAV File (Optional, auto-saved in reverb_presets/):</label>
+          <input type="text" id="roomIrOutputInput" class="search-input" style="width:100%; font-size:11px;" placeholder="Custom target .wav path...">
+        </div>
+
+        <div style="display:flex; justify-content:space-between; align-items:center; margin-top:4px;">
+          <span id="roomIrStatusText" style="font-size:11px; color:var(--text-dim);">Ready to synthesize impulse response</span>
+          <button class="btn btn-primary" onclick="runRoomIrAction()" id="processRoomIrBtn" style="font-size:12px; padding:7px 18px;">
+            🏛️ Synthesize Room IR
+          </button>
+        </div>
+
+        <div id="roomIrOutputCard" style="background:#0b0d14; border:1px solid var(--border); border-radius:8px; padding:12px; font-family:monospace; font-size:11px; line-height:1.45; color:var(--emerald); min-height:80px; white-space:pre-wrap; overflow-x:auto;">Select acoustic space preset and click Synthesize Room IR.</div>
+      </div>
+
+      <div style="padding:10px 16px; background:#121520; border-top:1px solid var(--border); display:flex; justify-content:space-between; align-items:center;">
+        <span style="font-size:10px; color:var(--text-dim);">Binaural ITD/ILD spatialized stereo impulse response</span>
+        <button class="btn btn-secondary" onclick="closeRoomIrModal()">Close</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Phase 22: Word-by-Word LRC to Karaoke Subtitle Styler & ASS Converter Modal -->
+  <div class="modal-backdrop" id="assSubtitlesModal" style="display:none;">
+    <div class="modal-card" style="width:720px; max-width:95vw; background:#161926; border:1px solid var(--border); border-radius:12px; box-shadow:0 12px 36px rgba(0,0,0,0.7); overflow:hidden;">
+      <div style="padding:16px 20px; background:#121520; border-bottom:1px solid var(--border); display:flex; justify-content:space-between; align-items:center;">
+        <div class="modal-title" style="font-size:14px; font-weight:700; display:flex; align-items:center; gap:8px;">
+          <span>🎨</span>
+          <span>Word-by-Word LRC to Karaoke Subtitle Styler &amp; ASS Converter</span>
+        </div>
+        <button onclick="closeAssSubtitlesModal()" style="background:none; border:none; color:var(--text-muted); font-size:16px; cursor:pointer;">✕</button>
+      </div>
+
+      <div style="padding:20px; max-height:75vh; overflow-y:auto; display:flex; flex-direction:column; gap:16px;">
+        <div style="font-size:11px; color:var(--text-dim); line-height:1.5;">
+          Converts plain and syllable-timed synchronized LRC/ELRC lyrics into broadcast-grade Advanced SubStation Alpha (.ass) subtitles with progressive syllable karaoke sweeps, glowing outlines, and custom typography.
+        </div>
+
+        <div>
+          <label style="font-size:11px; font-weight:600; color:var(--text-muted); display:block; margin-bottom:6px;">Target LRC Lyrics File (.lrc or .elrc):</label>
+          <div style="display:flex; gap:8px;">
+            <input type="text" id="assSubtitlesLrcInput" class="search-input" style="width:100%; font-size:11px;" placeholder="Path to companion .lrc file...">
+            <button class="btn btn-secondary" onclick="loadActiveTrackLrcForAss()" style="font-size:11px; padding:6px 12px; white-space:nowrap;">Active Track LRC</button>
+          </div>
+        </div>
+
+        <div style="display:grid; grid-template-columns:1fr 1fr 1fr; gap:12px;">
+          <div>
+            <label style="font-size:11px; font-weight:600; color:var(--text-muted); display:block; margin-bottom:6px;">Visual Style Preset:</label>
+            <select id="assSubtitlesStyleSelect" class="search-input" style="width:100%; font-size:11px;">
+              <option value="karaoke" selected>Karaoke Glow Wipe</option>
+              <option value="minimal">Minimal Modern</option>
+              <option value="cinematic">Cinematic Letterbox</option>
+            </select>
+          </div>
+
+          <div>
+            <label style="font-size:11px; font-weight:600; color:var(--text-muted); display:block; margin-bottom:6px;">Highlight Color:</label>
+            <div style="display:flex; gap:6px; align-items:center;">
+              <input type="color" id="assSubtitlesColorPicker" value="#ffd700" style="width:36px; height:28px; border:none; background:transparent; cursor:pointer;" onchange="document.getElementById('assSubtitlesColorInput').value=this.value;">
+              <input type="text" id="assSubtitlesColorInput" class="search-input" style="width:100%; font-size:11px;" value="#FFD700">
+            </div>
+          </div>
+
+          <div>
+            <label style="font-size:11px; font-weight:600; color:var(--text-muted); display:block; margin-bottom:6px;">Font Family:</label>
+            <input type="text" id="assSubtitlesFontInput" class="search-input" style="width:100%; font-size:11px;" value="Trebuchet MS">
+          </div>
+        </div>
+
+        <div style="display:flex; align-items:center; gap:8px;">
+          <input type="checkbox" id="assSubtitlesSrtCheck" style="accent-color:var(--primary); cursor:pointer;">
+          <label for="assSubtitlesSrtCheck" style="font-size:11px; color:var(--text-dim); cursor:pointer;">Also generate standard clean .srt subtitle file</label>
+        </div>
+
+        <div>
+          <label style="font-size:11px; font-weight:600; color:var(--text-muted); display:block; margin-bottom:6px;">Output .ASS File (Optional, auto-named if blank):</label>
+          <input type="text" id="assSubtitlesOutputInput" class="search-input" style="width:100%; font-size:11px;" placeholder="Custom output .ass path...">
+        </div>
+
+        <div style="display:flex; justify-content:space-between; align-items:center; margin-top:4px;">
+          <span id="assSubtitlesStatusText" style="font-size:11px; color:var(--text-dim);">Ready to convert lyrics to subtitles</span>
+          <button class="btn btn-primary" onclick="runAssConvertAction()" id="processAssSubtitlesBtn" style="font-size:12px; padding:7px 18px;">
+            🎨 Convert to ASS Subtitles
+          </button>
+        </div>
+
+        <div id="assSubtitlesOutputCard" style="background:#0b0d14; border:1px solid var(--border); border-radius:8px; padding:12px; font-family:monospace; font-size:11px; line-height:1.45; color:var(--cyan); min-height:80px; white-space:pre-wrap; overflow-x:auto;">Select LRC lyrics file and click Convert to ASS Subtitles.</div>
+      </div>
+
+      <div style="padding:10px 16px; background:#121520; border-top:1px solid var(--border); display:flex; justify-content:space-between; align-items:center;">
+        <span style="font-size:10px; color:var(--text-dim);">Includes syllable sweep tags for VLC, MPV, Aegisub, and HandBrake</span>
+        <button class="btn btn-secondary" onclick="closeAssSubtitlesModal()">Close</button>
+      </div>
+    </div>
+  </div>
+
   <!-- Podcast & Long Mix Bookmark Resumption Toast (Phase 10) -->
   <div id="podcastResumeToast" style="display:none; position:fixed; bottom:85px; right:20px; z-index:9999; background:#131722; border:1px solid var(--border); box-shadow:0 8px 24px rgba(0,0,0,0.6); border-radius:10px; padding:10px 14px; align-items:center; gap:10px; backdrop-filter:blur(10px);">
     <span style="font-size:16px;">⏱️</span>
@@ -8408,6 +8685,10 @@
         closeDeclipperModal();
         closeTrackSplitterModal();
         closeLyricsVideoModal();
+        closeUpsamplerModal();
+        closeCueFixerModal();
+        closeRoomIrModal();
+        closeAssSubtitlesModal();
         dismissPodcastResumeToast();
         const popup = document.getElementById('speedStudioPopup');
         if (popup) popup.style.display = 'none';
@@ -14039,6 +14320,315 @@
           if (btn) {
             btn.disabled = false;
             btn.innerText = '🎬 Generate Video Presentation';
+          }
+          if (out) out.innerText = '✕ Error: ' + (err.message || err);
+        });
+      }
+    // ------------------ Phase 22: Sinc Audio Upsampler & Apodizing Studio ------------------
+    function openUpsamplerModal() {
+      const modal = document.getElementById('upsamplerModal');
+      if (modal) modal.style.display = 'flex';
+      const input = document.getElementById('upsamplerTargetInput');
+      if (input && !input.value && currentTrack && currentTrack.file_path) {
+        input.value = currentTrack.file_path;
+      }
+    }
+
+    function closeUpsamplerModal() {
+      const modal = document.getElementById('upsamplerModal');
+      if (modal) modal.style.display = 'none';
+    }
+
+    function loadActiveTrackForUpsampler() {
+      const input = document.getElementById('upsamplerTargetInput');
+      if (currentTrack && currentTrack.file_path) {
+        if (input) input.value = currentTrack.file_path;
+        showToast('Loaded currently playing track for upsampling.');
+      } else {
+        showToast('No active audio track playing.', true);
+      }
+    }
+
+    function runUpsampleAction() {
+      const inp = document.getElementById('upsamplerTargetInput')?.value?.trim();
+      const sr = parseInt(document.getElementById('upsamplerSrSelect')?.value || '192000', 10);
+      const filt = document.getElementById('upsamplerFilterSelect')?.value || 'linear';
+      const outPath = document.getElementById('upsamplerOutputInput')?.value?.trim() || null;
+      const btn = document.getElementById('processUpsamplerBtn');
+      const st = document.getElementById('upsamplerStatusText');
+      const out = document.getElementById('upsamplerOutputCard');
+
+      if (!inp) {
+        showToast('Please enter an audio file to upsample.', true);
+        return;
+      }
+
+      if (btn) {
+        btn.disabled = true;
+        btn.innerText = '⏳ Sinc Interpolating...';
+      }
+      if (st) {
+        st.innerText = `Calculating Whittaker-Shannon polyphase filter (${filt} phase -> ${sr} Hz)...`;
+        st.style.color = 'var(--cyan)';
+      }
+
+      if (window.pywebview && window.pywebview.api && window.pywebview.api.upsample_audio_track) {
+        window.pywebview.api.upsample_audio_track(inp, sr, outPath, filt).then(res => {
+          if (btn) {
+            btn.disabled = false;
+            btn.innerText = '🚀 Upsample Audio';
+          }
+          if (res && res.success) {
+            if (st) {
+              st.innerText = '✓ Audio upsampling complete!';
+              st.style.color = 'var(--emerald)';
+            }
+            let card = `WHITTAKER-SHANNON POLYPHASE SINC UPSAMPLER COMPLETE\n`;
+            card += `Original Format : ${res.orig_sr} Hz | ${res.channels} Ch | ${res.orig_samples} samples\n`;
+            card += `Target Format   : ${res.target_sr} Hz | 24-bit PCM WAV (Factor: ${res.resample_ratio}x)\n`;
+            card += `Filter Type     : ${res.filter_type.toUpperCase()} PHASE (Taps: ${res.taps_per_phase * 2} | Window: Kaiser -120dB)\n`;
+            card += `Attenuation     : Headroom Peak: ${res.peak_dbfs} dBFS\n`;
+            card += `Output Master   : ${res.output_path}\n`;
+            if (out) out.innerText = card;
+          } else {
+            if (st) {
+              st.innerText = '✕ Upsampling failed: ' + (res ? res.error : 'Unknown');
+              st.style.color = 'var(--rose)';
+            }
+          }
+        }).catch(err => {
+          if (btn) {
+            btn.disabled = false;
+            btn.innerText = '🚀 Upsample Audio';
+          }
+          if (out) out.innerText = '✕ Error: ' + (err.message || err);
+        });
+      }
+    }
+
+    // ------------------ Phase 22: Smart CUE Sheet Doctor & Validator ------------------
+    function openCueFixerModal() {
+      const modal = document.getElementById('cueFixerModal');
+      if (modal) modal.style.display = 'flex';
+    }
+
+    function closeCueFixerModal() {
+      const modal = document.getElementById('cueFixerModal');
+      if (modal) modal.style.display = 'none';
+    }
+
+    function runCueFixerAction() {
+      const cueIn = document.getElementById('cueFixerTargetInput')?.value?.trim();
+      const audIn = document.getElementById('cueFixerAudioInput')?.value?.trim() || null;
+      const outCue = document.getElementById('cueFixerOutputInput')?.value?.trim() || null;
+      const btn = document.getElementById('processCueFixerBtn');
+      const st = document.getElementById('cueFixerStatusText');
+      const out = document.getElementById('cueFixerOutputCard');
+
+      if (!cueIn) {
+        showToast('Please specify a CUE sheet to audit.', true);
+        return;
+      }
+
+      if (btn) {
+        btn.disabled = true;
+        btn.innerText = '⏳ Auditing CUE...';
+      }
+      if (st) {
+        st.innerText = 'Scanning sector frames, file links, and encoding...';
+        st.style.color = 'var(--cyan)';
+      }
+
+      if (window.pywebview && window.pywebview.api && window.pywebview.api.audit_and_fix_cue_sheet) {
+        window.pywebview.api.audit_and_fix_cue_sheet(cueIn, audIn, outCue).then(res => {
+          if (btn) {
+            btn.disabled = false;
+            btn.innerText = '📄 Audit & Fix CUE Sheet';
+          }
+          if (res && res.success) {
+            if (st) {
+              st.innerText = '✓ CUE sheet audit and repair complete!';
+              st.style.color = 'var(--emerald)';
+            }
+            let card = `CUE SHEET DOCTOR AUDIT & REPAIR COMPLETE\n`;
+            card += `File Path    : ${res.file_path}\n`;
+            card += `Encoding     : ${res.detected_encoding} -> UTF-8 (Cleaned)\n`;
+            card += `Red Book OK  : ${res.red_book_compliant ? 'YES (Valid)' : 'Repaired'}\n`;
+            card += `Total Tracks : ${res.total_tracks}\n`;
+            card += `FILE Links   : ${res.files_found ? res.files_found.join(', ') : 'Direct'}\n`;
+            if (res.issues_fixed && res.issues_fixed.length > 0) {
+              card += `Issues Fixed :\n`;
+              res.issues_fixed.forEach(iss => card += `  • ${iss}\n`);
+            } else {
+              card += `Issues Fixed : Zero errors detected; perfect Red Book structure.\n`;
+            }
+            card += `Repaired CUE : ${res.repaired_cue_path}\n`;
+            if (out) out.innerText = card;
+          } else {
+            if (st) {
+              st.innerText = '✕ Audit failed: ' + (res ? res.error : 'Unknown');
+              st.style.color = 'var(--rose)';
+            }
+          }
+        }).catch(err => {
+          if (btn) {
+            btn.disabled = false;
+            btn.innerText = '📄 Audit & Fix CUE Sheet';
+          }
+          if (out) out.innerText = '✕ Error: ' + (err.message || err);
+        });
+      }
+    }
+
+    // ------------------ Phase 22: Room Acoustic IR Synthesizer ------------------------
+    function openRoomIrModal() {
+      const modal = document.getElementById('roomIrModal');
+      if (modal) modal.style.display = 'flex';
+    }
+
+    function closeRoomIrModal() {
+      const modal = document.getElementById('roomIrModal');
+      if (modal) modal.style.display = 'none';
+    }
+
+    function runRoomIrAction() {
+      const preset = document.getElementById('roomIrPresetSelect')?.value || 'room';
+      const rt60Raw = document.getElementById('roomIrRt60Input')?.value?.trim();
+      const rt60 = rt60Raw ? parseFloat(rt60Raw) : null;
+      const sr = parseInt(document.getElementById('roomIrSrSelect')?.value || '48000', 10);
+      const outPath = document.getElementById('roomIrOutputInput')?.value?.trim() || null;
+      const btn = document.getElementById('processRoomIrBtn');
+      const st = document.getElementById('roomIrStatusText');
+      const out = document.getElementById('roomIrOutputCard');
+
+      if (btn) {
+        btn.disabled = true;
+        btn.innerText = '⏳ Synthesizing IR...';
+      }
+      if (st) {
+        st.innerText = 'Tracing 3D specular ray paths and generating diffuse tail...';
+        st.style.color = 'var(--cyan)';
+      }
+
+      if (window.pywebview && window.pywebview.api && window.pywebview.api.generate_room_impulse_response) {
+        window.pywebview.api.generate_room_impulse_response(preset, rt60, sr, outPath).then(res => {
+          if (btn) {
+            btn.disabled = false;
+            btn.innerText = '🏛️ Synthesize Room IR';
+          }
+          if (res && res.success) {
+            if (st) {
+              st.innerText = '✓ Acoustic impulse response synthesized!';
+              st.style.color = 'var(--emerald)';
+            }
+            let card = `ROOM ACOUSTIC IMPULSE RESPONSE SYNTHESIS COMPLETE\n`;
+            card += `Space Preset : ${res.preset_name}\n`;
+            card += `Dimensions   : ${res.dimensions[0]}m x ${res.dimensions[1]}m x ${res.dimensions[2]}m (${res.volume_m3} m³)\n`;
+            card += `Reverb Time  : RT60 = ${res.rt60_sec} s (Decay to -60 dBFS)\n`;
+            card += `Format       : ${res.sample_rate} Hz | ${res.bit_depth}-bit Stereo WAV (${res.duration_sec}s)\n`;
+            card += `Early Paths  : ${res.early_reflections_count} discrete specular reflections\n`;
+            card += `DRR Ratio    : ${res.drr_db} dB (Peak: ${res.peak_dbfs} dBFS)\n`;
+            card += `Output File  : ${res.output_path}\n`;
+            if (out) out.innerText = card;
+          } else {
+            if (st) {
+              st.innerText = '✕ IR synthesis failed: ' + (res ? res.error : 'Unknown');
+              st.style.color = 'var(--rose)';
+            }
+          }
+        }).catch(err => {
+          if (btn) {
+            btn.disabled = false;
+            btn.innerText = '🏛️ Synthesize Room IR';
+          }
+          if (out) out.innerText = '✕ Error: ' + (err.message || err);
+        });
+      }
+    }
+
+    // ------------------ Phase 22: Word-by-Word LRC to ASS Subtitle Converter ----------
+    function openAssSubtitlesModal() {
+      const modal = document.getElementById('assSubtitlesModal');
+      if (modal) modal.style.display = 'flex';
+      const input = document.getElementById('assSubtitlesLrcInput');
+      if (input && !input.value && currentTrack && currentTrack.file_path) {
+        const lrcCand = currentTrack.file_path.replace(/\.[^/.]+$/, '.lrc');
+        input.value = lrcCand;
+      }
+    }
+
+    function closeAssSubtitlesModal() {
+      const modal = document.getElementById('assSubtitlesModal');
+      if (modal) modal.style.display = 'none';
+    }
+
+    function loadActiveTrackLrcForAss() {
+      const input = document.getElementById('assSubtitlesLrcInput');
+      if (currentTrack && currentTrack.file_path) {
+        const lrcCand = currentTrack.file_path.replace(/\.[^/.]+$/, '.lrc');
+        if (input) input.value = lrcCand;
+        showToast('Loaded companion LRC for playing track.');
+      } else {
+        showToast('No active track playing.', true);
+      }
+    }
+
+    function runAssConvertAction() {
+      const lrcIn = document.getElementById('assSubtitlesLrcInput')?.value?.trim();
+      const style = document.getElementById('assSubtitlesStyleSelect')?.value || 'karaoke';
+      const color = document.getElementById('assSubtitlesColorInput')?.value?.trim() || '#FFD700';
+      const exportSrt = !!document.getElementById('assSubtitlesSrtCheck')?.checked;
+      const outPath = document.getElementById('assSubtitlesOutputInput')?.value?.trim() || null;
+      const btn = document.getElementById('processAssSubtitlesBtn');
+      const st = document.getElementById('assSubtitlesStatusText');
+      const out = document.getElementById('assSubtitlesOutputCard');
+
+      if (!lrcIn) {
+        showToast('Please specify an LRC lyrics file.', true);
+        return;
+      }
+
+      if (btn) {
+        btn.disabled = true;
+        btn.innerText = '⏳ Converting Subtitles...';
+      }
+      if (st) {
+        st.innerText = 'Synthesizing syllable wipes and building ASS script...';
+        st.style.color = 'var(--cyan)';
+      }
+
+      if (window.pywebview && window.pywebview.api && window.pywebview.api.convert_lrc_to_ass_subtitles) {
+        window.pywebview.api.convert_lrc_to_ass_subtitles(lrcIn, outPath, style, color, exportSrt).then(res => {
+          if (btn) {
+            btn.disabled = false;
+            btn.innerText = '🎨 Convert to ASS Subtitles';
+          }
+          if (res && res.success) {
+            if (st) {
+              st.innerText = '✓ Subtitles converted successfully!';
+              st.style.color = 'var(--emerald)';
+            }
+            let card = `LRC TO KARAOKE ASS SUBTITLES COMPLETE\n`;
+            card += `Track Title  : ${res.title} - ${res.artist}\n`;
+            card += `Style Preset : ${res.style_preset.toUpperCase()} | Font: ${res.font_name}\n`;
+            card += `Wipe Color   : ${res.primary_color}\n`;
+            card += `Total Lines  : ${res.total_lines} lines (${res.duration_sec}s duration)\n`;
+            card += `Syllable Sync: ${res.enhanced_lines > 0 ? res.enhanced_lines + ' word-timed lines' : 'Synthesized Syllables'}\n`;
+            card += `Output .ASS  : ${res.output_ass_path}\n`;
+            if (res.output_srt_path) {
+              card += `Output .SRT  : ${res.output_srt_path}\n`;
+            }
+            if (out) out.innerText = card;
+          } else {
+            if (st) {
+              st.innerText = '✕ Conversion failed: ' + (res ? res.error : 'Unknown');
+              st.style.color = 'var(--rose)';
+            }
+          }
+        }).catch(err => {
+          if (btn) {
+            btn.disabled = false;
+            btn.innerText = '🎨 Convert to ASS Subtitles';
           }
           if (out) out.innerText = '✕ Error: ' + (err.message || err);
         });
