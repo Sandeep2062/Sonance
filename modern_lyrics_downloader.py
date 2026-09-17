@@ -37,6 +37,8 @@ import cookie_manager
 import playlist_manager
 import discord_rpc
 import scrobbler
+import tag_editor
+import cache_manager
 
 APP_VERSION = "2.1.0"
 GITHUB_REPO = "Sandeep2062/Sonance"
@@ -99,6 +101,16 @@ class AudioStreamHandler(BaseHTTPRequestHandler):
                 from tinytag import TinyTag
                 tag = TinyTag.get(file_path, image=True)
                 image_data = tag.get_image()
+            except Exception:
+                pass
+
+        if not image_data and tag_editor:
+            try:
+                t = tag_editor.read_tags(file_path)
+                uri = t.get("cover_data_uri", "")
+                if uri and uri.startswith("data:"):
+                    header, b64_str = uri.split(",", 1)
+                    image_data = base64.b64decode(b64_str)
             except Exception:
                 pass
 
@@ -546,6 +558,33 @@ class LyricsAPI:
     def get_similar_tracks(self, artist: str, track: str) -> List[Dict[str, Any]]:
         """Retrieves similar recommended tracks."""
         return scrobbler.lastfm_client.get_similar_tracks(artist, track)
+
+    # ------------------ Tag Editor & Cover Art (Mp3tag Grade) ------------------
+    def read_track_tags(self, file_path: str) -> Dict[str, Any]:
+        """Reads ID3/Vorbis/MP4 tags and cover art data URI."""
+        return tag_editor.read_tags(file_path)
+
+    def save_track_tags(self, file_path: str, tags: Dict[str, Any]) -> Dict[str, Any]:
+        """Saves metadata tags and embeds cover art."""
+        return tag_editor.write_tags(file_path, tags)
+
+    def auto_fetch_track_tags(self, title: str, artist: str) -> Dict[str, Any]:
+        """Queries MusicBrainz and web databases to auto-fill tags and cover art."""
+        return tag_editor.auto_fetch_metadata(title, artist)
+
+    # ------------------ Live Lyrics Timing Offset ------------------
+    def shift_lrc_offset(self, file_path: str, offset_ms: int) -> Dict[str, Any]:
+        """Permanently shifts all timestamps in the .lrc file by offset_ms."""
+        return lyrics_engine.shift_lrc_file_offset(file_path, offset_ms)
+
+    # ------------------ Stream Cache & Offline Mode ------------------
+    def get_cache_stats(self) -> Dict[str, Any]:
+        """Returns total cached stream files and size in MB."""
+        return cache_manager.get_cache_stats()
+
+    def clear_stream_cache(self) -> bool:
+        """Clears local stream cache."""
+        return cache_manager.clear_cache()
 
     def _save_last_folder(self, folder: str):
         try:

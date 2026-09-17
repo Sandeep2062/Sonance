@@ -1081,8 +1081,11 @@
       </button>
     </div>
 
-    <!-- Quick Equalizer, Spek & Update -->
+    <!-- Quick Sleep, Equalizer, Spek & Update -->
     <div style="display:flex; align-items:center; gap:8px;">
+      <button class="btn btn-secondary" onclick="openSleepTimerModal()" style="padding:5px 9px; font-size:11px;" id="sleepTimerHeaderBtn" title="Set Sleep Timer">
+        🌙 Sleep
+      </button>
       <button class="btn btn-secondary" onclick="openEqualizerModal()" style="padding:5px 9px; font-size:11px;">
         🎚️ Equalizer
       </button>
@@ -1225,6 +1228,22 @@
         <button class="btn btn-secondary" style="padding:4px 8px; font-size:10px;" onclick="openCustomSearchForSelected()">
           Edit
         </button>
+      </div>
+
+      <!-- Live Lyrics Offset Fine-Tuner Bar -->
+      <div style="padding:5px 12px; background:#121520; border-bottom:1px solid var(--border); display:flex; align-items:center; justify-content:space-between; font-size:10px;">
+        <div style="display:flex; align-items:center; gap:5px;">
+          <span style="color:var(--text-dim); font-weight:600;">Offset:</span>
+          <span id="liveOffsetDisplay" style="font-family:monospace; font-weight:700; color:var(--emerald); min-width:38px;">0.0s</span>
+        </div>
+        <div style="display:flex; align-items:center; gap:3px;">
+          <button class="btn btn-secondary" style="padding:2px 5px; font-size:10px;" onclick="adjustLiveOffset(-0.5)" title="Shift lyrics 0.5s earlier">-0.5s</button>
+          <button class="btn btn-secondary" style="padding:2px 5px; font-size:10px;" onclick="adjustLiveOffset(-0.1)" title="Shift lyrics 0.1s earlier">-0.1s</button>
+          <button class="btn btn-secondary" style="padding:2px 5px; font-size:10px;" onclick="adjustLiveOffset(0.1)" title="Shift lyrics 0.1s later">+0.1s</button>
+          <button class="btn btn-secondary" style="padding:2px 5px; font-size:10px;" onclick="adjustLiveOffset(0.5)" title="Shift lyrics 0.5s later">+0.5s</button>
+          <button class="btn btn-secondary" style="padding:2px 5px; font-size:10px;" onclick="resetLiveOffset()" title="Reset timing offset">0s</button>
+          <button class="btn btn-primary" style="padding:2px 7px; font-size:10px; margin-left:3px;" onclick="saveLrcOffsetToDisk()" title="Permanently write offset to .lrc file on disk">💾 Save</button>
+        </div>
       </div>
 
       <div class="preview-lyrics" id="lyricsViewer">
@@ -1561,6 +1580,49 @@
           </div>
         </div>
 
+        <!-- DJ Crossfade & Gapless Engine -->
+        <div class="settings-card">
+          <div class="settings-card-header">
+            <div>
+              <div class="settings-card-title">
+                <span>🎚️</span>
+                <span>DJ Crossfade & Gapless Playback</span>
+              </div>
+              <div class="settings-card-sub">Crossfade between consecutive tracks and eliminate silence gaps like MusicBee and pro DJ players.</div>
+            </div>
+          </div>
+          <div style="display:flex; flex-direction:column; gap:12px; margin-top:10px;">
+            <div style="display:flex; align-items:center; justify-content:space-between;">
+              <label class="form-label" style="margin-bottom:0;">Crossfade Duration: <strong id="crossfadeDurationLabel" style="color:var(--emerald);">0s (Instant)</strong></label>
+              <input type="range" id="crossfadeSlider" min="0" max="12" step="1" value="0" style="width:180px;" oninput="updateCrossfadeSetting(this.value)">
+            </div>
+            <div style="display:flex; align-items:center; gap:8px;">
+              <input type="checkbox" id="gaplessToggle" checked onchange="updateGaplessSetting(this.checked)" style="accent-color:var(--emerald); cursor:pointer;">
+              <label for="gaplessToggle" class="form-label" style="margin-bottom:0; cursor:pointer;">Enable Intelligent Gapless Transition</label>
+            </div>
+          </div>
+        </div>
+
+        <!-- Smart Stream & Offline Cache -->
+        <div class="settings-card">
+          <div class="settings-card-header">
+            <div>
+              <div class="settings-card-title">
+                <span>⚡</span>
+                <span>Smart Stream & Offline Cache</span>
+              </div>
+              <div class="settings-card-sub">Pre-caches streamed tracks and album art locally to save bandwidth and enable offline play.</div>
+            </div>
+          </div>
+          <div style="display:flex; justify-content:space-between; align-items:center; margin-top:10px;">
+            <div>
+              <div style="font-size:12px; color:var(--text-main);">Current Cache: <strong id="cacheSizeText" style="color:var(--emerald);">0.0 MB</strong></div>
+              <div style="font-size:11px; color:var(--text-dim);" id="cacheFilesText">0 cached files</div>
+            </div>
+            <button class="btn btn-secondary" style="font-size:11px; padding:5px 12px;" onclick="clearStreamCache()">🗑️ Clear Cache</button>
+          </div>
+        </div>
+
         <!-- Download & General Storage -->
         <div class="settings-card">
           <div class="settings-card-header">
@@ -1614,9 +1676,11 @@
 
     <div class="player-center">
       <div class="player-controls">
+        <button class="control-btn" onclick="playPreviousTrack()" title="Previous Track (MusicBee)">⏮</button>
         <button class="control-btn" onclick="seekRelative(-10)" title="Rewind 10s">⏪</button>
         <button class="control-btn play-circle" id="playPauseBtn" onclick="togglePlayPause()">▶</button>
         <button class="control-btn" onclick="seekRelative(10)" title="Forward 10s">⏩</button>
+        <button class="control-btn" onclick="playNextTrack()" title="Next Track (MusicBee)">⏭</button>
       </div>
 
       <div class="scrubber-row">
@@ -1790,6 +1854,168 @@
     </div>
   </div>
 
+  <!-- Mp3tag Studio Visual Tag & Album Art Editor Modal -->
+  <div class="modal-backdrop" id="tagEditorModal" style="display:none;">
+    <div class="modal-box" style="width:740px; max-width:92vw;">
+      <div class="modal-header">
+        <div style="display:flex; align-items:center; gap:8px;">
+          <span style="font-size:15px;">🏷️</span>
+          <div>
+            <div style="font-weight:700; font-size:13px;">Mp3tag Studio — Audio Metadata & Cover Art Editor</div>
+            <div id="tagEditFilePath" style="font-size:10px; color:var(--text-dim); max-width:550px; overflow:hidden; text-overflow:ellipsis; white-space:nowrap;"></div>
+          </div>
+        </div>
+        <button onclick="closeTagEditorModal()" style="background:none; border:none; color:var(--text-muted); cursor:pointer; font-size:14px;">✕</button>
+      </div>
+
+      <div class="modal-body" style="display:flex; gap:20px; padding:16px;">
+        <!-- Left: Cover Art Management -->
+        <div style="width:210px; display:flex; flex-direction:column; align-items:center;">
+          <div style="width:190px; height:190px; border-radius:8px; border:1px solid var(--border); overflow:hidden; background:#0b0d13; display:flex; align-items:center; justify-content:center; position:relative;">
+            <img id="tagEditCoverPreview" src="" alt="Album Art" style="width:100%; height:100%; object-fit:cover; display:none;">
+            <div id="tagEditCoverPlaceholder" style="color:var(--text-dim); font-size:11px; text-align:center; padding:12px;">
+              <span style="font-size:28px; display:block; margin-bottom:4px;">🖼️</span>
+              No Album Artwork Embedded
+            </div>
+          </div>
+
+          <div id="tagEditCoverInfo" style="font-size:10px; color:var(--text-dim); margin-top:6px; text-align:center;">-</div>
+
+          <div style="display:flex; flex-direction:column; gap:6px; width:100%; margin-top:10px;">
+            <button class="btn btn-secondary" onclick="document.getElementById('tagCoverFileInput').click()" style="font-size:11px; padding:5px 8px; justify-content:center;">
+              🖼️ Change Cover Art
+            </button>
+            <button class="btn btn-secondary" onclick="removeTagCover()" style="font-size:11px; padding:5px 8px; justify-content:center; color:#f87171;">
+              🗑️ Remove Cover
+            </button>
+            <input type="file" id="tagCoverFileInput" accept="image/jpeg,image/png,image/webp" style="display:none;" onchange="handleCoverFileSelected(event)">
+          </div>
+        </div>
+
+        <!-- Right: Form Fields & Auto-Fill -->
+        <div style="flex:1; display:flex; flex-direction:column; gap:10px;">
+          <div style="display:flex; justify-content:space-between; align-items:center;">
+            <span style="font-size:11px; font-weight:600; color:var(--text-muted);">Standard Tags (ID3v2.4 / Vorbis / MP4)</span>
+            <button class="btn btn-secondary" onclick="autoFetchCurrentTags()" id="autoFetchTagsBtn" style="font-size:11px; padding:4px 10px; border-color:var(--emerald); color:var(--emerald);">
+              ✨ Auto-Fill from MusicBrainz
+            </button>
+          </div>
+
+          <div style="display:grid; grid-template-columns:1fr 1fr; gap:10px;">
+            <div class="form-group" style="grid-column: span 2;">
+              <label class="form-label" style="font-size:10px;">Track Title</label>
+              <input type="text" id="tagEditTitle" class="form-input" style="padding:6px 10px; font-size:12px;" placeholder="Track Title">
+            </div>
+
+            <div class="form-group">
+              <label class="form-label" style="font-size:10px;">Lead Artist</label>
+              <input type="text" id="tagEditArtist" class="form-input" style="padding:6px 10px; font-size:12px;" placeholder="Artist">
+            </div>
+
+            <div class="form-group">
+              <label class="form-label" style="font-size:10px;">Album Artist</label>
+              <input type="text" id="tagEditAlbumArtist" class="form-input" style="padding:6px 10px; font-size:12px;" placeholder="Album Artist">
+            </div>
+
+            <div class="form-group" style="grid-column: span 2;">
+              <label class="form-label" style="font-size:10px;">Album Title</label>
+              <input type="text" id="tagEditAlbum" class="form-input" style="padding:6px 10px; font-size:12px;" placeholder="Album Name">
+            </div>
+
+            <div class="form-group">
+              <label class="form-label" style="font-size:10px;">Release Year</label>
+              <input type="text" id="tagEditYear" class="form-input" style="padding:6px 10px; font-size:12px;" placeholder="e.g. 2024">
+            </div>
+
+            <div class="form-group">
+              <label class="form-label" style="font-size:10px;">Genre</label>
+              <input type="text" id="tagEditGenre" class="form-input" style="padding:6px 10px; font-size:12px;" placeholder="e.g. Pop, Rock, Synthwave">
+            </div>
+
+            <div class="form-group">
+              <label class="form-label" style="font-size:10px;">Track # (Number / Total)</label>
+              <div style="display:flex; gap:6px; align-items:center;">
+                <input type="text" id="tagEditTrackNo" class="form-input" style="padding:6px 10px; font-size:12px; width:50px;" placeholder="1">
+                <span style="color:var(--text-dim); font-size:11px;">/</span>
+                <input type="text" id="tagEditTotalTracks" class="form-input" style="padding:6px 10px; font-size:12px; width:50px;" placeholder="12">
+              </div>
+            </div>
+
+            <div class="form-group">
+              <label class="form-label" style="font-size:10px;">Disc #</label>
+              <input type="text" id="tagEditDiscNo" class="form-input" style="padding:6px 10px; font-size:12px; width:70px;" placeholder="1">
+            </div>
+
+            <div class="form-group" style="grid-column: span 2;">
+              <label class="form-label" style="font-size:10px;">Comment / Encoder Notes</label>
+              <input type="text" id="tagEditComment" class="form-input" style="padding:6px 10px; font-size:12px;" placeholder="Optional comments">
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div style="padding:10px 16px; background:#121520; border-top:1px solid var(--border); display:flex; justify-content:space-between; align-items:center; border-radius:0 0 12px 12px;">
+        <div id="tagEditStatus" style="font-size:11px; color:var(--text-dim);">Ready to save tags</div>
+        <div style="display:flex; gap:8px;">
+          <button class="btn btn-secondary" onclick="closeTagEditorModal()">Cancel</button>
+          <button class="btn btn-primary" id="saveTagsBtn" onclick="saveTagEditorChanges()">💾 Save Tags to File</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Sleep Timer Modal -->
+  <div class="modal-backdrop" id="sleepTimerModal" style="display:none;">
+    <div class="modal-box" style="width:400px;">
+      <div class="modal-header">
+        <div style="display:flex; align-items:center; gap:6px;">
+          <span>🌙</span>
+          <div style="font-weight:700; font-size:13px;">Sleep Timer</div>
+        </div>
+        <button onclick="closeSleepTimerModal()" style="background:none; border:none; color:var(--text-muted); cursor:pointer; font-size:14px;">✕</button>
+      </div>
+
+      <div class="modal-body" style="padding:16px;">
+        <!-- Active Status -->
+        <div id="sleepTimerActiveBox" style="display:none; padding:10px 14px; background:#182032; border:1px solid var(--emerald); border-radius:8px; margin-bottom:14px; align-items:center; justify-content:space-between;">
+          <div>
+            <div style="font-size:11px; color:var(--text-dim);">Active Timer:</div>
+            <div id="sleepTimerRemainingText" style="font-size:16px; font-weight:700; color:var(--emerald);">00:00</div>
+          </div>
+          <button class="btn btn-secondary" onclick="cancelSleepTimer()" style="font-size:10px; padding:4px 8px; color:#f87171;">Cancel Timer</button>
+        </div>
+
+        <div style="font-size:11px; color:var(--text-muted); margin-bottom:8px;">Choose Sleep Duration:</div>
+        <div style="display:grid; grid-template-columns:1fr 1fr; gap:8px; margin-bottom:12px;">
+          <button class="btn btn-secondary" onclick="setSleepTimerPreset(15)" style="justify-content:center;">⏱️ 15 Minutes</button>
+          <button class="btn btn-secondary" onclick="setSleepTimerPreset(30)" style="justify-content:center;">⏱️ 30 Minutes</button>
+          <button class="btn btn-secondary" onclick="setSleepTimerPreset(45)" style="justify-content:center;">⏱️ 45 Minutes</button>
+          <button class="btn btn-secondary" onclick="setSleepTimerPreset(60)" style="justify-content:center;">⏱️ 60 Minutes</button>
+        </div>
+
+        <button class="btn btn-secondary" onclick="setSleepTimerPreset('track_end')" style="width:100%; justify-content:center; margin-bottom:12px;">
+          🎵 Stop at End of Current Track
+        </button>
+
+        <div style="display:flex; align-items:center; gap:8px; margin-bottom:14px;">
+          <input type="number" id="sleepCustomMinutes" class="form-input" placeholder="Custom mins" min="1" max="360" style="width:110px; padding:6px 10px; font-size:11px;">
+          <button class="btn btn-secondary" onclick="setCustomSleepTimer()" style="font-size:11px; padding:6px 10px;">Set Minutes</button>
+        </div>
+
+        <div style="display:flex; align-items:center; gap:8px; padding-top:8px; border-top:1px solid var(--border);">
+          <input type="checkbox" id="sleepFadeToggle" checked style="accent-color:var(--emerald); cursor:pointer;">
+          <label for="sleepFadeToggle" class="form-label" style="margin-bottom:0; cursor:pointer; font-size:11px;">
+            Gentle volume fade-out over final 30 seconds
+          </label>
+        </div>
+      </div>
+
+      <div style="padding:10px 16px; background:#121520; border-top:1px solid var(--border); display:flex; justify-content:flex-end;">
+        <button class="btn btn-secondary" onclick="closeSleepTimerModal()">Close</button>
+      </div>
+    </div>
+  </div>
+
   <script>
     // State
     let libraryTracks = [];
@@ -1821,6 +2047,8 @@
           }
         });
         checkAppUpdates();
+        initCrossfadeSettings();
+        refreshCacheStats();
       }
     });
 
@@ -2024,6 +2252,9 @@
               <button class="btn btn-secondary" style="padding:3px 7px; font-size:11px; ${t.is_favorite ? 'color:#ec4899;' : 'color:var(--text-muted);'}" title="Toggle Favorite" onclick="event.stopPropagation(); toggleTrackFavorite(${t.index})">
                 ${t.is_favorite ? '♥' : '♡'}
               </button>
+              <button class="btn btn-secondary" style="padding:3px 7px; font-size:10px;" title="Edit Audio Metadata & Album Art (Mp3tag)" onclick="event.stopPropagation(); openTagEditor(${t.index})">
+                🏷️ Edit
+              </button>
               <button class="btn btn-secondary" style="padding:3px 7px; font-size:10px;" onclick="event.stopPropagation(); downloadSingleTrack(${t.index})">
                 ${t.state === 'synced' ? 'Re-fetch' : 'Download'}
               </button>
@@ -2144,8 +2375,10 @@
       }
     }
 
+    let masterVolume = 0.9;
     function changeVolume(val) {
-      audio.volume = parseFloat(val);
+      masterVolume = parseFloat(val);
+      audio.volume = masterVolume;
       document.getElementById('muteIcon').innerText = val > 0 ? '🔊' : '🔇';
     }
 
@@ -2154,7 +2387,47 @@
       document.getElementById('muteIcon').innerText = audio.muted ? '🔇' : '🔊';
     }
 
-    // Audio time update: Real-time karaoke sync!
+    function playNextTrack() {
+      if (libraryTracks.length === 0) return;
+      let nextIdx = 0;
+      if (playingTrackIndex !== null) {
+        const curPos = libraryTracks.findIndex(t => t.index === playingTrackIndex);
+        if (curPos !== -1) {
+          nextIdx = (curPos + 1) % libraryTracks.length;
+        }
+      }
+      playTrack(libraryTracks[nextIdx].index);
+    }
+
+    function playPreviousTrack() {
+      if (libraryTracks.length === 0) return;
+      if (audio.currentTime > 3) {
+        audio.currentTime = 0;
+        return;
+      }
+      let prevIdx = 0;
+      if (playingTrackIndex !== null) {
+        const curPos = libraryTracks.findIndex(t => t.index === playingTrackIndex);
+        if (curPos !== -1) {
+          prevIdx = (curPos - 1 + libraryTracks.length) % libraryTracks.length;
+        }
+      }
+      playTrack(libraryTracks[prevIdx].index);
+    }
+
+    // Audio End & DJ Crossfade handler
+    audio.addEventListener('ended', () => {
+      if (sleepAtTrackEnd) {
+        sleepAtTrackEnd = false;
+        cancelSleepTimer();
+        audio.pause();
+        document.getElementById('playPauseBtn').innerText = '▶';
+        return;
+      }
+      playNextTrack();
+    });
+
+    // Audio time update: Real-time karaoke sync & crossfade!
     audio.addEventListener('timeupdate', () => {
       const cur = audio.currentTime;
       const dur = audio.duration || 0;
@@ -2166,8 +2439,28 @@
         document.getElementById('scrubberFill').style.width = ((cur / dur) * 100) + '%';
       }
 
-      // Karaoke line sync
+      // Karaoke line sync (with live fine-tuning offset)
       syncKaraoke(cur);
+
+      // DJ Crossfade Engine
+      if (crossfadeSeconds > 0 && dur > crossfadeSeconds + 3 && (dur - cur) <= crossfadeSeconds && !isCrossfading) {
+        isCrossfading = true;
+        const fadeRatio = Math.max(0, (dur - cur) / crossfadeSeconds);
+        audio.volume = masterVolume * fadeRatio;
+        if ((dur - cur) <= 0.4) {
+          playNextTrack();
+          let fadeInCount = 0;
+          const fadeInInterval = setInterval(() => {
+            fadeInCount++;
+            audio.volume = masterVolume * (fadeInCount / 10);
+            if (fadeInCount >= 10) {
+              clearInterval(fadeInInterval);
+              audio.volume = masterVolume;
+              isCrossfading = false;
+            }
+          }, (crossfadeSeconds * 1000) / 20);
+        }
+      }
 
       // Automatic Scrobble Submission (Last.fm & ListenBrainz after 50% or 4 min)
       if (!currentTrackScrobbled && dur >= 30 && (cur >= dur * 0.5 || cur >= 240)) {
@@ -2188,11 +2481,12 @@
     function syncKaraoke(currentTime) {
       if (!lyricsLines || lyricsLines.length === 0) return;
 
+      const effectiveTime = currentTime - liveLyricsOffset;
       let activeIdx = -1;
       for (let i = 0; i < lyricsLines.length; i++) {
         const sec = lyricsLines[i].seconds;
         if (sec !== null && sec !== undefined) {
-          if (sec <= currentTime + 0.25) {
+          if (sec <= effectiveTime + 0.25) {
             activeIdx = i;
           } else {
             break;
@@ -2219,6 +2513,8 @@
     // Track Selection & Lyrics Loading
     function selectTrack(index) {
       selectedTrackIndex = index;
+      liveLyricsOffset = 0.0;
+      updateLiveOffsetDisplay();
       const track = libraryTracks.find(t => t.index === index);
       if (!track) return;
 
@@ -3174,6 +3470,402 @@
           btn.innerText = origText;
           alert('Extraction failed: ' + err);
         });
+      }
+    }
+
+    // =========================================================================
+    // Phase 6: Live Lyrics Offset Fine-Tuning
+    // =========================================================================
+    let liveLyricsOffset = 0.0;
+
+    function adjustLiveOffset(delta) {
+      liveLyricsOffset = Math.round((liveLyricsOffset + delta) * 10) / 10;
+      updateLiveOffsetDisplay();
+      syncKaraoke(audio.currentTime);
+    }
+
+    function resetLiveOffset() {
+      liveLyricsOffset = 0.0;
+      updateLiveOffsetDisplay();
+      syncKaraoke(audio.currentTime);
+    }
+
+    function updateLiveOffsetDisplay() {
+      const el = document.getElementById('liveOffsetDisplay');
+      if (el) {
+        const sign = liveLyricsOffset > 0 ? '+' : '';
+        el.innerText = `${sign}${liveLyricsOffset.toFixed(1)}s`;
+      }
+    }
+
+    function saveLrcOffsetToDisk() {
+      const curTrack = (selectedTrackIndex !== null) ? libraryTracks.find(t => t.index === selectedTrackIndex) :
+                       (playingTrackIndex !== null ? libraryTracks.find(t => t.index === playingTrackIndex) : null);
+      if (!curTrack) {
+        alert("Please select or play a track first.");
+        return;
+      }
+      if (Math.abs(liveLyricsOffset) < 0.05) {
+        alert("Timing offset is 0.0s — no offset to save.");
+        return;
+      }
+      const offsetMs = Math.round(liveLyricsOffset * 1000);
+      if (window.pywebview && window.pywebview.api) {
+        window.pywebview.api.shift_lrc_offset(curTrack.path, offsetMs).then(res => {
+          if (res.success) {
+            alert(`✅ Lyrics timing offset permanently shifted by ${liveLyricsOffset.toFixed(1)}s (${res.shifted_lines} lines updated in .lrc file)!`);
+            liveLyricsOffset = 0.0;
+            updateLiveOffsetDisplay();
+            selectTrack(curTrack.index);
+          } else {
+            alert("Error shifting lyrics: " + (res.error || "Unknown error"));
+          }
+        }).catch(err => alert("Error saving lyrics offset: " + err));
+      }
+    }
+
+    // =========================================================================
+    // Phase 6: Sleep Timer with Gentle Volume Fade-Out
+    // =========================================================================
+    let sleepTimerInterval = null;
+    let sleepTimerTargetTime = null;
+    let sleepAtTrackEnd = false;
+
+    function openSleepTimerModal() {
+      document.getElementById('sleepTimerModal').style.display = 'flex';
+      updateSleepModalDisplay();
+    }
+
+    function closeSleepTimerModal() {
+      document.getElementById('sleepTimerModal').style.display = 'none';
+    }
+
+    function setSleepTimerPreset(mins) {
+      if (mins === 'track_end') {
+        sleepAtTrackEnd = true;
+        if (sleepTimerInterval) clearInterval(sleepTimerInterval);
+        sleepTimerInterval = null;
+        sleepTimerTargetTime = null;
+        document.getElementById('sleepTimerHeaderBtn').innerText = '🌙 End Track';
+        updateSleepModalDisplay();
+        closeSleepTimerModal();
+        return;
+      }
+      sleepAtTrackEnd = false;
+      const durationMs = mins * 60 * 1000;
+      sleepTimerTargetTime = Date.now() + durationMs;
+      if (sleepTimerInterval) clearInterval(sleepTimerInterval);
+      sleepTimerInterval = setInterval(tickSleepTimer, 1000);
+      tickSleepTimer();
+      updateSleepModalDisplay();
+      closeSleepTimerModal();
+    }
+
+    function setCustomSleepTimer() {
+      const input = document.getElementById('sleepCustomMinutes');
+      const val = parseInt(input.value);
+      if (isNaN(val) || val <= 0) {
+        alert("Please enter a valid duration in minutes.");
+        return;
+      }
+      setSleepTimerPreset(val);
+    }
+
+    function cancelSleepTimer() {
+      if (sleepTimerInterval) clearInterval(sleepTimerInterval);
+      sleepTimerInterval = null;
+      sleepTimerTargetTime = null;
+      sleepAtTrackEnd = false;
+      audio.volume = masterVolume;
+      document.getElementById('sleepTimerHeaderBtn').innerText = '🌙 Sleep';
+      updateSleepModalDisplay();
+    }
+
+    function tickSleepTimer() {
+      if (!sleepTimerTargetTime) return;
+      const remainingMs = sleepTimerTargetTime - Date.now();
+      if (remainingMs <= 0) {
+        if (sleepTimerInterval) clearInterval(sleepTimerInterval);
+        sleepTimerInterval = null;
+        sleepTimerTargetTime = null;
+        audio.pause();
+        audio.volume = masterVolume;
+        document.getElementById('playPauseBtn').innerText = '▶';
+        document.getElementById('sleepTimerHeaderBtn').innerText = '🌙 Sleep';
+        updateSleepModalDisplay();
+        return;
+      }
+
+      // Gentle volume fade-out over final 30 seconds
+      const fadeToggle = document.getElementById('sleepFadeToggle');
+      if (fadeToggle && fadeToggle.checked && remainingMs <= 30000) {
+        const ratio = Math.max(0, remainingMs / 30000);
+        audio.volume = masterVolume * ratio;
+      }
+
+      const totalSec = Math.floor(remainingMs / 1000);
+      const m = Math.floor(totalSec / 60);
+      const s = totalSec % 60;
+      const formatted = `${m}:${s < 10 ? '0' : ''}${s}`;
+      const headerBtn = document.getElementById('sleepTimerHeaderBtn');
+      if (headerBtn) headerBtn.innerText = `🌙 ${m}m`;
+      const remText = document.getElementById('sleepTimerRemainingText');
+      if (remText) remText.innerText = formatted;
+    }
+
+    function updateSleepModalDisplay() {
+      const activeBox = document.getElementById('sleepTimerActiveBox');
+      if (!activeBox) return;
+      if (sleepAtTrackEnd) {
+        activeBox.style.display = 'flex';
+        document.getElementById('sleepTimerRemainingText').innerText = 'At End of Track';
+      } else if (sleepTimerTargetTime) {
+        activeBox.style.display = 'flex';
+        tickSleepTimer();
+      } else {
+        activeBox.style.display = 'none';
+      }
+    }
+
+    // =========================================================================
+    // Phase 6: Mp3tag Studio Visual Metadata & Cover Art Editor
+    // =========================================================================
+    let tagEditorCurrentTrack = null;
+    let tagEditorCoverDataUri = null;
+    let tagEditorRemoveCover = false;
+
+    function openTagEditor(index) {
+      const track = libraryTracks.find(t => t.index === index);
+      if (!track) return;
+      tagEditorCurrentTrack = track;
+      tagEditorCoverDataUri = null;
+      tagEditorRemoveCover = false;
+
+      document.getElementById('tagEditFilePath').innerText = track.path;
+      document.getElementById('tagEditTitle').value = track.title || '';
+      document.getElementById('tagEditArtist').value = track.artist || '';
+      document.getElementById('tagEditAlbum').value = track.album || '';
+      document.getElementById('tagEditAlbumArtist').value = '';
+      document.getElementById('tagEditYear').value = '';
+      document.getElementById('tagEditGenre').value = '';
+      document.getElementById('tagEditTrackNo').value = '';
+      document.getElementById('tagEditTotalTracks').value = '';
+      document.getElementById('tagEditDiscNo').value = '1';
+      document.getElementById('tagEditComment').value = '';
+      document.getElementById('tagEditStatus').innerText = 'Reading audio tags with mutagen...';
+
+      const previewImg = document.getElementById('tagEditCoverPreview');
+      const placeholder = document.getElementById('tagEditCoverPlaceholder');
+      previewImg.style.display = 'none';
+      placeholder.style.display = 'block';
+
+      document.getElementById('tagEditorModal').style.display = 'flex';
+
+      if (window.pywebview && window.pywebview.api) {
+        window.pywebview.api.read_track_tags(track.path).then(res => {
+          if (res.success) {
+            if (res.title) document.getElementById('tagEditTitle').value = res.title;
+            if (res.artist) document.getElementById('tagEditArtist').value = res.artist;
+            if (res.album) document.getElementById('tagEditAlbum').value = res.album;
+            if (res.album_artist) document.getElementById('tagEditAlbumArtist').value = res.album_artist;
+            if (res.year) document.getElementById('tagEditYear').value = res.year;
+            if (res.genre) document.getElementById('tagEditGenre').value = res.genre;
+            if (res.track_number) document.getElementById('tagEditTrackNo').value = res.track_number;
+            if (res.total_tracks) document.getElementById('tagEditTotalTracks').value = res.total_tracks;
+            if (res.disc_number) document.getElementById('tagEditDiscNo').value = res.disc_number;
+            if (res.comment) document.getElementById('tagEditComment').value = res.comment;
+
+            if (res.has_cover && res.cover_data_uri) {
+              tagEditorCoverDataUri = res.cover_data_uri;
+              previewImg.src = res.cover_data_uri;
+              previewImg.style.display = 'block';
+              placeholder.style.display = 'none';
+              document.getElementById('tagEditCoverInfo').innerText = `Embedded Artwork (${res.cover_mime || 'JPEG'})`;
+            } else {
+              document.getElementById('tagEditCoverInfo').innerText = 'No Embedded Artwork';
+            }
+            document.getElementById('tagEditStatus').innerText = `Loaded ${res.format} metadata cleanly`;
+          } else {
+            document.getElementById('tagEditStatus').innerText = 'Error: ' + (res.error || 'Failed to read tags');
+          }
+        }).catch(err => {
+          document.getElementById('tagEditStatus').innerText = 'Error reading tags: ' + err;
+        });
+      }
+    }
+
+    function closeTagEditorModal() {
+      document.getElementById('tagEditorModal').style.display = 'none';
+      tagEditorCurrentTrack = null;
+    }
+
+    function handleCoverFileSelected(event) {
+      const file = event.target.files[0];
+      if (!file) return;
+      const reader = new FileReader();
+      reader.onload = (e) => {
+        tagEditorCoverDataUri = e.target.result;
+        tagEditorRemoveCover = false;
+        const previewImg = document.getElementById('tagEditCoverPreview');
+        const placeholder = document.getElementById('tagEditCoverPlaceholder');
+        previewImg.src = tagEditorCoverDataUri;
+        previewImg.style.display = 'block';
+        placeholder.style.display = 'none';
+        document.getElementById('tagEditCoverInfo').innerText = `Selected Image (${(file.size / 1024).toFixed(0)} KB)`;
+      };
+      reader.readAsDataURL(file);
+    }
+
+    function removeTagCover() {
+      tagEditorCoverDataUri = '';
+      tagEditorRemoveCover = true;
+      const previewImg = document.getElementById('tagEditCoverPreview');
+      const placeholder = document.getElementById('tagEditCoverPlaceholder');
+      previewImg.style.display = 'none';
+      placeholder.style.display = 'block';
+      document.getElementById('tagEditCoverInfo').innerText = 'Artwork will be removed on save';
+    }
+
+    function autoFetchCurrentTags() {
+      const title = document.getElementById('tagEditTitle').value.trim();
+      const artist = document.getElementById('tagEditArtist').value.trim();
+      if (!title || !artist) {
+        alert("Please ensure Track Title and Artist are filled to lookup metadata.");
+        return;
+      }
+      const btn = document.getElementById('autoFetchTagsBtn');
+      btn.innerText = 'Searching MusicBrainz...';
+      document.getElementById('tagEditStatus').innerText = 'Querying MusicBrainz & online databases...';
+
+      if (window.pywebview && window.pywebview.api) {
+        window.pywebview.api.auto_fetch_track_tags(title, artist).then(res => {
+          btn.innerText = '✨ Auto-Fill from MusicBrainz';
+          if (res) {
+            if (res.album && !document.getElementById('tagEditAlbum').value) {
+              document.getElementById('tagEditAlbum').value = res.album;
+            }
+            if (res.year && !document.getElementById('tagEditYear').value) {
+              document.getElementById('tagEditYear').value = res.year;
+            }
+            if (res.genre && !document.getElementById('tagEditGenre').value) {
+              document.getElementById('tagEditGenre').value = res.genre;
+            }
+            if (res.cover_data_uri) {
+              tagEditorCoverDataUri = res.cover_data_uri;
+              tagEditorRemoveCover = false;
+              const previewImg = document.getElementById('tagEditCoverPreview');
+              const placeholder = document.getElementById('tagEditCoverPlaceholder');
+              previewImg.src = res.cover_data_uri;
+              previewImg.style.display = 'block';
+              placeholder.style.display = 'none';
+              document.getElementById('tagEditCoverInfo').innerText = 'Retrieved Cover Art';
+            }
+            document.getElementById('tagEditStatus').innerText = 'Tags auto-filled from MusicBrainz / Deezer!';
+          } else {
+            document.getElementById('tagEditStatus').innerText = 'No online metadata found.';
+          }
+        }).catch(err => {
+          btn.innerText = '✨ Auto-Fill from MusicBrainz';
+          document.getElementById('tagEditStatus').innerText = 'Lookup error: ' + err;
+        });
+      }
+    }
+
+    function saveTagEditorChanges() {
+      if (!tagEditorCurrentTrack) return;
+      const saveBtn = document.getElementById('saveTagsBtn');
+      saveBtn.innerText = 'Saving...';
+      saveBtn.disabled = true;
+      document.getElementById('tagEditStatus').innerText = 'Writing tags to audio file with mutagen...';
+
+      const payload = {
+        title: document.getElementById('tagEditTitle').value.trim(),
+        artist: document.getElementById('tagEditArtist').value.trim(),
+        album: document.getElementById('tagEditAlbum').value.trim(),
+        album_artist: document.getElementById('tagEditAlbumArtist').value.trim(),
+        year: document.getElementById('tagEditYear').value.trim(),
+        genre: document.getElementById('tagEditGenre').value.trim(),
+        track_number: document.getElementById('tagEditTrackNo').value.trim(),
+        total_tracks: document.getElementById('tagEditTotalTracks').value.trim(),
+        disc_number: document.getElementById('tagEditDiscNo').value.trim(),
+        comment: document.getElementById('tagEditComment').value.trim(),
+        cover_data_uri: tagEditorCoverDataUri || '',
+        remove_cover: tagEditorRemoveCover,
+      };
+
+      if (window.pywebview && window.pywebview.api) {
+        window.pywebview.api.save_track_tags(tagEditorCurrentTrack.path, payload).then(res => {
+          saveBtn.innerText = '💾 Save Tags to File';
+          saveBtn.disabled = false;
+          if (res.success) {
+            tagEditorCurrentTrack.title = payload.title || tagEditorCurrentTrack.title;
+            tagEditorCurrentTrack.artist = payload.artist || tagEditorCurrentTrack.artist;
+            tagEditorCurrentTrack.album = payload.album || tagEditorCurrentTrack.album;
+            if (tagEditorCoverDataUri) {
+              tagEditorCurrentTrack.cover_url = `${tagEditorCurrentTrack.cover_url}&t=${Date.now()}`;
+            }
+            renderFilteredTracklist();
+            closeTagEditorModal();
+            alert("✅ Metadata & Album Artwork successfully saved!");
+          } else {
+            document.getElementById('tagEditStatus').innerText = 'Save error: ' + (res.error || 'Failed to write tags');
+          }
+        }).catch(err => {
+          saveBtn.innerText = '💾 Save Tags to File';
+          saveBtn.disabled = false;
+          document.getElementById('tagEditStatus').innerText = 'Save error: ' + err;
+        });
+      }
+    }
+
+    // =========================================================================
+    // Phase 6: DJ Crossfade, Gapless Engine & Offline Cache Settings
+    // =========================================================================
+    let crossfadeSeconds = parseInt(localStorage.getItem('sonance_crossfade') || '0');
+    let gaplessEnabled = localStorage.getItem('sonance_gapless') !== 'false';
+    let isCrossfading = false;
+
+    function initCrossfadeSettings() {
+      const slider = document.getElementById('crossfadeSlider');
+      const label = document.getElementById('crossfadeDurationLabel');
+      const toggle = document.getElementById('gaplessToggle');
+      if (slider) slider.value = crossfadeSeconds;
+      if (label) label.innerText = crossfadeSeconds > 0 ? `${crossfadeSeconds}s` : '0s (Instant)';
+      if (toggle) toggle.checked = gaplessEnabled;
+    }
+
+    function updateCrossfadeSetting(val) {
+      crossfadeSeconds = parseInt(val) || 0;
+      localStorage.setItem('sonance_crossfade', crossfadeSeconds);
+      const label = document.getElementById('crossfadeDurationLabel');
+      if (label) label.innerText = crossfadeSeconds > 0 ? `${crossfadeSeconds}s` : '0s (Instant)';
+    }
+
+    function updateGaplessSetting(checked) {
+      gaplessEnabled = checked;
+      localStorage.setItem('sonance_gapless', checked);
+    }
+
+    function refreshCacheStats() {
+      if (window.pywebview && window.pywebview.api && window.pywebview.api.get_cache_stats) {
+        window.pywebview.api.get_cache_stats().then(stats => {
+          if (stats) {
+            const sizeEl = document.getElementById('cacheSizeText');
+            const filesEl = document.getElementById('cacheFilesText');
+            if (sizeEl) sizeEl.innerText = `${stats.size_mb.toFixed(1)} MB`;
+            if (filesEl) filesEl.innerText = `${stats.files_count} cached audio files`;
+          }
+        }).catch(err => console.error("Cache stats error:", err));
+      }
+    }
+
+    function clearStreamCache() {
+      if (!confirm("Are you sure you want to clear all offline and streamed cache files?")) return;
+      if (window.pywebview && window.pywebview.api && window.pywebview.api.clear_stream_cache) {
+        window.pywebview.api.clear_stream_cache().then(ok => {
+          refreshCacheStats();
+          alert("⚡ Stream cache successfully emptied!");
+        }).catch(err => alert("Error clearing cache: " + err));
       }
     }
   </script>

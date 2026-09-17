@@ -3,7 +3,7 @@ lyrics_engine.py - Sonance Core Lyrics Engine
 Advanced Lyrics Fetching & Anti-Mismatch Verification Engine
 
 Part of the Sonance project (https://github.com/Sandeep2062/Sonance)
-Copyright (c) 2024-2026 Sandeep Khadka — MIT License
+Copyright (c) 2024-2026 Sandeep Khadka — GPLv3 with Commons Clause
 
 Includes:
 - Intelligent audio metadata extraction (tinytag with bitrate, samplerate, bitdepth, quality badge)
@@ -515,3 +515,65 @@ def analyze_lrc_content(content: str) -> str:
     elif ratio > 0.05:
         return "incomplete"
     return "plain"
+
+
+def shift_lrc_content(content: str, offset_ms: int) -> str:
+    """
+    Shifts all [mm:ss.xx] timestamps in the LRC content by offset_ms (+ or -).
+    Prevents negative timestamps by clamping to 00:00.00.
+    """
+    if offset_ms == 0:
+        return content
+
+    def _replace_ts(match):
+        mins = int(match.group(1))
+        secs = int(match.group(2))
+        ms_str = match.group(3) or "0"
+        if len(ms_str) == 1:
+            ms = int(ms_str) * 100
+        elif len(ms_str) == 2:
+            ms = int(ms_str) * 10
+        else:
+            ms = int(ms_str[:3])
+
+        total_ms = mins * 60000 + secs * 1000 + ms + offset_ms
+        if total_ms < 0:
+            total_ms = 0
+
+        new_mins = total_ms // 60000
+        rem = total_ms % 60000
+        new_secs = rem // 1000
+        new_hundredths = (rem % 1000) // 10
+
+        return f"[{new_mins:02d}:{new_secs:02d}.{new_hundredths:02d}]"
+
+    shifted_lines = []
+    for line in content.splitlines():
+        new_line = TIMESTAMP_RE.sub(_replace_ts, line)
+        shifted_lines.append(new_line)
+
+    return "\n".join(shifted_lines)
+
+
+def shift_lrc_file_offset(file_path: str, offset_ms: int) -> Dict[str, Any]:
+    """
+    Finds the .lrc file corresponding to the track, shifts all timestamps by offset_ms,
+    and saves the file back to disk.
+    """
+    lrc_path = os.path.splitext(file_path)[0] + ".lrc"
+    if not os.path.exists(lrc_path):
+        return {"success": False, "error": "No .lrc file found for this track"}
+
+    try:
+        with open(lrc_path, "r", encoding="utf-8", errors="ignore") as f:
+            raw = f.read()
+
+        shifted = shift_lrc_content(raw, offset_ms)
+
+        with open(lrc_path, "w", encoding="utf-8") as f:
+            f.write(shifted)
+
+        return {"success": True, "file": lrc_path, "offset_ms": offset_ms}
+    except Exception as e:
+        return {"success": False, "error": str(e)}
+

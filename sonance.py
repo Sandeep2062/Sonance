@@ -44,6 +44,16 @@ Examples:
       help="Check GitHub for latest release updates",
   )
   parser.add_argument(
+      "--clear-cache",
+      action="store_true",
+      help="Clear local offline and stream audio cache",
+  )
+  parser.add_argument(
+      "--inspect-tags",
+      metavar="AUDIO_FILE",
+      help="Inspect metadata tags & cover art of an audio file",
+  )
+  parser.add_argument(
       "--version",
       action="version",
       version=f"Sonance v{modern_lyrics_downloader.APP_VERSION}",
@@ -75,6 +85,21 @@ Examples:
       print(
           f"[*] Sonance is up to date (v{modern_lyrics_downloader.APP_VERSION})."
       )
+    return
+
+  if args.clear_cache:
+    import cache_manager
+    ok = cache_manager.clear_cache()
+    print("[+] Stream cache cleared successfully." if ok else "[-] Failed to clear cache.")
+    return
+
+  if args.inspect_tags:
+    import tag_editor
+    tags = tag_editor.read_tags(args.inspect_tags)
+    print(f"[*] Metadata for: {args.inspect_tags}")
+    for k, v in tags.items():
+      if k != "cover_data_uri":
+        print(f"  {k}: {v}")
     return
 
   if args.classic:
