@@ -39,6 +39,8 @@ import discord_rpc
 import scrobbler
 import tag_editor
 import cache_manager
+import auto_dj
+import library_doctor
 
 APP_VERSION = "2.1.0"
 GITHUB_REPO = "Sandeep2062/Sonance"
@@ -585,6 +587,37 @@ class LyricsAPI:
     def clear_stream_cache(self) -> bool:
         """Clears local stream cache."""
         return cache_manager.clear_cache()
+
+    # ------------------ Phase 7: Desktop Mini-Player & Overlay ------------------
+    def toggle_mini_player(self, enable: bool) -> Dict[str, Any]:
+        """Toggles compact 380x240 always-on-top floating desktop widget."""
+        try:
+            if self._window:
+                if enable:
+                    self._window.resize(380, 240)
+                    self._window.on_top = True
+                else:
+                    self._window.resize(1160, 780)
+                    self._window.on_top = False
+                return {"success": True, "is_mini": enable}
+        except Exception as e:
+            return {"success": False, "error": str(e)}
+        return {"success": False, "error": "Window not initialized"}
+
+    # ------------------ Phase 7: Auto-DJ & Infinite Radio ------------------
+    def get_auto_dj_tracks(self, artist: str, title: str, count: int = 5) -> List[Dict[str, Any]]:
+        """Queries Auto-DJ engine for similar matching tracks to keep music playing."""
+        return auto_dj.auto_dj_engine.get_recommendations(artist, title, count)
+
+    # ------------------ Phase 7: Library Doctor & Duplicates ------------------
+    def scan_library_health(self, folder: Optional[str] = None) -> Dict[str, Any]:
+        """Analyzes music folder for duplicates, missing lyrics, and library health."""
+        target = folder or self._current_folder
+        return library_doctor.scan_library_health(target)
+
+    def delete_duplicate_file(self, file_path: str) -> Dict[str, Any]:
+        """Removes a duplicate audio file and deletes any corresponding .lrc file."""
+        return library_doctor.delete_audio_file(file_path)
 
     def _save_last_folder(self, folder: str):
         try:

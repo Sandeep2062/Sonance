@@ -54,6 +54,13 @@ Examples:
       help="Inspect metadata tags & cover art of an audio file",
   )
   parser.add_argument(
+      "--doctor",
+      metavar="FOLDER",
+      nargs="?",
+      const=".",
+      help="Scan music library with Sonance Library Doctor to detect duplicates & health score",
+  )
+  parser.add_argument(
       "--version",
       action="version",
       version=f"Sonance v{modern_lyrics_downloader.APP_VERSION}",
@@ -100,6 +107,28 @@ Examples:
     for k, v in tags.items():
       if k != "cover_data_uri":
         print(f"  {k}: {v}")
+    return
+
+  if args.doctor is not None:
+    import library_doctor
+    folder = args.doctor or "."
+    print(f"[*] Running Sonance Library Doctor on: {folder}")
+    res = library_doctor.scan_library_health(folder)
+    if not res.get("success"):
+      print(f"[-] Error: {res.get('error')}")
+      return
+    print(f"[+] Total Tracks Scanned: {res['total_tracks']}")
+    print(f"[+] Library Health Score: {res['health_score']}%")
+    print(f"[+] Missing Lyrics (.lrc): {res['missing_lyrics_count']}")
+    print(f"[+] Missing Tags: {res['missing_tags_count']}")
+    print(f"[+] Duplicate Groups Found: {res['total_duplicate_groups']} ({res['total_duplicate_files']} redundant files)")
+    if res['duplicate_groups']:
+      print("\n--- Duplicate Groups Detected ---")
+      for g in res['duplicate_groups'][:10]:
+        print(f"  * {g['artist']} - {g['title']} ({g['count']} files)")
+        for tr in g['tracks']:
+          status = "[RECOMMENDED KEEP]" if tr['is_recommended_keep'] else "[DUPLICATE]"
+          print(f"    - {status} {tr['filename']} ({tr['quality']}, {tr['size_mb']}MB)")
     return
 
   if args.classic:

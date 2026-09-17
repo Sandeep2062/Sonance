@@ -1083,6 +1083,15 @@
 
     <!-- Quick Sleep, Equalizer, Spek & Update -->
     <div style="display:flex; align-items:center; gap:8px;">
+      <button class="btn btn-secondary" onclick="openLibraryDoctorModal()" style="padding:5px 9px; font-size:11px;" title="Scan Library Health & Clean Duplicates">
+        🩺 Doctor
+      </button>
+      <button class="btn btn-secondary" onclick="openVisualizerModal()" style="padding:5px 9px; font-size:11px;" title="Party Visualizer Mode (F11)">
+        ✨ Visualizer
+      </button>
+      <button class="btn btn-secondary" onclick="toggleMiniPlayer(true)" style="padding:5px 9px; font-size:11px;" id="miniPlayerHeaderBtn" title="Floating Desktop Mini-Player">
+        📱 Mini
+      </button>
       <button class="btn btn-secondary" onclick="openSleepTimerModal()" style="padding:5px 9px; font-size:11px;" id="sleepTimerHeaderBtn" title="Set Sleep Timer">
         🌙 Sleep
       </button>
@@ -1623,6 +1632,23 @@
           </div>
         </div>
 
+        <!-- Studio Volume Normalizer & ReplayGain -->
+        <div class="settings-card">
+          <div class="settings-card-header">
+            <div>
+              <div class="settings-card-title">
+                <span>🔊</span>
+                <span>Studio Volume Normalizer (ReplayGain DSP)</span>
+              </div>
+              <div class="settings-card-sub">Dynamic loudness compression that evens out volume jumps between quiet and loud tracks across all sources without clipping.</div>
+            </div>
+          </div>
+          <div style="display:flex; align-items:center; gap:8px; margin-top:10px;">
+            <input type="checkbox" id="volumeNormalizerToggle" checked onchange="updateNormalizerSetting(this.checked)" style="accent-color:var(--emerald); cursor:pointer;">
+            <label for="volumeNormalizerToggle" class="form-label" style="margin-bottom:0; cursor:pointer;">Enable Automatic Loudness Normalization & Peak Limiter</label>
+          </div>
+        </div>
+
         <!-- Download & General Storage -->
         <div class="settings-card">
           <div class="settings-card-header">
@@ -1693,6 +1719,7 @@
     </div>
 
     <div class="player-right">
+      <button class="btn btn-secondary" id="autoDjBtn" onclick="toggleAutoDj()" style="padding:3px 8px; font-size:10px;" title="Auto-DJ / Infinite Radio Mode (Discovers & queues matching tracks)">⚡ Auto-DJ</button>
       <canvas class="spectrum-canvas" id="spectrumCanvas" width="70" height="24" title="Live Audio Spectrum Visualizer"></canvas>
       <span style="font-size:12px; cursor:pointer;" onclick="toggleMute()" id="muteIcon">🔊</span>
       <input type="range" min="0" max="1" step="0.05" value="0.9" class="volume-slider" id="volumeSlider" oninput="changeVolume(this.value)">
@@ -2016,6 +2043,155 @@
     </div>
   </div>
 
+  <!-- Library Doctor Modal -->
+  <div class="modal-backdrop" id="libraryDoctorModal" style="display:none;">
+    <div class="modal-box" style="width:760px; max-width:92vw;">
+      <div class="modal-header">
+        <div style="display:flex; align-items:center; gap:8px;">
+          <span style="font-size:16px;">🩺</span>
+          <div>
+            <div style="font-weight:700; font-size:13px;">Sonance Library Doctor — Health & Duplicate Cleaner</div>
+            <div style="font-size:10px; color:var(--text-dim);">Detects duplicates, compares audio bitrates, and checks library health</div>
+          </div>
+        </div>
+        <button onclick="closeLibraryDoctorModal()" style="background:none; border:none; color:var(--text-muted); cursor:pointer; font-size:14px;">✕</button>
+      </div>
+
+      <div class="modal-body" style="padding:16px;">
+        <!-- Health Score Dashboard -->
+        <div style="display:flex; gap:14px; background:#121520; border:1px solid var(--border); border-radius:10px; padding:14px; align-items:center; justify-content:space-between; margin-bottom:14px;">
+          <div style="display:flex; align-items:center; gap:12px;">
+            <div id="doctorHealthScoreCircle" style="width:56px; height:56px; border-radius:50%; background:#0f172a; border:3px solid var(--emerald); display:flex; align-items:center; justify-content:center; font-size:18px; font-weight:800; color:var(--emerald);">
+              --%
+            </div>
+            <div>
+              <div style="font-size:13px; font-weight:700;" id="doctorHealthVerdict">Analyzing library...</div>
+              <div style="font-size:11px; color:var(--text-dim);" id="doctorHealthSummary">Checking audio quality and duplicate files</div>
+            </div>
+          </div>
+
+          <div style="display:flex; gap:8px;">
+            <button class="btn btn-secondary" onclick="runLibraryDoctorScan()" style="font-size:11px; padding:5px 10px;">🔄 Re-scan</button>
+            <button class="btn btn-primary" id="cleanAllDuplicatesBtn" onclick="cleanAllLowerQualityDuplicates()" style="font-size:11px; padding:5px 12px; display:none;">⚡ Clean All Duplicates</button>
+          </div>
+        </div>
+
+        <!-- 4 Stat Pill Counters -->
+        <div style="display:grid; grid-template-columns:repeat(4, 1fr); gap:10px; margin-bottom:14px;">
+          <div style="background:#141824; border:1px solid var(--border); border-radius:8px; padding:8px 12px; text-align:center;">
+            <div style="font-size:10px; color:var(--text-dim);">Total Tracks</div>
+            <div id="doctorStatTotal" style="font-size:15px; font-weight:700; margin-top:2px;">0</div>
+          </div>
+          <div style="background:#141824; border:1px solid var(--border); border-radius:8px; padding:8px 12px; text-align:center;">
+            <div style="font-size:10px; color:var(--text-dim);">Duplicate Files</div>
+            <div id="doctorStatDuplicates" style="font-size:15px; font-weight:700; margin-top:2px; color:#f87171;">0</div>
+          </div>
+          <div style="background:#141824; border:1px solid var(--border); border-radius:8px; padding:8px 12px; text-align:center;">
+            <div style="font-size:10px; color:var(--text-dim);">Missing Lyrics</div>
+            <div id="doctorStatMissingLyrics" style="font-size:15px; font-weight:700; margin-top:2px; color:#fbbf24;">0</div>
+          </div>
+          <div style="background:#141824; border:1px solid var(--border); border-radius:8px; padding:8px 12px; text-align:center;">
+            <div style="font-size:10px; color:var(--text-dim);">Incomplete Tags</div>
+            <div id="doctorStatMissingTags" style="font-size:15px; font-weight:700; margin-top:2px; color:#a78bfa;">0</div>
+          </div>
+        </div>
+
+        <!-- Duplicates Group Review List -->
+        <div>
+          <div style="font-size:11px; font-weight:700; color:var(--text-muted); margin-bottom:8px;">Duplicate Track Groups:</div>
+          <div id="doctorDuplicatesList" style="max-height:240px; overflow-y:auto; display:flex; flex-direction:column; gap:8px;">
+            <div style="text-align:center; padding:30px; color:var(--text-dim); font-size:11px;">
+              Click "Re-scan" to analyze library health and find duplicates.
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div style="padding:10px 16px; background:#121520; border-top:1px solid var(--border); display:flex; justify-content:flex-end;">
+        <button class="btn btn-secondary" onclick="closeLibraryDoctorModal()">Close</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Fullscreen Party Visualizer Mode Modal -->
+  <div id="fullscreenVisualizerModal" style="position:fixed; top:0; left:0; width:100vw; height:100vh; background:#07090e; z-index:9999; display:none; flex-direction:column; justify-content:space-between; padding:24px; box-sizing:border-box;">
+    <!-- Top Bar -->
+    <div style="display:flex; justify-content:space-between; align-items:center;">
+      <div style="display:flex; align-items:center; gap:10px;">
+        <div style="font-size:20px;">🎵</div>
+        <div>
+          <div id="visModalTitle" style="font-size:16px; font-weight:700; color:#fff;">Not Playing</div>
+          <div id="visModalArtist" style="font-size:12px; color:var(--text-muted);">Sonance Party Visualizer</div>
+        </div>
+      </div>
+      <button onclick="closeVisualizerModal()" class="btn btn-secondary" style="font-size:11px; padding:6px 12px; border-radius:20px; background:rgba(255,255,255,0.1);">
+        ✕ Exit Visualizer (Esc)
+      </button>
+    </div>
+
+    <!-- Center Canvas & Glowing Karaoke Line -->
+    <div style="flex:1; display:flex; flex-direction:column; align-items:center; justify-content:center; position:relative; overflow:hidden;">
+      <canvas id="fullscreenCanvas" style="position:absolute; width:100%; height:100%; top:0; left:0; pointer-events:none;"></canvas>
+      <div style="z-index:2; text-align:center; max-width:850px; padding:0 20px;">
+        <div id="visPrevLyric" style="font-size:15px; color:rgba(255,255,255,0.3); margin-bottom:8px; min-height:22px; transition:all 0.3s;"></div>
+        <div id="visualizerActiveLyric" style="font-size:32px; font-weight:800; color:#10b981; text-shadow:0 0 30px rgba(16,185,129,0.8), 0 0 10px #10b981; min-height:48px; transition:all 0.2s;">
+          Sonance Live Visualizer
+        </div>
+        <div id="visNextLyric" style="font-size:15px; color:rgba(255,255,255,0.4); margin-top:8px; min-height:22px; transition:all 0.3s;"></div>
+      </div>
+    </div>
+
+    <!-- Bottom Controls Floating Pill -->
+    <div style="display:flex; justify-content:center; z-index:2;">
+      <div style="background:rgba(18,21,32,0.85); backdrop-filter:blur(16px); border:1px solid rgba(255,255,255,0.1); border-radius:30px; padding:8px 24px; display:flex; align-items:center; gap:16px;">
+        <button class="control-btn" onclick="playPreviousTrack()" title="Previous Track">⏮</button>
+        <button class="control-btn play-circle" id="visPlayPauseBtn" onclick="togglePlayPause()">▶</button>
+        <button class="control-btn" onclick="playNextTrack()" title="Next Track">⏭</button>
+        <span style="font-size:12px; color:var(--text-dim);" id="visTimeDisplay">0:00 / 0:00</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- Desktop Floating Mini-Player Widget -->
+  <div id="miniPlayerContainer" style="position:fixed; top:0; left:0; width:100%; height:100%; background:#0b0d14; z-index:10000; display:none; flex-direction:column; justify-content:space-between; padding:12px; box-sizing:border-box;">
+    <!-- Mini Top Info -->
+    <div style="display:flex; align-items:center; justify-content:space-between; gap:8px;">
+      <div style="display:flex; align-items:center; gap:8px; overflow:hidden;">
+        <div id="miniPlayerArt" style="width:36px; height:36px; border-radius:6px; background:#181d2a; overflow:hidden; flex-shrink:0; display:flex; align-items:center; justify-content:center; font-size:16px;">🎵</div>
+        <div style="overflow:hidden;">
+          <div id="miniPlayerTitle" style="font-size:12px; font-weight:700; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; color:#fff;">Not Playing</div>
+          <div id="miniPlayerArtist" style="font-size:10px; color:var(--text-dim); white-space:nowrap; overflow:hidden; text-overflow:ellipsis;">Select track</div>
+        </div>
+      </div>
+      <div style="display:flex; align-items:center; gap:4px; flex-shrink:0;">
+        <button class="btn btn-secondary" onclick="toggleMiniPlayer(false)" style="padding:3px 7px; font-size:11px;" title="Restore Full Window (Esc)">⛶</button>
+      </div>
+    </div>
+
+    <!-- Mini Center Glowing Lyric -->
+    <div style="flex:1; display:flex; align-items:center; justify-content:center; padding:4px 6px;">
+      <div id="miniKaraokeLine" style="font-size:13px; font-weight:700; color:var(--emerald); text-align:center; text-shadow:0 0 10px rgba(16,185,129,0.5); white-space:nowrap; overflow:hidden; text-overflow:ellipsis; max-width:340px;">
+        Sonance Mini-Player
+      </div>
+    </div>
+
+    <!-- Mini Bottom Controls & Scrubber -->
+    <div>
+      <div class="scrubber-bar" id="miniScrubberBar" onclick="handleScrubClick(event)" style="height:3px; margin-bottom:8px;">
+        <div class="scrubber-fill" id="miniScrubberFill" style="background:var(--emerald);"></div>
+      </div>
+      <div style="display:flex; align-items:center; justify-content:space-between;">
+        <span id="miniCurrentTime" style="font-size:10px; color:var(--text-dim);">0:00</span>
+        <div style="display:flex; align-items:center; gap:10px;">
+          <button class="control-btn" onclick="playPreviousTrack()" style="font-size:12px;">⏮</button>
+          <button class="control-btn play-circle" id="miniPlayPauseBtn" onclick="togglePlayPause()" style="width:26px; height:26px; font-size:10px;">▶</button>
+          <button class="control-btn" onclick="playNextTrack()" style="font-size:12px;">⏭</button>
+        </div>
+        <span id="miniTotalTime" style="font-size:10px; color:var(--text-dim);">0:00</span>
+      </div>
+    </div>
+  </div>
+
   <script>
     // State
     let libraryTracks = [];
@@ -2049,6 +2225,8 @@
         checkAppUpdates();
         initCrossfadeSettings();
         refreshCacheStats();
+        initAutoDjSettings();
+        initNormalizerSettings();
       }
     });
 
@@ -2322,6 +2500,20 @@
       const artImg = document.getElementById('playerArt');
       artImg.innerHTML = `<img src="${track.cover_url}" onerror="this.parentElement.innerText='🎵'">`;
 
+      // Phase 7: Update Mini-Player UI
+      const miniTitle = document.getElementById('miniPlayerTitle');
+      const miniArtist = document.getElementById('miniPlayerArtist');
+      const miniArt = document.getElementById('miniPlayerArt');
+      if (miniTitle) miniTitle.innerText = track.title || track.filename;
+      if (miniArtist) miniArtist.innerText = track.artist || 'Unknown';
+      if (miniArt) miniArt.innerHTML = `<img src="${track.cover_url}" style="width:100%; height:100%; object-fit:cover;" onerror="this.parentElement.innerText='🎵'">`;
+
+      // Phase 7: Update Visualizer Party Mode UI
+      const visTitle = document.getElementById('visModalTitle');
+      const visArtist = document.getElementById('visModalArtist');
+      if (visTitle) visTitle.innerText = track.title || track.filename;
+      if (visArtist) visArtist.innerText = `${track.artist || 'Unknown'} · ${track.album || ''}`;
+
       renderFilteredTracklist();
     }
 
@@ -2330,9 +2522,17 @@
         playTrack(libraryTracks[0].index);
         return;
       }
-      if (audio.paused) {
+      const isPaused = audio.paused;
+      const playIcon = isPaused ? '⏸' : '▶';
+      const mainBtn = document.getElementById('playPauseBtn');
+      const miniBtn = document.getElementById('miniPlayPauseBtn');
+      const visBtn = document.getElementById('visPlayPauseBtn');
+      if (mainBtn) mainBtn.innerText = playIcon;
+      if (miniBtn) miniBtn.innerText = playIcon;
+      if (visBtn) visBtn.innerText = playIcon;
+
+      if (isPaused) {
         audio.play();
-        document.getElementById('playPauseBtn').innerText = '⏸';
         const curTrack = libraryTracks.find(t => t.index === playingTrackIndex);
         if (curTrack && window.pywebview && window.pywebview.api) {
           window.pywebview.api.update_discord_rpc(
@@ -2346,7 +2546,6 @@
         }
       } else {
         audio.pause();
-        document.getElementById('playPauseBtn').innerText = '▶';
         const curTrack = libraryTracks.find(t => t.index === playingTrackIndex);
         if (curTrack && window.pywebview && window.pywebview.api) {
           window.pywebview.api.update_discord_rpc(
@@ -2393,6 +2592,10 @@
       if (playingTrackIndex !== null) {
         const curPos = libraryTracks.findIndex(t => t.index === playingTrackIndex);
         if (curPos !== -1) {
+          if (curPos + 1 >= libraryTracks.length && autoDjEnabled) {
+            triggerAutoDjNext();
+            return;
+          }
           nextIdx = (curPos + 1) % libraryTracks.length;
         }
       }
@@ -2438,6 +2641,16 @@
       if (dur > 0) {
         document.getElementById('scrubberFill').style.width = ((cur / dur) * 100) + '%';
       }
+
+      // Phase 7: Update Mini-Player & Visualizer time displays
+      const miniCur = document.getElementById('miniCurrentTime');
+      const miniDur = document.getElementById('miniTotalTime');
+      const miniFill = document.getElementById('miniScrubberFill');
+      const visTime = document.getElementById('visTimeDisplay');
+      if (miniCur) miniCur.innerText = formatDuration(cur);
+      if (miniDur) miniDur.innerText = formatDuration(dur);
+      if (miniFill && dur > 0) miniFill.style.width = ((cur / dur) * 100) + '%';
+      if (visTime) visTime.innerText = `${formatDuration(cur)} / ${formatDuration(dur)}`;
 
       // Karaoke line sync (with live fine-tuning offset)
       syncKaraoke(cur);
@@ -2507,6 +2720,21 @@
             el.classList.remove('active-karaoke');
           }
         });
+
+        // Phase 7: Update Mini-Player & Fullscreen Visualizer live lyrics
+        const activeText = lyricsLines[activeIdx] ? lyricsLines[activeIdx].text : '';
+        const prevText = (activeIdx > 0 && lyricsLines[activeIdx - 1]) ? lyricsLines[activeIdx - 1].text : '';
+        const nextText = (activeIdx < lyricsLines.length - 1 && lyricsLines[activeIdx + 1]) ? lyricsLines[activeIdx + 1].text : '';
+
+        const miniLyric = document.getElementById('miniKaraokeLine');
+        if (miniLyric) miniLyric.innerText = activeText;
+
+        const visActive = document.getElementById('visualizerActiveLyric');
+        const visPrev = document.getElementById('visPrevLyric');
+        const visNext = document.getElementById('visNextLyric');
+        if (visActive) visActive.innerText = activeText;
+        if (visPrev) visPrev.innerText = prevText;
+        if (visNext) visNext.innerText = nextText;
       }
     }
 
@@ -2575,6 +2803,8 @@
     };
     let eqFilters = [];
     let currentEqGains = [0, 0, 0, 0, 0, 0, 0, 0, 0, 0];
+    let dynamicsCompressor = null;
+    let normalizerEnabled = localStorage.getItem('sonance_normalizer') !== 'false';
 
     // Web Audio API & Hardware Equalizer DSP
     function setupWebAudio() {
@@ -2601,13 +2831,27 @@
           return filter;
         });
 
-        // Link: sourceNode -> filter[0] -> ... -> filter[9] -> analyser -> destination
+        // Link: sourceNode -> filter[0] -> ... -> filter[9]
         let prev = sourceNode;
         eqFilters.forEach(f => {
           prev.connect(f);
           prev = f;
         });
-        prev.connect(analyser);
+
+        // Phase 7: Studio Loudness Normalizer (ReplayGain Dynamics Compressor)
+        dynamicsCompressor = audioCtx.createDynamicsCompressor();
+        dynamicsCompressor.threshold.setValueAtTime(-24, audioCtx.currentTime);
+        dynamicsCompressor.knee.setValueAtTime(30, audioCtx.currentTime);
+        dynamicsCompressor.ratio.setValueAtTime(12, audioCtx.currentTime);
+        dynamicsCompressor.attack.setValueAtTime(0.003, audioCtx.currentTime);
+        dynamicsCompressor.release.setValueAtTime(0.25, audioCtx.currentTime);
+
+        if (normalizerEnabled) {
+          prev.connect(dynamicsCompressor);
+          dynamicsCompressor.connect(analyser);
+        } else {
+          prev.connect(analyser);
+        }
         analyser.connect(audioCtx.destination);
 
         drawSpectrum();
@@ -3868,6 +4112,391 @@
         }).catch(err => alert("Error clearing cache: " + err));
       }
     }
+
+    // =========================================================================
+    // Phase 7: Auto-DJ & Infinite Radio Mode
+    // =========================================================================
+    let autoDjEnabled = localStorage.getItem('sonance_autodj') === 'true';
+    let isFetchingAutoDj = false;
+
+    function initAutoDjSettings() {
+      updateAutoDjButtonUI();
+    }
+
+    function toggleAutoDj() {
+      autoDjEnabled = !autoDjEnabled;
+      localStorage.setItem('sonance_autodj', autoDjEnabled);
+      updateAutoDjButtonUI();
+      if (autoDjEnabled) {
+        alert("⚡ Auto-DJ Activated!\n\nWhen your playback queue ends, Sonance will automatically discover and enqueue acoustically matching tracks from Last.fm & Deezer.");
+        if (playingTrackIndex !== null && playingTrackIndex >= libraryTracks.length - 1) {
+          triggerAutoDjNext();
+        }
+      }
+    }
+
+    function updateAutoDjButtonUI() {
+      const btn = document.getElementById('autoDjBtn');
+      if (btn) {
+        if (autoDjEnabled) {
+          btn.style.borderColor = 'var(--emerald)';
+          btn.style.color = 'var(--emerald)';
+          btn.style.boxShadow = '0 0 10px rgba(16,185,129,0.3)';
+        } else {
+          btn.style.borderColor = 'var(--border)';
+          btn.style.color = 'var(--text-main)';
+          btn.style.boxShadow = 'none';
+        }
+      }
+    }
+
+    function triggerAutoDjNext() {
+      if (isFetchingAutoDj) return;
+      const curTrack = libraryTracks.find(t => t.index === playingTrackIndex) || (libraryTracks.length > 0 ? libraryTracks[0] : null);
+      if (!curTrack) return;
+
+      isFetchingAutoDj = true;
+      const curArtist = curTrack.artist || 'Unknown';
+      const curTitle = curTrack.title || curTrack.filename;
+
+      if (window.pywebview && window.pywebview.api && window.pywebview.api.get_auto_dj_tracks) {
+        window.pywebview.api.get_auto_dj_tracks(curArtist, curTitle, 5).then(tracks => {
+          isFetchingAutoDj = false;
+          if (tracks && tracks.length > 0) {
+            let nextStartIndex = libraryTracks.length;
+            const newTracks = tracks.map((tr, idx) => ({
+              id: tr.id,
+              index: nextStartIndex + idx,
+              filename: `${tr.artist} - ${tr.title}.mp3`,
+              path: tr.stream_url,
+              title: tr.title,
+              artist: tr.artist,
+              album: tr.album || 'Auto-DJ Radio',
+              duration: tr.duration || 210,
+              quality: tr.quality || 'Online Stream',
+              format: tr.format || 'MP3',
+              state: 'synced',
+              stream_url: tr.stream_url,
+              cover_url: tr.cover_url,
+              is_favorite: false,
+              is_auto_dj: true,
+              checked: false,
+            }));
+
+            libraryTracks.push(...newTracks);
+            renderFilteredTracklist();
+            playTrack(nextStartIndex);
+          }
+        }).catch(err => {
+          isFetchingAutoDj = false;
+          console.error("Auto-DJ fetch error:", err);
+        });
+      }
+    }
+
+    // =========================================================================
+    // Phase 7: Studio Volume Normalizer (ReplayGain) Settings
+    // =========================================================================
+    function initNormalizerSettings() {
+      const toggle = document.getElementById('volumeNormalizerToggle');
+      if (toggle) toggle.checked = normalizerEnabled;
+    }
+
+    function updateNormalizerSetting(enabled) {
+      normalizerEnabled = enabled;
+      localStorage.setItem('sonance_normalizer', enabled);
+      if (audioCtx && dynamicsCompressor && eqFilters.length > 0) {
+        try {
+          const lastFilter = eqFilters[eqFilters.length - 1];
+          lastFilter.disconnect();
+          if (normalizerEnabled) {
+            lastFilter.connect(dynamicsCompressor);
+            dynamicsCompressor.connect(analyser);
+          } else {
+            lastFilter.connect(analyser);
+          }
+        } catch (e) {
+          console.error("Dynamics compressor routing error:", e);
+        }
+      }
+    }
+
+    // =========================================================================
+    // Phase 7: Desktop Floating Mini-Player & Lyrics Overlay
+    // =========================================================================
+    let isMiniPlayerActive = false;
+
+    function toggleMiniPlayer(enable) {
+      isMiniPlayerActive = enable;
+      const container = document.getElementById('miniPlayerContainer');
+      if (enable) {
+        container.style.display = 'flex';
+        const curTrack = (playingTrackIndex !== null) ? libraryTracks.find(t => t.index === playingTrackIndex) : null;
+        if (curTrack) {
+          document.getElementById('miniPlayerTitle').innerText = curTrack.title || curTrack.filename;
+          document.getElementById('miniPlayerArtist').innerText = curTrack.artist || 'Unknown';
+          document.getElementById('miniPlayerArt').innerHTML = `<img src="${curTrack.cover_url}" style="width:100%; height:100%; object-fit:cover;" onerror="this.parentElement.innerText='🎵'">`;
+        }
+        document.getElementById('miniPlayPauseBtn').innerText = audio.paused ? '▶' : '⏸';
+      } else {
+        container.style.display = 'none';
+      }
+
+      if (window.pywebview && window.pywebview.api && window.pywebview.api.toggle_mini_player) {
+        window.pywebview.api.toggle_mini_player(enable);
+      }
+    }
+
+    // =========================================================================
+    // Phase 7: Library Doctor & Duplicate Track Finder
+    // =========================================================================
+    let doctorHealthData = null;
+
+    function openLibraryDoctorModal() {
+      document.getElementById('libraryDoctorModal').style.display = 'flex';
+      runLibraryDoctorScan();
+    }
+
+    function closeLibraryDoctorModal() {
+      document.getElementById('libraryDoctorModal').style.display = 'none';
+    }
+
+    function runLibraryDoctorScan() {
+      const scoreCircle = document.getElementById('doctorHealthScoreCircle');
+      const verdict = document.getElementById('doctorHealthVerdict');
+      const summary = document.getElementById('doctorHealthSummary');
+      const list = document.getElementById('doctorDuplicatesList');
+
+      scoreCircle.innerText = '...';
+      scoreCircle.style.borderColor = 'var(--emerald)';
+      verdict.innerText = 'Analyzing Library Health...';
+      summary.innerText = 'Calculating duplicate acoustic profiles & metadata completeness...';
+      list.innerHTML = '<div style="text-align:center; padding:30px; color:var(--text-dim); font-size:11px;">Scanning audio files...</div>';
+
+      if (window.pywebview && window.pywebview.api && window.pywebview.api.scan_library_health) {
+        window.pywebview.api.scan_library_health().then(res => {
+          doctorHealthData = res;
+          if (!res || !res.success) {
+            verdict.innerText = 'Scan Error';
+            summary.innerText = res ? (res.error || 'Failed to scan') : 'Unknown error';
+            return;
+          }
+
+          const score = res.health_score;
+          scoreCircle.innerText = `${score}%`;
+          if (score >= 80) {
+            scoreCircle.style.borderColor = 'var(--emerald)';
+            scoreCircle.style.color = 'var(--emerald)';
+            verdict.innerText = 'Excellent Health';
+          } else if (score >= 60) {
+            scoreCircle.style.borderColor = 'var(--amber)';
+            scoreCircle.style.color = 'var(--amber)';
+            verdict.innerText = 'Good (A few improvements needed)';
+          } else {
+            scoreCircle.style.borderColor = 'var(--rose)';
+            scoreCircle.style.color = 'var(--rose)';
+            verdict.innerText = 'Needs Attention';
+          }
+
+          summary.innerText = `${res.total_tracks} tracks analyzed. Found ${res.total_duplicate_files} duplicate files across ${res.total_duplicate_groups} song groups.`;
+          document.getElementById('doctorStatTotal').innerText = res.total_tracks;
+          document.getElementById('doctorStatDuplicates').innerText = res.total_duplicate_files;
+          document.getElementById('doctorStatMissingLyrics').innerText = res.missing_lyrics_count;
+          document.getElementById('doctorStatMissingTags').innerText = res.missing_tags_count;
+
+          const cleanBtn = document.getElementById('cleanAllDuplicatesBtn');
+          if (cleanBtn) {
+            cleanBtn.style.display = res.total_duplicate_files > 0 ? 'block' : 'none';
+          }
+
+          renderDoctorDuplicatesList(res.duplicate_groups);
+        }).catch(err => {
+          verdict.innerText = 'Scan Failed';
+          summary.innerText = err;
+        });
+      }
+    }
+
+    function renderDoctorDuplicatesList(groups) {
+      const list = document.getElementById('doctorDuplicatesList');
+      if (!groups || groups.length === 0) {
+        list.innerHTML = '<div style="text-align:center; padding:30px; color:var(--emerald); font-size:11px;">✨ Perfect! No duplicate tracks detected in your library.</div>';
+        return;
+      }
+
+      let html = '';
+      groups.forEach((g, gIdx) => {
+        html += `
+          <div style="background:#131622; border:1px solid var(--border); border-radius:8px; padding:10px;">
+            <div style="font-weight:700; font-size:12px; margin-bottom:6px; color:#fff;">
+              ${escapeHtml(g.artist)} — ${escapeHtml(g.title)} <span style="font-size:10px; color:var(--text-dim);">(${g.count} copies)</span>
+            </div>
+            <div style="display:flex; flex-direction:column; gap:6px;">
+        `;
+
+        g.tracks.forEach(tr => {
+          const isKeep = tr.is_recommended_keep;
+          html += `
+            <div style="display:flex; align-items:center; justify-content:space-between; background:#0d0f17; border:1px solid ${isKeep ? 'rgba(16,185,129,0.3)' : 'var(--border)'}; border-radius:6px; padding:6px 10px; font-size:11px;">
+              <div style="overflow:hidden; max-width:540px;">
+                <div style="display:flex; align-items:center; gap:6px;">
+                  <span class="quality-badge ${tr.format === 'FLAC' ? 'lossless' : ''}">${escapeHtml(tr.quality || tr.format)}</span>
+                  <span style="color:var(--text-main);">${escapeHtml(tr.filename)}</span>
+                  <span style="color:var(--text-dim);">(${tr.size_mb} MB)</span>
+                </div>
+                <div style="font-size:9px; color:var(--text-dim); white-space:nowrap; overflow:hidden; text-overflow:ellipsis;">${escapeHtml(tr.path)}</div>
+              </div>
+              <div>
+                ${isKeep ? `<span style="color:var(--emerald); font-weight:700; font-size:10px;">⭐ Best Quality (Keep)</span>` :
+                  `<button class="btn btn-secondary" onclick="deleteDoctorDuplicate('${escapeHtml(tr.path.replace(/\\/g, '\\\\'))}')" style="padding:3px 8px; font-size:10px; color:#f87171;">🗑️ Delete</button>`}
+              </div>
+            </div>
+          `;
+        });
+
+        html += `</div></div>`;
+      });
+
+      list.innerHTML = html;
+    }
+
+    function deleteDoctorDuplicate(filePath) {
+      if (!confirm(`Are you sure you want to delete this duplicate audio file?\n\n${filePath}`)) return;
+      if (window.pywebview && window.pywebview.api && window.pywebview.api.delete_duplicate_file) {
+        window.pywebview.api.delete_duplicate_file(filePath).then(res => {
+          if (res && res.success) {
+            libraryTracks = libraryTracks.filter(t => t.path !== filePath);
+            renderFilteredTracklist();
+            runLibraryDoctorScan();
+          } else {
+            alert("Failed to delete file: " + (res ? res.error : 'Unknown error'));
+          }
+        }).catch(err => alert("Delete error: " + err));
+      }
+    }
+
+    function cleanAllLowerQualityDuplicates() {
+      if (!doctorHealthData || !doctorHealthData.duplicate_groups) return;
+      const filesToDelete = [];
+      doctorHealthData.duplicate_groups.forEach(g => {
+        g.tracks.forEach(tr => {
+          if (!tr.is_recommended_keep) {
+            filesToDelete.push(tr.path);
+          }
+        });
+      });
+
+      if (filesToDelete.length === 0) {
+        alert("No duplicate files to delete.");
+        return;
+      }
+
+      if (!confirm(`Are you sure you want to automatically clean and delete ${filesToDelete.length} lower-quality duplicate audio files?\n\nThis will keep the highest bitrate / lossless version of each track.`)) return;
+
+      let deletedCount = 0;
+      const deletePromises = filesToDelete.map(fp => 
+        window.pywebview.api.delete_duplicate_file(fp).then(r => {
+          if (r && r.success) {
+            deletedCount++;
+            libraryTracks = libraryTracks.filter(t => t.path !== fp);
+          }
+        })
+      );
+
+      Promise.all(deletePromises).then(() => {
+        alert(`⚡ Library Doctor Cleaned!\n\nSuccessfully deleted ${deletedCount} duplicate audio files while preserving your highest-quality songs!`);
+        renderFilteredTracklist();
+        runLibraryDoctorScan();
+      }).catch(err => alert("Batch deletion error: " + err));
+    }
+
+    // =========================================================================
+    // Phase 7: Fullscreen Party Visualizer (Web Audio Spectrum)
+    // =========================================================================
+    let visualizerActive = false;
+    let visualizerAnimId = null;
+
+    function openVisualizerModal() {
+      visualizerActive = true;
+      setupWebAudio();
+      document.getElementById('fullscreenVisualizerModal').style.display = 'flex';
+
+      const curTrack = (playingTrackIndex !== null) ? libraryTracks.find(t => t.index === playingTrackIndex) : null;
+      if (curTrack) {
+        document.getElementById('visModalTitle').innerText = curTrack.title || curTrack.filename;
+        document.getElementById('visModalArtist').innerText = `${curTrack.artist || 'Unknown'} · ${curTrack.album || ''}`;
+      }
+      document.getElementById('visPlayPauseBtn').innerText = audio.paused ? '▶' : '⏸';
+
+      drawFullscreenVisualizer();
+    }
+
+    function closeVisualizerModal() {
+      visualizerActive = false;
+      if (visualizerAnimId) cancelAnimationFrame(visualizerAnimId);
+      document.getElementById('fullscreenVisualizerModal').style.display = 'none';
+    }
+
+    function drawFullscreenVisualizer() {
+      if (!visualizerActive) return;
+      visualizerAnimId = requestAnimationFrame(drawFullscreenVisualizer);
+
+      const canvas = document.getElementById('fullscreenCanvas');
+      if (!canvas) return;
+      if (canvas.width !== window.innerWidth || canvas.height !== window.innerHeight) {
+        canvas.width = window.innerWidth;
+        canvas.height = window.innerHeight;
+      }
+
+      const ctx = canvas.getContext('2d');
+      const width = canvas.width;
+      const height = canvas.height;
+
+      ctx.clearRect(0, 0, width, height);
+
+      if (!analyser) return;
+
+      const bufferLength = analyser.frequencyBinCount;
+      const dataArray = new Uint8Array(bufferLength);
+      analyser.getByteFrequencyData(dataArray);
+
+      const barWidth = (width / bufferLength) * 1.6;
+      let x = 0;
+
+      // Draw dynamic glowing bars
+      for (let i = 0; i < bufferLength; i++) {
+        const v = dataArray[i] / 255.0;
+        const barHeight = v * (height * 0.48);
+
+        const grad = ctx.createLinearGradient(0, height, 0, height - barHeight);
+        grad.addColorStop(0, 'rgba(16, 185, 129, 0.1)');
+        grad.addColorStop(0.7, 'rgba(16, 185, 129, 0.7)');
+        grad.addColorStop(1, 'rgba(56, 189, 248, 0.95)');
+
+        ctx.fillStyle = grad;
+        ctx.fillRect(x, height - barHeight, barWidth - 3, barHeight);
+
+        // Peak neon dot
+        if (barHeight > 6) {
+          ctx.fillStyle = '#38bdf8';
+          ctx.fillRect(x, height - barHeight - 3, barWidth - 3, 2);
+        }
+
+        x += barWidth;
+      }
+    }
+
+    // Global Keyboard Shortcuts (F11 & Escape)
+    window.addEventListener('keydown', (e) => {
+      if (e.key === 'F11') {
+        e.preventDefault();
+        if (visualizerActive) closeVisualizerModal();
+        else openVisualizerModal();
+      } else if (e.key === 'Escape') {
+        if (visualizerActive) closeVisualizerModal();
+        if (isMiniPlayerActive) toggleMiniPlayer(false);
+      }
+    });
   </script>
 </body>
 </html>
