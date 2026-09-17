@@ -84,7 +84,14 @@ Sonance brings together three distinct open-source powerhouses:
 - **Sleep Timer**: 15m, 30m, 45m, 60m, Custom, or "End of Current Track" presets with a gentle 30-second volume fade-out.
 - **Smart Stream & Offline Cache**: Pre-caches streamed tracks locally with deterministic SHA-256 hashing for instant offline replay and zero buffering.
 
-### 🔄 8. In-App Updates & Releases
+### 🎛️ 8. Workstation Master: Mini-Player, Auto-DJ, Library Doctor & Visualizer
+- **Floating Mini-Player & Desktop Lyrics Overlay**: Compact 380×240 glassmorphic widget pinned always-on-top, featuring glowing synchronized lyrics line, animated cover art, and playback controls.
+- **Auto-DJ & Infinite Radio Mode**: Automatically discovers acoustically similar tracks from Last.fm and Deezer when your playlist ends, keeping playback going endlessly.
+- **Studio Volume Normalizer & ReplayGain DSP**: Real-time Web Audio `DynamicsCompressorNode` smoothing out harsh volume jumps across streaming platforms and local files.
+- **Library Doctor & Duplicate Audio Cleaner**: Scans your entire music collection, calculates a 0-100% Library Health Score, detects duplicates (with bitrate and lossless quality comparisons), and cleans redundant files. CLI access available via `python sonance.py --doctor [FOLDER]`.
+- **Fullscreen Party Visualizer Mode**: Smooth high-FPS canvas spectrum visualizer with neon glow bars, animated backdrop, and centered real-time karaoke lyrics.
+
+### 🔄 9. In-App Updates & Releases
 - Automatic update detection checking against [GitHub Releases](https://github.com/Sandeep2062/Sonance/releases).
 - Every release includes SHA-256 and MD5 checksum manifests (`RELEASE.sha256sum`, `RELEASE.md5sum`).
 
