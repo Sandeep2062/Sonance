@@ -1123,6 +1123,12 @@
       <button class="btn btn-secondary" onclick="openRoomEqModal()" style="padding:5px 9px; font-size:11px;" id="roomEqHeaderBtn" title="Acoustic Room Correction IR & Sub-Bass DSP">
         🎛️ Room EQ
       </button>
+      <button class="btn btn-secondary" onclick="openStemModal()" style="padding:5px 9px; font-size:11px;" id="stemHeaderBtn" title="AI & Spectral Stem Separator (Vocals, Backing, Bass, Drums)">
+        🎚️ Stems
+      </button>
+      <button class="btn btn-secondary" onclick="openAuditorModal()" style="padding:5px 9px; font-size:11px;" id="auditorHeaderBtn" title="Lossless Audio Authenticity Auditor (Fake Lossless / Brickwall Cutoff)">
+        🔬 Auditor
+      </button>
       <button class="btn btn-secondary" onclick="openLrcStudioModal()" style="padding:5px 9px; font-size:11px;" id="lrcStudioHeaderBtn" title="Interactive LRC Studio & Live Time-Stamper">
         ✍️ LRC Studio
       </button>
@@ -1762,6 +1768,7 @@
         <div style="display:flex; align-items:center; gap:6px;">
           <span class="quality-badge" id="playerQuality">--</span>
           <span id="playerDacTelemetry" style="font-size:10px; color:var(--cyan); font-family:monospace; font-weight:700; background:rgba(6,182,212,0.1); border:1px solid rgba(6,182,212,0.25); padding:1px 6px; border-radius:4px;" title="Bit-Perfect Stream & DAC Telemetry">Direct PCM</span>
+          <span id="playerBpmKeyBadge" style="display:none; font-size:10px; color:var(--amber); font-family:monospace; font-weight:700; background:rgba(245,158,11,0.12); border:1px solid rgba(245,158,11,0.25); padding:1px 6px; border-radius:4px; cursor:pointer;" onclick="openDjMixerInfo()" title="DJ BPM & Camelot Wheel Harmonic Key (Click for Mixing Compatibility)">-- BPM · --</span>
           <button class="btn btn-secondary" style="padding:1px 5px; font-size:10px;" onclick="openCurrentArtistInfo()" title="View Artist Bio & Recommendations">ℹ️ Bio</button>
         </div>
       </div>
@@ -3186,6 +3193,171 @@
     </div>
   </div>
 
+  <!-- AI & Spectral Stem Separator Studio Modal (Phase 14) -->
+  <div class="modal-backdrop" id="stemSeparatorModal" style="display:none;">
+    <div class="modal-box" style="width:780px; max-width:95vw; max-height:88vh; display:flex; flex-direction:column;">
+      <div class="modal-header">
+        <div style="display:flex; align-items:center; gap:8px;">
+          <span style="font-size:18px;">🎚️</span>
+          <div>
+            <div style="font-weight:700; font-size:14px; color:#fff;">AI & Spectral Stem Separator Studio</div>
+            <div style="font-size:10px; color:var(--text-dim);">Isolate Vocals (Acapella), Instrumental Backing, Bass, and Drums via spectral phase cancellation & AI models</div>
+          </div>
+        </div>
+        <button onclick="closeStemModal()" style="background:none; border:none; color:var(--text-muted); cursor:pointer; font-size:16px;">✕</button>
+      </div>
+
+      <div class="modal-body" style="flex:1; display:flex; flex-direction:column; overflow-y:auto; padding:16px; gap:14px;">
+        <div style="background:#121522; border:1px solid var(--border); border-radius:8px; padding:14px; display:flex; flex-direction:column; gap:12px;">
+          <div>
+            <label style="font-size:11px; color:var(--text-dim); display:block; margin-bottom:4px;">Source Audio File:</label>
+            <div style="display:flex; gap:8px;">
+              <input type="text" id="stemSourceFile" class="search-input" placeholder="Select a track from your library or enter absolute file path..." style="flex:1; font-size:11px; padding:6px 10px;">
+              <button class="btn btn-secondary" onclick="useCurrentTrackForStems()" style="font-size:11px; padding:6px 12px; white-space:nowrap;">🎯 Use Active Track</button>
+            </div>
+          </div>
+
+          <div style="display:grid; grid-template-columns:1fr 1fr 1fr; gap:12px;">
+            <div>
+              <label style="font-size:11px; color:var(--text-dim); display:block; margin-bottom:4px;">Separation Mode:</label>
+              <select id="stemModeSelect" class="search-input" style="width:100%; font-size:11px; padding:6px 8px;">
+                <option value="2stems">2-Stem: Vocals + Instrumental</option>
+                <option value="4stems">4-Stem: Vocals + Backing + Bass + Drums</option>
+              </select>
+            </div>
+            <div>
+              <label style="font-size:11px; color:var(--text-dim); display:block; margin-bottom:4px;">Export Format:</label>
+              <select id="stemFormatSelect" class="search-input" style="width:100%; font-size:11px; padding:6px 8px;">
+                <option value="flac">Lossless FLAC</option>
+                <option value="wav">Uncompressed 24-bit WAV</option>
+                <option value="mp3">High-Quality MP3 (320 kbps)</option>
+              </select>
+            </div>
+            <div>
+              <label style="font-size:11px; color:var(--text-dim); display:block; margin-bottom:4px;">Custom Output Directory:</label>
+              <input type="text" id="stemOutputDir" class="search-input" placeholder="Default: <source_folder>/<song>_stems" style="width:100%; font-size:11px; padding:6px 8px;">
+            </div>
+          </div>
+
+          <div style="display:flex; justify-content:space-between; align-items:center; margin-top:4px;">
+            <div id="stemStatusText" style="font-size:11px; color:var(--text-dim);">Ready to separate audio stems. Powered by FFmpeg DSP spectral extraction.</div>
+            <button class="btn btn-primary" id="startStemBtn" onclick="runStemSeparationAction()" style="font-size:12px; padding:7px 18px;">
+              ⚡ Isolate & Export Stems
+            </button>
+          </div>
+        </div>
+
+        <!-- Stem Results & Playback Cards -->
+        <div id="stemResultsSection" style="display:none; flex-direction:column; gap:8px;">
+          <div style="font-size:12px; font-weight:700; color:#fff; display:flex; justify-content:space-between; align-items:center;">
+            <span>Isolated Audio Stems</span>
+            <span id="stemOutputLocation" style="font-size:10px; color:var(--cyan); font-family:monospace;"></span>
+          </div>
+          <div id="stemCardsGrid" style="display:grid; grid-template-columns:1fr 1fr; gap:10px;"></div>
+        </div>
+      </div>
+
+      <div style="padding:10px 16px; background:#121520; border-top:1px solid var(--border); display:flex; justify-content:space-between; align-items:center;">
+        <span style="font-size:10px; color:var(--text-dim);">Center-Panning Subtraction & Formant BPF · Zero Cloud Uploads</span>
+        <button class="btn btn-secondary" onclick="closeStemModal()">Close</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Lossless Audio Authenticity Auditor Modal (Phase 14) -->
+  <div class="modal-backdrop" id="audioAuditorModal" style="display:none;">
+    <div class="modal-box" style="width:820px; max-width:95vw; max-height:88vh; display:flex; flex-direction:column;">
+      <div class="modal-header">
+        <div style="display:flex; align-items:center; gap:8px;">
+          <span style="font-size:18px;">🔬</span>
+          <div>
+            <div style="font-weight:700; font-size:14px; color:#fff;">Lossless Audio Authenticity Auditor</div>
+            <div style="font-size:10px; color:var(--text-dim);">Detect "Fake Lossless" FLAC files upscaled from 128k/192k lossy MP3s via brickwall frequency analysis</div>
+          </div>
+        </div>
+        <button onclick="closeAuditorModal()" style="background:none; border:none; color:var(--text-muted); cursor:pointer; font-size:16px;">✕</button>
+      </div>
+
+      <div class="modal-body" style="flex:1; display:flex; flex-direction:column; overflow-y:auto; padding:16px; gap:14px;">
+        <div style="background:#121522; border:1px solid var(--border); border-radius:8px; padding:14px; display:flex; flex-direction:column; gap:10px;">
+          <label style="font-size:11px; color:var(--text-dim); display:block;">Target Audio File or Folder to Audit:</label>
+          <div style="display:flex; gap:8px;">
+            <input type="text" id="auditorTargetPath" class="search-input" placeholder="Path to audio file or whole album folder..." style="flex:1; font-size:11px; padding:6px 10px;">
+            <button class="btn btn-secondary" onclick="useCurrentTrackForAuditor()" style="font-size:11px; padding:6px 12px; white-space:nowrap;">🎯 Active Track</button>
+            <button class="btn btn-secondary" onclick="useLibraryFolderForAuditor()" style="font-size:11px; padding:6px 12px; white-space:nowrap;">📁 Library Folder</button>
+            <button class="btn btn-primary" id="auditorScanBtn" onclick="runAuditorScanAction()" style="font-size:11px; padding:6px 16px; white-space:nowrap;">
+              🔍 Run Audit Scan
+            </button>
+          </div>
+        </div>
+
+        <!-- Auditor Results View -->
+        <div id="auditorResultsContainer" style="flex:1; background:#0e111a; border:1px solid var(--border); border-radius:8px; padding:16px; display:flex; flex-direction:column; gap:12px;">
+          <div style="text-align:center; padding:40px; color:var(--text-dim); font-size:12px;">
+            Select an audio file or library folder above and click "Run Audit Scan" to inspect frequency brickwall roll-offs.
+          </div>
+        </div>
+      </div>
+
+      <div style="padding:10px 16px; background:#121520; border-top:1px solid var(--border); display:flex; justify-content:space-between; align-items:center;">
+        <span style="font-size:10px; color:var(--text-dim);">Brickwall Spectral Cutoff Detection: 16 kHz (128k MP3) · 19.5 kHz (320k) · 22 kHz (Genuine CD)</span>
+        <button class="btn btn-secondary" onclick="closeAuditorModal()">Close</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Guitar Chord Tab & Voicing Modal (Phase 14) -->
+  <div class="modal-backdrop" id="chordFretModal" style="display:none; z-index:10001;">
+    <div class="modal-box" style="width:360px; max-width:90vw; display:flex; flex-direction:column;">
+      <div class="modal-header">
+        <div style="font-weight:700; font-size:13px; color:#fff;" id="chordModalTitle">Guitar Chord Tab</div>
+        <button onclick="closeChordFretModal()" style="background:none; border:none; color:var(--text-muted); cursor:pointer; font-size:16px;">✕</button>
+      </div>
+      <div class="modal-body" style="padding:16px; text-align:center; display:flex; flex-direction:column; align-items:center; gap:10px;">
+        <div id="chordModalName" style="font-size:24px; font-weight:800; color:var(--amber);"></div>
+        <pre id="chordModalAscii" style="background:#07090f; border:1px solid var(--border); border-radius:6px; padding:12px; font-family:monospace; font-size:12px; line-height:1.25; color:var(--emerald); width:180px; text-align:left;"></pre>
+        <div id="chordModalFrets" style="font-size:11px; color:var(--text-muted);"></div>
+      </div>
+      <div style="padding:8px 16px; background:#121520; border-top:1px solid var(--border); text-align:right;">
+        <button class="btn btn-secondary" onclick="closeChordFretModal()" style="padding:4px 12px; font-size:11px;">Close</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- DJ Camelot Harmonic Mixing Compatibility Modal (Phase 14) -->
+  <div class="modal-backdrop" id="djMixerModal" style="display:none; z-index:10000;">
+    <div class="modal-box" style="width:580px; max-width:92vw; display:flex; flex-direction:column;">
+      <div class="modal-header">
+        <div style="display:flex; align-items:center; gap:8px;">
+          <span style="font-size:16px;">🎛️</span>
+          <div style="font-weight:700; font-size:13px; color:#fff;">DJ Camelot Harmonic Mixing Wheel</div>
+        </div>
+        <button onclick="closeDjMixerModal()" style="background:none; border:none; color:var(--text-muted); cursor:pointer; font-size:16px;">✕</button>
+      </div>
+      <div class="modal-body" style="padding:16px; display:flex; flex-direction:column; gap:12px;">
+        <div id="djModalTrackInfo" style="background:#121522; border:1px solid var(--border); border-radius:8px; padding:12px; display:flex; justify-content:space-between; align-items:center;">
+          <div>
+            <div id="djModalTitle" style="font-weight:700; font-size:13px; color:#fff;">--</div>
+            <div id="djModalArtist" style="font-size:11px; color:var(--text-dim);">--</div>
+          </div>
+          <div style="text-align:right;">
+            <div id="djModalKeyBadge" style="font-size:14px; font-weight:800; color:var(--amber);">--</div>
+            <div id="djModalBpmBadge" style="font-size:11px; color:var(--cyan); font-family:monospace;">-- BPM</div>
+          </div>
+        </div>
+
+        <div>
+          <div style="font-size:11px; font-weight:700; color:#fff; margin-bottom:6px;">Compatible Camelot Keys for Seamless Mix Transitions:</div>
+          <div id="djCompatibleKeysList" style="display:flex; flex-direction:column; gap:6px;"></div>
+        </div>
+      </div>
+      <div style="padding:8px 16px; background:#121520; border-top:1px solid var(--border); display:flex; justify-content:space-between; align-items:center;">
+        <span style="font-size:10px; color:var(--text-dim);">Camelot Wheel: ±1 Step Energy · Relative Maj/Min Mood Shift</span>
+        <button class="btn btn-secondary" onclick="closeDjMixerModal()" style="padding:4px 12px; font-size:11px;">Close</button>
+      </div>
+    </div>
+  </div>
+
   <!-- Podcast & Long Mix Bookmark Resumption Toast (Phase 10) -->
   <div id="podcastResumeToast" style="display:none; position:fixed; bottom:85px; right:20px; z-index:9999; background:#131722; border:1px solid var(--border); box-shadow:0 8px 24px rgba(0,0,0,0.6); border-radius:10px; padding:10px 14px; align-items:center; gap:10px; backdrop-filter:blur(10px);">
     <span style="font-size:16px;">⏱️</span>
@@ -3553,6 +3725,11 @@
         updateDacTelemetryDisplay(track);
       }
 
+      // Phase 14: Analyze & Display BPM & Camelot Key
+      if (typeof updateTrackBpmKeyDisplay === 'function') {
+        updateTrackBpmKeyDisplay(track);
+      }
+
       // Phase 11: Update Ambient Fluid Mesh Backdrop
       if (typeof updateAmbientColorsFromTrack === 'function') {
         updateAmbientColorsFromTrack(track);
@@ -3877,6 +4054,19 @@
               }
             });
           }
+
+          // Phase 14: Synchronized Chords Accompaniment
+          if (window.pywebview.api.get_synced_chords && (track.artist || track.title)) {
+            window.pywebview.api.get_synced_chords(track.artist || '', track.title || track.filename, currentTrackKey || 'A Minor').then(chordData => {
+              if (chordData && chordData.progression && lyricsLines.length > 0) {
+                const prog = chordData.progression;
+                lyricsLines.forEach((l, i) => {
+                  l.chord = prog[i % prog.length];
+                });
+                renderLyricsPreview(lyricsLines);
+              }
+            });
+          }
         });
       }
       renderFilteredTracklist();
@@ -3893,6 +4083,7 @@
       lines.forEach((l, i) => {
         const hasTs = l.timestamp !== '';
         const sub = l.romanized || l.translation;
+        const chordBadge = l.chord ? `<span class="chord-badge" title="Guitar Tab: ${escapeHtml(l.chord)}" style="color:var(--amber); font-weight:700; font-family:monospace; background:rgba(245,158,11,0.15); border:1px solid rgba(245,158,11,0.3); border-radius:4px; padding:1px 5px; font-size:10px; margin-right:4px; cursor:pointer;" onclick="event.stopPropagation(); showChordFretModal('${escapeHtml(l.chord)}')">[${escapeHtml(l.chord)}]</span>` : '';
         const wordsHtml = (l.words && l.words.length > 0)
           ? l.words.map(w => `<span class="karaoke-word" data-start="${w.start_sec}" data-end="${w.end_sec}" style="transition:all 0.08s ease;">${escapeHtml(w.word)}</span>`).join('')
           : escapeHtml(l.text);
@@ -3901,6 +4092,7 @@
           <div class="lyric-line" onclick="seekToLyric(${l.seconds})">
             <div style="display:flex; align-items:center; gap:8px;">
               ${hasTs ? `<span class="lyric-ts">${l.timestamp}</span>` : ''}
+              ${chordBadge}
               <span class="lyric-content">${wordsHtml}</span>
             </div>
             ${sub ? `<div style="font-size:11px; color:#38bdf8; font-weight:500; margin-top:2px; padding-left:${hasTs ? '46px' : '0'}; opacity:0.85;">${escapeHtml(sub)}</div>` : ''}
@@ -6114,6 +6306,10 @@
         closeCdRipperModal();
         closeCloudModal();
         closeRoomEqModal();
+        closeStemModal();
+        closeAuditorModal();
+        closeChordFretModal();
+        closeDjMixerModal();
         dismissPodcastResumeToast();
         const popup = document.getElementById('speedStudioPopup');
         if (popup) popup.style.display = 'none';
@@ -8395,6 +8591,339 @@
       if (audioCtx && subBassGain && subBassEnabled) {
         subBassGain.gain.setValueAtTime((subBassDrive / 100.0) * 0.7, audioCtx.currentTime);
       }
+    }
+
+    // =========================================================================
+    // Phase 14: Stem Separator Studio, Lossless Authenticity Auditor & DJ Mixer
+    // =========================================================================
+    let currentTrackBpm = null;
+    let currentTrackKey = null;
+    let currentTrackCamelot = null;
+    let currentTrackCamelotFull = null;
+    let currentCompatibleKeys = [];
+
+    // --- Stem Separator ---
+    function openStemModal() {
+      const modal = document.getElementById('stemSeparatorModal');
+      if (modal) modal.style.display = 'flex';
+      const input = document.getElementById('stemSourceFile');
+      if (input && !input.value.trim()) {
+        useCurrentTrackForStems();
+      }
+    }
+
+    function closeStemModal() {
+      const modal = document.getElementById('stemSeparatorModal');
+      if (modal) modal.style.display = 'none';
+    }
+
+    function useCurrentTrackForStems() {
+      const track = (playingTrackIndex !== null) ? libraryTracks.find(t => t.index === playingTrackIndex)
+                  : (selectedTrackIndex !== null) ? libraryTracks.find(t => t.index === selectedTrackIndex) : null;
+      const input = document.getElementById('stemSourceFile');
+      if (track && track.path && input) {
+        input.value = track.path;
+      }
+    }
+
+    function runStemSeparationAction() {
+      const file = (document.getElementById('stemSourceFile').value || '').trim();
+      if (!file) {
+        alert('Please specify or select an audio file to separate.');
+        return;
+      }
+
+      const mode = document.getElementById('stemModeSelect').value;
+      const fmt = document.getElementById('stemFormatSelect').value;
+      const outDir = (document.getElementById('stemOutputDir').value || '').trim() || null;
+      const btn = document.getElementById('startStemBtn');
+      const status = document.getElementById('stemStatusText');
+      const resultsSection = document.getElementById('stemResultsSection');
+      const grid = document.getElementById('stemCardsGrid');
+
+      btn.disabled = true;
+      btn.innerHTML = '⏳ Separating Stems...';
+      status.innerText = 'Analyzing audio spectrum & extracting stems via spectral isolation...';
+      status.style.color = 'var(--cyan)';
+
+      if (window.pywebview && window.pywebview.api && window.pywebview.api.separate_audio_stems) {
+        window.pywebview.api.separate_audio_stems(file, outDir, mode, fmt).then(res => {
+          btn.disabled = false;
+          btn.innerHTML = '⚡ Isolate & Export Stems';
+
+          if (res && res.success) {
+            status.innerText = `✓ Stems successfully separated into ${res.output_dir}`;
+            status.style.color = 'var(--emerald)';
+            document.getElementById('stemOutputLocation').innerText = res.output_dir;
+
+            let html = '';
+            const stemIcons = {
+              vocals: '🎤',
+              instrumental: '🎸',
+              backing: '🎹',
+              bass: '🎻',
+              drums: '🥁'
+            };
+
+            for (const [stemName, stemPath] of Object.entries(res.stems || {})) {
+              const icon = stemIcons[stemName.toLowerCase()] || '🎵';
+              const filename = stemPath.replace(/^.*[\\\/]/, '');
+              html += `
+                <div style="background:#141824; border:1px solid var(--border); border-radius:6px; padding:10px; display:flex; align-items:center; justify-content:space-between;">
+                  <div style="display:flex; align-items:center; gap:8px;">
+                    <span style="font-size:18px;">${icon}</span>
+                    <div>
+                      <div style="font-weight:700; font-size:11px; color:#fff; text-transform:capitalize;">${stemName}</div>
+                      <div style="font-size:10px; color:var(--text-dim); max-width:200px; overflow:hidden; text-overflow:ellipsis; white-space:nowrap;" title="${escapeHtml(filename)}">${escapeHtml(filename)}</div>
+                    </div>
+                  </div>
+                  <div style="display:flex; gap:6px;">
+                    <button class="btn btn-secondary" style="padding:3px 8px; font-size:10px;" onclick="playAudioFileDirect('${escapeHtml(stemPath.replace(/\\/g, '/'))}')" title="Preview Stem">▶ Preview</button>
+                  </div>
+                </div>
+              `;
+            }
+            grid.innerHTML = html;
+            resultsSection.style.display = 'flex';
+          } else {
+            status.innerText = `✕ Error: ${(res ? res.error : 'Separation failed')}`;
+            status.style.color = 'var(--rose)';
+          }
+        }).catch(err => {
+          btn.disabled = false;
+          btn.innerHTML = '⚡ Isolate & Export Stems';
+          status.innerText = `✕ Error: ${err.message || err}`;
+          status.style.color = 'var(--rose)';
+        });
+      }
+    }
+
+    function playAudioFileDirect(path) {
+      if (!path) return;
+      audio.src = `/stream/${encodeURIComponent(path)}`;
+      audio.play().catch(() => {
+        audio.src = `file:///${path.replace(/^\//, '')}`;
+        audio.play();
+      });
+      document.getElementById('playPauseBtn').innerText = '⏸';
+    }
+
+    // --- Lossless Audio Authenticity Auditor ---
+    function openAuditorModal() {
+      const modal = document.getElementById('audioAuditorModal');
+      if (modal) modal.style.display = 'flex';
+      const input = document.getElementById('auditorTargetPath');
+      if (input && !input.value.trim()) {
+        useCurrentTrackForAuditor();
+      }
+    }
+
+    function closeAuditorModal() {
+      const modal = document.getElementById('audioAuditorModal');
+      if (modal) modal.style.display = 'none';
+    }
+
+    function useCurrentTrackForAuditor() {
+      const track = (playingTrackIndex !== null) ? libraryTracks.find(t => t.index === playingTrackIndex)
+                  : (selectedTrackIndex !== null) ? libraryTracks.find(t => t.index === selectedTrackIndex) : null;
+      const input = document.getElementById('auditorTargetPath');
+      if (track && track.path && input) {
+        input.value = track.path;
+      }
+    }
+
+    function useLibraryFolderForAuditor() {
+      const folder = document.getElementById('currentFolderText').innerText;
+      const input = document.getElementById('auditorTargetPath');
+      if (folder && folder !== 'No folder selected' && input) {
+        input.value = folder;
+      }
+    }
+
+    function runAuditorScanAction() {
+      const target = (document.getElementById('auditorTargetPath').value || '').trim();
+      if (!target) {
+        alert('Please specify a target audio file or folder to audit.');
+        return;
+      }
+
+      const btn = document.getElementById('auditorScanBtn');
+      const container = document.getElementById('auditorResultsContainer');
+
+      btn.disabled = true;
+      btn.innerHTML = '⏳ Scanning Spectrum...';
+      container.innerHTML = '<div style="text-align:center; padding:40px; color:var(--cyan); font-size:12px;">Auditing spectral cutoff frequencies and Nyquist energy...</div>';
+
+      const isFolder = !/\.[a-zA-Z0-9]{2,5}$/.test(target);
+      const apiMethod = isFolder ? 'audit_batch_authenticity' : 'audit_audio_authenticity';
+
+      if (window.pywebview && window.pywebview.api && window.pywebview.api[apiMethod]) {
+        window.pywebview.api[apiMethod](target).then(res => {
+          btn.disabled = false;
+          btn.innerHTML = '🔍 Run Audit Scan';
+
+          if (!res || !res.success) {
+            container.innerHTML = `<div style="text-align:center; padding:40px; color:var(--rose); font-size:12px;">Audit failed: ${escapeHtml((res ? res.error : 'Unknown error'))}</div>`;
+            return;
+          }
+
+          if (isFolder) {
+            let html = `
+              <div style="display:flex; justify-content:space-between; align-items:center; border-bottom:1px solid var(--border); padding-bottom:8px;">
+                <div>
+                  <div style="font-weight:700; font-size:13px; color:#fff;">Batch Audit: ${res.total_audited} Tracks Inspected</div>
+                  <div style="font-size:10px; color:var(--text-dim);">${escapeHtml(res.directory)}</div>
+                </div>
+                <div style="display:flex; gap:8px;">
+                  <span class="quality-badge" style="background:rgba(16,185,129,0.15); color:var(--emerald); border-color:rgba(16,185,129,0.3);">✓ ${res.genuine_lossless_count} Genuine</span>
+                  <span class="quality-badge" style="background:rgba(244,63,94,0.15); color:var(--rose); border-color:rgba(244,63,94,0.3);">✕ ${res.fake_lossless_count} Fake/Upscaled</span>
+                </div>
+              </div>
+              <div style="overflow-y:auto; max-height:400px; display:flex; flex-direction:column; gap:6px;">
+            `;
+
+            (res.results || []).forEach(f => {
+              html += `
+                <div style="background:#131722; border:1px solid var(--border); border-radius:6px; padding:8px 12px; display:flex; justify-content:space-between; align-items:center;">
+                  <div>
+                    <div style="font-size:11px; font-weight:600; color:#fff;">${escapeHtml(f.filename)}</div>
+                    <div style="font-size:10px; color:var(--text-dim);">${f.format} · ${f.samplerate} Hz · ${f.bitdepth}-bit · Cutoff: ${f.cutoff_frequency_hz} Hz</div>
+                  </div>
+                  <span class="quality-badge" style="background:${f.badge_color ? f.badge_color.replace(')', ', 0.15)').replace('var(', 'rgba(') : 'transparent'}; color:${f.badge_color}; border-color:${f.badge_color};">${escapeHtml(f.verdict_label)}</span>
+                </div>
+              `;
+            });
+            html += `</div>`;
+            container.innerHTML = html;
+          } else {
+            const score = res.authenticity_score || 80;
+            const scoreColor = score >= 90 ? 'var(--emerald)' : score >= 60 ? 'var(--amber)' : 'var(--rose)';
+            container.innerHTML = `
+              <div style="display:flex; justify-content:space-between; align-items:center; border-bottom:1px solid var(--border); padding-bottom:12px;">
+                <div>
+                  <div style="font-weight:700; font-size:14px; color:#fff;">${escapeHtml(res.filename)}</div>
+                  <div style="font-size:11px; color:var(--text-dim);">${res.format} · ${res.samplerate} Hz (${res.bitdepth}-bit) · Nyquist: ${res.nyquist_hz} Hz</div>
+                </div>
+                <div style="text-align:right;">
+                  <span class="quality-badge" style="font-size:12px; padding:4px 10px; background:rgba(16,185,129,0.15); color:${res.badge_color}; border-color:${res.badge_color};">
+                    ${escapeHtml(res.verdict_label)}
+                  </span>
+                </div>
+              </div>
+
+              <div style="display:grid; grid-template-columns:1fr 1fr; gap:12px; margin-top:8px;">
+                <div style="background:#141724; border:1px solid var(--border); border-radius:8px; padding:12px;">
+                  <div style="font-size:11px; color:var(--text-dim); margin-bottom:4px;">Spectral Brickwall Frequency Cutoff:</div>
+                  <div style="font-size:22px; font-weight:800; color:var(--cyan); font-family:monospace;">${res.cutoff_frequency_hz} <span style="font-size:12px;">Hz</span></div>
+                  <div style="font-size:10px; color:var(--text-dim); margin-top:4px;">CD standard cutoff: 22,050 Hz | MP3 128k: 16,000 Hz</div>
+                </div>
+
+                <div style="background:#141724; border:1px solid var(--border); border-radius:8px; padding:12px;">
+                  <div style="font-size:11px; color:var(--text-dim); margin-bottom:4px;">Authenticity Score:</div>
+                  <div style="font-size:22px; font-weight:800; color:${scoreColor}; font-family:monospace;">${score} <span style="font-size:12px;">/ 100</span></div>
+                  <div style="height:6px; background:#23293a; border-radius:3px; margin-top:8px; overflow:hidden;">
+                    <div style="height:100%; width:${score}%; background:${scoreColor};"></div>
+                  </div>
+                </div>
+              </div>
+
+              <div style="background:#121520; border:1px solid var(--border); border-radius:6px; padding:10px; font-size:11px; color:var(--text-muted); line-height:1.4;">
+                <strong>Diagnostic Finding:</strong> ${escapeHtml(res.notes)}
+              </div>
+            `;
+          }
+        }).catch(err => {
+          btn.disabled = false;
+          btn.innerHTML = '🔍 Run Audit Scan';
+          container.innerHTML = `<div style="text-align:center; padding:40px; color:var(--rose); font-size:12px;">Scan error: ${err.message || err}</div>`;
+        });
+      }
+    }
+
+    // --- DJ Camelot Harmonic Key & BPM Beatmatcher ---
+    function updateTrackBpmKeyDisplay(track) {
+      const badge = document.getElementById('playerBpmKeyBadge');
+      if (!badge || !track || !track.path) return;
+
+      if (window.pywebview && window.pywebview.api && window.pywebview.api.analyze_track_key_bpm) {
+        window.pywebview.api.analyze_track_key_bpm(track.path).then(res => {
+          if (res && res.success) {
+            currentTrackBpm = res.bpm;
+            currentTrackKey = res.key;
+            currentTrackCamelot = res.camelot;
+            currentTrackCamelotFull = res.camelot_full;
+            currentCompatibleKeys = res.compatible_keys || [];
+
+            badge.innerText = `⚡ ${res.bpm} BPM · ${res.camelot_full}`;
+            badge.style.display = 'inline-block';
+          }
+        }).catch(() => {});
+      }
+    }
+
+    function openDjMixerInfo() {
+      const modal = document.getElementById('djMixerModal');
+      if (!modal) return;
+
+      const track = (playingTrackIndex !== null) ? libraryTracks.find(t => t.index === playingTrackIndex) : null;
+      if (track) {
+        document.getElementById('djModalTitle').innerText = track.title || track.filename;
+        document.getElementById('djModalArtist').innerText = track.artist || 'Unknown Artist';
+      }
+
+      document.getElementById('djModalKeyBadge').innerText = currentTrackCamelotFull || '8A (Am)';
+      document.getElementById('djModalBpmBadge').innerText = `${currentTrackBpm || 120.0} BPM`;
+
+      const listEl = document.getElementById('djCompatibleKeysList');
+      if (listEl) {
+        let html = '';
+        (currentCompatibleKeys || []).forEach(k => {
+          html += `
+            <div style="background:#141724; border:1px solid var(--border); border-radius:6px; padding:8px 12px; display:flex; justify-content:space-between; align-items:center;">
+              <div style="display:flex; align-items:center; gap:8px;">
+                <span class="quality-badge" style="background:rgba(245,158,11,0.15); color:var(--amber); border-color:rgba(245,158,11,0.3); font-weight:700;">${k.camelot}</span>
+                <span style="font-size:11px; color:#fff; font-weight:600;">${k.key}</span>
+              </div>
+              <span style="font-size:10px; color:var(--text-dim);">${k.relation}</span>
+            </div>
+          `;
+        });
+        listEl.innerHTML = html;
+      }
+
+      modal.style.display = 'flex';
+    }
+
+    function closeDjMixerModal() {
+      const modal = document.getElementById('djMixerModal');
+      if (modal) modal.style.display = 'none';
+    }
+
+    // --- Synchronized Guitar Chord Studio ---
+    function showChordFretModal(chordName) {
+      if (!chordName) return;
+      const modal = document.getElementById('chordFretModal');
+      if (!modal) return;
+
+      document.getElementById('chordModalName').innerText = chordName;
+
+      if (window.pywebview && window.pywebview.api && window.pywebview.api.get_chord_diagram) {
+        window.pywebview.api.get_chord_diagram(chordName).then(data => {
+          if (data) {
+            document.getElementById('chordModalAscii').innerText = data.ascii_art || '';
+            const fretsStr = (data.frets || []).map(f => f === -1 ? 'X' : f).join(' - ');
+            document.getElementById('chordModalFrets').innerText = `Tuning EADGBE: [ ${fretsStr} ]`;
+          }
+          modal.style.display = 'flex';
+        });
+      } else {
+        modal.style.display = 'flex';
+      }
+    }
+
+    function closeChordFretModal() {
+      const modal = document.getElementById('chordFretModal');
+      if (modal) modal.style.display = 'none';
     }
 
     // Auto-init Phase 11, 12 & 13 features on DOM ready

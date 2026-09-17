@@ -146,6 +146,22 @@ Examples:
       help="Convert playlist: --convert-playlist <input_file_or_url> [output_format] [output_file]",
   )
   parser.add_argument(
+      "--split-stems",
+      nargs="+",
+      metavar="PARAM",
+      help="Separate audio file into stems: --split-stems <audio_file> [output_dir] [2stems|4stems] [format]",
+  )
+  parser.add_argument(
+      "--audit",
+      metavar="FILE_OR_DIR",
+      help="Audit lossless audio authenticity & detect fake upscaled MP3 files",
+  )
+  parser.add_argument(
+      "--analyze-key",
+      metavar="AUDIO_FILE",
+      help="Analyze track BPM tempo, musical key, and Camelot DJ wheel mixing code",
+  )
+  parser.add_argument(
       "--version",
       action="version",
       version=f"Sonance v{modern_lyrics_downloader.APP_VERSION}",
@@ -443,6 +459,69 @@ Examples:
       print(f"    Saved: {res.get('output_file')}")
     else:
       print(f"[-] Playlist conversion failed: {res.get('error')}")
+    return
+
+  if args.split_stems:
+    import vocal_separator
+    audio_file = args.split_stems[0]
+    out_dir = args.split_stems[1] if len(args.split_stems) > 1 and args.split_stems[1] not in ["2stems", "4stems", "wav", "mp3", "flac", "m4a"] else None
+    mode = "4stems" if "4stems" in args.split_stems else "2stems"
+    fmt = "flac"
+    for p in args.split_stems[1:]:
+      if p in ["wav", "mp3", "flac", "m4a"]:
+        fmt = p
+        break
+    print(f"[*] Separating stems for {audio_file} (Mode: {mode.upper()}, Format: {fmt.upper()})...")
+    res = vocal_separator.separate_stems(audio_file, out_dir, mode, fmt)
+    if res.get("success"):
+      print(f"[+] Successfully separated stems to: {res.get('output_dir')}")
+      for stem_name, path in res.get("stems", {}).items():
+        print(f"    • {stem_name.capitalize()}: {os.path.basename(path)}")
+    else:
+      print(f"[-] Stem separation failed: {res.get('error')}")
+    return
+
+  if args.audit:
+    import audio_auditor
+    target = args.audit
+    if os.path.isdir(target):
+      print(f"[*] Batch auditing audio authenticity in folder: {target}...")
+      res = audio_auditor.audit_directory(target)
+      if res.get("success"):
+        print(f"[+] Scanned {res.get('total_scanned')} lossless files:")
+        print(f"    • Genuine Lossless: {res.get('genuine_count')}")
+        print(f"    • Fake / Upscaled:  {res.get('fake_count')}")
+        for f in res.get("files", []):
+          icon = "[+]" if "genuine" in f.get("verdict_category", "") else "[-]"
+          print(f"    {icon} {f.get('filename')}: {f.get('verdict_label')} (Cutoff: {f.get('cutoff_frequency_hz')} Hz)")
+      else:
+        print(f"[-] Audit failed: {res.get('error')}")
+    else:
+      print(f"[*] Auditing audio authenticity for: {target}...")
+      res = audio_auditor.audit_file(target)
+      if res.get("success"):
+        print(f"[+] Verdict: {res.get('verdict_label')} (Score: {res.get('authenticity_score', 95)}/100)")
+        print(f"    • Cutoff Frequency: {res.get('cutoff_frequency_hz')} Hz")
+        print(f"    • Nyquist Limit:    {res.get('nyquist_hz')} Hz")
+        print(f"    • Analysis:         {res.get('notes')}")
+      else:
+        print(f"[-] Audit failed: {res.get('error')}")
+    return
+
+  if args.analyze_key:
+    import dj_mixer
+    audio_file = args.analyze_key
+    print(f"[*] Analyzing BPM tempo & Camelot harmonic key for: {audio_file}...")
+    res = dj_mixer.analyze_track_bpm_and_key(audio_file)
+    if res.get("success"):
+      print(f"[+] Track:   {res.get('filename')}")
+      print(f"[+] Tempo:   {res.get('bpm')} BPM")
+      print(f"[+] Key:     {res.get('key')} [{res.get('camelot_full')}] (Confidence: {res.get('confidence')*100:.0f}%)")
+      print("[*] Harmonically Compatible DJ Transition Keys:")
+      for k in res.get("compatible_keys", []):
+        print(f"    • {k['camelot']} ({k['key']}) -> {k['relation']}")
+    else:
+      print(f"[-] Key analysis failed: {res.get('error')}")
     return
 
   if args.classic:

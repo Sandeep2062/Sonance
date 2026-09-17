@@ -58,6 +58,10 @@ import cd_ripper
 import cloud_streamer
 import room_eq
 import playlist_converter
+import vocal_separator
+import audio_auditor
+import dj_mixer
+import chord_studio
 
 APP_VERSION = "2.1.0"
 GITHUB_REPO = "Sandeep2062/Sonance"
@@ -928,6 +932,34 @@ class LyricsAPI:
     def convert_playlist_file(self, input_path: str, output_format: str, output_path: Optional[str] = None) -> Dict[str, Any]:
         """Converts playlist file to another format."""
         return playlist_converter.convert_playlist(input_path, output_format, output_path)
+
+    # ------------------ Phase 14: Stem Separator Studio -------------------------
+    def separate_audio_stems(self, file_path: str, output_dir: Optional[str] = None, mode: str = "2stems", output_format: str = "flac") -> Dict[str, Any]:
+        """Separates audio file into isolated stems (Vocals, Instrumental, Bass, Drums)."""
+        return vocal_separator.separate_stems(file_path, output_dir, mode, output_format)
+
+    # ------------------ Phase 14: Lossless Authenticity Auditor -----------------
+    def audit_audio_authenticity(self, file_path: str) -> Dict[str, Any]:
+        """Audits an audio file for fake/upscaled lossless compression via brickwall frequency cutoff."""
+        return audio_auditor.audit_file(file_path)
+
+    def audit_batch_authenticity(self, folder_path: str) -> Dict[str, Any]:
+        """Audits all lossless files in a directory to detect fake upscales."""
+        return audio_auditor.audit_directory(folder_path)
+
+    # ------------------ Phase 14: DJ Camelot Harmonic Key & BPM -----------------
+    def analyze_track_key_bpm(self, file_path: str) -> Dict[str, Any]:
+        """Analyzes BPM tempo, musical key, and Camelot DJ wheel mixing code."""
+        return dj_mixer.analyze_track_bpm_and_key(file_path)
+
+    # ------------------ Phase 14: Synchronized Guitar Chord Studio --------------
+    def get_synced_chords(self, artist: str, title: str, key_name: Optional[str] = "A Minor") -> Dict[str, Any]:
+        """Fetches harmonic progression and chord diagrams for track."""
+        return chord_studio.get_song_chord_studio_data(artist, title, key_name)
+
+    def get_chord_diagram(self, chord_name: str) -> Dict[str, Any]:
+        """Returns guitar fretboard diagram and voicing for chord."""
+        return chord_studio.get_chord_details(chord_name)
 
     def _save_last_folder(self, folder: str):
         try:
