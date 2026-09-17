@@ -1497,6 +1497,70 @@
           </div>
         </div>
 
+        <!-- Scrobbling & Social Tracking (Last.fm & ListenBrainz) Card -->
+        <div class="settings-card" style="border-left: 3px solid #d51007;">
+          <div class="settings-card-header">
+            <div>
+              <div class="settings-card-title">
+                <span>📻</span>
+                <span>Scrobbling & Social Music (Last.fm & ListenBrainz)</span>
+              </div>
+              <div class="settings-card-sub">Automatically track your listening habits, show live "Now Playing" on your profile, and receive smart recommendations.</div>
+            </div>
+          </div>
+
+          <div style="display:grid; grid-template-columns: 1fr 1fr; gap:14px;">
+            <!-- Last.fm Box -->
+            <div style="background:var(--bg-card); padding:12px; border-radius:8px; border:1px solid var(--border);">
+              <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:8px;">
+                <div style="display:flex; align-items:center; gap:6px;">
+                  <span style="font-weight:700; font-size:13px; color:#d51007;">Last.fm</span>
+                  <label style="display:flex; align-items:center; cursor:pointer;">
+                    <input type="checkbox" id="settingLastfmEnabled" style="cursor:pointer;">
+                    <span style="font-size:11px; margin-left:6px; color:var(--text-muted);">Enable</span>
+                  </label>
+                </div>
+                <span class="auth-status-pill logged-out" id="lastfmStatusPill">Disconnected</span>
+              </div>
+
+              <div class="form-group" style="margin-bottom:8px;">
+                <label class="form-label" style="font-size:11px;">Session Key</label>
+                <input type="password" class="form-input" id="settingLastfmSessionKey" placeholder="Paste Last.fm Session Key..." style="font-size:11px; padding:6px 10px;">
+              </div>
+
+              <div style="display:flex; gap:6px; align-items:center;">
+                <button class="btn btn-secondary" style="font-size:10px; padding:4px 8px;" onclick="openLastfmWebAuth()">🌐 Connect via Web</button>
+                <button class="btn btn-primary" style="font-size:10px; padding:4px 8px;" onclick="saveScrobblerSettings()">Save</button>
+              </div>
+            </div>
+
+            <!-- ListenBrainz Box -->
+            <div style="background:var(--bg-card); padding:12px; border-radius:8px; border:1px solid var(--border);">
+              <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:8px;">
+                <div style="display:flex; align-items:center; gap:6px;">
+                  <span style="font-weight:700; font-size:13px; color:#eb743b;">ListenBrainz</span>
+                  <label style="display:flex; align-items:center; cursor:pointer;">
+                    <input type="checkbox" id="settingListenbrainzEnabled" style="cursor:pointer;">
+                    <span style="font-size:11px; margin-left:6px; color:var(--text-muted);">Enable</span>
+                  </label>
+                </div>
+                <span class="auth-status-pill logged-out" id="listenbrainzStatusPill">Disconnected</span>
+              </div>
+
+              <div class="form-group" style="margin-bottom:8px;">
+                <label class="form-label" style="font-size:11px;">User Token (listenbrainz.org)</label>
+                <input type="password" class="form-input" id="settingListenbrainzToken" placeholder="Paste your User Token..." style="font-size:11px; padding:6px 10px;">
+              </div>
+
+              <div style="display:flex; gap:6px; align-items:center;">
+                <button class="btn btn-secondary" style="font-size:10px; padding:4px 8px;" onclick="openListenBrainzTokenPage()">🔑 Get Token</button>
+                <button class="btn btn-secondary" style="font-size:10px; padding:4px 8px;" onclick="testListenBrainzToken()">Verify</button>
+                <button class="btn btn-primary" style="font-size:10px; padding:4px 8px;" onclick="saveScrobblerSettings()">Save</button>
+              </div>
+            </div>
+          </div>
+        </div>
+
         <!-- Download & General Storage -->
         <div class="settings-card">
           <div class="settings-card-header">
@@ -1541,7 +1605,10 @@
       <div class="player-names">
         <div class="player-title" id="playerTitle">Not Playing</div>
         <div class="player-artist" id="playerArtist">Select a track</div>
-        <span class="quality-badge" id="playerQuality">--</span>
+        <div style="display:flex; align-items:center; gap:6px;">
+          <span class="quality-badge" id="playerQuality">--</span>
+          <button class="btn btn-secondary" style="padding:1px 5px; font-size:10px;" onclick="openCurrentArtistInfo()" title="View Artist Bio & Recommendations">ℹ️ Bio</button>
+        </div>
       </div>
     </div>
 
@@ -1679,6 +1746,50 @@
     </div>
   </div>
 
+  <!-- Artist Insights & Similar Recommendations (Last.fm) Modal -->
+  <div class="modal-backdrop" id="artistModal">
+    <div class="modal-box" style="width:640px; max-height:85vh; display:flex; flex-direction:column;">
+      <div class="modal-header">
+        <div>
+          <div style="font-weight:700; font-size:14px;" id="artistModalName">Artist Insights</div>
+          <div style="font-size:10px; color:var(--text-dim);" id="artistModalStats">Powered by Last.fm & MusicBrainz</div>
+        </div>
+        <button onclick="closeArtistModal()" style="background:none; border:none; color:var(--text-muted); cursor:pointer; font-size:14px;">✕</button>
+      </div>
+
+      <div class="modal-body" style="overflow-y:auto; flex:1;">
+        <!-- Tags -->
+        <div id="artistModalTags" style="display:flex; flex-wrap:wrap; gap:6px; margin-bottom:10px;"></div>
+
+        <!-- Bio -->
+        <div style="margin-bottom:12px;">
+          <div style="font-size:11px; font-weight:700; color:var(--text-muted); margin-bottom:4px;">Biography:</div>
+          <div id="artistModalBio" style="background:#12151e; border:1px solid var(--border); border-radius:8px; padding:12px; font-size:11px; line-height:1.6; color:var(--text-white); max-height:140px; overflow-y:auto;">
+            Loading biography...
+          </div>
+        </div>
+
+        <!-- Similar Artists -->
+        <div style="margin-bottom:12px;">
+          <div style="font-size:11px; font-weight:700; color:var(--text-muted); margin-bottom:4px;">Similar Artists:</div>
+          <div id="artistModalSimilarArtists" style="display:flex; flex-wrap:wrap; gap:6px;"></div>
+        </div>
+
+        <!-- Similar / Recommended Tracks -->
+        <div>
+          <div style="font-size:11px; font-weight:700; color:var(--text-muted); margin-bottom:4px;">Recommended Tracks:</div>
+          <div id="artistModalSimilarTracks" style="max-height:160px; overflow-y:auto;">
+            <div style="color:var(--text-dim); font-size:11px;">No track recommendations available.</div>
+          </div>
+        </div>
+
+        <div style="display:flex; justify-content:flex-end; margin-top:12px;">
+          <button class="btn btn-secondary" onclick="closeArtistModal()">Close</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
   <script>
     // State
     let libraryTracks = [];
@@ -1690,6 +1801,8 @@
     let playingTrackIndex = null;
     let isAllSelected = false;
     let lyricsLines = [];
+    let currentTrackScrobbled = false;
+    let trackStartTime = Date.now();
 
     // Audio & Web Audio API
     const audio = document.getElementById('audioPlayer');
@@ -1940,6 +2053,10 @@
       playingTrackIndex = index;
       selectTrack(index);
 
+      // Reset scrobbler state
+      currentTrackScrobbled = false;
+      trackStartTime = Date.now();
+
       // Setup audio source from streaming server
       audio.src = track.stream_url;
       audio.play().then(() => {
@@ -1953,6 +2070,13 @@
             track.duration ? Math.round(track.duration) : 0,
             track.cover_url || '',
             true
+          );
+          // Broadcast Now Playing to Last.fm & ListenBrainz
+          window.pywebview.api.scrobble_now_playing(
+            track.artist || 'Unknown',
+            track.title || track.filename,
+            track.album || '',
+            track.duration ? Math.round(track.duration) : 0
           );
         }
       }).catch(err => console.error("Playback error:", err));
@@ -2044,6 +2168,21 @@
 
       // Karaoke line sync
       syncKaraoke(cur);
+
+      // Automatic Scrobble Submission (Last.fm & ListenBrainz after 50% or 4 min)
+      if (!currentTrackScrobbled && dur >= 30 && (cur >= dur * 0.5 || cur >= 240)) {
+        currentTrackScrobbled = true;
+        const curTrack = (playingTrackIndex !== null) ? libraryTracks.find(t => t.index === playingTrackIndex) : null;
+        if (curTrack && window.pywebview && window.pywebview.api) {
+          window.pywebview.api.scrobble_track(
+            curTrack.artist || 'Unknown',
+            curTrack.title || curTrack.filename,
+            curTrack.album || '',
+            Math.round(dur),
+            Math.floor(trackStartTime / 1000)
+          );
+        }
+      }
     });
 
     function syncKaraoke(currentTime) {
@@ -2644,6 +2783,7 @@
         setupWebAudio();
         if (window.pywebview && window.pywebview.api) {
           window.pywebview.api.update_discord_rpc(title, artist, 'Stream Preview', 30, cover || '', true);
+          window.pywebview.api.scrobble_now_playing(artist, title, 'Stream Preview', 30);
         }
       }).catch(err => console.error("Preview error:", err));
       document.getElementById('playerTitle').innerText = title;
@@ -2755,6 +2895,33 @@
           if (cfg.spotify_client_secret) document.getElementById('settingSpotifyClientSecret').value = cfg.spotify_client_secret;
         });
 
+        if (window.pywebview.api.get_scrobbler_config) {
+          window.pywebview.api.get_scrobbler_config().then(sc => {
+            sc = sc || {};
+            document.getElementById('settingLastfmEnabled').checked = !!sc.lastfm_enabled;
+            document.getElementById('settingLastfmSessionKey').value = sc.lastfm_session_key || '';
+            const lfmPill = document.getElementById('lastfmStatusPill');
+            if (sc.lastfm_session_key) {
+              lfmPill.className = 'auth-status-pill logged-in';
+              lfmPill.innerText = sc.lastfm_username ? `@${sc.lastfm_username}` : 'Connected';
+            } else {
+              lfmPill.className = 'auth-status-pill logged-out';
+              lfmPill.innerText = 'Disconnected';
+            }
+
+            document.getElementById('settingListenbrainzEnabled').checked = !!sc.listenbrainz_enabled;
+            document.getElementById('settingListenbrainzToken').value = sc.listenbrainz_token || '';
+            const lbPill = document.getElementById('listenbrainzStatusPill');
+            if (sc.listenbrainz_token) {
+              lbPill.className = 'auth-status-pill logged-in';
+              lbPill.innerText = sc.listenbrainz_username ? `@${sc.listenbrainz_username}` : 'Connected';
+            } else {
+              lbPill.className = 'auth-status-pill logged-out';
+              lbPill.innerText = 'Disconnected';
+            }
+          });
+        }
+
         window.pywebview.api.get_download_dir().then(dir => {
           document.getElementById('settingDownloadDir').value = dir || '';
         });
@@ -2811,6 +2978,125 @@
           });
         });
       }
+    }
+
+    // ------------------ Scrobbler & Artist Insights Handlers ------------------
+    function saveScrobblerSettings() {
+      const cfg = {
+        lastfm_enabled: document.getElementById('settingLastfmEnabled').checked,
+        lastfm_session_key: document.getElementById('settingLastfmSessionKey').value.trim(),
+        listenbrainz_enabled: document.getElementById('settingListenbrainzEnabled').checked,
+        listenbrainz_token: document.getElementById('settingListenbrainzToken').value.trim()
+      };
+      if (window.pywebview && window.pywebview.api) {
+        window.pywebview.api.save_scrobbler_config(cfg).then(() => {
+          loadAuthSettings();
+          alert("Scrobbler settings saved!");
+        });
+      }
+    }
+
+    function openLastfmWebAuth() {
+      const authUrl = "http://www.last.fm/api/auth/?api_key=4a9f2c8d234f51e1948087e5498fa670";
+      window.open(authUrl, "_blank");
+      const token = prompt("After authorizing on Last.fm in your browser, enter the 'token' from the URL bar (e.g. ?token=...):");
+      if (token && token.trim() && window.pywebview && window.pywebview.api) {
+        window.pywebview.api.get_lastfm_session(token.trim()).then(res => {
+          if (res && res.success) {
+            alert(`Successfully connected to Last.fm as ${res.username || 'user'}!`);
+            loadAuthSettings();
+          } else {
+            alert(`Last.fm connection failed: ${res.error || 'Invalid token'}`);
+          }
+        });
+      }
+    }
+
+    function openListenBrainzTokenPage() {
+      window.open("https://listenbrainz.org/profile/", "_blank");
+    }
+
+    function testListenBrainzToken() {
+      const token = document.getElementById('settingListenbrainzToken').value.trim();
+      if (!token) {
+        alert("Please paste a ListenBrainz User Token first.");
+        return;
+      }
+      if (window.pywebview && window.pywebview.api) {
+        window.pywebview.api.validate_listenbrainz_token(token).then(res => {
+          if (res && res.valid) {
+            alert(`Token valid! Connected as ListenBrainz user: ${res.username}`);
+            document.getElementById('settingListenbrainzEnabled').checked = true;
+            saveScrobblerSettings();
+          } else {
+            alert(`Token validation failed: ${res.error || 'Invalid token'}`);
+          }
+        });
+      }
+    }
+
+    function openCurrentArtistInfo() {
+      const curTrack = (playingTrackIndex !== null) ? libraryTracks.find(t => t.index === playingTrackIndex) : (libraryTracks[0] || null);
+      const artist = curTrack ? (curTrack.artist || 'Unknown') : 'The Weeknd';
+      const title = curTrack ? (curTrack.title || curTrack.filename || '') : '';
+      openArtistModal(artist, title);
+    }
+
+    function openArtistModal(artist, title = "") {
+      const modal = document.getElementById('artistModal');
+      document.getElementById('artistModalName').innerText = artist;
+      document.getElementById('artistModalBio').innerText = "Loading biography and insights from Last.fm...";
+      document.getElementById('artistModalTags').innerHTML = "";
+      document.getElementById('artistModalSimilarArtists').innerHTML = "";
+      document.getElementById('artistModalSimilarTracks').innerHTML = "<div style='color:var(--text-dim); font-size:11px;'>Loading similar tracks...</div>";
+      modal.style.display = 'flex';
+
+      if (window.pywebview && window.pywebview.api) {
+        window.pywebview.api.get_artist_info(artist).then(info => {
+          document.getElementById('artistModalBio').innerText = info.bio || "No biography available.";
+          if (info.tags && info.tags.length > 0) {
+            document.getElementById('artistModalTags').innerHTML = info.tags.map(t => `<span class="quality-badge">${escapeHtml(t)}</span>`).join('');
+          }
+          if (info.similar_artists && info.similar_artists.length > 0) {
+            document.getElementById('artistModalSimilarArtists').innerHTML = info.similar_artists.map(a => `
+              <span class="pill pill-plain" style="cursor:pointer;" onclick="openArtistModal('${escapeHtml(a)}')">${escapeHtml(a)}</span>
+            `).join('');
+          }
+          if (info.listeners) {
+            document.getElementById('artistModalStats').innerText = `🎧 ${Number(info.listeners).toLocaleString()} listeners · ▶ ${Number(info.playcount).toLocaleString()} scrobbles`;
+          }
+        });
+
+        if (title) {
+          window.pywebview.api.get_similar_tracks(artist, title).then(tracks => {
+            const container = document.getElementById('artistModalSimilarTracks');
+            if (!tracks || tracks.length === 0) {
+              container.innerHTML = "<div style='color:var(--text-dim); font-size:11px;'>No similar tracks found.</div>";
+              return;
+            }
+            container.innerHTML = tracks.map(t => `
+              <div style="display:flex; justify-content:space-between; align-items:center; padding:6px 8px; background:#12151e; border-radius:6px; margin-bottom:4px; font-size:11px;">
+                <div>
+                  <strong style="color:var(--text-white);">${escapeHtml(t.title)}</strong>
+                  <span style="color:var(--text-dim);"> - ${escapeHtml(t.artist)}</span>
+                </div>
+                <button class="btn btn-primary" style="padding:2px 8px; font-size:10px;" onclick="searchAndPlaySimilar('${escapeHtml(t.title)}', '${escapeHtml(t.artist)}')">🔍 Search & Stream</button>
+              </div>
+            `).join('');
+          });
+        }
+      }
+    }
+
+    function searchAndPlaySimilar(title, artist) {
+      closeArtistModal();
+      showAppView('search');
+      document.getElementById('onlineSearchInput').value = `${artist} ${title}`;
+      executeOnlineSearch();
+    }
+
+    function closeArtistModal() {
+      document.getElementById('artistModal').style.display = 'none';
     }
 
     function changeDownloadFolder() {

@@ -36,6 +36,7 @@ import downloader_engine
 import cookie_manager
 import playlist_manager
 import discord_rpc
+import scrobbler
 
 APP_VERSION = "2.1.0"
 GITHUB_REPO = "Sandeep2062/Sonance"
@@ -511,6 +512,40 @@ class LyricsAPI:
             discord_rpc.rpc_manager.clear_activity()
         except Exception:
             pass
+
+    # ------------------ Last.fm & ListenBrainz Scrobbler ------------------
+    def get_scrobbler_config(self) -> Dict[str, Any]:
+        """Returns active Last.fm and ListenBrainz configuration."""
+        return scrobbler.load_config()
+
+    def save_scrobbler_config(self, cfg: Dict[str, Any]) -> bool:
+        """Saves Last.fm and ListenBrainz configuration."""
+        scrobbler.save_config(cfg)
+        return True
+
+    def validate_listenbrainz_token(self, token: str) -> Dict[str, Any]:
+        """Validates ListenBrainz token against official API."""
+        return scrobbler.listenbrainz_client.validate_token(token)
+
+    def get_lastfm_session(self, token: str) -> Dict[str, Any]:
+        """Exchanges Last.fm web auth token for session key."""
+        return scrobbler.lastfm_client.get_session_from_token(token)
+
+    def scrobble_now_playing(self, artist: str, track: str, album: str = "", duration: int = 0):
+        """Broadcasts Now Playing state to Last.fm and ListenBrainz."""
+        scrobbler.scrobble_now_playing(artist=artist, track=track, album=album or None, duration=duration or None)
+
+    def scrobble_track(self, artist: str, track: str, album: str = "", duration: int = 0, timestamp: int = 0):
+        """Submits scrobble to Last.fm and ListenBrainz."""
+        scrobbler.scrobble_track(artist=artist, track=track, album=album or None, duration=duration or None, timestamp=timestamp or None)
+
+    def get_artist_info(self, artist: str) -> Dict[str, Any]:
+        """Retrieves artist bio, genre tags, and listener statistics."""
+        return scrobbler.lastfm_client.get_artist_info(artist)
+
+    def get_similar_tracks(self, artist: str, track: str) -> List[Dict[str, Any]]:
+        """Retrieves similar recommended tracks."""
+        return scrobbler.lastfm_client.get_similar_tracks(artist, track)
 
     def _save_last_folder(self, folder: str):
         try:
