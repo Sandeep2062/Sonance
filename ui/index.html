@@ -1243,6 +1243,18 @@
       <button class="btn btn-secondary" onclick="openCueMarkersModal()" style="padding:5px 9px; font-size:11px;" id="cueMarkersHeaderBtn" title="Broadcast Audio Cue Markers & Podcast Chapter Studio">
         📑 Cue Markers
       </button>
+      <button class="btn btn-secondary" onclick="openTapeModal()" style="padding:5px 9px; font-size:11px;" id="tapeHeaderBtn" title="Analog Tape Saturation & Tube Warmth Studio">
+        📼 Tape Warmth
+      </button>
+      <button class="btn btn-secondary" onclick="openFormantModal()" style="padding:5px 9px; font-size:11px;" id="formantHeaderBtn" title="Multi-Rate Pitch Shifter & Formant-Preserving Vocal Resizer">
+        🗣️ Formant Resizer
+      </button>
+      <button class="btn btn-secondary" onclick="openLoudnessWarModal()" style="padding:5px 9px; font-size:11px;" id="loudnessWarHeaderBtn" title="Mastering Loudness War & True Dynamic Spread Analyzer Studio">
+        📊 Loudness War
+      </button>
+      <button class="btn btn-secondary" onclick="openStemsRemixerModal()" style="padding:5px 9px; font-size:11px;" id="stemsRemixerHeaderBtn" title="Multi-Track Stems & Audio Remixer Studio">
+        🎛️ Stems Remixer
+      </button>
       <button class="btn btn-secondary" onclick="openLrcStudioModal()" style="padding:5px 9px; font-size:11px;" id="lrcStudioHeaderBtn" title="Interactive LRC Studio & Live Time-Stamper">
         ✍️ LRC Studio
       </button>
@@ -6193,6 +6205,374 @@
     </div>
   </div>
 
+  <!-- Phase 25: Analog Tape Saturation & Tube Warmth Studio Modal -->
+  <div class="modal-backdrop" id="tapeModal" style="display:none;">
+    <div class="modal-card" style="width:720px; max-width:95vw; background:#161926; border:1px solid var(--border); border-radius:12px; box-shadow:0 12px 36px rgba(0,0,0,0.7); overflow:hidden;">
+      <div style="padding:16px 20px; background:#121520; border-bottom:1px solid var(--border); display:flex; justify-content:space-between; align-items:center;">
+        <div class="modal-title" style="font-size:14px; font-weight:700; display:flex; align-items:center; gap:8px;">
+          <span>📼</span>
+          <span>Analog Tape Saturation &amp; Tube Warmth Studio</span>
+        </div>
+        <button onclick="closeTapeModal()" style="background:none; border:none; color:var(--text-muted); font-size:16px; cursor:pointer;">✕</button>
+      </div>
+
+      <div style="padding:20px; max-height:75vh; overflow-y:auto; display:flex; flex-direction:column; gap:16px;">
+        <div style="font-size:11px; color:var(--text-dim); line-height:1.5;">
+          Applies soft-knee hyperbolic tangent saturation (y = tanh(x &times; drive) / tanh(drive)), asymmetrical 2nd-harmonic tube warmth, low-frequency tape head-bump resonance (50-100 Hz), high-frequency tape flux compression, and optional authentic tape hiss (-75 to -95 dBFS).
+        </div>
+
+        <div>
+          <label style="font-size:11px; font-weight:600; color:var(--text-muted); display:block; margin-bottom:6px;">Target Audio File:</label>
+          <div style="display:flex; gap:8px;">
+            <input type="text" id="tapeTargetInput" class="search-input" style="width:100%; font-size:11px;" placeholder="Path to input audio file...">
+            <button class="btn btn-secondary" onclick="loadActiveTrackForTape()" style="font-size:11px; padding:6px 12px; white-space:nowrap;">Active Track</button>
+          </div>
+        </div>
+
+        <div>
+          <label style="font-size:11px; font-weight:600; color:var(--text-muted); display:block; margin-bottom:6px;">Custom Export Destination (Optional):</label>
+          <input type="text" id="tapeOutputInput" class="search-input" style="width:100%; font-size:11px;" placeholder="Auto-generated if empty: <original>_tape.wav">
+        </div>
+
+        <div style="display:grid; grid-template-columns:1fr 1fr; gap:14px; background:#121520; padding:14px; border-radius:8px; border:1px solid var(--border);">
+          <div>
+            <div style="display:flex; justify-content:space-between; margin-bottom:4px;">
+              <label style="font-size:11px; font-weight:600; color:var(--text-muted);">Tape Drive:</label>
+              <span id="tapeDriveVal" style="font-size:11px; color:var(--cyan); font-weight:600;">2.5x</span>
+            </div>
+            <input type="range" id="tapeDriveSlider" min="1.0" max="8.0" step="0.1" value="2.5" style="width:100%;" oninput="document.getElementById('tapeDriveVal').innerText = this.value + 'x'">
+          </div>
+
+          <div>
+            <label style="font-size:11px; font-weight:600; color:var(--text-muted); display:block; margin-bottom:4px;">Tape Speed (IPS):</label>
+            <select id="tapeSpeedSelect" class="search-input" style="width:100%; font-size:11px; padding:4px 8px;">
+              <option value="30.0">30.0 ips (Ultra-Fi Studio Mastering)</option>
+              <option value="15.0" selected>15.0 ips (Classic Studio Warmth)</option>
+              <option value="7.5">7.5 ips (Vintage Lo-Fi Thick Crunch)</option>
+            </select>
+          </div>
+
+          <div>
+            <div style="display:flex; justify-content:space-between; margin-bottom:4px;">
+              <label style="font-size:11px; font-weight:600; color:var(--text-muted);">Tube Warmth (2nd Harmonic):</label>
+              <span id="tapeWarmthVal" style="font-size:11px; color:var(--cyan); font-weight:600;">2.0</span>
+            </div>
+            <input type="range" id="tapeWarmthSlider" min="0.0" max="5.0" step="0.1" value="2.0" style="width:100%;" oninput="document.getElementById('tapeWarmthVal').innerText = this.value">
+          </div>
+
+          <div>
+            <div style="display:flex; justify-content:space-between; margin-bottom:4px;">
+              <label style="font-size:11px; font-weight:600; color:var(--text-muted);">Head Bias Level:</label>
+              <span id="tapeBiasVal" style="font-size:11px; color:var(--cyan); font-weight:600;">0.50</span>
+            </div>
+            <input type="range" id="tapeBiasSlider" min="0.0" max="1.5" step="0.05" value="0.5" style="width:100%;" oninput="document.getElementById('tapeBiasVal').innerText = parseFloat(this.value).toFixed(2)">
+          </div>
+
+          <div style="grid-column:1 / -1; display:flex; align-items:center; justify-content:space-between; padding-top:4px; border-top:1px solid rgba(255,255,255,0.06);">
+            <label style="font-size:11px; font-weight:600; color:var(--text-muted); display:flex; align-items:center; gap:8px; cursor:pointer;">
+              <input type="checkbox" id="tapeHissCheck">
+              <span>Enable Analog Tape Hiss</span>
+            </label>
+            <div style="display:flex; align-items:center; gap:8px; width:45%;">
+              <span style="font-size:10px; color:var(--text-dim);">Level:</span>
+              <input type="range" id="tapeHissLevelSlider" min="-95.0" max="-70.0" step="1.0" value="-82.0" style="flex:1;" oninput="document.getElementById('tapeHissVal').innerText = this.value + ' dB'">
+              <span id="tapeHissVal" style="font-size:11px; color:var(--cyan); font-weight:600; min-width:55px; text-align:right;">-82 dB</span>
+            </div>
+          </div>
+        </div>
+
+        <div style="display:flex; justify-content:space-between; align-items:center; margin-top:4px;">
+          <span id="tapeStatusText" style="font-size:11px; color:var(--text-dim);">Ready to process analog tape saturation</span>
+          <button class="btn btn-primary" onclick="runTapeAction()" id="processTapeBtn" style="font-size:12px; padding:7px 18px;">
+            📼 Apply Tape Warmth
+          </button>
+        </div>
+
+        <div id="tapeOutputCard" style="background:#0b0d14; border:1px solid var(--border); border-radius:8px; padding:12px; font-family:monospace; font-size:11px; line-height:1.45; color:var(--cyan); min-height:80px; white-space:pre-wrap; overflow-x:auto;">Select audio file and click Apply Tape Warmth.</div>
+      </div>
+
+      <div style="padding:10px 16px; background:#121520; border-top:1px solid var(--border); display:flex; justify-content:space-between; align-items:center;">
+        <span style="font-size:10px; color:var(--text-dim);">Physical tape head flux modeling with 24-bit PCM WAV export</span>
+        <button class="btn btn-secondary" onclick="closeTapeModal()">Close</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Phase 25: Multi-Rate Pitch Shifter & Formant-Preserving Vocal Resizer Modal -->
+  <div class="modal-backdrop" id="formantModal" style="display:none;">
+    <div class="modal-card" style="width:720px; max-width:95vw; background:#161926; border:1px solid var(--border); border-radius:12px; box-shadow:0 12px 36px rgba(0,0,0,0.7); overflow:hidden;">
+      <div style="padding:16px 20px; background:#121520; border-bottom:1px solid var(--border); display:flex; justify-content:space-between; align-items:center;">
+        <div class="modal-title" style="font-size:14px; font-weight:700; display:flex; align-items:center; gap:8px;">
+          <span>🗣️</span>
+          <span>Multi-Rate Pitch Shifter &amp; Formant-Preserving Vocal Resizer</span>
+        </div>
+        <button onclick="closeFormantModal()" style="background:none; border:none; color:var(--text-muted); font-size:16px; cursor:pointer;">✕</button>
+      </div>
+
+      <div style="padding:20px; max-height:75vh; overflow-y:auto; display:flex; flex-direction:column; gap:16px;">
+        <div style="font-size:11px; color:var(--text-dim); line-height:1.5;">
+          Transposes vocal and instrumental pitch (&plusmn;12 semitones) with true vocal tract formant preservation via STFT phase vocoder and cepstral liftering spectral envelope re-imposition (eliminates chipmunk/munchkin effect), plus independent vocal tract scaling (0.75&times; to 1.35&times;).
+        </div>
+
+        <div>
+          <label style="font-size:11px; font-weight:600; color:var(--text-muted); display:block; margin-bottom:6px;">Target Audio File:</label>
+          <div style="display:flex; gap:8px;">
+            <input type="text" id="formantTargetInput" class="search-input" style="width:100%; font-size:11px;" placeholder="Path to input audio file...">
+            <button class="btn btn-secondary" onclick="loadActiveTrackForFormant()" style="font-size:11px; padding:6px 12px; white-space:nowrap;">Active Track</button>
+          </div>
+        </div>
+
+        <div>
+          <label style="font-size:11px; font-weight:600; color:var(--text-muted); display:block; margin-bottom:6px;">Custom Export Destination (Optional):</label>
+          <input type="text" id="formantOutputInput" class="search-input" style="width:100%; font-size:11px;" placeholder="Auto-generated if empty: <original>_formant.wav">
+        </div>
+
+        <div style="display:grid; grid-template-columns:1fr 1fr; gap:14px; background:#121520; padding:14px; border-radius:8px; border:1px solid var(--border);">
+          <div>
+            <div style="display:flex; justify-content:space-between; margin-bottom:4px;">
+              <label style="font-size:11px; font-weight:600; color:var(--text-muted);">Pitch Shift (Semitones):</label>
+              <span id="formantPitchVal" style="font-size:11px; color:var(--cyan); font-weight:600;">0.0 st</span>
+            </div>
+            <input type="range" id="formantPitchSlider" min="-12.0" max="12.0" step="0.5" value="0.0" style="width:100%;" oninput="document.getElementById('formantPitchVal').innerText = (this.value >= 0 ? '+' : '') + parseFloat(this.value).toFixed(1) + ' st'">
+          </div>
+
+          <div>
+            <div style="display:flex; justify-content:space-between; margin-bottom:4px;">
+              <label style="font-size:11px; font-weight:600; color:var(--text-muted);">Vocal Tract Formant Scale:</label>
+              <span id="formantScaleVal" style="font-size:11px; color:var(--cyan); font-weight:600;">1.00x</span>
+            </div>
+            <input type="range" id="formantScaleSlider" min="0.75" max="1.35" step="0.01" value="1.00" style="width:100%;" oninput="document.getElementById('formantScaleVal').innerText = parseFloat(this.value).toFixed(2) + 'x'">
+          </div>
+
+          <div style="grid-column:1 / -1; display:flex; align-items:center; justify-content:space-between; padding-top:6px; border-top:1px solid rgba(255,255,255,0.06);">
+            <label style="font-size:11px; font-weight:600; color:var(--text-muted); display:flex; align-items:center; gap:8px; cursor:pointer;">
+              <input type="checkbox" id="formantLockCheck" checked>
+              <span>Formant Lock (Preserve Natural Vocal Timbre During Pitch Shifting)</span>
+            </label>
+          </div>
+        </div>
+
+        <div style="display:flex; justify-content:space-between; align-items:center; margin-top:4px;">
+          <span id="formantStatusText" style="font-size:11px; color:var(--text-dim);">Ready to shift pitch and scale formants</span>
+          <button class="btn btn-primary" onclick="runFormantAction()" id="processFormantBtn" style="font-size:12px; padding:7px 18px;">
+            🗣️ Process Formants &amp; Pitch
+          </button>
+        </div>
+
+        <div id="formantOutputCard" style="background:#0b0d14; border:1px solid var(--border); border-radius:8px; padding:12px; font-family:monospace; font-size:11px; line-height:1.45; color:var(--cyan); min-height:80px; white-space:pre-wrap; overflow-x:auto;">Select audio file and click Process Formants &amp; Pitch.</div>
+      </div>
+
+      <div style="padding:10px 16px; background:#121520; border-top:1px solid var(--border); display:flex; justify-content:space-between; align-items:center;">
+        <span style="font-size:10px; color:var(--text-dim);">STFT Phase Vocoder with Cepstral Spectral Envelope Liftering</span>
+        <button class="btn btn-secondary" onclick="closeFormantModal()">Close</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Phase 25: Mastering Loudness War & True Dynamic Spread Analyzer Studio Modal -->
+  <div class="modal-backdrop" id="loudnessWarModal" style="display:none;">
+    <div class="modal-card" style="width:720px; max-width:95vw; background:#161926; border:1px solid var(--border); border-radius:12px; box-shadow:0 12px 36px rgba(0,0,0,0.7); overflow:hidden;">
+      <div style="padding:16px 20px; background:#121520; border-bottom:1px solid var(--border); display:flex; justify-content:space-between; align-items:center;">
+        <div class="modal-title" style="font-size:14px; font-weight:700; display:flex; align-items:center; gap:8px;">
+          <span>📊</span>
+          <span>Mastering Loudness War &amp; True Dynamic Spread Analyzer</span>
+        </div>
+        <button onclick="closeLoudnessWarModal()" style="background:none; border:none; color:var(--text-muted); font-size:16px; cursor:pointer;">✕</button>
+      </div>
+
+      <div style="padding:20px; max-height:75vh; overflow-y:auto; display:flex; flex-direction:column; gap:16px;">
+        <div style="font-size:11px; color:var(--text-dim); line-height:1.5;">
+          Full ITU-R BS.1770-4 / EBU R128 compliance analyzer. Computes Integrated LUFS (dual-stage absolute &amp; relative gating), 3-second Short-Term LUFS, 400ms Momentary LUFS, Loudness Range (LRA in LU), Crest Factor (dB), Dynamic Health rating (0-100%), and streaming normalization penalties for Spotify, Apple Music, YouTube, and Tidal.
+        </div>
+
+        <div>
+          <label style="font-size:11px; font-weight:600; color:var(--text-muted); display:block; margin-bottom:6px;">Target Audio File:</label>
+          <div style="display:flex; gap:8px;">
+            <input type="text" id="loudnessWarTargetInput" class="search-input" style="width:100%; font-size:11px;" placeholder="Path to input audio file...">
+            <button class="btn btn-secondary" onclick="loadActiveTrackForLoudnessWar()" style="font-size:11px; padding:6px 12px; white-space:nowrap;">Active Track</button>
+          </div>
+        </div>
+
+        <div style="background:#121520; padding:14px; border-radius:8px; border:1px solid var(--border); display:flex; flex-direction:column; gap:10px;">
+          <div style="display:flex; justify-content:space-between; align-items:center;">
+            <label style="font-size:11px; font-weight:600; color:var(--text-muted);">Target Reference Loudness:</label>
+            <div style="display:flex; align-items:center; gap:8px;">
+              <input type="number" id="loudnessWarTargetLufs" class="search-input" style="width:80px; font-size:11px; text-align:right;" step="0.5" value="-14.0">
+              <span style="font-size:11px; color:var(--text-muted);">LUFS</span>
+            </div>
+          </div>
+          <div style="display:flex; gap:6px; flex-wrap:wrap;">
+            <button class="btn btn-secondary" onclick="setLoudnessWarPreset(-14.0)" style="font-size:10px; padding:3px 8px;">Spotify / YT (-14 LUFS)</button>
+            <button class="btn btn-secondary" onclick="setLoudnessWarPreset(-16.0)" style="font-size:10px; padding:3px 8px;">Apple Music (-16 LUFS)</button>
+            <button class="btn btn-secondary" onclick="setLoudnessWarPreset(-23.0)" style="font-size:10px; padding:3px 8px;">EBU R128 Broadcast (-23 LUFS)</button>
+            <button class="btn btn-secondary" onclick="setLoudnessWarPreset(-9.0)" style="font-size:10px; padding:3px 8px;">Hot CD Master (-9 LUFS)</button>
+          </div>
+        </div>
+
+        <div style="display:flex; justify-content:space-between; align-items:center; margin-top:4px;">
+          <span id="loudnessWarStatusText" style="font-size:11px; color:var(--text-dim);">Ready to analyze loudness and dynamic spread</span>
+          <button class="btn btn-primary" onclick="runLoudnessWarAction()" id="processLoudnessWarBtn" style="font-size:12px; padding:7px 18px;">
+            📊 Analyze Loudness War
+          </button>
+        </div>
+
+        <div id="loudnessWarOutputCard" style="background:#0b0d14; border:1px solid var(--border); border-radius:8px; padding:12px; font-family:monospace; font-size:11px; line-height:1.45; color:var(--cyan); min-height:80px; white-space:pre-wrap; overflow-x:auto;">Select audio file and click Analyze Loudness War.</div>
+      </div>
+
+      <div style="padding:10px 16px; background:#121520; border-top:1px solid var(--border); display:flex; justify-content:space-between; align-items:center;">
+        <span style="font-size:10px; color:var(--text-dim);">ITU-R BS.1770-4 K-weighting pre-filter &amp; gated energy integration</span>
+        <button class="btn btn-secondary" onclick="closeLoudnessWarModal()">Close</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Phase 25: Multi-Track Stems & Audio Remixer Studio Modal -->
+  <div class="modal-backdrop" id="stemsRemixerModal" style="display:none;">
+    <div class="modal-card" style="width:780px; max-width:95vw; background:#161926; border:1px solid var(--border); border-radius:12px; box-shadow:0 12px 36px rgba(0,0,0,0.7); overflow:hidden;">
+      <div style="padding:16px 20px; background:#121520; border-bottom:1px solid var(--border); display:flex; justify-content:space-between; align-items:center;">
+        <div class="modal-title" style="font-size:14px; font-weight:700; display:flex; align-items:center; gap:8px;">
+          <span>🎛️</span>
+          <span>Multi-Track Stems &amp; Audio Remixer Studio</span>
+        </div>
+        <button onclick="closeStemsRemixerModal()" style="background:none; border:none; color:var(--text-muted); font-size:16px; cursor:pointer;">✕</button>
+      </div>
+
+      <div style="padding:20px; max-height:75vh; overflow-y:auto; display:flex; flex-direction:column; gap:16px;">
+        <div style="font-size:11px; color:var(--text-dim); line-height:1.5;">
+          Rebalance, pan, and produce multi-track stems (Vocals, Drums, Bass, Other). Features constant-power stereo panning (-100% L to +100% R), per-stem volume faders (-30 dB to +12 dB), one-click production presets, and 24-bit PCM WAV master export.
+        </div>
+
+        <div style="display:flex; justify-content:space-between; align-items:center; background:#121520; padding:10px 14px; border-radius:8px; border:1px solid var(--border);">
+          <label style="font-size:11px; font-weight:600; color:var(--text-muted);">Production Preset:</label>
+          <select id="stemsPresetSelect" class="search-input" style="width:240px; font-size:11px;" onchange="applyStemsPreset(this.value)">
+            <option value="custom" selected>Custom Balance</option>
+            <option value="acapella">Acapella (Vocals Solo)</option>
+            <option value="karaoke">Karaoke / Instrumental (Mute Vocals)</option>
+            <option value="drum_bass">Drum &amp; Bass Focus</option>
+            <option value="vocal_boost">Vocal Clarity Boost</option>
+          </select>
+        </div>
+
+        <div style="display:flex; flex-direction:column; gap:10px;">
+          <!-- Vocals Row -->
+          <div style="background:#121520; border:1px solid var(--border); border-radius:8px; padding:10px 14px; display:flex; flex-direction:column; gap:8px;">
+            <div style="display:flex; align-items:center; gap:8px;">
+              <span style="font-size:14px;">🎤</span>
+              <input type="text" id="stemsVocalsInput" class="search-input" style="flex:1; font-size:11px;" placeholder="Path to vocals stem file...">
+            </div>
+            <div style="display:grid; grid-template-columns:1fr 1fr; gap:14px;">
+              <div>
+                <div style="display:flex; justify-content:space-between;">
+                  <span style="font-size:10px; color:var(--text-dim);">Vocals Gain:</span>
+                  <span id="stemsVocalsGainVal" style="font-size:10px; color:var(--cyan); font-weight:600;">0.0 dB</span>
+                </div>
+                <input type="range" id="stemsVocalsGainSlider" min="-30.0" max="12.0" step="0.5" value="0.0" style="width:100%;" oninput="document.getElementById('stemsVocalsGainVal').innerText = (this.value >= 0 ? '+' : '') + parseFloat(this.value).toFixed(1) + ' dB'">
+              </div>
+              <div>
+                <div style="display:flex; justify-content:space-between;">
+                  <span style="font-size:10px; color:var(--text-dim);">Vocals Pan:</span>
+                  <span id="stemsVocalsPanVal" style="font-size:10px; color:var(--cyan); font-weight:600;">Center</span>
+                </div>
+                <input type="range" id="stemsVocalsPanSlider" min="-1.0" max="1.0" step="0.05" value="0.0" style="width:100%;" oninput="updatePanDisplay(this.value, 'stemsVocalsPanVal')">
+              </div>
+            </div>
+          </div>
+
+          <!-- Drums Row -->
+          <div style="background:#121520; border:1px solid var(--border); border-radius:8px; padding:10px 14px; display:flex; flex-direction:column; gap:8px;">
+            <div style="display:flex; align-items:center; gap:8px;">
+              <span style="font-size:14px;">🥁</span>
+              <input type="text" id="stemsDrumsInput" class="search-input" style="flex:1; font-size:11px;" placeholder="Path to drums stem file...">
+            </div>
+            <div style="display:grid; grid-template-columns:1fr 1fr; gap:14px;">
+              <div>
+                <div style="display:flex; justify-content:space-between;">
+                  <span style="font-size:10px; color:var(--text-dim);">Drums Gain:</span>
+                  <span id="stemsDrumsGainVal" style="font-size:10px; color:var(--cyan); font-weight:600;">0.0 dB</span>
+                </div>
+                <input type="range" id="stemsDrumsGainSlider" min="-30.0" max="12.0" step="0.5" value="0.0" style="width:100%;" oninput="document.getElementById('stemsDrumsGainVal').innerText = (this.value >= 0 ? '+' : '') + parseFloat(this.value).toFixed(1) + ' dB'">
+              </div>
+              <div>
+                <div style="display:flex; justify-content:space-between;">
+                  <span style="font-size:10px; color:var(--text-dim);">Drums Pan:</span>
+                  <span id="stemsDrumsPanVal" style="font-size:10px; color:var(--cyan); font-weight:600;">Center</span>
+                </div>
+                <input type="range" id="stemsDrumsPanSlider" min="-1.0" max="1.0" step="0.05" value="0.0" style="width:100%;" oninput="updatePanDisplay(this.value, 'stemsDrumsPanVal')">
+              </div>
+            </div>
+          </div>
+
+          <!-- Bass Row -->
+          <div style="background:#121520; border:1px solid var(--border); border-radius:8px; padding:10px 14px; display:flex; flex-direction:column; gap:8px;">
+            <div style="display:flex; align-items:center; gap:8px;">
+              <span style="font-size:14px;">🎸</span>
+              <input type="text" id="stemsBassInput" class="search-input" style="flex:1; font-size:11px;" placeholder="Path to bass stem file...">
+            </div>
+            <div style="display:grid; grid-template-columns:1fr 1fr; gap:14px;">
+              <div>
+                <div style="display:flex; justify-content:space-between;">
+                  <span style="font-size:10px; color:var(--text-dim);">Bass Gain:</span>
+                  <span id="stemsBassGainVal" style="font-size:10px; color:var(--cyan); font-weight:600;">0.0 dB</span>
+                </div>
+                <input type="range" id="stemsBassGainSlider" min="-30.0" max="12.0" step="0.5" value="0.0" style="width:100%;" oninput="document.getElementById('stemsBassGainVal').innerText = (this.value >= 0 ? '+' : '') + parseFloat(this.value).toFixed(1) + ' dB'">
+              </div>
+              <div>
+                <div style="display:flex; justify-content:space-between;">
+                  <span style="font-size:10px; color:var(--text-dim);">Bass Pan:</span>
+                  <span id="stemsBassPanVal" style="font-size:10px; color:var(--cyan); font-weight:600;">Center</span>
+                </div>
+                <input type="range" id="stemsBassPanSlider" min="-1.0" max="1.0" step="0.05" value="0.0" style="width:100%;" oninput="updatePanDisplay(this.value, 'stemsBassPanVal')">
+              </div>
+            </div>
+          </div>
+
+          <!-- Other Row -->
+          <div style="background:#121520; border:1px solid var(--border); border-radius:8px; padding:10px 14px; display:flex; flex-direction:column; gap:8px;">
+            <div style="display:flex; align-items:center; gap:8px;">
+              <span style="font-size:14px;">🎹</span>
+              <input type="text" id="stemsOtherInput" class="search-input" style="flex:1; font-size:11px;" placeholder="Path to other/instruments stem file...">
+            </div>
+            <div style="display:grid; grid-template-columns:1fr 1fr; gap:14px;">
+              <div>
+                <div style="display:flex; justify-content:space-between;">
+                  <span style="font-size:10px; color:var(--text-dim);">Other Gain:</span>
+                  <span id="stemsOtherGainVal" style="font-size:10px; color:var(--cyan); font-weight:600;">0.0 dB</span>
+                </div>
+                <input type="range" id="stemsOtherGainSlider" min="-30.0" max="12.0" step="0.5" value="0.0" style="width:100%;" oninput="document.getElementById('stemsOtherGainVal').innerText = (this.value >= 0 ? '+' : '') + parseFloat(this.value).toFixed(1) + ' dB'">
+              </div>
+              <div>
+                <div style="display:flex; justify-content:space-between;">
+                  <span style="font-size:10px; color:var(--text-dim);">Other Pan:</span>
+                  <span id="stemsOtherPanVal" style="font-size:10px; color:var(--cyan); font-weight:600;">Center</span>
+                </div>
+                <input type="range" id="stemsOtherPanSlider" min="-1.0" max="1.0" step="0.05" value="0.0" style="width:100%;" oninput="updatePanDisplay(this.value, 'stemsOtherPanVal')">
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div>
+          <label style="font-size:11px; font-weight:600; color:var(--text-muted); display:block; margin-bottom:6px;">Master Output WAV Destination (Optional):</label>
+          <input type="text" id="stemsOutputInput" class="search-input" style="width:100%; font-size:11px;" placeholder="Auto-generated if empty: <folder>/remix_master.wav">
+        </div>
+
+        <div style="display:flex; justify-content:space-between; align-items:center; margin-top:4px;">
+          <span id="stemsRemixerStatusText" style="font-size:11px; color:var(--text-dim);">Ready to remix audio stems</span>
+          <button class="btn btn-primary" onclick="runStemsRemixerAction()" id="processStemsRemixerBtn" style="font-size:12px; padding:7px 18px;">
+            🎛️ Export Stems Mixdown
+          </button>
+        </div>
+
+        <div id="stemsRemixerOutputCard" style="background:#0b0d14; border:1px solid var(--border); border-radius:8px; padding:12px; font-family:monospace; font-size:11px; line-height:1.45; color:var(--cyan); min-height:80px; white-space:pre-wrap; overflow-x:auto;">Set stem audio files and click Export Stems Mixdown.</div>
+      </div>
+
+      <div style="padding:10px 16px; background:#121520; border-top:1px solid var(--border); display:flex; justify-content:space-between; align-items:center;">
+        <span style="font-size:10px; color:var(--text-dim);">Constant-power sinusoidal panning &amp; 24-bit PCM stem summation</span>
+        <button class="btn btn-secondary" onclick="closeStemsRemixerModal()">Close</button>
+      </div>
+    </div>
+  </div>
+
   <!-- Podcast & Long Mix Bookmark Resumption Toast (Phase 10) -->
   <div id="podcastResumeToast" style="display:none; position:fixed; bottom:85px; right:20px; z-index:9999; background:#131722; border:1px solid var(--border); box-shadow:0 8px 24px rgba(0,0,0,0.6); border-radius:10px; padding:10px 14px; align-items:center; gap:10px; backdrop-filter:blur(10px);">
     <span style="font-size:16px;">⏱️</span>
@@ -9193,6 +9573,10 @@
         closeMidSideModal();
         closeWatermarkModal();
         closeCueMarkersModal();
+        closeTapeModal();
+        closeFormantModal();
+        closeLoudnessWarModal();
+        closeStemsRemixerModal();
         dismissPodcastResumeToast();
         const popup = document.getElementById('speedStudioPopup');
         if (popup) popup.style.display = 'none';
@@ -15878,6 +16262,434 @@
           if (btn) {
             btn.disabled = false;
             btn.innerText = '📑 Process Cue Markers';
+          }
+          if (out) out.innerText = '✕ Error: ' + (err.message || err);
+        });
+      }
+    }
+
+    // ------------------ Phase 25: Analog Tape Saturation & Tube Warmth Studio ------------------
+    function openTapeModal() {
+      const modal = document.getElementById('tapeModal');
+      if (modal) modal.style.display = 'flex';
+      const input = document.getElementById('tapeTargetInput');
+      if (input && !input.value && currentTrack && currentTrack.file_path) {
+        input.value = currentTrack.file_path;
+      }
+    }
+
+    function closeTapeModal() {
+      const modal = document.getElementById('tapeModal');
+      if (modal) modal.style.display = 'none';
+    }
+
+    function loadActiveTrackForTape() {
+      const input = document.getElementById('tapeTargetInput');
+      if (currentTrack && currentTrack.file_path) {
+        if (input) input.value = currentTrack.file_path;
+        showToast('Loaded active track for Tape Warmth.');
+      } else {
+        showToast('No active audio track playing.', true);
+      }
+    }
+
+    function runTapeAction() {
+      const inp = document.getElementById('tapeTargetInput')?.value?.trim();
+      const outPath = document.getElementById('tapeOutputInput')?.value?.trim() || null;
+      const drive = parseFloat(document.getElementById('tapeDriveSlider')?.value || '2.5');
+      const speed = parseFloat(document.getElementById('tapeSpeedSelect')?.value || '15.0');
+      const warmth = parseFloat(document.getElementById('tapeWarmthSlider')?.value || '2.0');
+      const bias = parseFloat(document.getElementById('tapeBiasSlider')?.value || '0.5');
+      const hiss = document.getElementById('tapeHissCheck')?.checked || false;
+      const hissLevel = parseFloat(document.getElementById('tapeHissLevelSlider')?.value || '-82.0');
+
+      const btn = document.getElementById('processTapeBtn');
+      const st = document.getElementById('tapeStatusText');
+      const out = document.getElementById('tapeOutputCard');
+
+      if (!inp) {
+        showToast('Please specify an audio file.', true);
+        return;
+      }
+
+      if (btn) {
+        btn.disabled = true;
+        btn.innerText = '⏳ Emulating Tape Flux...';
+      }
+      if (st) {
+        st.innerText = 'Processing analog tape saturation and tube harmonics...';
+        st.style.color = 'var(--cyan)';
+      }
+
+      if (window.pywebview && window.pywebview.api && window.pywebview.api.emulate_analog_tape) {
+        window.pywebview.api.emulate_analog_tape(inp, drive, speed, warmth, bias, hiss, hissLevel, outPath).then(res => {
+          if (btn) {
+            btn.disabled = false;
+            btn.innerText = '📼 Apply Tape Warmth';
+          }
+          if (res && res.status === 'error') {
+            if (st) {
+              st.innerText = '✕ Tape saturation failed: ' + (res.message || 'Unknown error');
+              st.style.color = '#ef4444';
+            }
+            if (out) out.innerText = '✕ Error: ' + (res.message || 'Unknown error');
+            return;
+          }
+          if (res) {
+            if (st) {
+              st.innerText = '✓ Analog tape saturation complete!';
+              st.style.color = 'var(--emerald)';
+            }
+            let card = `ANALOG TAPE SATURATION & TUBE WARMTH REPORT\n`;
+            card += `Input File       : ${inp}\n`;
+            card += `Output File      : ${res.output_path}\n`;
+            card += `Tape Head Speed  : ${res.speed_ips} ips\n`;
+            card += `Drive Factor     : ${res.drive.toFixed(1)}x\n`;
+            card += `Tube Warmth (2nd): ${res.warmth.toFixed(1)}\n`;
+            card += `Head Bias        : ${res.bias.toFixed(2)}\n`;
+            card += `Analog Tape Hiss : ${res.hiss ? 'Enabled' : 'Bypassed'}\n`;
+            card += `Master Peak      : ${res.peak_dbfs.toFixed(2)} dBFS\n`;
+            card += `Master RMS       : ${res.rms_dbfs.toFixed(2)} dBFS\n`;
+            card += `Harmonic THD Est : ${res.thd_estimate_pct.toFixed(2)}%\n`;
+            if (out) out.innerText = card;
+            showToast('Analog tape warmth applied!');
+          }
+        }).catch(err => {
+          if (btn) {
+            btn.disabled = false;
+            btn.innerText = '📼 Apply Tape Warmth';
+          }
+          if (out) out.innerText = '✕ Error: ' + (err.message || err);
+        });
+      }
+    }
+
+    // ------------------ Phase 25: Multi-Rate Pitch Shifter & Formant Resizer ------------------
+    function openFormantModal() {
+      const modal = document.getElementById('formantModal');
+      if (modal) modal.style.display = 'flex';
+      const input = document.getElementById('formantTargetInput');
+      if (input && !input.value && currentTrack && currentTrack.file_path) {
+        input.value = currentTrack.file_path;
+      }
+    }
+
+    function closeFormantModal() {
+      const modal = document.getElementById('formantModal');
+      if (modal) modal.style.display = 'none';
+    }
+
+    function loadActiveTrackForFormant() {
+      const input = document.getElementById('formantTargetInput');
+      if (currentTrack && currentTrack.file_path) {
+        if (input) input.value = currentTrack.file_path;
+        showToast('Loaded active track for Formant Resizer.');
+      } else {
+        showToast('No active audio track playing.', true);
+      }
+    }
+
+    function runFormantAction() {
+      const inp = document.getElementById('formantTargetInput')?.value?.trim();
+      const outPath = document.getElementById('formantOutputInput')?.value?.trim() || null;
+      const pitch = parseFloat(document.getElementById('formantPitchSlider')?.value || '0.0');
+      const formantScale = parseFloat(document.getElementById('formantScaleSlider')?.value || '1.0');
+      const formantLock = document.getElementById('formantLockCheck')?.checked ?? true;
+
+      const btn = document.getElementById('processFormantBtn');
+      const st = document.getElementById('formantStatusText');
+      const out = document.getElementById('formantOutputCard');
+
+      if (!inp) {
+        showToast('Please specify an audio file.', true);
+        return;
+      }
+
+      if (btn) {
+        btn.disabled = true;
+        btn.innerText = '⏳ Processing STFT Formants...';
+      }
+      if (st) {
+        st.innerText = 'Shifting pitch and preserving vocal spectral envelope...';
+        st.style.color = 'var(--cyan)';
+      }
+
+      if (window.pywebview && window.pywebview.api && window.pywebview.api.shift_vocal_formants) {
+        window.pywebview.api.shift_vocal_formants(inp, pitch, formantScale, formantLock, outPath).then(res => {
+          if (btn) {
+            btn.disabled = false;
+            btn.innerText = '🗣️ Process Formants & Pitch';
+          }
+          if (res && res.status === 'error') {
+            if (st) {
+              st.innerText = '✕ Pitch/Formant processing failed: ' + (res.message || 'Unknown error');
+              st.style.color = '#ef4444';
+            }
+            if (out) out.innerText = '✕ Error: ' + (res.message || 'Unknown error');
+            return;
+          }
+          if (res) {
+            if (st) {
+              st.innerText = '✓ Formant-preserving pitch shift complete!';
+              st.style.color = 'var(--emerald)';
+            }
+            let card = `PITCH SHIFTER & FORMANT RESIZING REPORT\n`;
+            card += `Input File       : ${inp}\n`;
+            card += `Output File      : ${res.output_path}\n`;
+            card += `Pitch Transpose  : ${(res.pitch_semitones >= 0 ? '+' : '')}${res.pitch_semitones.toFixed(1)} semitones\n`;
+            card += `Vocal Tract Form : ${res.formant_scale.toFixed(2)}x\n`;
+            card += `Formant Lock     : ${res.formant_lock ? 'Enabled (Preserves Natural Timbre)' : 'Disabled'}\n`;
+            card += `Duration         : ${res.duration_sec.toFixed(2)}s @ ${res.sample_rate} Hz\n`;
+            if (out) out.innerText = card;
+            showToast('Formant and pitch processing complete!');
+          }
+        }).catch(err => {
+          if (btn) {
+            btn.disabled = false;
+            btn.innerText = '🗣️ Process Formants & Pitch';
+          }
+          if (out) out.innerText = '✕ Error: ' + (err.message || err);
+        });
+      }
+    }
+
+    // ------------------ Phase 25: Mastering Loudness War & True Dynamic Spread ------------------
+    function openLoudnessWarModal() {
+      const modal = document.getElementById('loudnessWarModal');
+      if (modal) modal.style.display = 'flex';
+      const input = document.getElementById('loudnessWarTargetInput');
+      if (input && !input.value && currentTrack && currentTrack.file_path) {
+        input.value = currentTrack.file_path;
+      }
+    }
+
+    function closeLoudnessWarModal() {
+      const modal = document.getElementById('loudnessWarModal');
+      if (modal) modal.style.display = 'none';
+    }
+
+    function loadActiveTrackForLoudnessWar() {
+      const input = document.getElementById('loudnessWarTargetInput');
+      if (currentTrack && currentTrack.file_path) {
+        if (input) input.value = currentTrack.file_path;
+        showToast('Loaded active track for Loudness War Analyzer.');
+      } else {
+        showToast('No active audio track playing.', true);
+      }
+    }
+
+    function setLoudnessWarPreset(lufs) {
+      const inp = document.getElementById('loudnessWarTargetLufs');
+      if (inp) inp.value = lufs.toFixed(1);
+    }
+
+    function runLoudnessWarAction() {
+      const inp = document.getElementById('loudnessWarTargetInput')?.value?.trim();
+      const targetLufs = parseFloat(document.getElementById('loudnessWarTargetLufs')?.value || '-14.0');
+
+      const btn = document.getElementById('processLoudnessWarBtn');
+      const st = document.getElementById('loudnessWarStatusText');
+      const out = document.getElementById('loudnessWarOutputCard');
+
+      if (!inp) {
+        showToast('Please specify an audio file.', true);
+        return;
+      }
+
+      if (btn) {
+        btn.disabled = true;
+        btn.innerText = '⏳ Calculating Gated LUFS...';
+      }
+      if (st) {
+        st.innerText = 'Running ITU-R BS.1770-4 K-weighting and dynamic analysis...';
+        st.style.color = 'var(--cyan)';
+      }
+
+      if (window.pywebview && window.pywebview.api && window.pywebview.api.analyze_loudness_spread) {
+        window.pywebview.api.analyze_loudness_spread(inp, targetLufs).then(res => {
+          if (btn) {
+            btn.disabled = false;
+            btn.innerText = '📊 Analyze Loudness War';
+          }
+          if (res && res.status === 'error') {
+            if (st) {
+              st.innerText = '✕ Loudness analysis failed: ' + (res.message || 'Unknown error');
+              st.style.color = '#ef4444';
+            }
+            if (out) out.innerText = '✕ Error: ' + (res.message || 'Unknown error');
+            return;
+          }
+          if (res) {
+            if (st) {
+              st.innerText = '✓ Loudness & dynamic spread analysis complete!';
+              st.style.color = 'var(--emerald)';
+            }
+            let card = `MASTERING LOUDNESS WAR & DYNAMIC SPREAD REPORT\n`;
+            card += `Target File      : ${res.file_path || inp}\n`;
+            card += `Integrated LUFS  : ${res.integrated_lufs.toFixed(1)} LUFS (BS.1770-4 gated)\n`;
+            card += `Short-Term Max   : ${res.short_term_max_lufs.toFixed(1)} LUFS (3s sliding)\n`;
+            card += `Momentary Max    : ${res.momentary_max_lufs.toFixed(1)} LUFS (400ms sliding)\n`;
+            card += `Loudness Range   : ${res.lra_lu.toFixed(1)} LU (LRA dynamic spread)\n`;
+            card += `Sample Peak      : ${res.sample_peak_dbfs.toFixed(2)} dBFS\n`;
+            card += `Crest Factor     : ${res.crest_factor_db.toFixed(1)} dB\n`;
+            const ratingDesc = res.dynamic_health_pct > 70 ? 'High Dynamics' : (res.dynamic_health_pct > 40 ? 'Moderate Compression' : 'Heavily Squashed / Brickwalled');
+            card += `Dynamic Health   : ${res.dynamic_health_pct.toFixed(1)}% (${ratingDesc})\n`;
+            card += `Target Norm      : ${res.target_lufs.toFixed(1)} LUFS (Adjustment: ${(res.gain_adjustment_db >= 0 ? '+' : '')}${res.gain_adjustment_db.toFixed(1)} dB)\n`;
+            card += `--------------------------------------------------------\n`;
+            card += `STREAMING NORMALIZATION PENALTIES:\n`;
+            if (res.platform_penalties) {
+              card += `  * Spotify (-14 LUFS)    : ${res.platform_penalties.spotify.toFixed(1)} dB\n`;
+              card += `  * Apple Music (-16 LUFS): ${res.platform_penalties.apple_music.toFixed(1)} dB\n`;
+              card += `  * YouTube (-14 LUFS)    : ${res.platform_penalties.youtube.toFixed(1)} dB\n`;
+              card += `  * Tidal (-14 LUFS)      : ${res.platform_penalties.tidal.toFixed(1)} dB\n`;
+            }
+            if (out) out.innerText = card;
+            showToast('Loudness & dynamic analysis complete!');
+          }
+        }).catch(err => {
+          if (btn) {
+            btn.disabled = false;
+            btn.innerText = '📊 Analyze Loudness War';
+          }
+          if (out) out.innerText = '✕ Error: ' + (err.message || err);
+        });
+      }
+    }
+
+    // ------------------ Phase 25: Multi-Track Stems & Audio Remixer ------------------
+    function openStemsRemixerModal() {
+      const modal = document.getElementById('stemsRemixerModal');
+      if (modal) modal.style.display = 'flex';
+    }
+
+    function closeStemsRemixerModal() {
+      const modal = document.getElementById('stemsRemixerModal');
+      if (modal) modal.style.display = 'none';
+    }
+
+    function updatePanDisplay(val, elemId) {
+      const v = parseFloat(val);
+      const elem = document.getElementById(elemId);
+      if (!elem) return;
+      if (Math.abs(v) < 0.05) {
+        elem.innerText = 'Center';
+      } else if (v < 0) {
+        elem.innerText = Math.round(Math.abs(v) * 100) + '% L';
+      } else {
+        elem.innerText = Math.round(v * 100) + '% R';
+      }
+    }
+
+    function applyStemsPreset(preset) {
+      const vG = document.getElementById('stemsVocalsGainSlider');
+      const dG = document.getElementById('stemsDrumsGainSlider');
+      const bG = document.getElementById('stemsBassGainSlider');
+      const oG = document.getElementById('stemsOtherGainSlider');
+      if (!vG || !dG || !bG || !oG) return;
+
+      if (preset === 'acapella') {
+        vG.value = 0.0;
+        dG.value = -30.0;
+        bG.value = -30.0;
+        oG.value = -30.0;
+      } else if (preset === 'karaoke') {
+        vG.value = -30.0;
+        dG.value = 0.0;
+        bG.value = 0.0;
+        oG.value = 0.0;
+      } else if (preset === 'drum_bass') {
+        vG.value = -30.0;
+        dG.value = 1.0;
+        bG.value = 1.0;
+        oG.value = -30.0;
+      } else if (preset === 'vocal_boost') {
+        vG.value = 3.0;
+        dG.value = 0.0;
+        bG.value = 0.0;
+        oG.value = -2.0;
+      } else {
+        // custom
+        vG.value = 0.0;
+        dG.value = 0.0;
+        bG.value = 0.0;
+        oG.value = 0.0;
+      }
+
+      document.getElementById('stemsVocalsGainVal').innerText = (vG.value >= 0 ? '+' : '') + parseFloat(vG.value).toFixed(1) + ' dB';
+      document.getElementById('stemsDrumsGainVal').innerText = (dG.value >= 0 ? '+' : '') + parseFloat(dG.value).toFixed(1) + ' dB';
+      document.getElementById('stemsBassGainVal').innerText = (bG.value >= 0 ? '+' : '') + parseFloat(bG.value).toFixed(1) + ' dB';
+      document.getElementById('stemsOtherGainVal').innerText = (oG.value >= 0 ? '+' : '') + parseFloat(oG.value).toFixed(1) + ' dB';
+    }
+
+    function runStemsRemixerAction() {
+      const vocals = document.getElementById('stemsVocalsInput')?.value?.trim() || null;
+      const drums = document.getElementById('stemsDrumsInput')?.value?.trim() || null;
+      const bass = document.getElementById('stemsBassInput')?.value?.trim() || null;
+      const other = document.getElementById('stemsOtherInput')?.value?.trim() || null;
+      const outPath = document.getElementById('stemsOutputInput')?.value?.trim() || null;
+      const preset = document.getElementById('stemsPresetSelect')?.value || 'custom';
+
+      const vGain = parseFloat(document.getElementById('stemsVocalsGainSlider')?.value || '0.0');
+      const dGain = parseFloat(document.getElementById('stemsDrumsGainSlider')?.value || '0.0');
+      const bGain = parseFloat(document.getElementById('stemsBassGainSlider')?.value || '0.0');
+      const oGain = parseFloat(document.getElementById('stemsOtherGainSlider')?.value || '0.0');
+
+      const vPan = parseFloat(document.getElementById('stemsVocalsPanSlider')?.value || '0.0');
+      const dPan = parseFloat(document.getElementById('stemsDrumsPanSlider')?.value || '0.0');
+      const bPan = parseFloat(document.getElementById('stemsBassPanSlider')?.value || '0.0');
+      const oPan = parseFloat(document.getElementById('stemsOtherPanSlider')?.value || '0.0');
+
+      const btn = document.getElementById('processStemsRemixerBtn');
+      const st = document.getElementById('stemsRemixerStatusText');
+      const out = document.getElementById('stemsRemixerOutputCard');
+
+      if (!vocals && !drums && !bass && !other) {
+        showToast('Please provide at least one audio stem.', true);
+        return;
+      }
+
+      if (btn) {
+        btn.disabled = true;
+        btn.innerText = '⏳ Mixing Down Stems...';
+      }
+      if (st) {
+        st.innerText = 'Balancing stems, applying panning matrix, and summing mixdown...';
+        st.style.color = 'var(--cyan)';
+      }
+
+      if (window.pywebview && window.pywebview.api && window.pywebview.api.remix_audio_stems) {
+        window.pywebview.api.remix_audio_stems(vocals, drums, bass, other, vGain, dGain, bGain, oGain, vPan, dPan, bPan, oPan, outPath, preset).then(res => {
+          if (btn) {
+            btn.disabled = false;
+            btn.innerText = '🎛️ Export Stems Mixdown';
+          }
+          if (res && res.status === 'error') {
+            if (st) {
+              st.innerText = '✕ Stems remix failed: ' + (res.message || 'Unknown error');
+              st.style.color = '#ef4444';
+            }
+            if (out) out.innerText = '✕ Error: ' + (res.message || 'Unknown error');
+            return;
+          }
+          if (res) {
+            if (st) {
+              st.innerText = '✓ Stems remix master exported successfully!';
+              st.style.color = 'var(--emerald)';
+            }
+            let card = `MULTI-TRACK STEMS REMIX REPORT\n`;
+            card += `Master Output    : ${res.output_path}\n`;
+            card += `Mix Preset       : ${res.preset}\n`;
+            card += `Active Stems     : ${(res.active_stems || []).join(', ')}\n`;
+            card += `Master Duration  : ${res.duration_sec.toFixed(2)}s\n`;
+            card += `Master Peak      : ${res.peak_dbfs.toFixed(2)} dBFS\n`;
+            card += `Master RMS       : ${res.rms_dbfs.toFixed(2)} dBFS\n`;
+            if (out) out.innerText = card;
+            showToast('Stems remix exported successfully!');
+          }
+        }).catch(err => {
+          if (btn) {
+            btn.disabled = false;
+            btn.innerText = '🎛️ Export Stems Mixdown';
           }
           if (out) out.innerText = '✕ Error: ' + (err.message || err);
         });

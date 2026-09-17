@@ -29,6 +29,7 @@ def main():
   parser = argparse.ArgumentParser(
       description="Sonance - The Ultimate All-in-One Music Platform",
       formatter_class=argparse.RawDescriptionHelpFormatter,
+      allow_abbrev=False,
       epilog="""
 Examples:
   python sonance.py                 # Launch modern desktop application (Default)
@@ -409,6 +410,30 @@ Examples:
       nargs="+",
       metavar="PARAM",
       help="Broadcast cue markers & podcast chapter studio: --markers <audio_file> [--import-timestamps <text_or_file>] [--export-cue <cue_file>] [--output <out_file>]",
+  )
+  parser.add_argument(
+      "--tape",
+      nargs="+",
+      metavar="PARAM",
+      help="Analog tape saturation & tube warmth studio: --tape <audio_file> [output_file] [--drive 2.5] [--speed 15|30|7.5] [--warmth 2.0] [--bias 0.5] [--hiss]",
+  )
+  parser.add_argument(
+      "--formant",
+      nargs="+",
+      metavar="PARAM",
+      help="Pitch shifter & formant vocal resizer: --formant <audio_file> [output_file] [--pitch +2] [--formant 1.1] [--no-preserve-formants]",
+  )
+  parser.add_argument(
+      "--loudness-war",
+      nargs="+",
+      metavar="PARAM",
+      help="Mastering loudness war & dynamic spread analyzer: --loudness-war <audio_file> [--target -14.0]",
+  )
+  parser.add_argument(
+      "--remix",
+      nargs="*",
+      metavar="PARAM",
+      help="Multi-track stems remixer studio: --remix [--vocals <file>] [--drums <file>] [--bass <file>] [--other <file>] [--folder <dir>] [--output <file>] [--preset acapella|karaoke|drum_and_bass|vocal_boost]",
   )
   parser.add_argument(
       "--version",
@@ -1991,6 +2016,164 @@ Examples:
       print(f"[*] Reading cue points & chapter markers: {inp}...")
       res = cue_markers.read_cue_markers(inp)
       print(cue_markers.format_markers_card(res))
+    return
+
+  if args.tape:
+    import analog_tape_emulator
+    tp_params = list(args.tape) + list(unknown)
+    inp = tp_params[0]
+    out = None
+    drv = 2.5
+    spd = 15.0
+    wrm = 2.0
+    bias = 0.5
+    hiss = False
+    hiss_db = -80.0
+    idx = 1
+    while idx < len(tp_params):
+      arg = tp_params[idx]
+      if arg in ("--drive", "-d") and idx + 1 < len(tp_params):
+        drv = float(tp_params[idx + 1])
+        idx += 2
+      elif arg in ("--speed", "-s") and idx + 1 < len(tp_params):
+        spd = float(tp_params[idx + 1])
+        idx += 2
+      elif arg in ("--warmth", "-w") and idx + 1 < len(tp_params):
+        wrm = float(tp_params[idx + 1])
+        idx += 2
+      elif arg in ("--bias", "-b") and idx + 1 < len(tp_params):
+        bias = float(tp_params[idx + 1])
+        idx += 2
+      elif arg == "--hiss":
+        hiss = True
+        idx += 1
+      elif arg == "--hiss-db" and idx + 1 < len(tp_params):
+        hiss_db = float(tp_params[idx + 1])
+        idx += 2
+      elif arg in ("--output", "--out") and idx + 1 < len(tp_params):
+        out = tp_params[idx + 1]
+        idx += 2
+      elif not arg.startswith("--") and out is None:
+        out = arg
+        idx += 1
+      else:
+        idx += 1
+    print(f"[*] Simulating analog tape saturation ({spd} ips, Drive: {drv}x): {inp}...")
+    res = analog_tape_emulator.process_analog_tape(
+        inp, output_path=out, drive=drv, tape_speed_ips=spd, warmth=wrm, tube_bias=bias, add_hiss=hiss, hiss_db=hiss_db
+    )
+    print(analog_tape_emulator.format_tape_card(res))
+    return
+
+  if args.formant:
+    import formant_shifter
+    fm_params = list(args.formant) + list(unknown)
+    inp = fm_params[0]
+    out = None
+    pitch = 0.0
+    formant = 1.0
+    preserve = True
+    idx = 1
+    while idx < len(fm_params):
+      arg = fm_params[idx]
+      if arg in ("--pitch", "-p") and idx + 1 < len(fm_params):
+        pitch = float(fm_params[idx + 1])
+        idx += 2
+      elif arg in ("--scale", "--ratio", "--formant-scale", "-f") and idx + 1 < len(fm_params):
+        formant = float(fm_params[idx + 1])
+        idx += 2
+      elif arg == "--no-preserve-formants":
+        preserve = False
+        idx += 1
+      elif arg in ("--output", "--out") and idx + 1 < len(fm_params):
+        out = fm_params[idx + 1]
+        idx += 2
+      elif not arg.startswith("--") and out is None:
+        out = arg
+        idx += 1
+      else:
+        idx += 1
+    print(f"[*] Processing pitch transposition ({pitch:+0.1f} st) & formant scaling ({formant}x): {inp}...")
+    res = formant_shifter.process_formant_shifter(
+        inp, output_path=out, pitch_semitones=pitch, formant_ratio=formant, preserve_formants=preserve
+    )
+    print(formant_shifter.format_formant_card(res))
+    return
+
+  if args.loudness_war:
+    import loudness_war_studio
+    lw_params = list(args.loudness_war) + list(unknown)
+    inp = lw_params[0]
+    tgt = -14.0
+    idx = 1
+    while idx < len(lw_params):
+      arg = lw_params[idx]
+      if arg in ("--target", "-t") and idx + 1 < len(lw_params):
+        tgt = float(lw_params[idx + 1])
+        idx += 2
+      else:
+        idx += 1
+    print(f"[*] Analyzing ITU-R BS.1770-4 loudness war metrics: {inp}...")
+    res = loudness_war_studio.analyze_loudness_war(inp, target_lufs=tgt)
+    print(loudness_war_studio.format_loudness_war_card(res))
+    return
+
+  if args.remix is not None:
+    import stems_remixer
+    rm_params = list(args.remix) + list(unknown)
+    stems = {}
+    gains = {"vocals": 0.0, "drums": 0.0, "bass": 0.0, "other": 0.0}
+    preset = None
+    out = None
+    idx = 0
+    while idx < len(rm_params):
+      arg = rm_params[idx]
+      if arg == "--vocals" and idx + 1 < len(rm_params):
+        stems["vocals"] = rm_params[idx + 1]
+        idx += 2
+      elif arg == "--drums" and idx + 1 < len(rm_params):
+        stems["drums"] = rm_params[idx + 1]
+        idx += 2
+      elif arg == "--bass" and idx + 1 < len(rm_params):
+        stems["bass"] = rm_params[idx + 1]
+        idx += 2
+      elif arg == "--other" and idx + 1 < len(rm_params):
+        stems["other"] = rm_params[idx + 1]
+        idx += 2
+      elif arg == "--folder" and idx + 1 < len(rm_params):
+        folder = rm_params[idx + 1]
+        if os.path.isdir(folder):
+          for f in os.listdir(folder):
+            fl = f.lower()
+            fp = os.path.join(folder, f)
+            if "vocal" in fl: stems["vocals"] = fp
+            elif "drum" in fl: stems["drums"] = fp
+            elif "bass" in fl: stems["bass"] = fp
+            elif "other" in fl or "inst" in fl: stems["other"] = fp
+        idx += 2
+      elif arg == "--preset" and idx + 1 < len(rm_params):
+        preset = rm_params[idx + 1]
+        idx += 2
+      elif arg in ("--output", "--out") and idx + 1 < len(rm_params):
+        out = rm_params[idx + 1]
+        idx += 2
+      elif arg == "--vocal-gain" and idx + 1 < len(rm_params):
+        gains["vocals"] = float(rm_params[idx + 1])
+        idx += 2
+      elif arg == "--drums-gain" and idx + 1 < len(rm_params):
+        gains["drums"] = float(rm_params[idx + 1])
+        idx += 2
+      elif arg == "--bass-gain" and idx + 1 < len(rm_params):
+        gains["bass"] = float(rm_params[idx + 1])
+        idx += 2
+      elif arg == "--other-gain" and idx + 1 < len(rm_params):
+        gains["other"] = float(rm_params[idx + 1])
+        idx += 2
+      else:
+        idx += 1
+    print(f"[*] Remixing multi-track audio stems...")
+    res = stems_remixer.remix_stems(stems, output_path=out, gains_db=gains, preset=preset)
+    print(stems_remixer.format_remix_card(res))
     return
 
   if args.classic:

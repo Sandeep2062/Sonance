@@ -102,6 +102,10 @@ import audio_deesser
 import midside_processor
 import audio_watermark
 import cue_markers
+import analog_tape_emulator
+import formant_shifter
+import loudness_war_studio
+import stems_remixer
 
 APP_VERSION = "2.1.0"
 GITHUB_REPO = "Sandeep2062/Sonance"
@@ -1582,6 +1586,80 @@ class LyricsAPI:
             }
         else:
             return cue_markers.read_cue_markers(input_path)
+
+    # ------------------ Phase 25: Analog Tape Saturation & Tube Warmth ------------------
+    def emulate_analog_tape(
+        self,
+        input_path: str,
+        output_path: Optional[str] = None,
+        drive: float = 2.5,
+        tape_speed_ips: float = 15.0,
+        warmth: float = 2.0,
+        tube_bias: float = 0.5,
+        add_hiss: bool = False,
+        hiss_db: float = -80.0,
+    ) -> Dict[str, Any]:
+        """Simulates magnetic tape saturation, tube 2nd harmonics, and head-bump bass response."""
+        return analog_tape_emulator.process_analog_tape(
+            input_path=input_path,
+            output_path=output_path,
+            drive=drive,
+            tape_speed_ips=tape_speed_ips,
+            warmth=warmth,
+            tube_bias=tube_bias,
+            add_hiss=add_hiss,
+            hiss_db=hiss_db,
+        )
+
+    # ------------------ Phase 25: Multi-Rate Pitch & Formant Vocal Resizer ------------------
+    def shift_vocal_formants(
+        self,
+        input_path: str,
+        output_path: Optional[str] = None,
+        pitch_semitones: float = 0.0,
+        formant_ratio: float = 1.0,
+        preserve_formants: bool = True,
+    ) -> Dict[str, Any]:
+        """Transposes pitch independently of vocal tract formants to eliminate chipmunk effect."""
+        return formant_shifter.process_formant_shifter(
+            input_path=input_path,
+            output_path=output_path,
+            pitch_semitones=pitch_semitones,
+            formant_ratio=formant_ratio,
+            preserve_formants=preserve_formants,
+        )
+
+    # ------------------ Phase 25: Mastering Loudness War & Dynamic Spread ------------------
+    def analyze_loudness_spread(
+        self,
+        input_path: str,
+        target_lufs: float = -14.0,
+    ) -> Dict[str, Any]:
+        """Measures EBU R128 BS.1770-4 gated LUFS, LRA dynamic spread, crest factor, and streaming penalties."""
+        return loudness_war_studio.analyze_loudness_war(
+            file_path=input_path,
+            target_lufs=target_lufs,
+        )
+
+    # ------------------ Phase 25: Multi-Track Stems & Audio Remixer ------------------
+    def remix_audio_stems(
+        self,
+        stems_dict: Dict[str, str],
+        output_path: Optional[str] = None,
+        gains_db: Optional[Dict[str, float]] = None,
+        pans: Optional[Dict[str, float]] = None,
+        mutes: Optional[Dict[str, bool]] = None,
+        preset: Optional[str] = None,
+    ) -> Dict[str, Any]:
+        """Mixes and balances 4-track separated stems (Vocals, Drums, Bass, Other) into 24-bit WAV master."""
+        return stems_remixer.remix_stems(
+            stems_dict=stems_dict,
+            output_path=output_path,
+            gains_db=gains_db,
+            pans=pans,
+            mutes=mutes,
+            preset=preset,
+        )
 
     def _save_last_folder(self, folder: str):
         try:
