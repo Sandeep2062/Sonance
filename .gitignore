@@ -14,13 +14,18 @@ dist/
 downloads/
 eggs/
 .eggs/
-lib/
 lib64/
 parts/
 sdist/
 var/
 wheels/
 share/python-wheels/
+
+# Flutter & Dart
+.dart_tool/
+.flutter-plugins
+.flutter-plugins-dependencies
+.packages
 *.egg-info/
 .installed.cfg
 *.egg

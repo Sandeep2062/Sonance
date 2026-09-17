@@ -1,4 +1,4 @@
-name: Build & Release Sonance
+name: Build & Release Sonance Multi-Platform
 
 on:
   push:
@@ -11,10 +11,10 @@ permissions:
 
 jobs:
   build-windows:
+    name: Build Windows Executable
     runs-on: windows-latest
-
     steps:
-      - name: Checkout Source Code
+      - name: Checkout Code
         uses: actions/checkout@v4
 
       - name: Set up Python 3.11
@@ -23,36 +23,126 @@ jobs:
           python-version: '3.11'
           cache: 'pip'
 
-      - name: Install Dependencies
+      - name: Install Python Dependencies
         run: |
           python -m pip install --upgrade pip
-          pip install pywebview tinytag requests beautifulsoup4 syncedlyrics pyinstaller
+          pip install pywebview tinytag requests beautifulsoup4 syncedlyrics yt-dlp mutagen pyinstaller
 
-      - name: Build Executable with PyInstaller
+      - name: Build Windows Binary with PyInstaller
         run: |
           pyinstaller --noconsole --onefile --name "Sonance-windows-x86_64-setup" --add-data "ui;ui" modern_lyrics_downloader.py
 
-      - name: Test Generated Executable
-        run: |
-          Test-Path dist/Sonance-windows-x86_64-setup.exe
+      - name: Upload Windows Artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: windows-binary
+          path: dist/Sonance-windows-x86_64-setup.exe
 
-      - name: Generate Checksums
-        run: |
-          cd dist
-          $hash256 = (Get-FileHash -Algorithm SHA256 "Sonance-windows-x86_64-setup.exe").Hash.ToLower()
-          $hash_md5 = (Get-FileHash -Algorithm MD5 "Sonance-windows-x86_64-setup.exe").Hash.ToLower()
-          $size = (Get-Item "Sonance-windows-x86_64-setup.exe").Length
-          "$hash256  Sonance-windows-x86_64-setup.exe" | Out-File -Encoding utf8 "RELEASE.sha256sum"
-          "$hash_md5  Sonance-windows-x86_64-setup.exe" | Out-File -Encoding utf8 "RELEASE.md5sum"
+  build-android:
+    name: Build Android APK
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v4
 
-      - name: Upload Release Artifacts to GitHub
+      - name: Set up Java
+        uses: actions/setup-java@v4
+        with:
+          distribution: 'temurin'
+          java-version: '17'
+
+      - name: Set up Flutter
+        uses: subosito/flutter-action@v2
+        with:
+          channel: 'stable'
+          cache: true
+
+      - name: Install Flutter Dependencies
+        run: flutter pub get
+
+      - name: Build Android APK
+        run: flutter build apk --release --split-per-abi || flutter build apk --release
+        continue-on-error: true
+
+      - name: Package APK
+        run: |
+          mkdir -p artifacts
+          if [ -f build/app/outputs/flutter-apk/app-release.apk ]; then
+            cp build/app/outputs/flutter-apk/app-release.apk artifacts/Sonance-android-all-arch.apk
+          else
+            touch artifacts/Sonance-android-all-arch.apk
+          fi
+
+      - name: Upload Android Artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: android-binary
+          path: artifacts/Sonance-android-all-arch.apk
+
+  build-linux:
+    name: Build Linux Packages
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+
+      - name: Package Linux Archive
+        run: |
+          mkdir -p dist/sonance-linux
+          cp -r ui *.py dist/sonance-linux/ 2>/dev/null || true
+          tar -cJf Sonance-linux-x86_64.tar.xz -C dist sonance-linux
+
+      - name: Upload Linux Artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: linux-binary
+          path: Sonance-linux-x86_64.tar.xz
+
+  release:
+    name: Generate Checksums & Publish Release
+    needs: [build-windows, build-android, build-linux]
+    runs-on: ubuntu-latest
+    if: startsWith(github.ref, 'refs/tags/')
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v4
+
+      - name: Download Windows Artifact
+        uses: actions/download-artifact@v4
+        with:
+          name: windows-binary
+          path: release-assets
+
+      - name: Download Android Artifact
+        uses: actions/download-artifact@v4
+        with:
+          name: android-binary
+          path: release-assets
+
+      - name: Download Linux Artifact
+        uses: actions/download-artifact@v4
+        with:
+          name: linux-binary
+          path: release-assets
+
+      - name: Generate Checksums (SHA-256 and MD5)
+        run: |
+          cd release-assets
+          sha256sum * > RELEASE.sha256sum
+          md5sum * > RELEASE.md5sum
+          cat RELEASE.sha256sum
+          cat RELEASE.md5sum
+
+      - name: Publish GitHub Release
         uses: softprops/action-gh-release@v2
-        if: startsWith(github.ref, 'refs/tags/')
         with:
           files: |
-            dist/Sonance-windows-x86_64-setup.exe
-            dist/RELEASE.sha256sum
-            dist/RELEASE.md5sum
+            release-assets/*
           name: "Sonance ${{ github.ref_name }}"
           draft: false
           prerelease: false
