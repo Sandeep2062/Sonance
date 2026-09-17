@@ -139,7 +139,13 @@ Sonance brings together three distinct open-source powerhouses:
 - **Synchronized Guitar Chord Studio & Tab Companion (`chord_studio.py`)**: Displays real-time synchronized guitar chord progressions (`[Am]`, `[C]`, `[G]`, `[F]`) right above or alongside karaoke lyric lines in the Karaoke Stage. Includes interactive fretboard diagrams (6-string EADGBE fingerings) for 40+ popular chord voicings.
 - **Live DJ Telemetry Badge**: Real-time tempo and key badge in the bottom player bar (`⚡ 128 BPM · 8A (Am)`) with 1-click access to harmonic transition pairings.
 
-### 🔄 16. In-App Updates & Releases
+### 🎛️ 16. Audiophile Resampler, Pitch Transposer, Library Auto-Organizer & Monolithic Album Packer
+- **Audiophile Polyphase Sinc Resampler & TPDF Dither Studio (`audio_resampler.py`)**: High-fidelity sample rate conversion up to 192 kHz / 384 kHz utilizing bandlimited Kaiser-windowed sinc interpolation with triangular probability density function (TPDF) random dither and high-pass noise shaping ($e[n] - 0.75 e[n-1]$). Quantization noise is pushed into ultrasonic registers (>18 kHz) ensuring pristine bit-depth reductions (e.g. 24-bit to 16-bit) without harmonic distortion or limit cycles. CLI: `python sonance.py --resample <audio_file> <sample_rate> [bit_depth] [output_file]`.
+- **Karaoke Vocal Pitch Transposer & Key Shifter (`pitch_shifter.py`)**: Real-time semitone pitch transposition ($\pm 6$ semitones) without tempo changes using an STFT phase vocoder and FFmpeg `rubberband`/`atempo` pipeline. Ideal for vocalists practicing songs outside their native vocal range or matching karaoke tracks to singing pitch. CLI: `python sonance.py --pitch-shift <audio_file> <semitones> [output_file]`.
+- **MusicBee-Style Library Auto-Organizer & File Renamer (`library_organizer.py`)**: Rule-based library reorganization matching tracks by ID3/Vorbis tags into structured directories (`%artist%/[%year%] %album%/%track% - %title%`). Migrates companion `.lrc` synced lyrics and cover artwork, sanitizes Windows reserved characters (`<>:"/\|?*`), and features a dry-run preview before committing moves or copies. CLI: `python sonance.py --organize <folder> [--pattern "<pattern>"] [--execute] [--copy]`.
+- **Lossless Monolithic Album Packer & CUE Archiver (`album_packer.py`)**: Merges loose album tracks into a single continuous, gapless FLAC or WAV image accompanied by an exact Red Book audio CD compliant CUE sheet (`mm:ss:ff` 75 fps sector index timing). Supports lossless unpacking of monolithic album images back into pristine tagged tracks. CLI: `python sonance.py --pack-album <folder> [output_flac]` and `python sonance.py --unpack-album <monolithic_flac> [output_dir]`.
+
+### 🔄 17. In-App Updates & Releases
 - Automatic update detection checking against [GitHub Releases](https://github.com/Sandeep2062/Sonance/releases).
 - Every release includes SHA-256 and MD5 checksum manifests (`RELEASE.sha256sum`, `RELEASE.md5sum`).
 
