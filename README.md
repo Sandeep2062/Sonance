@@ -111,7 +111,14 @@ Sonance brings together three distinct open-source powerhouses:
 - **Artist Discography & Full-Album Downloader (`discography_scraper.py`)**: Explore complete artist discographies, inspect studio albums, EPs, and full tracklists, and batch-download entire albums with synchronized lyrics with 1 click. Also available via CLI: `python sonance.py --discography "Artist Name"`.
 - **Podcast & Audiobook Smart Resuming**: Automatically saves and restores exact playback positions for long audio tracks (>15 minutes), displaying a 1-click "Resume from MM:SS" toast notification.
 
-### 🔄 12. In-App Updates & Releases
+### 💿 12. CUE Sheet Lossless Splitter, Audio Cutter Studio, DAC Selector & Ambient Visuals
+- **CUE Sheet Album Lossless Splitter & Virtual Track Engine (`cue_splitter.py`)**: Parse Red Book CD `.cue` index sheets, browse and play virtual tracks on-the-fly without copying files, or perform sample-accurate lossless physical track splitting with full metadata tagging and cover preservation. CLI: `python sonance.py --cue-split <cue_file> [out_dir] [format] [bitrate]`.
+- **Visual Waveform Audio Cutter & Ringtone Studio (`audio_cutter.py`)**: Millisecond-accurate visual audio trimmer with draggable range bounds, customizable fade-in/fade-out curves (0.5s - 3.0s), loop preview, and export to iPhone ringtones (`.m4r`), MP3 (320 kbps), WAV, and M4A. CLI: `python sonance.py --trim <audio_file> <start_sec> <end_sec> [format] [out_file]`.
+- **Hardware Audio Output Device Selector (DAC & Sink Selector)**: Direct hardware routing to external USB DACs, Bluetooth headphones, and studio monitors via the HTML5 Audio Sink API (`audio.setSinkId()`).
+- **Ambient Fluid Album Art Mesh Canvas Backdrop**: Real-time breathing animated canvas mesh gradient extracting dominant color stops from the current playing album cover art.
+- **Podcast & Audiobook Silence Skipper DSP**: Real-time silence detection automatically skipping or accelerating pauses > 1.2s in podcasts, audiobooks, and recorded lectures.
+
+### 🔄 13. In-App Updates & Releases
 - Automatic update detection checking against [GitHub Releases](https://github.com/Sandeep2062/Sonance/releases).
 - Every release includes SHA-256 and MD5 checksum manifests (`RELEASE.sha256sum`, `RELEASE.md5sum`).
 
