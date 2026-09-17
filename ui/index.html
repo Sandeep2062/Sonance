@@ -1195,6 +1195,18 @@
       <button class="btn btn-secondary" onclick="openLyricsRetimerModal()" style="padding:5px 9px; font-size:11px;" id="lyricsRetimerHeaderBtn" title="Smart Lyrics Sync Offset Drift Corrector & Two-Point Re-Timer">
         ⏱️ Drift Corrector
       </button>
+      <button class="btn btn-secondary" onclick="openSpectrumModal()" style="padding:5px 9px; font-size:11px;" id="spectrumHeaderBtn" title="Hi-Res Audio Spectrogram & Bandwidth Cutoff Analyzer">
+        📊 Spectrum
+      </button>
+      <button class="btn btn-secondary" onclick="openDeclipperModal()" style="padding:5px 9px; font-size:11px;" id="declipperHeaderBtn" title="Dynamic Range Expander & Digital Audio De-Clipper Studio">
+        🔨 De-Clipper
+      </button>
+      <button class="btn btn-secondary" onclick="openTrackSplitterModal()" style="padding:5px 9px; font-size:11px;" id="trackSplitterHeaderBtn" title="Smart Silence Track Splitter & Auto-CUE Sheet Generator">
+        ✂️ Auto-Splitter
+      </button>
+      <button class="btn btn-secondary" onclick="openLyricsVideoModal()" style="padding:5px 9px; font-size:11px;" id="lyricsVideoHeaderBtn" title="Synchronized LRC Karaoke Video & Theater Generator">
+        🎬 Video Karaoke
+      </button>
       <button class="btn btn-secondary" onclick="openLrcStudioModal()" style="padding:5px 9px; font-size:11px;" id="lrcStudioHeaderBtn" title="Interactive LRC Studio & Live Time-Stamper">
         ✍️ LRC Studio
       </button>
@@ -5133,6 +5145,281 @@
     </div>
   </div>
 
+  <!-- Phase 21: Hi-Res Audio Spectrogram & Bandwidth Cutoff Analyzer Modal -->
+  <div class="modal-backdrop" id="spectrumModal" style="display:none;">
+    <div class="modal-box" style="width:720px; max-width:94vw; display:flex; flex-direction:column; max-height:90vh;">
+      <div class="modal-header">
+        <div style="display:flex; align-items:center; gap:8px;">
+          <span style="font-size:18px;">📊</span>
+          <div>
+            <div class="modal-title" style="font-size:14px; font-weight:700;">Hi-Res Audio Spectrogram & Bandwidth Cutoff Analyzer</div>
+            <div style="font-size:10px; color:var(--text-dim);">Detects Genuine Hi-Res Bandwidth, Fake Upsampling & Lossy MP3 Brickwall Cutoffs</div>
+          </div>
+        </div>
+        <button onclick="closeSpectrumModal()" style="background:none; border:none; color:var(--text-muted); cursor:pointer; font-size:16px;">✕</button>
+      </div>
+
+      <div style="padding:16px; overflow-y:auto; display:flex; flex-direction:column; gap:12px; flex:1;">
+        <!-- Input Row -->
+        <div style="display:flex; gap:8px; align-items:flex-end;">
+          <div style="flex:1;">
+            <label style="font-size:11px; color:var(--text-dim); display:block; margin-bottom:4px;">Target Audio Track:</label>
+            <input type="text" id="spectrumTargetInput" class="search-input" style="width:100%; font-size:11px;" placeholder="Path to audio file (FLAC, WAV, MP3, M4A)...">
+          </div>
+          <button class="btn btn-secondary" onclick="loadActiveTrackForSpectrum()" style="font-size:11px; padding:6px 12px; white-space:nowrap;">Active Track</button>
+          <button class="btn btn-primary" onclick="runSpectrumAnalysisAction()" id="analyzeSpectrumBtn" style="font-size:11px; padding:6px 16px; white-space:nowrap;">📊 Analyze Spectrum</button>
+        </div>
+
+        <!-- Authenticity Banner -->
+        <div id="spectrumVerdictBanner" style="display:none; background:#10131d; border:1px solid var(--border); border-radius:8px; padding:10px 14px; align-items:center; justify-content:space-between;">
+          <div>
+            <div id="spectrumVerdictTitle" style="font-size:12px; font-weight:700; color:var(--emerald);">True Hi-Res Audio</div>
+            <div id="spectrumVerdictDesc" style="font-size:11px; color:var(--text-dim); margin-top:2px;">Full active ultrasonic spectrum detected.</div>
+          </div>
+          <span id="spectrumCutoffBadge" class="nav-badge" style="background:rgba(16,185,129,0.15); color:var(--emerald); font-size:11px; padding:4px 10px;">Cutoff: 38.5 kHz</span>
+        </div>
+
+        <!-- Spectrum Canvas -->
+        <div style="background:#07090e; border:1px solid var(--border); border-radius:8px; padding:10px; position:relative;">
+          <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:6px;">
+            <span style="font-size:10px; font-weight:700; color:var(--text-dim); text-transform:uppercase;">Power Spectral Density (20 Hz - Nyquist)</span>
+            <span id="spectrumPeakLabel" style="font-size:10px; color:var(--cyan); font-family:monospace;">Peak: -- Hz</span>
+          </div>
+          <canvas id="spectrumCanvas" width="650" height="150" style="width:100%; height:140px; display:block; background:#07090e; border-radius:4px;"></canvas>
+          <div style="display:flex; justify-content:space-between; font-size:9px; color:var(--text-dim); margin-top:4px; font-family:monospace;">
+            <span>20 Hz</span>
+            <span>100 Hz</span>
+            <span>1 kHz</span>
+            <span>10 kHz</span>
+            <span>20 kHz</span>
+            <span>Nyquist</span>
+          </div>
+        </div>
+
+        <!-- Metrics Grid -->
+        <div style="display:grid; grid-template-columns:repeat(4, 1fr); gap:8px; font-size:11px;">
+          <div style="background:#111420; padding:8px; border-radius:6px; border:1px solid var(--border);">
+            <div style="font-size:9px; color:var(--text-dim); text-transform:uppercase;">Dominant Peak</div>
+            <div id="specMetricPeak" style="font-weight:700; color:#fff; font-size:12px; margin-top:2px;">-- Hz</div>
+          </div>
+          <div style="background:#111420; padding:8px; border-radius:6px; border:1px solid var(--border);">
+            <div style="font-size:9px; color:var(--text-dim); text-transform:uppercase;">Spectral Centroid</div>
+            <div id="specMetricCentroid" style="font-weight:700; color:#fff; font-size:12px; margin-top:2px;">-- Hz</div>
+          </div>
+          <div style="background:#111420; padding:8px; border-radius:6px; border:1px solid var(--border);">
+            <div style="font-size:9px; color:var(--text-dim); text-transform:uppercase;">85% Energy Rolloff</div>
+            <div id="specMetricRolloff85" style="font-weight:700; color:#fff; font-size:12px; margin-top:2px;">-- Hz</div>
+          </div>
+          <div style="background:#111420; padding:8px; border-radius:6px; border:1px solid var(--border);">
+            <div style="font-size:9px; color:var(--text-dim); text-transform:uppercase;">Frequency Ceiling</div>
+            <div id="specMetricCutoff" style="font-weight:700; color:var(--cyan); font-size:12px; margin-top:2px;">-- Hz</div>
+          </div>
+        </div>
+
+        <div id="spectrumOutputCard" style="background:#0b0d14; border:1px solid var(--border); border-radius:8px; padding:10px; font-family:monospace; font-size:11px; line-height:1.4; color:var(--cyan); min-height:60px; white-space:pre-wrap; overflow-x:auto;">Select track and click Analyze Spectrum to inspect frequency bandwidth and authenticity.</div>
+      </div>
+
+      <div style="padding:10px 16px; background:#121520; border-top:1px solid var(--border); display:flex; justify-content:space-between; align-items:center;">
+        <span style="font-size:10px; color:var(--text-dim);">FFT power spectral density with Wiener entropy and energy rolloff detection</span>
+        <button class="btn btn-secondary" onclick="closeSpectrumModal()">Close</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Phase 21: Dynamic Range Expander & Audio De-Clipper Studio Modal -->
+  <div class="modal-backdrop" id="declipperModal" style="display:none;">
+    <div class="modal-box" style="width:680px; max-width:92vw; display:flex; flex-direction:column; max-height:88vh;">
+      <div class="modal-header">
+        <div style="display:flex; align-items:center; gap:8px;">
+          <span style="font-size:18px;">🔨</span>
+          <div>
+            <div class="modal-title" style="font-size:14px; font-weight:700;">Dynamic Range Expander & Digital Audio De-Clipper Studio</div>
+            <div style="font-size:10px; color:var(--text-dim);">Reconstructs Clipped Peaks & Restores Punch Lost to Loudness War Mastering</div>
+          </div>
+        </div>
+        <button onclick="closeDeclipperModal()" style="background:none; border:none; color:var(--text-muted); cursor:pointer; font-size:16px;">✕</button>
+      </div>
+
+      <div style="padding:16px; overflow-y:auto; display:flex; flex-direction:column; gap:12px; flex:1;">
+        <!-- Target Audio -->
+        <div style="display:flex; gap:8px; align-items:flex-end;">
+          <div style="flex:1;">
+            <label style="font-size:11px; color:var(--text-dim); display:block; margin-bottom:4px;">Target Audio Track:</label>
+            <input type="text" id="declipperTargetInput" class="search-input" style="width:100%; font-size:11px;" placeholder="Path to clipped or brickwalled audio file...">
+          </div>
+          <button class="btn btn-secondary" onclick="loadActiveTrackForDeclipper()" style="font-size:11px; padding:6px 12px; white-space:nowrap;">Active Track</button>
+        </div>
+
+        <!-- Controls Row -->
+        <div style="display:grid; grid-template-columns:1fr 1fr; gap:12px; background:#10131d; padding:12px; border-radius:8px; border:1px solid var(--border);">
+          <div>
+            <div style="display:flex; justify-content:space-between; font-size:11px; margin-bottom:4px;">
+              <span style="color:var(--text-dim);">Dynamic Expansion:</span>
+              <span id="declipperExpVal" style="font-weight:700; color:var(--emerald);">+2.0 dB</span>
+            </div>
+            <input type="range" id="declipperExpSlider" min="0.0" max="6.0" step="0.5" value="2.0" style="width:100%;" oninput="document.getElementById('declipperExpVal').innerText = '+' + parseFloat(this.value).toFixed(1) + ' dB'">
+            <div style="font-size:10px; color:var(--text-dim); margin-top:2px;">Selectively expands transient attacks to restore snare & kick punch.</div>
+          </div>
+
+          <div>
+            <div style="display:flex; justify-content:space-between; font-size:11px; margin-bottom:4px;">
+              <span style="color:var(--text-dim);">Headroom Pre-Attenuation:</span>
+              <span id="declipperHdrVal" style="font-weight:700; color:var(--cyan);">-4.0 dB</span>
+            </div>
+            <input type="range" id="declipperHdrSlider" min="1.0" max="8.0" step="0.5" value="4.0" style="width:100%;" oninput="document.getElementById('declipperHdrVal').innerText = '-' + parseFloat(this.value).toFixed(1) + ' dB'">
+            <div style="font-size:10px; color:var(--text-dim); margin-top:2px;">Lowers gain before peak reconstruction to avoid digital overs.</div>
+          </div>
+        </div>
+
+        <div style="display:flex; justify-content:space-between; align-items:center;">
+          <span id="declipperStatusText" style="font-size:11px; color:var(--text-dim);">Ready to audit clipping and restore dynamics.</span>
+          <button class="btn btn-primary" onclick="runDeclipperAction()" id="processDeclipBtn" style="font-size:11px; padding:6px 18px;">
+            🔨 Declip & Restore Audio
+          </button>
+        </div>
+
+        <div id="declipperOutputCard" style="background:#0b0d14; border:1px solid var(--border); border-radius:8px; padding:12px; font-family:monospace; font-size:11px; line-height:1.45; color:var(--cyan); min-height:80px; white-space:pre-wrap; overflow-x:auto;">Select track and click Declip & Restore Audio to reconstruct clipped peaks.</div>
+      </div>
+
+      <div style="padding:10px 16px; background:#121520; border-top:1px solid var(--border); display:flex; justify-content:space-between; align-items:center;">
+        <span style="font-size:10px; color:var(--text-dim);">Cubic Hermite polynomial spline peak reconstruction</span>
+        <button class="btn btn-secondary" onclick="closeDeclipperModal()">Close</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Phase 21: Smart Silence Audio Track Splitter & Auto-CUE Generator Modal -->
+  <div class="modal-backdrop" id="trackSplitterModal" style="display:none;">
+    <div class="modal-box" style="width:680px; max-width:92vw; display:flex; flex-direction:column; max-height:88vh;">
+      <div class="modal-header">
+        <div style="display:flex; align-items:center; gap:8px;">
+          <span style="font-size:18px;">✂️</span>
+          <div>
+            <div class="modal-title" style="font-size:14px; font-weight:700;">Smart Silence Audio Track Splitter & Auto-CUE Generator</div>
+            <div style="font-size:10px; color:var(--text-dim);">Splits Monolithic Vinyl Rips, Concerts & DJ Sets into Individual Tracks with CUE Sheets</div>
+          </div>
+        </div>
+        <button onclick="closeTrackSplitterModal()" style="background:none; border:none; color:var(--text-muted); cursor:pointer; font-size:16px;">✕</button>
+      </div>
+
+      <div style="padding:16px; overflow-y:auto; display:flex; flex-direction:column; gap:12px; flex:1;">
+        <!-- Input Row -->
+        <div style="display:flex; gap:8px; align-items:flex-end;">
+          <div style="flex:1;">
+            <label style="font-size:11px; color:var(--text-dim); display:block; margin-bottom:4px;">Monolithic Audio File:</label>
+            <input type="text" id="trackSplitterTargetInput" class="search-input" style="width:100%; font-size:11px;" placeholder="Path to vinyl rip or concert recording...">
+          </div>
+          <button class="btn btn-secondary" onclick="loadActiveTrackForSplitter()" style="font-size:11px; padding:6px 12px; white-space:nowrap;">Active Track</button>
+        </div>
+
+        <!-- Parameter Controls -->
+        <div style="display:grid; grid-template-columns:1fr 1fr; gap:10px;">
+          <div>
+            <label style="font-size:11px; color:var(--text-dim); display:block; margin-bottom:4px;">Silence Threshold:</label>
+            <select id="splitterThresholdSelect" class="search-input" style="width:100%; font-size:11px;">
+              <option value="-48.0">-48.0 dBFS (Very Clean Silence)</option>
+              <option value="-42.0" selected>-42.0 dBFS (Standard Studio Silence)</option>
+              <option value="-36.0">-36.0 dBFS (Noisy Vinyl / Live Crowd)</option>
+              <option value="-30.0">-30.0 dBFS (High Noise Floor)</option>
+            </select>
+          </div>
+          <div>
+            <label style="font-size:11px; color:var(--text-dim); display:block; margin-bottom:4px;">Minimum Gap Duration:</label>
+            <select id="splitterMinSilenceSelect" class="search-input" style="width:100%; font-size:11px;">
+              <option value="1.0">1.0 Second</option>
+              <option value="1.5" selected>1.5 Seconds (Standard)</option>
+              <option value="2.0">2.0 Seconds (Vinyl Album Spacing)</option>
+              <option value="3.0">3.0 Seconds (Distinct Gaps)</option>
+            </select>
+          </div>
+        </div>
+
+        <div>
+          <label style="font-size:11px; color:var(--text-dim); display:block; margin-bottom:4px;">Output Directory (Optional):</label>
+          <input type="text" id="splitterOutputDirInput" class="search-input" style="width:100%; font-size:11px;" placeholder="Leave empty for auto-named folder beside input file...">
+        </div>
+
+        <div style="display:flex; justify-content:space-between; align-items:center;">
+          <span id="splitterStatusText" style="font-size:11px; color:var(--text-dim);">Ready to detect silence gaps.</span>
+          <button class="btn btn-primary" onclick="runTrackSplitterAction()" id="processSplitterBtn" style="font-size:11px; padding:6px 18px;">
+            ✂️ Scan & Split Tracks
+          </button>
+        </div>
+
+        <div id="splitterOutputCard" style="background:#0b0d14; border:1px solid var(--border); border-radius:8px; padding:12px; font-family:monospace; font-size:11px; line-height:1.45; color:var(--cyan); min-height:80px; white-space:pre-wrap; overflow-x:auto;">Select audio file and click Scan & Split Tracks to generate CUE sheet and segmented files.</div>
+      </div>
+
+      <div style="padding:10px 16px; background:#121520; border-top:1px solid var(--border); display:flex; justify-content:space-between; align-items:center;">
+        <span style="font-size:10px; color:var(--text-dim);">Zero-crossing split snapping prevents audible clicks between tracks</span>
+        <button class="btn btn-secondary" onclick="closeTrackSplitterModal()">Close</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Phase 21: Synchronized LRC Karaoke Video & Theater Generator Modal -->
+  <div class="modal-backdrop" id="lyricsVideoModal" style="display:none;">
+    <div class="modal-box" style="width:680px; max-width:92vw; display:flex; flex-direction:column; max-height:88vh;">
+      <div class="modal-header">
+        <div style="display:flex; align-items:center; gap:8px;">
+          <span style="font-size:18px;">🎬</span>
+          <div>
+            <div class="modal-title" style="font-size:14px; font-weight:700;">Synchronized LRC Karaoke Video & Theater Generator</div>
+            <div style="font-size:10px; color:var(--text-dim);">Transforms Audio & Synced Lyrics into Sleek Animated Video and Fullscreen Theater</div>
+          </div>
+        </div>
+        <button onclick="closeLyricsVideoModal()" style="background:none; border:none; color:var(--text-muted); cursor:pointer; font-size:16px;">✕</button>
+      </div>
+
+      <div style="padding:16px; overflow-y:auto; display:flex; flex-direction:column; gap:12px; flex:1;">
+        <div style="display:flex; gap:8px; align-items:flex-end;">
+          <div style="flex:1;">
+            <label style="font-size:11px; color:var(--text-dim); display:block; margin-bottom:4px;">Audio File Track:</label>
+            <input type="text" id="lyricsVideoAudioInput" class="search-input" style="width:100%; font-size:11px;" placeholder="Path to audio file (MP3, FLAC, WAV)...">
+          </div>
+          <button class="btn btn-secondary" onclick="loadActiveTrackForLyricsVideo()" style="font-size:11px; padding:6px 12px; white-space:nowrap;">Active Track</button>
+        </div>
+
+        <div style="display:flex; gap:8px; align-items:flex-end;">
+          <div style="flex:1;">
+            <label style="font-size:11px; color:var(--text-dim); display:block; margin-bottom:4px;">Synchronized LRC File (Optional if companion exists):</label>
+            <input type="text" id="lyricsVideoLrcInput" class="search-input" style="width:100%; font-size:11px;" placeholder="Leave empty to use companion .lrc...">
+          </div>
+        </div>
+
+        <!-- Video Resolution & Format -->
+        <div style="display:grid; grid-template-columns:1fr 1fr; gap:10px;">
+          <div>
+            <label style="font-size:11px; color:var(--text-dim); display:block; margin-bottom:4px;">Video Resolution:</label>
+            <select id="lyricsVideoResSelect" class="search-input" style="width:100%; font-size:11px;">
+              <option value="1080p" selected>1080p Full HD (1920x1080 @ 60fps)</option>
+              <option value="720p">720p HD (1280x720 @ 60fps)</option>
+            </select>
+          </div>
+          <div>
+            <label style="font-size:11px; color:var(--text-dim); display:block; margin-bottom:4px;">Output Video File (Optional):</label>
+            <input type="text" id="lyricsVideoOutInput" class="search-input" style="width:100%; font-size:11px;" placeholder="Auto-named .mp4 / .html...">
+          </div>
+        </div>
+
+        <div style="display:flex; justify-content:space-between; align-items:center;">
+          <span id="lyricsVideoStatusText" style="font-size:11px; color:var(--text-dim);">Ready to generate lyrics video presentation.</span>
+          <div style="display:flex; gap:8px;">
+            <button class="btn btn-primary" onclick="runLyricsVideoAction()" id="processLyricsVideoBtn" style="font-size:11px; padding:6px 18px;">
+              🎬 Generate Video Presentation
+            </button>
+          </div>
+        </div>
+
+        <div id="lyricsVideoOutputCard" style="background:#0b0d14; border:1px solid var(--border); border-radius:8px; padding:12px; font-family:monospace; font-size:11px; line-height:1.45; color:var(--cyan); min-height:80px; white-space:pre-wrap; overflow-x:auto;">Select audio track with companion LRC and click Generate Video Presentation.</div>
+      </div>
+
+      <div style="padding:10px 16px; background:#121520; border-top:1px solid var(--border); display:flex; justify-content:space-between; align-items:center;">
+        <span style="font-size:10px; color:var(--text-dim);">Generates both standalone HTML5 presentation & MP4 video</span>
+        <button class="btn btn-secondary" onclick="closeLyricsVideoModal()">Close</button>
+      </div>
+    </div>
+  </div>
+
   <!-- Podcast & Long Mix Bookmark Resumption Toast (Phase 10) -->
   <div id="podcastResumeToast" style="display:none; position:fixed; bottom:85px; right:20px; z-index:9999; background:#131722; border:1px solid var(--border); box-shadow:0 8px 24px rgba(0,0,0,0.6); border-radius:10px; padding:10px 14px; align-items:center; gap:10px; backdrop-filter:blur(10px);">
     <span style="font-size:16px;">⏱️</span>
@@ -8117,6 +8404,10 @@
         closePhaseMeterModal();
         closeDacTesterModal();
         closeLyricsRetimerModal();
+        closeSpectrumModal();
+        closeDeclipperModal();
+        closeTrackSplitterModal();
+        closeLyricsVideoModal();
         dismissPodcastResumeToast();
         const popup = document.getElementById('speedStudioPopup');
         if (popup) popup.style.display = 'none';
@@ -13336,6 +13627,418 @@
           if (btn) {
             btn.disabled = false;
             btn.innerText = '⏱️ Calibrate & Save LRC';
+          }
+          if (out) out.innerText = '✕ Error: ' + (err.message || err);
+        });
+      }
+    }
+
+    // =========================================================================
+    // PHASE 21: HI-RES AUDIO SPECTRUM & BANDWIDTH CUTOFF ANALYZER
+    // =========================================================================
+    function openSpectrumModal() {
+      const modal = document.getElementById('spectrumModal');
+      if (!modal) return;
+      loadActiveTrackForSpectrum();
+      modal.style.display = 'flex';
+      drawSpectrumGrid();
+    }
+
+    function closeSpectrumModal() {
+      const modal = document.getElementById('spectrumModal');
+      if (modal) modal.style.display = 'none';
+    }
+
+    function loadActiveTrackForSpectrum() {
+      const track = (playingTrackIndex !== null) ? libraryTracks.find(t => t.index === playingTrackIndex)
+                  : (selectedTrackIndex !== null) ? libraryTracks.find(t => t.index === selectedTrackIndex) : null;
+      const inp = document.getElementById('spectrumTargetInput');
+      if (inp && track && track.path) {
+        inp.value = track.path;
+      }
+    }
+
+    function drawSpectrumGrid() {
+      const canvas = document.getElementById('spectrumCanvas');
+      if (!canvas) return;
+      const ctx = canvas.getContext('2d');
+      const w = canvas.width;
+      const h = canvas.height;
+      ctx.fillStyle = '#07090e';
+      ctx.fillRect(0, 0, w, h);
+
+      // Horizontal dB lines (-12, -24, -36, -48, -60, -72 dB)
+      ctx.strokeStyle = 'rgba(255, 255, 255, 0.06)';
+      ctx.lineWidth = 1;
+      for (let y = 20; y < h; y += 25) {
+        ctx.beginPath();
+        ctx.moveTo(0, y);
+        ctx.lineTo(w, y);
+        ctx.stroke();
+      }
+    }
+
+    function drawSpectrumBars(freqs, dbs, cutoffHz) {
+      drawSpectrumGrid();
+      const canvas = document.getElementById('spectrumCanvas');
+      if (!canvas || !freqs || !freqs.length) return;
+      const ctx = canvas.getContext('2d');
+      const w = canvas.width;
+      const h = canvas.height;
+      const barWidth = Math.max(2, (w / freqs.length) - 1);
+
+      for (let i = 0; i < freqs.length; i++) {
+        const db = Math.max(-90.0, Math.min(0.0, dbs[i]));
+        const barHeight = ((db + 90.0) / 90.0) * (h - 10);
+        const x = i * (w / freqs.length);
+        const y = h - barHeight;
+
+        // Color gradient: cyan to emerald, or amber near cutoff
+        const f = freqs[i];
+        if (f > cutoffHz) {
+          ctx.fillStyle = 'rgba(244, 63, 94, 0.4)'; // Above cutoff / noise floor
+        } else if (f > 20000) {
+          ctx.fillStyle = '#38bdf8'; // Ultrasonic Hi-Res
+        } else if (f > 2000) {
+          ctx.fillStyle = '#10b981'; // Highs
+        } else {
+          ctx.fillStyle = '#06b6d4'; // Low-mids
+        }
+        ctx.fillRect(x, y, barWidth, barHeight);
+      }
+    }
+
+    function runSpectrumAnalysisAction() {
+      const target = (document.getElementById('spectrumTargetInput').value || '').trim();
+      if (!target) {
+        alert('Please specify an audio file to analyze spectrum.');
+        return;
+      }
+      const btn = document.getElementById('analyzeSpectrumBtn');
+      const out = document.getElementById('spectrumOutputCard');
+      const banner = document.getElementById('spectrumVerdictBanner');
+      if (btn) {
+        btn.disabled = true;
+        btn.innerText = '📊 Computing FFT...';
+      }
+      if (out) out.innerText = 'Computing Short-Time Fourier Transform, spectral energy rolloff & cutoff frequency...';
+
+      if (window.pywebview && window.pywebview.api && window.pywebview.api.analyze_audio_spectrum) {
+        window.pywebview.api.analyze_audio_spectrum(target, 60.0).then(res => {
+          if (btn) {
+            btn.disabled = false;
+            btn.innerText = '📊 Analyze Spectrum';
+          }
+          if (res && res.success) {
+            document.getElementById('specMetricPeak').innerText = `${res.peak_freq_hz} Hz`;
+            document.getElementById('specMetricCentroid').innerText = `${res.spectral_centroid_hz} Hz`;
+            document.getElementById('specMetricRolloff85').innerText = `${res.spectral_rolloff_85_hz} Hz`;
+            document.getElementById('specMetricCutoff').innerText = `${res.detected_cutoff_hz} Hz`;
+            document.getElementById('spectrumPeakLabel').innerText = `Peak: ${res.peak_freq_hz} Hz (${res.peak_dbfs > 0 ? '+' : ''}${res.peak_dbfs} dBFS)`;
+
+            if (banner) {
+              banner.style.display = 'flex';
+              const titleEl = document.getElementById('spectrumVerdictTitle');
+              const descEl = document.getElementById('spectrumVerdictDesc');
+              const badgeEl = document.getElementById('spectrumCutoffBadge');
+              if (titleEl) titleEl.innerText = res.hi_res_status.replace(/_/g, ' ');
+              if (descEl) descEl.innerText = res.authenticity_verdict;
+              if (badgeEl) {
+                badgeEl.innerText = `Cutoff: ${(res.detected_cutoff_hz / 1000).toFixed(1)} kHz`;
+                if (res.hi_res_status === 'GENUINE_HI_RES') {
+                  badgeEl.style.background = 'rgba(16,185,129,0.15)';
+                  badgeEl.style.color = 'var(--emerald)';
+                } else if (res.hi_res_status.includes('LOSSY')) {
+                  badgeEl.style.background = 'rgba(244,63,94,0.15)';
+                  badgeEl.style.color = 'var(--rose)';
+                } else {
+                  badgeEl.style.background = 'rgba(56,189,248,0.15)';
+                  badgeEl.style.color = 'var(--cyan)';
+                }
+              }
+            }
+
+            if (res.ui_freqs && res.ui_dbs) {
+              drawSpectrumBars(res.ui_freqs, res.ui_dbs, res.detected_cutoff_hz);
+            }
+
+            let card = `HIGH-RES AUDIO SPECTRUM & BANDWIDTH FORENSICS\n`;
+            card += `File          : ${res.file}\n`;
+            card += `Format        : ${res.sample_rate} Hz | ${res.channels} Ch | ${res.duration_sec}s Duration (Nyquist: ${res.nyquist_hz} Hz)\n`;
+            card += `Dominant Peak : ${res.peak_freq_hz} Hz (${res.peak_dbfs} dBFS)\n`;
+            card += `Spectral Cent : ${res.spectral_centroid_hz} Hz (Center of mass / Brightness)\n`;
+            card += `85% Rolloff   : ${res.spectral_rolloff_85_hz} Hz | 95% Rolloff: ${res.spectral_rolloff_95_hz} Hz\n`;
+            card += `Ceiling Cutoff: ${res.detected_cutoff_hz} Hz\n`;
+            card += `Wiener Entropy: ${res.spectral_flatness} (Spectral Flatness)\n\n`;
+            card += `AUTHENTICITY VERDICT:\n${res.authenticity_verdict}\n`;
+            if (out) out.innerText = card;
+          } else {
+            if (out) out.innerText = `✕ Analysis failed: ${res ? res.error : 'Unknown error'}`;
+          }
+        }).catch(err => {
+          if (btn) {
+            btn.disabled = false;
+            btn.innerText = '📊 Analyze Spectrum';
+          }
+          if (out) out.innerText = `✕ Error: ${err.message || err}`;
+        });
+      }
+    }
+
+    // =========================================================================
+    // PHASE 21: MULTIBAND DYNAMIC RANGE EXPANDER & AUDIO DE-CLIPPER
+    // =========================================================================
+    function openDeclipperModal() {
+      const modal = document.getElementById('declipperModal');
+      if (!modal) return;
+      loadActiveTrackForDeclipper();
+      modal.style.display = 'flex';
+    }
+
+    function closeDeclipperModal() {
+      const modal = document.getElementById('declipperModal');
+      if (modal) modal.style.display = 'none';
+    }
+
+    function loadActiveTrackForDeclipper() {
+      const track = (playingTrackIndex !== null) ? libraryTracks.find(t => t.index === playingTrackIndex)
+                  : (selectedTrackIndex !== null) ? libraryTracks.find(t => t.index === selectedTrackIndex) : null;
+      const inp = document.getElementById('declipperTargetInput');
+      if (inp && track && track.path) {
+        inp.value = track.path;
+      }
+    }
+
+    function runDeclipperAction() {
+      const target = (document.getElementById('declipperTargetInput').value || '').trim();
+      if (!target) {
+        alert('Please specify an audio track to declip.');
+        return;
+      }
+      const exp = parseFloat(document.getElementById('declipperExpSlider').value || '2.0');
+      const hdr = parseFloat(document.getElementById('declipperHdrSlider').value || '4.0');
+
+      const btn = document.getElementById('processDeclipBtn');
+      const st = document.getElementById('declipperStatusText');
+      const out = document.getElementById('declipperOutputCard');
+
+      if (btn) {
+        btn.disabled = true;
+        btn.innerText = '⏳ Restoring Waveform...';
+      }
+      if (st) {
+        st.innerText = 'Reconstructing clipped sample peaks and expanding dynamic range...';
+        st.style.color = 'var(--cyan)';
+      }
+
+      if (window.pywebview && window.pywebview.api && window.pywebview.api.declip_audio_track) {
+        window.pywebview.api.declip_audio_track(target, null, exp, hdr).then(res => {
+          if (btn) {
+            btn.disabled = false;
+            btn.innerText = '🔨 Declip & Restore Audio';
+          }
+          if (res && res.success) {
+            if (st) {
+              st.innerText = '✓ De-clipping and dynamic range expansion complete!';
+              st.style.color = 'var(--emerald)';
+            }
+            let card = `MULTIBAND DYNAMIC EXPANSION & DE-CLIPPING COMPLETE\n`;
+            card += `Input File      : ${res.input_file}\n`;
+            card += `Restored Output : ${res.output_path}\n`;
+            card += `Format          : ${res.sample_rate} Hz | ${res.channels} Channels | ${res.duration_sec}s Duration\n\n`;
+            card += `Clipped Samples : ${res.clipped_samples_detected.toLocaleString()} (${res.clipped_percentage}% of track)\n`;
+            card += `Clipped Bursts  : ${res.clipped_bursts_count.toLocaleString()} flat-topped events repaired\n`;
+            card += `Headroom Shift  : ${res.headroom_applied_db > 0 ? '+' : ''}${res.headroom_applied_db} dB pre-attenuation\n`;
+            card += `Transient Boost : +${res.dynamic_expansion_db} dB upward expansion\n`;
+            card += `Peak Transition : ${res.pre_peak_dbfs} dBFS  ->  ${res.post_peak_dbfs} dBFS (Clean Headroom)\n`;
+            if (out) out.innerText = card;
+          } else {
+            if (st) {
+              st.innerText = '✕ De-clipping failed: ' + (res ? res.error : 'Unknown');
+              st.style.color = 'var(--rose)';
+            }
+          }
+        }).catch(err => {
+          if (btn) {
+            btn.disabled = false;
+            btn.innerText = '🔨 Declip & Restore Audio';
+          }
+          if (out) out.innerText = '✕ Error: ' + (err.message || err);
+        });
+      }
+    }
+
+    // =========================================================================
+    // PHASE 21: SMART SILENCE AUDIO TRACK SPLITTER & AUTO-CUE
+    // =========================================================================
+    function openTrackSplitterModal() {
+      const modal = document.getElementById('trackSplitterModal');
+      if (!modal) return;
+      loadActiveTrackForSplitter();
+      modal.style.display = 'flex';
+    }
+
+    function closeTrackSplitterModal() {
+      const modal = document.getElementById('trackSplitterModal');
+      if (modal) modal.style.display = 'none';
+    }
+
+    function loadActiveTrackForSplitter() {
+      const track = (playingTrackIndex !== null) ? libraryTracks.find(t => t.index === playingTrackIndex)
+                  : (selectedTrackIndex !== null) ? libraryTracks.find(t => t.index === selectedTrackIndex) : null;
+      const inp = document.getElementById('trackSplitterTargetInput');
+      if (inp && track && track.path) {
+        inp.value = track.path;
+      }
+    }
+
+    function runTrackSplitterAction() {
+      const target = (document.getElementById('trackSplitterTargetInput').value || '').trim();
+      if (!target) {
+        alert('Please specify an audio file to split.');
+        return;
+      }
+      const th = parseFloat(document.getElementById('splitterThresholdSelect').value || '-42.0');
+      const minS = parseFloat(document.getElementById('splitterMinSilenceSelect').value || '1.5');
+      const outDir = (document.getElementById('splitterOutputDirInput').value || '').trim() || null;
+
+      const btn = document.getElementById('processSplitterBtn');
+      const st = document.getElementById('splitterStatusText');
+      const out = document.getElementById('splitterOutputCard');
+
+      if (btn) {
+        btn.disabled = true;
+        btn.innerText = '⏳ Scanning Silence...';
+      }
+      if (st) {
+        st.innerText = 'Auditing audio energy and snapping split points to zero-crossings...';
+        st.style.color = 'var(--cyan)';
+      }
+
+      if (window.pywebview && window.pywebview.api && window.pywebview.api.auto_split_track_silence) {
+        window.pywebview.api.auto_split_track_silence(target, outDir, th, minS).then(res => {
+          if (btn) {
+            btn.disabled = false;
+            btn.innerText = '✂️ Scan & Split Tracks';
+          }
+          if (res && res.success) {
+            if (st) {
+              st.innerText = `✓ Split into ${res.tracks_count} tracks successfully!`;
+              st.style.color = 'var(--emerald)';
+            }
+            let card = `SMART AUDIO TRACK SPLIT COMPLETE\n`;
+            card += `Source Audio : ${res.input_file}\n`;
+            card += `Output Dir   : ${res.output_dir}\n`;
+            card += `CUE Sheet    : ${res.cue_path}\n`;
+            card += `Total Tracks : ${res.tracks_count} (${res.total_duration_sec}s total audio)\n\n`;
+            card += `Track # | Filename                     | Start Time | Duration\n`;
+            card += `--------+------------------------------+------------+---------\n`;
+            res.tracks.forEach(t => {
+              const fname = (t.filename.length > 28 ? t.filename.substring(0, 25) + '...' : t.filename).padEnd(28);
+              card += `#${t.track_number.toString().padStart(2, '0')}     | ${fname} | ${t.start_sec.toFixed(1).padStart(8)}s | ${t.duration_sec.toFixed(1).padStart(6)}s\n`;
+            });
+            if (out) out.innerText = card;
+          } else {
+            if (st) {
+              st.innerText = '✕ Splitting failed: ' + (res ? res.error : 'Unknown');
+              st.style.color = 'var(--rose)';
+            }
+          }
+        }).catch(err => {
+          if (btn) {
+            btn.disabled = false;
+            btn.innerText = '✂️ Scan & Split Tracks';
+          }
+          if (out) out.innerText = '✕ Error: ' + (err.message || err);
+        });
+      }
+    }
+
+    // =========================================================================
+    // PHASE 21: SYNCHRONIZED LRC KARAOKE VIDEO & THEATER GENERATOR
+    // =========================================================================
+    function openLyricsVideoModal() {
+      const modal = document.getElementById('lyricsVideoModal');
+      if (!modal) return;
+      loadActiveTrackForLyricsVideo();
+      modal.style.display = 'flex';
+    }
+
+    function closeLyricsVideoModal() {
+      const modal = document.getElementById('lyricsVideoModal');
+      if (modal) modal.style.display = 'none';
+    }
+
+    function loadActiveTrackForLyricsVideo() {
+      const track = (playingTrackIndex !== null) ? libraryTracks.find(t => t.index === playingTrackIndex)
+                  : (selectedTrackIndex !== null) ? libraryTracks.find(t => t.index === selectedTrackIndex) : null;
+      const aInp = document.getElementById('lyricsVideoAudioInput');
+      const lInp = document.getElementById('lyricsVideoLrcInput');
+      if (track && track.path) {
+        if (aInp) aInp.value = track.path;
+        if (lInp) {
+          const lrc = track.path.replace(/\.[^/.]+$/, '.lrc');
+          lInp.value = lrc;
+        }
+      }
+    }
+
+    function runLyricsVideoAction() {
+      const aud = (document.getElementById('lyricsVideoAudioInput').value || '').trim();
+      const lrc = (document.getElementById('lyricsVideoLrcInput').value || '').trim() || null;
+      const resMode = document.getElementById('lyricsVideoResSelect').value || '1080p';
+      const outPath = (document.getElementById('lyricsVideoOutInput').value || '').trim() || null;
+
+      if (!aud) {
+        alert('Please specify an audio track.');
+        return;
+      }
+
+      const btn = document.getElementById('processLyricsVideoBtn');
+      const st = document.getElementById('lyricsVideoStatusText');
+      const out = document.getElementById('lyricsVideoOutputCard');
+
+      if (btn) {
+        btn.disabled = true;
+        btn.innerText = '⏳ Generating Presentation...';
+      }
+      if (st) {
+        st.innerText = 'Parsing synchronized LRC lines and compiling interactive video presentation...';
+        st.style.color = 'var(--cyan)';
+      }
+
+      if (window.pywebview && window.pywebview.api && window.pywebview.api.render_lyrics_karaoke_video) {
+        window.pywebview.api.render_lyrics_karaoke_video(aud, lrc, outPath, resMode).then(res => {
+          if (btn) {
+            btn.disabled = false;
+            btn.innerText = '🎬 Generate Video Presentation';
+          }
+          if (res && res.success) {
+            if (st) {
+              st.innerText = '✓ Lyrics Karaoke Video presentation generated!';
+              st.style.color = 'var(--emerald)';
+            }
+            let card = `SYNCHRONIZED LRC KARAOKE VIDEO GENERATION COMPLETE\n`;
+            card += `Title        : ${res.track_title} - ${res.artist}\n`;
+            card += `Audio File   : ${res.audio_file}\n`;
+            card += `Lyrics File  : ${res.lrc_file} (${res.lines_count} lines)\n`;
+            card += `HTML Theater : ${res.html_player_path}\n`;
+            if (res.video_rendered) {
+              card += `Rendered MP4 : ${res.video_path} (${res.resolution})\n`;
+            } else {
+              card += `Presentation : Standalone HTML5 Karaoke Theater ready for browser or full-screen theater\n`;
+            }
+            if (out) out.innerText = card;
+          } else {
+            if (st) {
+              st.innerText = '✕ Video generation failed: ' + (res ? res.error : 'Unknown');
+              st.style.color = 'var(--rose)';
+            }
+          }
+        }).catch(err => {
+          if (btn) {
+            btn.disabled = false;
+            btn.innerText = '🎬 Generate Video Presentation';
           }
           if (out) out.innerText = '✕ Error: ' + (err.message || err);
         });

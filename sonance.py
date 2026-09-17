@@ -315,6 +315,30 @@ Examples:
       help="Recalibrate drifting lyrics sync: --retime-lyrics <lrc_file> <t1_old> <t1_new> <t2_old> <t2_new> [output_lrc]",
   )
   parser.add_argument(
+      "--spectrum",
+      nargs="+",
+      metavar="PARAM",
+      help="Analyze audio frequency spectrum & genuine Hi-Res bandwidth: --spectrum <audio_file> [--max-sec 60]",
+  )
+  parser.add_argument(
+      "--declip",
+      nargs="+",
+      metavar="PARAM",
+      help="Repair digital clipping & expand dynamic range: --declip <audio_file> [output_file] [--expansion 2.0] [--headroom 4.0]",
+  )
+  parser.add_argument(
+      "--auto-split",
+      nargs="+",
+      metavar="PARAM",
+      help="Split continuous audio by silence gaps & generate CUE: --auto-split <audio_file> [output_dir] [--threshold -42.0] [--min-silence 1.5]",
+  )
+  parser.add_argument(
+      "--lyrics-video",
+      nargs="+",
+      metavar="PARAM",
+      help="Generate animated synchronized lyrics karaoke video: --lyrics-video <audio_file> [lrc_file] [output_video] [--resolution 1080p|720p]",
+  )
+  parser.add_argument(
       "--version",
       action="version",
       version=f"Sonance v{modern_lyrics_downloader.APP_VERSION}",
@@ -1373,6 +1397,113 @@ Examples:
     print(f"[*] Recalibrating lyrics drift for: {lrc_f}...")
     res = lyrics_retimer.retime_lyrics(content, t1_o, t1_n, t2_o, t2_n, output_path=out_f)
     print(lyrics_retimer.format_retimer_card(res))
+    return
+
+  if args.spectrum:
+    import spectrum_analyzer
+    sp_params = list(args.spectrum) + list(unknown)
+    target = sp_params[0]
+    max_sec = 60.0
+    idx = 1
+    while idx < len(sp_params):
+      if sp_params[idx] in ("--max-sec", "--sec", "--duration") and idx + 1 < len(sp_params):
+        max_sec = float(sp_params[idx + 1])
+        idx += 2
+      else:
+        idx += 1
+    print(f"[*] Analyzing frequency spectrum & bandwidth forensics: {target}...")
+    res = spectrum_analyzer.analyze_spectrum(target, max_duration_sec=max_sec)
+    print(spectrum_analyzer.format_spectrum_card(res))
+    return
+
+  if args.declip:
+    import audio_declipper
+    dc_params = list(args.declip) + list(unknown)
+    inp = dc_params[0]
+    out = None
+    exp = 2.0
+    hdr = 4.0
+    idx = 1
+    while idx < len(dc_params):
+      arg = dc_params[idx]
+      if arg in ("--expansion", "--expand") and idx + 1 < len(dc_params):
+        exp = float(dc_params[idx + 1])
+        idx += 2
+      elif arg in ("--headroom", "--attenuation") and idx + 1 < len(dc_params):
+        hdr = float(dc_params[idx + 1])
+        idx += 2
+      elif arg in ("--output", "--out") and idx + 1 < len(dc_params):
+        out = dc_params[idx + 1]
+        idx += 2
+      elif not arg.startswith("--") and out is None:
+        out = arg
+        idx += 1
+      else:
+        idx += 1
+    print(f"[*] Auditing digital clipping & expanding dynamic range: {inp}...")
+    res = audio_declipper.declip_audio(inp, output_path=out, expansion_db=exp, headroom_db=hdr)
+    print(audio_declipper.format_declipper_card(res))
+    return
+
+  if args.auto_split:
+    import track_splitter
+    as_params = list(args.auto_split) + list(unknown)
+    inp = as_params[0]
+    out_dir = None
+    th = -42.0
+    ms = 1.5
+    idx = 1
+    while idx < len(as_params):
+      arg = as_params[idx]
+      if arg in ("--threshold", "--silence-threshold") and idx + 1 < len(as_params):
+        th = float(as_params[idx + 1])
+        idx += 2
+      elif arg in ("--min-silence", "--silence-sec") and idx + 1 < len(as_params):
+        ms = float(as_params[idx + 1])
+        idx += 2
+      elif arg in ("--output-dir", "--out", "--dir") and idx + 1 < len(as_params):
+        out_dir = as_params[idx + 1]
+        idx += 2
+      elif not arg.startswith("--") and out_dir is None:
+        out_dir = arg
+        idx += 1
+      else:
+        idx += 1
+    print(f"[*] Scanning audio silence gaps and generating CUE tracks: {inp}...")
+    res = track_splitter.auto_split_audio(inp, output_dir=out_dir, silence_threshold_db=th, min_silence_sec=ms)
+    print(track_splitter.format_splitter_card(res))
+    return
+
+  if args.lyrics_video:
+    import lyrics_video_maker
+    lv_params = list(args.lyrics_video) + list(unknown)
+    aud = lv_params[0]
+    lrc = None
+    out = None
+    res_mode = "1080p"
+    idx = 1
+    while idx < len(lv_params):
+      arg = lv_params[idx]
+      if arg in ("--resolution", "--res") and idx + 1 < len(lv_params):
+        res_mode = lv_params[idx + 1]
+        idx += 2
+      elif arg in ("--lrc", "--lyrics") and idx + 1 < len(lv_params):
+        lrc = lv_params[idx + 1]
+        idx += 2
+      elif arg in ("--output", "--out", "--video") and idx + 1 < len(lv_params):
+        out = lv_params[idx + 1]
+        idx += 2
+      elif not arg.startswith("--"):
+        if lrc is None and arg.endswith(".lrc"):
+          lrc = arg
+        elif out is None:
+          out = arg
+        idx += 1
+      else:
+        idx += 1
+    print(f"[*] Generating synchronized lyrics karaoke video: {aud}...")
+    res = lyrics_video_maker.generate_lyrics_video(aud, lrc_path=lrc, output_path=out, resolution=res_mode)
+    print(lyrics_video_maker.format_video_card(res))
     return
 
   if args.classic:

@@ -86,6 +86,10 @@ import parametric_eq
 import phase_correlation
 import dac_tester
 import lyrics_retimer
+import spectrum_analyzer
+import audio_declipper
+import track_splitter
+import lyrics_video_maker
 
 APP_VERSION = "2.1.0"
 GITHUB_REPO = "Sandeep2062/Sonance"
@@ -1307,6 +1311,55 @@ class LyricsAPI:
                 return {"success": False, "error": f"Failed to read lyrics file: {e}"}
         return lyrics_retimer.retime_lyrics(
             lyrics_content, t1_old=t1_old, t1_new=t1_new, t2_old=t2_old, t2_new=t2_new, output_path=output_path
+        )
+
+    # ------------------ Phase 21: High-Res Spectrum & Forensics ------------------
+    def analyze_audio_spectrum(self, file_path: str, max_sec: float = 60.0) -> Dict[str, Any]:
+        """Analyzes audio frequency spectrum, bandwidth rolloff, and genuine Hi-Res status."""
+        return spectrum_analyzer.analyze_spectrum(file_path, max_duration_sec=max_sec)
+
+    # ------------------ Phase 21: Dynamic De-Clipper & Expander ------------------
+    def declip_audio_track(
+        self,
+        input_path: str,
+        output_path: Optional[str] = None,
+        expansion_db: float = 2.0,
+        headroom_db: float = 4.0,
+    ) -> Dict[str, Any]:
+        """Reconstructs clipped digital waveform peaks and applies multiband dynamic expansion."""
+        return audio_declipper.declip_audio(
+            input_path, output_path=output_path, expansion_db=expansion_db, headroom_db=headroom_db
+        )
+
+    # ------------------ Phase 21: Smart Silence Track Splitter -------------------
+    def auto_split_track_silence(
+        self,
+        input_path: str,
+        output_dir: Optional[str] = None,
+        silence_threshold_db: float = -42.0,
+        min_silence_sec: float = 1.5,
+        min_track_sec: float = 15.0,
+    ) -> Dict[str, Any]:
+        """Detects silence gaps, generates Red Book CUE sheet, and splits into individual tracks."""
+        return track_splitter.auto_split_audio(
+            input_path,
+            output_dir=output_dir,
+            silence_threshold_db=silence_threshold_db,
+            min_silence_sec=min_silence_sec,
+            min_track_sec=min_track_sec,
+        )
+
+    # ------------------ Phase 21: Synchronized Lyrics Video Maker ----------------
+    def render_lyrics_karaoke_video(
+        self,
+        audio_path: str,
+        lrc_path: Optional[str] = None,
+        output_path: Optional[str] = None,
+        resolution: str = "1080p",
+    ) -> Dict[str, Any]:
+        """Generates synchronized lyrics karaoke video / interactive HTML5 presentation."""
+        return lyrics_video_maker.generate_lyrics_video(
+            audio_path, lrc_path=lrc_path, output_path=output_path, resolution=resolution
         )
 
     def _save_last_folder(self, folder: str):
