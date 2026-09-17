@@ -1147,6 +1147,18 @@
       <button class="btn btn-secondary" onclick="openWordAlignerModal()" style="padding:5px 9px; font-size:11px;" id="wordAlignerHeaderBtn" title="Word-by-Word Enhanced LRC (ELRC) Syllable Aligner">
         ✨ Syllable Aligner
       </button>
+      <button class="btn btn-secondary" onclick="openAutoEqModal()" style="padding:5px 9px; font-size:11px;" id="autoEqHeaderBtn" title="Headphone AutoEq & Harman 2020 Target Calibration">
+        🎧 AutoEq
+      </button>
+      <button class="btn btn-secondary" onclick="openFlacVerifyModal()" style="padding:5px 9px; font-size:11px;" id="flacVerifyHeaderBtn" title="Lossless FLAC Stream MD5 Integrity Auditor">
+        🛡️ FLAC Verify
+      </button>
+      <button class="btn btn-secondary" onclick="openDjAutoMixModal()" style="padding:5px 9px; font-size:11px;" id="djAutoMixHeaderBtn" title="DJ Harmonic Auto-Mix & Phrase-Synced Crossfade">
+        🎛️ DJ AutoMix
+      </button>
+      <button class="btn btn-secondary" onclick="openLyricsAggregatorModal()" style="padding:5px 9px; font-size:11px;" id="lyricsAggregatorHeaderBtn" title="Multi-Source Synced Lyrics Search & Batch Fetcher">
+        🌐 Lyrics Fetch
+      </button>
       <button class="btn btn-secondary" onclick="openLrcStudioModal()" style="padding:5px 9px; font-size:11px;" id="lrcStudioHeaderBtn" title="Interactive LRC Studio & Live Time-Stamper">
         ✍️ LRC Studio
       </button>
@@ -3870,6 +3882,247 @@
       <div style="padding:10px 16px; background:#121520; border-top:1px solid var(--border); display:flex; justify-content:space-between; align-items:center;">
         <span style="font-size:10px; color:var(--text-dim);">Compatible with Sonance glowing syllable sweep and mobile sync</span>
         <button class="btn btn-secondary" onclick="closeWordAlignerModal()">Close</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Phase 17: Headphone AutoEq & Harman Target Calibration Modal -->
+  <div class="modal-backdrop" id="autoEqModal" style="display:none;">
+    <div class="modal-box" style="width:640px; max-width:92vw; display:flex; flex-direction:column; max-height:88vh;">
+      <div class="modal-header">
+        <div style="display:flex; align-items:center; gap:8px;">
+          <span style="font-size:18px;">🎧</span>
+          <div>
+            <div style="font-weight:700; font-size:14px; color:#fff;">Headphone AutoEq & Harman Target Studio</div>
+            <div style="font-size:10px; color:var(--text-dim);">Calibrate frequency response to Harman 2020 Target for studio-grade headphone clarity</div>
+          </div>
+        </div>
+        <button onclick="closeAutoEqModal()" style="background:none; border:none; color:var(--text-muted); cursor:pointer; font-size:16px;">✕</button>
+      </div>
+
+      <div class="modal-body" style="padding:16px; display:flex; flex-direction:column; gap:12px; overflow-y:auto;">
+        <div>
+          <label style="font-size:11px; color:var(--text-dim); display:block; margin-bottom:4px;">Select Headphone / IEM Profile:</label>
+          <select id="autoEqSelect" class="search-input" style="width:100%; font-size:11px; padding:7px 10px;" onchange="onAutoEqProfileSelected()">
+            <option value="">Loading profiles...</option>
+          </select>
+        </div>
+
+        <div style="background:#121522; border:1px solid var(--border); border-radius:8px; padding:12px; display:flex; flex-direction:column; gap:6px;">
+          <div style="display:flex; justify-content:space-between; align-items:center;">
+            <div id="autoEqProfileName" style="font-weight:700; font-size:13px; color:#fff;">Select a profile above</div>
+            <span id="autoEqPreampBadge" style="font-size:10px; color:var(--cyan); font-family:monospace;">Preamp: 0.0 dB</span>
+          </div>
+          <div id="autoEqDescText" style="font-size:11px; color:var(--text-dim);">Harman Target compensation smooths acoustic resonances and expands perceived soundstage.</div>
+        </div>
+
+        <div>
+          <div style="font-size:11px; color:var(--text-muted); font-weight:700; margin-bottom:6px;">10-Band Studio EQ Gain Profile (dB):</div>
+          <div id="autoEqGainsGrid" style="display:grid; grid-template-columns:repeat(10, 1fr); gap:4px; text-align:center;">
+            <!-- 10 frequency gain badges rendered via JS -->
+          </div>
+        </div>
+
+        <!-- Custom EqualizerAPO Import -->
+        <div style="border-top:1px solid rgba(255,255,255,0.06); padding-top:10px;">
+          <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:4px;">
+            <label style="font-size:11px; color:var(--text-dim);">Import Custom EqualizerAPO / Peace .txt Config:</label>
+            <button class="btn btn-secondary" onclick="parseCustomAutoEqAction()" style="font-size:10px; padding:2px 8px;">Parse Profile</button>
+          </div>
+          <textarea id="autoEqCustomText" class="search-input" style="width:100%; height:60px; font-family:monospace; font-size:10px; padding:6px; line-height:1.4;" placeholder="Paste 'GraphicEQ: 25 1.0; 40 2.5; ...' or parametric Filter lines..."></textarea>
+        </div>
+
+        <div style="display:flex; justify-content:space-between; align-items:center; margin-top:4px;">
+          <span id="autoEqStatusText" style="font-size:11px; color:var(--text-dim);">Ready to calibrate audio DSP engine.</span>
+          <button class="btn btn-primary" onclick="applyAutoEqToHardwareEqualizer()" id="applyAutoEqBtn" style="font-size:11px; padding:7px 18px;">
+            ⚡ Apply to Hardware Equalizer
+          </button>
+        </div>
+      </div>
+
+      <div style="padding:10px 16px; background:#121520; border-top:1px solid var(--border); display:flex; justify-content:space-between; align-items:center;">
+        <span style="font-size:10px; color:var(--text-dim);">AutoEq Harman 2020 curves curated by Jaakko Pasanen</span>
+        <button class="btn btn-secondary" onclick="closeAutoEqModal()">Close</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Phase 17: Lossless FLAC Stream MD5 Integrity Auditor Modal -->
+  <div class="modal-backdrop" id="flacVerifierModal" style="display:none;">
+    <div class="modal-box" style="width:680px; max-width:92vw; display:flex; flex-direction:column; max-height:88vh;">
+      <div class="modal-header">
+        <div style="display:flex; align-items:center; gap:8px;">
+          <span style="font-size:18px;">🛡️</span>
+          <div>
+            <div style="font-weight:700; font-size:14px; color:#fff;">Lossless FLAC Stream MD5 Integrity Auditor</div>
+            <div style="font-size:10px; color:var(--text-dim);">Verifies uncompressed PCM stream MD5 signatures to detect bit rot and file corruption</div>
+          </div>
+        </div>
+        <button onclick="closeFlacVerifyModal()" style="background:none; border:none; color:var(--text-muted); cursor:pointer; font-size:16px;">✕</button>
+      </div>
+
+      <div class="modal-body" style="padding:16px; display:flex; flex-direction:column; gap:12px; overflow-y:auto;">
+        <div style="background:#121522; border:1px solid var(--border); border-radius:8px; padding:12px; display:flex; justify-content:space-between; align-items:center;">
+          <div>
+            <div style="font-size:10px; color:var(--text-dim); text-transform:uppercase;">Target FLAC File or Library</div>
+            <div id="flacVerifyTrackTitle" style="font-weight:700; font-size:13px; color:#fff; max-width:400px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;">--</div>
+          </div>
+          <div style="display:flex; gap:8px;">
+            <button class="btn btn-primary" onclick="runFlacVerifyAction(false)" id="verifyFlacSingleBtn" style="font-size:11px; padding:6px 12px;">🛡️ Verify Active Track</button>
+            <button class="btn btn-secondary" onclick="runFlacVerifyAction(true)" id="verifyFlacFolderBtn" style="font-size:11px; padding:6px 12px;">📁 Audit Entire Folder</button>
+          </div>
+        </div>
+
+        <div style="display:grid; grid-template-columns:140px 1fr; gap:14px; background:#10131d; border:1px solid var(--border); border-radius:10px; padding:16px; align-items:center;">
+          <div style="text-align:center; padding:12px; background:#141724; border-radius:8px; border:1px solid rgba(255,255,255,0.06);">
+            <div id="flacVerifyStatusBadge" style="font-size:24px; font-weight:800; color:var(--emerald); font-family:monospace;">--</div>
+            <div id="flacVerifyScoreText" style="font-size:10px; font-weight:700; color:var(--text-muted); margin-top:2px;">INTEGRITY</div>
+          </div>
+          <div>
+            <div id="flacVerifyResultTitle" style="font-size:13px; font-weight:700; color:#fff; margin-bottom:4px;">No FLAC audit executed yet</div>
+            <div id="flacVerifyResultDesc" style="font-size:11px; color:var(--text-dim); margin-bottom:8px;">Extracts 128-bit MD5 signature from STREAMINFO header and validates PCM frames.</div>
+            <div style="display:flex; flex-direction:column; gap:4px; font-size:10px; font-family:monospace;">
+              <div>Stored MD5: <span id="flacStoredMd5Val" style="color:var(--cyan);">--</span></div>
+              <div>Decoded MD5: <span id="flacDecodedMd5Val" style="color:#94a3b8;">--</span></div>
+            </div>
+          </div>
+        </div>
+
+        <div id="flacReportContainer" style="display:none; flex-direction:column; gap:6px;">
+          <div style="font-size:11px; font-weight:700; color:var(--text-muted);">Batch FLAC Audit Summary:</div>
+          <pre id="flacReportText" style="background:#0b0d14; border:1px solid var(--border); border-radius:6px; padding:10px; font-family:monospace; font-size:10px; color:#94a3b8; overflow-x:auto; max-height:160px;"></pre>
+        </div>
+      </div>
+
+      <div style="padding:10px 16px; background:#121520; border-top:1px solid var(--border); display:flex; justify-content:space-between; align-items:center;">
+        <span style="font-size:10px; color:var(--text-dim);">Red Book & Studio Master FLAC STREAMINFO standard</span>
+        <button class="btn btn-secondary" onclick="closeFlacVerifyModal()">Close</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Phase 17: DJ Harmonic Auto-Mix & Phrase-Synced Crossfade Modal -->
+  <div class="modal-backdrop" id="djAutoMixModal" style="display:none;">
+    <div class="modal-box" style="width:680px; max-width:92vw; display:flex; flex-direction:column; max-height:88vh;">
+      <div class="modal-header">
+        <div style="display:flex; align-items:center; gap:8px;">
+          <span style="font-size:18px;">🎛️</span>
+          <div>
+            <div style="font-weight:700; font-size:14px; color:#fff;">DJ Harmonic Auto-Mix & Smart Crossfade Studio</div>
+            <div style="font-size:10px; color:var(--text-dim);">Continuous club mix generator with Camelot key harmonic matching and bass-swap filter sweeps</div>
+          </div>
+        </div>
+        <button onclick="closeDjAutoMixModal()" style="background:none; border:none; color:var(--text-muted); cursor:pointer; font-size:16px;">✕</button>
+      </div>
+
+      <div class="modal-body" style="padding:16px; display:flex; flex-direction:column; gap:12px; overflow-y:auto;">
+        <div>
+          <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:4px;">
+            <div style="font-size:11px; color:var(--text-dim);">Auto-Mix Track Sequence:</div>
+            <span id="djAutoMixTrackCount" style="font-size:10px; color:var(--cyan);">0 tracks loaded</span>
+          </div>
+          <div id="djAutoMixTrackList" style="background:#10131d; border:1px solid var(--border); border-radius:8px; max-height:140px; overflow-y:auto; padding:6px; font-size:11px; display:flex; flex-direction:column; gap:4px;">
+            <!-- Track chips populated via JS -->
+          </div>
+        </div>
+
+        <div style="display:grid; grid-template-columns:1fr 1fr; gap:12px;">
+          <div>
+            <label style="font-size:11px; color:var(--text-dim); display:block; margin-bottom:4px;">Phrase Transition Duration:</label>
+            <select id="djAutoMixTransSelect" class="search-input" style="width:100%; font-size:11px; padding:6px 8px;">
+              <option value="8">8.0s (Quick 16-Beat Transition)</option>
+              <option value="12" selected>12.0s (Standard Club 32-Beat Blend)</option>
+              <option value="16">16.0s (Smooth House/Trance Progression)</option>
+              <option value="20">20.0s (Extended Deep Mix Crossfade)</option>
+            </select>
+          </div>
+
+          <div style="background:#121522; border:1px solid var(--border); border-radius:8px; padding:10px; display:flex; justify-content:space-between; align-items:center;">
+            <div>
+              <div style="font-size:11px; font-weight:700; color:#fff;">Bass-Swap Filter Sweep</div>
+              <div style="font-size:10px; color:var(--text-dim);">Dials out outgoing sub-bass to prevent kick clashes</div>
+            </div>
+            <input type="checkbox" id="djAutoMixBassSwapToggle" checked style="accent-color:var(--emerald);">
+          </div>
+        </div>
+
+        <div style="display:flex; justify-content:space-between; align-items:center; margin-top:4px;">
+          <span id="djAutoMixStatusText" style="font-size:11px; color:var(--text-dim);">Aligns musical phrases based on Camelot key wheel harmony.</span>
+          <button class="btn btn-primary" onclick="runDjAutoMixAction()" id="startDjAutoMixBtn" style="font-size:11px; padding:7px 18px;">
+            ⚡ Render Continuous DJ Mix
+          </button>
+        </div>
+      </div>
+
+      <div style="padding:10px 16px; background:#121520; border-top:1px solid var(--border); display:flex; justify-content:space-between; align-items:center;">
+        <span style="font-size:10px; color:var(--text-dim);">BPM onset tracking and 12-semitone chromagram key correlation</span>
+        <button class="btn btn-secondary" onclick="closeDjAutoMixModal()">Close</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Phase 17: Multi-Source Synced Lyrics Aggregator Modal -->
+  <div class="modal-backdrop" id="lyricsAggregatorModal" style="display:none;">
+    <div class="modal-box" style="width:680px; max-width:92vw; display:flex; flex-direction:column; max-height:88vh;">
+      <div class="modal-header">
+        <div style="display:flex; align-items:center; gap:8px;">
+          <span style="font-size:18px;">🌐</span>
+          <div>
+            <div style="font-weight:700; font-size:14px; color:#fff;">Multi-Source Synced Lyrics Aggregator</div>
+            <div style="font-size:10px; color:var(--text-dim);">Search LRCLIB, Deezer & Megalobiz with automatic Asian romanization and batch library fetching</div>
+          </div>
+        </div>
+        <button onclick="closeLyricsAggregatorModal()" style="background:none; border:none; color:var(--text-muted); cursor:pointer; font-size:16px;">✕</button>
+      </div>
+
+      <div class="modal-body" style="padding:16px; display:flex; flex-direction:column; gap:12px; overflow-y:auto;">
+        <div style="display:grid; grid-template-columns:1fr 1fr; gap:10px;">
+          <div>
+            <label style="font-size:10px; color:var(--text-dim); display:block; margin-bottom:2px;">Artist Name:</label>
+            <input type="text" id="lyricsAggArtistInput" class="search-input" style="width:100%; font-size:11px; padding:6px 8px;" placeholder="e.g. Queen">
+          </div>
+          <div>
+            <label style="font-size:10px; color:var(--text-dim); display:block; margin-bottom:2px;">Track Title:</label>
+            <input type="text" id="lyricsAggTitleInput" class="search-input" style="width:100%; font-size:11px; padding:6px 8px;" placeholder="e.g. Bohemian Rhapsody">
+          </div>
+        </div>
+
+        <div style="display:flex; justify-content:space-between; align-items:center;">
+          <div style="display:flex; align-items:center; gap:6px;">
+            <input type="checkbox" id="lyricsAggRomanizeToggle" checked style="accent-color:var(--emerald);">
+            <label for="lyricsAggRomanizeToggle" style="font-size:11px; color:#fff;">Auto-Romanize Asian Lyrics (Romaji / Hangul / Pinyin)</label>
+          </div>
+          <button class="btn btn-primary" onclick="runLyricsAggregatorSearchAction()" id="searchAggLyricsBtn" style="font-size:11px; padding:6px 14px;">
+            🔍 Search Providers
+          </button>
+        </div>
+
+        <div>
+          <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:4px;">
+            <label style="font-size:11px; color:var(--text-dim);">Lyrics Result Preview:</label>
+            <span id="lyricsAggSourceBadge" style="font-size:10px; color:var(--emerald);">--</span>
+          </div>
+          <textarea id="lyricsAggPreviewText" class="search-input" style="width:100%; height:130px; font-family:monospace; font-size:11px; padding:8px; line-height:1.5; color:#38bdf8; background:#0b0d14; resize:vertical;" placeholder="Lyrics will appear here..."></textarea>
+        </div>
+
+        <!-- Batch Library Download Section -->
+        <div style="background:#121522; border:1px solid var(--border); border-radius:8px; padding:12px; display:flex; flex-direction:column; gap:8px;">
+          <div style="display:flex; justify-content:space-between; align-items:center;">
+            <div>
+              <div style="font-size:11px; font-weight:700; color:#fff;">Batch Missing Lyrics Downloader</div>
+              <div style="font-size:10px; color:var(--text-dim);">Scans current music library folder and downloads missing .lrc files automatically</div>
+            </div>
+            <button class="btn btn-secondary" onclick="runBatchDownloadLyricsAction()" id="batchDownloadLyricsBtn" style="font-size:11px; padding:5px 12px;">
+              ⚡ Batch Download for Folder
+            </button>
+          </div>
+          <span id="batchDownloadStatusText" style="font-size:10px; color:var(--text-dim);">Folder: Active library folder</span>
+        </div>
+      </div>
+
+      <div style="padding:10px 16px; background:#121520; border-top:1px solid var(--border); display:flex; justify-content:space-between; align-items:center;">
+        <span style="font-size:10px; color:var(--text-dim);">Millisecond-accurate timestamp ranking and Kana/Hangul phonetic transcription</span>
+        <button class="btn btn-secondary" onclick="closeLyricsAggregatorModal()">Close</button>
       </div>
     </div>
   </div>
@@ -6842,6 +7095,10 @@
         closeDeviceSyncModal();
         closeAbLooperModal();
         closeWordAlignerModal();
+        closeAutoEqModal();
+        closeFlacVerifyModal();
+        closeDjAutoMixModal();
+        closeLyricsAggregatorModal();
         dismissPodcastResumeToast();
         const popup = document.getElementById('speedStudioPopup');
         if (popup) popup.style.display = 'none';
@@ -10113,6 +10370,516 @@
           alert(`✓ Enhanced LRC Saved!\n\nCompanion File: ${elrcPath}`);
         }).catch(err => {
           alert('✕ Error saving .elrc: ' + (err.message || err));
+        });
+      }
+    }
+
+    // =========================================================================
+    // Phase 17: Headphone AutoEq, FLAC Verifier, DJ AutoMix, Lyrics Aggregator
+    // =========================================================================
+
+    function escapeHtml(str) {
+      if (!str) return '';
+      return String(str).replace(/[&<>"']/g, m => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m]));
+    }
+
+    // --- 1. Headphone AutoEq & Harman Target Calibration ---
+    let autoEqProfilesCache = null;
+    let currentAutoEqGains = [0, 0, 0, 0, 0, 0, 0, 0, 0, 0];
+    let currentAutoEqPreamp = 0.0;
+    const AUTOEQ_FREQS = [31, 63, 125, 250, 500, 1000, 2000, 4000, 8000, 16000];
+
+    function openAutoEqModal() {
+      const modal = document.getElementById('autoEqModal');
+      if (!modal) return;
+
+      if (!autoEqProfilesCache && window.pywebview && window.pywebview.api && window.pywebview.api.get_autoeq_profiles) {
+        window.pywebview.api.get_autoeq_profiles().then(profiles => {
+          autoEqProfilesCache = profiles || {};
+          const sel = document.getElementById('autoEqSelect');
+          if (sel) {
+            sel.innerHTML = Object.keys(autoEqProfilesCache).map(key => {
+              const p = autoEqProfilesCache[key];
+              const label = `${p.brand} ${p.model} (${p.type ? p.type.toUpperCase() : 'HP'})`;
+              return `<option value="${key}">${label}</option>`;
+            }).join('');
+            if (sel.options.length > 0) {
+              sel.selectedIndex = 0;
+              onAutoEqProfileSelected();
+            }
+          }
+        }).catch(err => {
+          console.error('Error fetching AutoEq profiles:', err);
+        });
+      } else if (autoEqProfilesCache) {
+        onAutoEqProfileSelected();
+      }
+
+      modal.style.display = 'flex';
+    }
+
+    function closeAutoEqModal() {
+      const modal = document.getElementById('autoEqModal');
+      if (modal) modal.style.display = 'none';
+    }
+
+    function onAutoEqProfileSelected() {
+      const sel = document.getElementById('autoEqSelect');
+      if (!sel || !sel.value) return;
+      const key = sel.value;
+
+      if (window.pywebview && window.pywebview.api && window.pywebview.api.get_autoeq_gains) {
+        window.pywebview.api.get_autoeq_gains(key).then(res => {
+          if (res && (res.success || res.bands || res.gains)) {
+            currentAutoEqGains = res.bands || res.gains || [0,0,0,0,0,0,0,0,0,0];
+            currentAutoEqPreamp = res.preamp_db || 0.0;
+            const nameEl = document.getElementById('autoEqProfileName');
+            const preampEl = document.getElementById('autoEqPreampBadge');
+            const descEl = document.getElementById('autoEqDescText');
+            if (nameEl) nameEl.innerText = `${res.brand} ${res.model}`;
+            if (preampEl) preampEl.innerText = `Preamp: ${currentAutoEqPreamp > 0 ? '+' : ''}${currentAutoEqPreamp} dB`;
+            if (descEl) descEl.innerText = `Harman 2020 target compensation curve (${res.type ? res.type.toUpperCase() : 'Headphone'}). Peak filter compensation applied across 10 studio bands.`;
+            renderAutoEqGainsGrid(currentAutoEqGains, res.frequencies || AUTOEQ_FREQS);
+          }
+        });
+      }
+    }
+
+    function renderAutoEqGainsGrid(gains, freqs) {
+      const grid = document.getElementById('autoEqGainsGrid');
+      if (!grid) return;
+      grid.innerHTML = gains.map((gain, i) => {
+        const freqLabel = freqs[i] >= 1000 ? `${freqs[i] / 1000}k` : `${freqs[i]}`;
+        const gainVal = Number(gain).toFixed(1);
+        const color = gain > 0 ? 'var(--cyan)' : (gain < 0 ? 'var(--rose)' : 'var(--text-muted)');
+        const bg = gain > 0 ? 'rgba(56, 189, 248, 0.1)' : (gain < 0 ? 'rgba(244, 63, 94, 0.1)' : 'rgba(255, 255, 255, 0.03)');
+        return `
+          <div style="background:${bg}; border:1px solid rgba(255,255,255,0.06); border-radius:6px; padding:6px 2px; display:flex; flex-direction:column; align-items:center; gap:2px;">
+            <div style="font-size:9px; color:var(--text-dim);">${freqLabel}Hz</div>
+            <div style="font-size:10px; font-weight:700; color:${color}; font-family:monospace;">${gain > 0 ? '+' : ''}${gainVal}</div>
+          </div>
+        `;
+      }).join('');
+    }
+
+    function parseCustomAutoEqAction() {
+      const text = (document.getElementById('autoEqCustomText').value || '').trim();
+      if (!text) {
+        alert('Please paste EqualizerAPO or Peace GraphicEQ lines first.');
+        return;
+      }
+
+      if (window.pywebview && window.pywebview.api && window.pywebview.api.parse_custom_autoeq) {
+        window.pywebview.api.parse_custom_autoeq(text).then(res => {
+          if (res && res.success) {
+            currentAutoEqGains = res.bands || res.gains || [0,0,0,0,0,0,0,0,0,0];
+            currentAutoEqPreamp = res.preamp_db || 0.0;
+            const nameEl = document.getElementById('autoEqProfileName');
+            const preampEl = document.getElementById('autoEqPreampBadge');
+            const descEl = document.getElementById('autoEqDescText');
+            if (nameEl) nameEl.innerText = res.name || 'Custom Imported Profile';
+            if (preampEl) preampEl.innerText = `Preamp: ${currentAutoEqPreamp > 0 ? '+' : ''}${currentAutoEqPreamp} dB`;
+            if (descEl) descEl.innerText = `Custom EqualizerAPO curve imported with ${res.raw_points_count || 0} source points interpolated to 10 standard ISO bands.`;
+            renderAutoEqGainsGrid(currentAutoEqGains, res.frequencies || AUTOEQ_FREQS);
+            const status = document.getElementById('autoEqStatusText');
+            if (status) {
+              status.innerText = '✓ Custom profile parsed successfully!';
+              status.style.color = 'var(--emerald)';
+            }
+          } else {
+            alert('✕ Failed to parse custom EqualizerAPO config: ' + (res ? res.error : 'Unknown format'));
+          }
+        }).catch(err => {
+          alert('✕ Error parsing config: ' + (err.message || err));
+        });
+      }
+    }
+
+    function applyAutoEqToHardwareEqualizer() {
+      if (!currentAutoEqGains || currentAutoEqGains.length !== 10) return;
+      currentEqGains = [...currentAutoEqGains];
+      currentEqGains.forEach((val, idx) => {
+        const slider = document.getElementById(`eqSlider-${idx}`);
+        if (slider) slider.value = val;
+        const lbl = document.getElementById(`eqVal-${idx}`);
+        if (lbl) lbl.innerText = `${val > 0 ? '+' : ''}${val}dB`;
+        if (typeof eqFilters !== 'undefined' && eqFilters[idx] && typeof audioCtx !== 'undefined' && audioCtx) {
+          try {
+            eqFilters[idx].gain.setValueAtTime(val, audioCtx.currentTime);
+          } catch (e) {}
+        }
+      });
+      const sel = document.getElementById('eqPresetSelect');
+      if (sel) sel.value = 'Custom';
+      const status = document.getElementById('autoEqStatusText');
+      if (status) {
+        status.innerText = '✓ Harman curve gains applied directly to 10-Band Hardware Equalizer!';
+        status.style.color = 'var(--emerald)';
+      }
+    }
+
+    // --- 2. Lossless FLAC Stream MD5 Integrity Auditor ---
+    function openFlacVerifyModal() {
+      const modal = document.getElementById('flacVerifierModal');
+      if (!modal) return;
+
+      const track = (playingTrackIndex !== null) ? libraryTracks.find(t => t.index === playingTrackIndex)
+                  : (selectedTrackIndex !== null) ? libraryTracks.find(t => t.index === selectedTrackIndex) : null;
+      const trackTitle = document.getElementById('flacVerifyTrackTitle');
+      if (trackTitle) {
+        if (track && track.path) {
+          trackTitle.innerText = track.path;
+        } else {
+          const folder = document.getElementById('currentFolderText').innerText;
+          trackTitle.innerText = (folder && folder !== 'No folder selected') ? folder : 'No audio file or library folder loaded';
+        }
+      }
+
+      modal.style.display = 'flex';
+    }
+
+    function closeFlacVerifyModal() {
+      const modal = document.getElementById('flacVerifierModal');
+      if (modal) modal.style.display = 'none';
+    }
+
+    function runFlacVerifyAction(isFolder) {
+      let targetPath = '';
+      const track = (playingTrackIndex !== null) ? libraryTracks.find(t => t.index === playingTrackIndex)
+                  : (selectedTrackIndex !== null) ? libraryTracks.find(t => t.index === selectedTrackIndex) : null;
+
+      if (!isFolder) {
+        if (track && track.path) {
+          targetPath = track.path;
+        } else {
+          alert('Please select or play an audio file to verify.');
+          return;
+        }
+      } else {
+        const folder = document.getElementById('currentFolderText').innerText;
+        if (folder && folder !== 'No folder selected') {
+          targetPath = folder;
+        } else if (track && track.path) {
+          const idx = Math.max(track.path.lastIndexOf('/'), track.path.lastIndexOf('\\'));
+          targetPath = idx > 0 ? track.path.substring(0, idx) : track.path;
+        } else {
+          alert('Please load a music library folder first.');
+          return;
+        }
+      }
+
+      const btn = isFolder ? document.getElementById('verifyFlacFolderBtn') : document.getElementById('verifyFlacSingleBtn');
+      const origText = btn ? btn.innerText : '';
+      if (btn) {
+        btn.disabled = true;
+        btn.innerText = '⏳ Verifying MD5...';
+      }
+
+      const badge = document.getElementById('flacVerifyStatusBadge');
+      const title = document.getElementById('flacVerifyResultTitle');
+      const desc = document.getElementById('flacVerifyResultDesc');
+      const storedEl = document.getElementById('flacStoredMd5Val');
+      const decodedEl = document.getElementById('flacDecodedMd5Val');
+      const reportContainer = document.getElementById('flacReportContainer');
+      const reportText = document.getElementById('flacReportText');
+
+      if (title) title.innerText = 'Auditing PCM Stream MD5 Signature...';
+      if (desc) desc.innerText = 'Extracting STREAMINFO block and calculating raw PCM hash...';
+
+      if (window.pywebview && window.pywebview.api && window.pywebview.api.audit_flac_integrity) {
+        window.pywebview.api.audit_flac_integrity(targetPath, isFolder).then(res => {
+          if (btn) {
+            btn.disabled = false;
+            btn.innerText = origText;
+          }
+
+          if (!res || !res.success) {
+            if (badge) { badge.innerText = 'ERR'; badge.style.color = 'var(--rose)'; }
+            if (title) title.innerText = '✕ Verification Failed';
+            if (desc) desc.innerText = (res ? res.error : 'Unknown verification error');
+            return;
+          }
+
+          if (isFolder) {
+            if (badge) {
+              const allPassed = res.corrupted_count === 0 && res.error_count === 0;
+              badge.innerText = `${res.valid_count}/${res.total_audited}`;
+              badge.style.color = allPassed ? 'var(--emerald)' : 'var(--amber)';
+            }
+            if (title) title.innerText = `Folder Audit: ${res.valid_count} Bit-Perfect / ${res.total_audited} Total`;
+            if (desc) desc.innerText = `Corrupted: ${res.corrupted_count} | Unspecified MD5: ${res.missing_md5_count} | Errors: ${res.error_count}`;
+            if (reportContainer && reportText) {
+              reportContainer.style.display = 'flex';
+              const fileLines = (res.results || []).map(r => {
+                const status = r.valid ? '✓ PASS' : (r.stored_md5 ? '✕ CORRUPT' : '? NO_MD5');
+                const fn = r.file ? r.file.split(/[/\\]/).pop() : 'unknown';
+                return `[${status}] ${fn}\n  Stored:  ${r.stored_md5 || 'N/A'}\n  Decoded: ${r.calculated_md5 || 'N/A'}`;
+              }).join('\n');
+              reportText.innerText = `Total Audited: ${res.total_audited}\nValid FLACs: ${res.valid_count}\nBit-Rot Corrupted: ${res.corrupted_count}\n\n` + fileLines;
+            }
+          } else {
+            if (reportContainer) reportContainer.style.display = 'none';
+            if (storedEl) storedEl.innerText = res.stored_md5 || 'N/A (Header unset)';
+            if (decodedEl) decodedEl.innerText = res.calculated_md5 || 'N/A';
+
+            if (res.valid) {
+              if (badge) { badge.innerText = 'PASS'; badge.style.color = 'var(--emerald)'; }
+              if (title) title.innerText = '✓ Bit-Perfect Lossless Audio (MD5 Match)';
+              if (desc) desc.innerText = 'Raw unencoded PCM audio stream matches the FLAC STREAMINFO 128-bit checksum exactly. Zero bit-rot or sector decay detected.';
+            } else if (res.stored_md5) {
+              if (badge) { badge.innerText = 'FAIL'; badge.style.color = 'var(--rose)'; }
+              if (title) title.innerText = '✕ Bit-Rot / Audio Corruption Detected!';
+              if (desc) desc.innerText = 'Decoded PCM samples do not match original recording checksum. File may be truncated, damaged, or corrupted during transfer.';
+            } else {
+              if (badge) { badge.innerText = 'WARN'; badge.style.color = 'var(--amber)'; }
+              if (title) title.innerText = '! Valid FLAC Frame, Missing Checksum';
+              if (desc) desc.innerText = res.message || 'The encoder did not populate the 128-bit audio MD5 signature in the STREAMINFO header.';
+            }
+          }
+        }).catch(err => {
+          if (btn) {
+            btn.disabled = false;
+            btn.innerText = origText;
+          }
+          alert('✕ FLAC Verifier error: ' + (err.message || err));
+        });
+      }
+    }
+
+    // --- 3. DJ Harmonic Auto-Mix & Phrase-Synced Crossfade ---
+    let djMixTracks = [];
+
+    function openDjAutoMixModal() {
+      const modal = document.getElementById('djAutoMixModal');
+      if (!modal) return;
+
+      djMixTracks = [];
+      if (playlist && playlist.length > 0) {
+        djMixTracks = playlist.slice(0, 10);
+      } else if (libraryTracks && libraryTracks.length > 0) {
+        djMixTracks = libraryTracks.slice(0, 10);
+      }
+
+      const countEl = document.getElementById('djAutoMixTrackCount');
+      if (countEl) countEl.innerText = `${djMixTracks.length} tracks queued`;
+
+      const listEl = document.getElementById('djAutoMixTrackList');
+      if (listEl) {
+        if (djMixTracks.length === 0) {
+          listEl.innerHTML = '<div style="color:var(--text-dim); padding:6px;">No audio tracks loaded in library or playlist.</div>';
+        } else {
+          listEl.innerHTML = djMixTracks.map((t, i) => `
+            <div style="display:flex; justify-content:space-between; align-items:center; background:rgba(255,255,255,0.03); padding:4px 8px; border-radius:4px;">
+              <span style="color:#fff; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; max-width:75%;">
+                <strong style="color:var(--cyan);">${i + 1}.</strong> ${escapeHtml(t.artist || 'Unknown')} - ${escapeHtml(t.title || 'Track')}
+              </span>
+              <span style="color:var(--text-dim); font-size:10px;">${typeof formatDuration === 'function' ? formatDuration(t.duration) : ''}</span>
+            </div>
+          `).join('');
+        }
+      }
+
+      modal.style.display = 'flex';
+    }
+
+    function closeDjAutoMixModal() {
+      const modal = document.getElementById('djAutoMixModal');
+      if (modal) modal.style.display = 'none';
+    }
+
+    function runDjAutoMixAction() {
+      if (!djMixTracks || djMixTracks.length < 2) {
+        alert('Please ensure at least 2 audio tracks are loaded in library or playlist to generate a continuous DJ mix.');
+        return;
+      }
+
+      const trackPaths = djMixTracks.map(t => t.path).filter(Boolean);
+      if (trackPaths.length < 2) {
+        alert('Could not resolve valid file paths for queued tracks.');
+        return;
+      }
+
+      const transSec = parseFloat(document.getElementById('djAutoMixTransSelect').value) || 12.0;
+      const bassSwap = document.getElementById('djAutoMixBassSwapToggle').checked;
+      const btn = document.getElementById('startDjAutoMixBtn');
+      const statusText = document.getElementById('djAutoMixStatusText');
+
+      if (btn) {
+        btn.disabled = true;
+        btn.innerText = '⏳ Mixing Club Set...';
+      }
+      if (statusText) {
+        statusText.innerText = 'Detecting Camelot keys, BPM phrase onsets, and rendering bass-swap transitions...';
+        statusText.style.color = 'var(--cyan)';
+      }
+
+      if (window.pywebview && window.pywebview.api && window.pywebview.api.render_dj_automix) {
+        window.pywebview.api.render_dj_automix(trackPaths, transSec, null).then(res => {
+          if (btn) {
+            btn.disabled = false;
+            btn.innerText = '⚡ Render Continuous DJ Mix';
+          }
+
+          if (res && res.success) {
+            if (statusText) {
+              statusText.innerText = `✓ DJ Mix exported: ${res.output_file}`;
+              statusText.style.color = 'var(--emerald)';
+            }
+            alert(`✓ Continuous DJ Auto-Mix Rendered Successfully!\n\nOutput: ${res.output_file}\nTotal Duration: ${res.total_duration_sec}s\nTracks Mixed: ${res.tracks_mixed}\nTransitions: ${res.transitions ? res.transitions.length : 0}`);
+          } else {
+            if (statusText) {
+              statusText.innerText = '✕ Auto-Mix failed: ' + (res ? res.error : 'Unknown');
+              statusText.style.color = 'var(--rose)';
+            }
+            alert('✕ DJ Auto-Mix error: ' + (res ? res.error : 'Unknown error'));
+          }
+        }).catch(err => {
+          if (btn) {
+            btn.disabled = false;
+            btn.innerText = '⚡ Render Continuous DJ Mix';
+          }
+          if (statusText) {
+            statusText.innerText = '✕ DJ Auto-Mix error';
+            statusText.style.color = 'var(--rose)';
+          }
+          alert('✕ Error: ' + (err.message || err));
+        });
+      }
+    }
+
+    // --- 4. Multi-Source Synced Lyrics Aggregator ---
+    function openLyricsAggregatorModal() {
+      const modal = document.getElementById('lyricsAggregatorModal');
+      if (!modal) return;
+
+      const track = (playingTrackIndex !== null) ? libraryTracks.find(t => t.index === playingTrackIndex)
+                  : (selectedTrackIndex !== null) ? libraryTracks.find(t => t.index === selectedTrackIndex) : null;
+      if (track) {
+        const artistIn = document.getElementById('lyricsAggArtistInput');
+        const titleIn = document.getElementById('lyricsAggTitleInput');
+        if (artistIn) artistIn.value = track.artist || '';
+        if (titleIn) titleIn.value = track.title || '';
+      }
+
+      const folder = document.getElementById('currentFolderText').innerText;
+      const folderStatus = document.getElementById('batchDownloadStatusText');
+      if (folderStatus) {
+        folderStatus.innerText = `Folder: ${(folder && folder !== 'No folder selected') ? folder : 'Active library folder'}`;
+      }
+
+      modal.style.display = 'flex';
+    }
+
+    function closeLyricsAggregatorModal() {
+      const modal = document.getElementById('lyricsAggregatorModal');
+      if (modal) modal.style.display = 'none';
+    }
+
+    function runLyricsAggregatorSearchAction() {
+      const artist = (document.getElementById('lyricsAggArtistInput').value || '').trim();
+      const title = (document.getElementById('lyricsAggTitleInput').value || '').trim();
+      const romanize = document.getElementById('lyricsAggRomanizeToggle').checked;
+
+      if (!title) {
+        alert('Please enter at least a track title.');
+        return;
+      }
+
+      const btn = document.getElementById('searchAggLyricsBtn');
+      const badge = document.getElementById('lyricsAggSourceBadge');
+      const preview = document.getElementById('lyricsAggPreviewText');
+
+      if (btn) {
+        btn.disabled = true;
+        btn.innerText = '⏳ Searching...';
+      }
+      if (badge) badge.innerText = 'Querying LRCLIB, Deezer & Megalobiz...';
+
+      if (window.pywebview && window.pywebview.api && window.pywebview.api.aggregate_lyrics_search) {
+        window.pywebview.api.aggregate_lyrics_search(artist, title, null, romanize).then(res => {
+          if (btn) {
+            btn.disabled = false;
+            btn.innerText = '🔍 Search Providers';
+          }
+
+          if (res && res.success && res.lyrics) {
+            if (preview) preview.value = res.lyrics;
+            if (badge) {
+              const src = (res.source || 'aggregator').toUpperCase();
+              const type = res.synced ? 'Synced LRC' : 'Plain Text';
+              badge.innerText = `✓ Source: ${src} (${type}) | Quality: ${res.quality_score}/100`;
+              badge.style.color = 'var(--emerald)';
+            }
+          } else {
+            if (preview) preview.value = 'No lyrics found across LRCLIB, Deezer, and Megalobiz for this query.';
+            if (badge) {
+              badge.innerText = 'No lyrics found';
+              badge.style.color = 'var(--rose)';
+            }
+          }
+        }).catch(err => {
+          if (btn) {
+            btn.disabled = false;
+            btn.innerText = '🔍 Search Providers';
+          }
+          if (badge) {
+            badge.innerText = 'Error querying providers';
+            badge.style.color = 'var(--rose)';
+          }
+          alert('✕ Lyrics search error: ' + (err.message || err));
+        });
+      }
+    }
+
+    function runBatchDownloadLyricsAction() {
+      let folder = document.getElementById('currentFolderText').innerText;
+      if (!folder || folder === 'No folder selected') {
+        const track = (playingTrackIndex !== null) ? libraryTracks.find(t => t.index === playingTrackIndex)
+                    : (selectedTrackIndex !== null) ? libraryTracks.find(t => t.index === selectedTrackIndex) : null;
+        if (track && track.path) {
+          const idx = Math.max(track.path.lastIndexOf('/'), track.path.lastIndexOf('\\'));
+          folder = idx > 0 ? track.path.substring(0, idx) : track.path;
+        } else {
+          alert('Please open a music folder first.');
+          return;
+        }
+      }
+
+      const btn = document.getElementById('batchDownloadLyricsBtn');
+      const statusText = document.getElementById('batchDownloadStatusText');
+
+      if (btn) {
+        btn.disabled = true;
+        btn.innerText = '⏳ Batch Fetching...';
+      }
+      if (statusText) statusText.innerText = 'Scanning library folder for missing .lrc companion files...';
+
+      if (window.pywebview && window.pywebview.api && window.pywebview.api.batch_download_missing_lyrics) {
+        window.pywebview.api.batch_download_missing_lyrics(folder, true).then(res => {
+          if (btn) {
+            btn.disabled = false;
+            btn.innerText = '⚡ Batch Download for Folder';
+          }
+
+          if (res && res.success) {
+            if (statusText) {
+              statusText.innerText = `✓ Complete: ${res.downloaded_count} lyrics saved, ${res.already_had_lyrics} already synced.`;
+              statusText.style.color = 'var(--emerald)';
+            }
+            alert(`✓ Batch Lyrics Downloader Finished!\n\nFolder: ${res.folder}\nAudio Files: ${res.total_audio_files}\nMissing Lyrics: ${res.missing_lyrics_count}\nSuccessfully Downloaded: ${res.downloaded_count}\nFailed: ${res.failed_count}`);
+          } else {
+            if (statusText) {
+              statusText.innerText = '✕ Batch download failed: ' + (res ? res.error : 'Unknown');
+              statusText.style.color = 'var(--rose)';
+            }
+            alert('✕ Batch lyrics download error: ' + (res ? res.error : 'Unknown error'));
+          }
+        }).catch(err => {
+          if (btn) {
+            btn.disabled = false;
+            btn.innerText = '⚡ Batch Download for Folder';
+          }
+          alert('✕ Error: ' + (err.message || err));
         });
       }
     }

@@ -215,6 +215,36 @@ Examples:
       help="Generate Enhanced Word-by-Word ELRC lyrics: --align-words <lrc_file> [audio_file] [output_elrc]",
   )
   parser.add_argument(
+      "--autoeq",
+      nargs="?",
+      const="list",
+      metavar="HEADPHONE_OR_FILE",
+      help="Inspect or apply Headphone AutoEq Harman 2020 calibration profiles: --autoeq [model_name|custom.txt]",
+  )
+  parser.add_argument(
+      "--verify-flac",
+      metavar="FILE_OR_DIR",
+      help="Audit lossless FLAC stream MD5 checksums to detect bit rot or corrupted files",
+  )
+  parser.add_argument(
+      "--automix",
+      nargs="+",
+      metavar="PARAM",
+      help="Generate continuous harmonic DJ mix: --automix <track1> <track2> ... [--transition <sec>] [--output <file>]",
+  )
+  parser.add_argument(
+      "--fetch-lyrics",
+      nargs="+",
+      metavar="PARAM",
+      help="Search multi-provider synchronized lyrics: --fetch-lyrics <artist> <title> [--romanize] [output.lrc]",
+  )
+  parser.add_argument(
+      "--batch-lyrics",
+      nargs="+",
+      metavar="PARAM",
+      help="Batch download missing companion .lrc lyrics for library folder: --batch-lyrics <folder> [--overwrite]",
+  )
+  parser.add_argument(
       "--version",
       action="version",
       version=f"Sonance v{modern_lyrics_downloader.APP_VERSION}",
@@ -784,6 +814,155 @@ Examples:
       print(f"[+] Saved Enhanced LRC to: {out_f}")
     else:
       print("[-] Alignment failed.")
+    return
+
+  if args.autoeq:
+    import headphone_autoeq
+    arg = args.autoeq
+    if arg in ("list", None):
+      print("[*] Available Built-in Headphone AutoEq Profiles (Harman 2020 Target):")
+      for p in headphone_autoeq.get_available_profiles():
+        print(f"    • [{p['key']}] {p['name']} ({p['type']}) - Preamp: {p['preamp_db']} dB")
+      print("[*] Run 'python sonance.py --autoeq <model_key>' to view calibration gains.")
+    elif os.path.isfile(arg):
+      print(f"[*] Parsing custom EqualizerAPO profile: {arg}...")
+      with open(arg, "r", encoding="utf-8") as f:
+        res = headphone_autoeq.parse_equalizer_apo_text(f.read())
+      if res.get("success"):
+        print(f"[+] Successfully parsed {res['name']} (Preamp: {res['preamp_db']} dB):")
+        for f_hz, g_db in zip(headphone_autoeq.EQ_10_BANDS, res["gains"]):
+          print(f"    • {f_hz:>5} Hz: {g_db:>+5.1f} dB")
+      else:
+        print(f"[-] Parse failed: {res.get('error')}")
+    else:
+      prof = headphone_autoeq.get_profile_by_key(arg)
+      if prof:
+        print(f"[+] Headphone AutoEq Profile: {prof['name']} [{prof['brand']}]")
+        print(f"    • Type:        {prof['type']}")
+        print(f"    • Preamp:      {prof['preamp_db']} dB")
+        print(f"    • Description: {prof['description']}")
+        print("    --- 10-Band Studio Hardware EQ Gains ---")
+        for f_hz, g_db in zip(headphone_autoeq.EQ_10_BANDS, prof["gains"]):
+          print(f"    • {f_hz:>5} Hz: {g_db:>+5.1f} dB")
+      else:
+        print(f"[-] Profile '{arg}' not found. Run with --autoeq to list available models.")
+    return
+
+  if args.verify_flac:
+    import flac_verifier
+    target = args.verify_flac
+    if os.path.isdir(target):
+      print(f"[*] Auditing FLAC stream integrity in: {target}...")
+      res = flac_verifier.verify_flac_directory(target)
+      if res.get("success"):
+        print(res["report_text"])
+      else:
+        print(f"[-] Audit failed: {res.get('error')}")
+    else:
+      print(f"[*] Verifying FLAC stream integrity for: {target}...")
+      res = flac_verifier.verify_single_flac(target)
+      if res.get("success"):
+        print(f"[+] File:        {res['filename']}")
+        print(f"[+] Status:      {res['status']} ({'Bit-Perfect Lossless' if res.get('is_bit_perfect') else res.get('message')})")
+        print(f"[+] Stored MD5:  {res['stored_md5']}")
+        if res.get("calculated_md5"):
+          print(f"[+] Calc MD5:    {res['calculated_md5']}")
+        print(f"[+] Resolution:  {res['bits_per_sample']}-bit / {res['sample_rate']} Hz ({res['channels']} ch)")
+      else:
+        print(f"[-] Verification failed: {res.get('error')}")
+    return
+
+  if args.automix:
+    import dj_automix
+    tracks = []
+    trans_s = 12.0
+    out_mix = None
+    idx = 0
+    while idx < len(args.automix):
+      a = args.automix[idx]
+      if a == "--transition" and idx + 1 < len(args.automix):
+        trans_s = float(args.automix[idx + 1])
+        idx += 2
+      elif a == "--output" and idx + 1 < len(args.automix):
+        out_mix = args.automix[idx + 1]
+        idx += 2
+      elif os.path.isfile(a):
+        tracks.append(a)
+        idx += 1
+      elif os.path.isdir(a):
+        for root, _, files in os.walk(a):
+          for f in sorted(files):
+            if os.path.splitext(f)[1].lower() in dj_automix.AUDIO_EXTS:
+              tracks.append(os.path.join(root, f))
+        idx += 1
+      else:
+        idx += 1
+
+    if len(tracks) < 2:
+      print("[-] Error: --automix requires at least 2 audio files or a directory containing audio files.")
+      return
+
+    print(f"[*] Creating Continuous DJ Auto-Mix for {len(tracks)} tracks (Transition: {trans_s}s)...")
+    res = dj_automix.create_dj_automix(tracks, transition_sec=trans_s, output_path=out_mix)
+    if res.get("success"):
+      print(f"[+] DJ Auto-Mix Complete!")
+      print(f"    • Output:   {res['output_file']}")
+      print(f"    • Duration: {res['formatted_duration']} ({res['total_duration_sec']}s)")
+      print(f"    • Tracks:   {res['total_tracks']}")
+      for t in res.get("transitions", []):
+        print(f"    • [{t['from_camelot']}] {t['from_track']} -> [{t['to_camelot']}] {t['to_track']} ({t['transition_sec']}s crossfade)")
+    else:
+      print(f"[-] DJ Auto-Mix failed: {res.get('error')}")
+    return
+
+  if args.fetch_lyrics:
+    import lyrics_aggregator
+    if len(args.fetch_lyrics) < 2:
+      print("[-] Error: --fetch-lyrics requires <artist> <title>.")
+      return
+    art = args.fetch_lyrics[0]
+    tit = args.fetch_lyrics[1]
+    rom = "--romanize" in args.fetch_lyrics
+    out_f = None
+    for a in args.fetch_lyrics[2:]:
+      if not a.startswith("--"):
+        out_f = a
+        break
+
+    print(f"[*] Searching multi-provider synchronized lyrics for: {art} - {tit}...")
+    res = lyrics_aggregator.aggregate_lyrics(art, tit, romanize=rom)
+    if res.get("success"):
+      print(f"[+] Found from: {res['source']} ({res['line_count']} lines, Synced: {res['synced']})")
+      if out_f:
+        with open(out_f, "w", encoding="utf-8") as f:
+          f.write(res["lyrics"])
+        print(f"[+] Saved to: {out_f}")
+      else:
+        print("\n--- Preview ---")
+        for l in res["lyrics"].splitlines()[:6]:
+          print(f"  {l}")
+    else:
+      print(f"[-] {res.get('error')}")
+    return
+
+  if args.batch_lyrics:
+    import lyrics_aggregator
+    folder = args.batch_lyrics[0]
+    ow = "--overwrite" in args.batch_lyrics
+    print(f"[*] Batch scanning folder for missing lyrics: {folder}...")
+    res = lyrics_aggregator.batch_download_folder_lyrics(
+        folder,
+        overwrite=ow,
+        progress_callback=lambda c, t, f: print(f"    [{c}/{t}] Scanning: {f}"),
+    )
+    if res.get("success"):
+      print("[+] Batch Download Complete!")
+      print(f"    • Total Tracks:      {res['total_tracks']}")
+      print(f"    • Downloaded Lyrics: {res['downloaded_count']}")
+      print(f"    • Already Present:   {res['already_present']}")
+      print(f"    • Missing/Failed:    {res['failed_count']}")
+    else:
+      print(f"[-] Batch failed: {res.get('error')}")
     return
 
   if args.classic:

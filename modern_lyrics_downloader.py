@@ -70,6 +70,10 @@ import dr_meter
 import device_sync
 import ab_looper
 import word_aligner
+import headphone_autoeq
+import flac_verifier
+import dj_automix
+import lyrics_aggregator
 
 APP_VERSION = "2.1.0"
 GITHUB_REPO = "Sandeep2062/Sonance"
@@ -1026,6 +1030,60 @@ class LyricsAPI:
             word_aligner.save_enhanced_lrc(res["enhanced_lrc"], output_path)
             res["output_file"] = output_path
         return res
+
+    # ------------------ Phase 17: Headphone AutoEq Studio -----------------------
+    def get_autoeq_profiles(self) -> List[Dict[str, Any]]:
+        """Returns built-in headphone AutoEq Harman calibration profiles."""
+        return headphone_autoeq.get_available_profiles()
+
+    def get_autoeq_gains(self, profile_key: str) -> Dict[str, Any]:
+        """Retrieves 10-band EQ gains and preamp for a specific headphone profile."""
+        prof = headphone_autoeq.get_profile_by_key(profile_key)
+        if prof:
+            data = dict(prof)
+            data["success"] = True
+            data["bands"] = list(prof.get("gains", []))
+            data["frequencies"] = headphone_autoeq.EQ_10_BANDS
+            return data
+        return {"success": False, "error": f"Profile '{profile_key}' not found"}
+
+    def parse_custom_autoeq(self, content: str) -> Dict[str, Any]:
+        """Parses custom EqualizerAPO / Peace configuration file."""
+        res = headphone_autoeq.parse_equalizer_apo_text(content)
+        if res.get("success"):
+            res["bands"] = list(res.get("gains", []))
+            res["frequencies"] = headphone_autoeq.EQ_10_BANDS
+        return res
+
+    # ------------------ Phase 17: FLAC MD5 Stream Integrity Auditor -------------
+    def audit_flac_integrity(self, file_or_dir: str) -> Dict[str, Any]:
+        """Verifies FLAC STREAMINFO MD5 checksum to detect bit rot or corruption."""
+        if os.path.isdir(file_or_dir):
+            return flac_verifier.verify_flac_directory(file_or_dir)
+        return flac_verifier.verify_single_flac(file_or_dir)
+
+    # ------------------ Phase 17: DJ Harmonic Auto-Mix Studio -------------------
+    def render_dj_automix(self, track_paths: List[str], transition_sec: Any = 12.0, output_file: Optional[str] = None, *args, **kwargs) -> Dict[str, Any]:
+        """Renders continuous DJ automix with phrase alignment and filter sweeps."""
+        if (transition_sec is None or not isinstance(transition_sec, (int, float))) and args:
+            for a in args:
+                if isinstance(a, (int, float)):
+                    transition_sec = a
+                    break
+        try:
+            sec = float(transition_sec) if transition_sec is not None else 12.0
+        except (ValueError, TypeError):
+            sec = 12.0
+        return dj_automix.create_dj_automix(track_paths, transition_sec=sec, output_path=output_file)
+
+    # ------------------ Phase 17: Multi-Source Lyrics Aggregator ----------------
+    def aggregate_lyrics_search(self, artist: str, title: str, album: Optional[str] = None, duration: Optional[float] = None, romanize: bool = False) -> Dict[str, Any]:
+        """Searches multi-provider synced lyrics with quality ranking and romanization."""
+        return lyrics_aggregator.aggregate_lyrics(artist, title, album=album, duration=duration, romanize=romanize)
+
+    def batch_download_missing_lyrics(self, folder_path: str, overwrite: bool = False) -> Dict[str, Any]:
+        """Batch downloads missing .lrc files for all tracks in a folder."""
+        return lyrics_aggregator.batch_download_folder_lyrics(folder_path, overwrite=overwrite)
 
     def _save_last_folder(self, folder: str):
         try:
