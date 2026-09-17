@@ -82,6 +82,10 @@ import accuraterip_verifier
 import playlist_doctor
 import audio_8d_spatializer
 import replaygain_normalizer
+import parametric_eq
+import phase_correlation
+import dac_tester
+import lyrics_retimer
 
 APP_VERSION = "2.1.0"
 GITHUB_REPO = "Sandeep2062/Sonance"
@@ -1230,6 +1234,79 @@ class LyricsAPI:
             output_path=output_path,
             target_lufs=target_lufs,
             peak_ceiling_db=peak_ceiling_db,
+        )
+
+    # ------------------ Phase 20: Parametric Master EQ ---------------------------
+    def get_parametric_eq_curve(self, bands: Optional[List[Dict[str, Any]]] = None) -> Dict[str, Any]:
+        """Calculates complex frequency response curve across 20Hz-20kHz."""
+        return parametric_eq.calculate_complex_response(bands or parametric_eq.DEFAULT_BANDS)
+
+    def render_parametric_eq(
+        self,
+        input_path: str,
+        output_path: Optional[str] = None,
+        bands: Optional[List[Dict[str, Any]]] = None,
+    ) -> Dict[str, Any]:
+        """Filters audio through the 5-band parametric master EQ."""
+        return parametric_eq.render_parametric_eq(input_path, output_path=output_path, bands=bands)
+
+    # ------------------ Phase 20: Phase Correlation & Goniometer -----------------
+    def analyze_stereo_phase(self, file_path: str) -> Dict[str, Any]:
+        """Analyzes stereo phase correlation, width, balance, and vector scope points."""
+        return phase_correlation.analyze_phase_correlation(file_path)
+
+    def correct_stereo_phase(
+        self,
+        input_path: str,
+        output_path: Optional[str] = None,
+        invert_right: bool = True,
+        mono_bass: bool = True,
+    ) -> Dict[str, Any]:
+        """Fixes inverted channel phase and applies elliptical EQ for bass punch."""
+        return phase_correlation.correct_stereo_phase(
+            input_path, output_path=output_path, invert_right_channel=invert_right, mono_bass=mono_bass
+        )
+
+    # ------------------ Phase 20: DAC Bit-Perfect Test Generator -----------------
+    def generate_dac_test_signal(
+        self,
+        test_type: str = "sweep",
+        sample_rate: int = 96000,
+        bit_depth: int = 24,
+        duration_sec: float = 10.0,
+        output_path: Optional[str] = None,
+    ) -> Dict[str, Any]:
+        """Generates precision DAC linearity, jitter, and room calibration test audio."""
+        return dac_tester.generate_test_signal_file(
+            test_type=test_type,
+            sample_rate=sample_rate,
+            bit_depth=bit_depth,
+            duration_sec=duration_sec,
+            output_path=output_path,
+        )
+
+    # ------------------ Phase 20: Lyrics Drift Corrector -------------------------
+    def retime_lyrics_drift(
+        self,
+        lyrics_content: str,
+        t1_old: float,
+        t1_new: float,
+        t2_old: float,
+        t2_new: float,
+        output_path: Optional[str] = None,
+    ) -> Dict[str, Any]:
+        """Recalibrates lyrics timestamps using two-point linear slope calibration."""
+        if os.path.isfile(lyrics_content):
+            if not output_path:
+                stem, ext = os.path.splitext(lyrics_content)
+                output_path = f"{stem}.calibrated{ext}"
+            try:
+                with open(lyrics_content, "r", encoding="utf-8", errors="ignore") as f:
+                    lyrics_content = f.read()
+            except Exception as e:
+                return {"success": False, "error": f"Failed to read lyrics file: {e}"}
+        return lyrics_retimer.retime_lyrics(
+            lyrics_content, t1_old=t1_old, t1_new=t1_new, t2_old=t2_old, t2_new=t2_new, output_path=output_path
         )
 
     def _save_last_folder(self, folder: str):

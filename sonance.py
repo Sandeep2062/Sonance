@@ -291,6 +291,30 @@ Examples:
       help="ReplayGain 2.0 & True-Peak loudness normalizer: --normalize-gain <file_or_dir> [--mode tag|hard] [--target-lufs <float>]",
   )
   parser.add_argument(
+      "--parametric-eq",
+      nargs="+",
+      metavar="PARAM",
+      help="Process audio with 5-band parametric master EQ: --parametric-eq <input> [output]",
+  )
+  parser.add_argument(
+      "--phase-meter",
+      nargs="+",
+      metavar="PARAM",
+      help="Analyze stereo phase correlation & correct anti-phase: --phase-meter <audio_file> [--correct]",
+  )
+  parser.add_argument(
+      "--test-tone",
+      nargs="+",
+      metavar="PARAM",
+      help="Generate DAC bit-perfect test audio: --test-tone <sweep|imd_smpte|imd_ccif|jtest|pink_noise|digital_black> [output] [--rate 96000] [--bits 24] [--dur 10]",
+  )
+  parser.add_argument(
+      "--retime-lyrics",
+      nargs="+",
+      metavar="PARAM",
+      help="Recalibrate drifting lyrics sync: --retime-lyrics <lrc_file> <t1_old> <t1_new> <t2_old> <t2_new> [output_lrc]",
+  )
+  parser.add_argument(
       "--version",
       action="version",
       version=f"Sonance v{modern_lyrics_downloader.APP_VERSION}",
@@ -1219,6 +1243,136 @@ Examples:
       else:
         res = replaygain_normalizer.analyze_audio_gain(tgt, target_lufs=target_lufs)
     print(replaygain_normalizer.format_replaygain_card(res))
+    return
+
+  if args.parametric_eq:
+    import parametric_eq
+    eq_params = list(args.parametric_eq) + list(unknown)
+    inp = eq_params[0]
+    out = None
+    idx = 1
+    while idx < len(eq_params):
+      arg = eq_params[idx]
+      if arg in ("--output", "--out", "--peq-out") and idx + 1 < len(eq_params):
+        out = eq_params[idx + 1]
+        idx += 2
+      elif not arg.startswith("--") and out is None:
+        out = arg
+        idx += 1
+      else:
+        idx += 1
+    print(f"[*] Processing audio through 5-Band Parametric Master EQ: {inp}...")
+    res = parametric_eq.render_parametric_eq(inp, output_path=out)
+    print(parametric_eq.format_parametric_card(res, parametric_eq.DEFAULT_BANDS))
+    return
+
+  if args.phase_meter:
+    import phase_correlation
+    pm_params = list(args.phase_meter) + list(unknown)
+    inp = pm_params[0]
+    should_correct = "--correct" in pm_params
+    if should_correct:
+      print(f"[*] Correcting inverted phase & mono bass: {inp}...")
+      res = phase_correlation.correct_stereo_phase(inp)
+      if res.get("success"):
+        print(f"[+] Corrected Audio Saved: {res['output_file']}")
+        print(f"    • Inverted Right Channel: {res['inverted_right']}")
+        print(f"    • Elliptical Mono Bass:   {res['mono_bass_applied']}")
+        print(f"    • New Phase Correlation:  {res['new_correlation']} ({res['new_status']})")
+      else:
+        print(f"[-] Correction failed: {res.get('error')}")
+    else:
+      print(f"[*] Analyzing stereo phase correlation: {inp}...")
+      res = phase_correlation.analyze_phase_correlation(inp)
+      print(phase_correlation.format_phase_card(res))
+    return
+
+  if args.test_tone:
+    import dac_tester
+    tt_params = list(args.test_tone) + list(unknown)
+    t_type = tt_params[0]
+    out_f = None
+    rate = 96000
+    bits = 24
+    dur = 10.0
+    idx = 1
+    while idx < len(tt_params):
+      arg = tt_params[idx]
+      if arg in ("--rate", "--sr", "--sample-rate") and idx + 1 < len(tt_params):
+        rate = int(tt_params[idx + 1])
+        idx += 2
+      elif arg in ("--bits", "--bit-depth") and idx + 1 < len(tt_params):
+        bits = int(tt_params[idx + 1])
+        idx += 2
+      elif arg in ("--dur", "--duration") and idx + 1 < len(tt_params):
+        dur = float(tt_params[idx + 1])
+        idx += 2
+      elif arg in ("--output", "--out", "--out-tone") and idx + 1 < len(tt_params):
+        out_f = tt_params[idx + 1]
+        idx += 2
+      elif not arg.startswith("--") and out_f is None:
+        out_f = arg
+        idx += 1
+      else:
+        idx += 1
+    print(f"[*] Synthesizing DAC Test Signal: {t_type.upper()} ({bits}-bit / {rate} Hz)...")
+    res = dac_tester.generate_test_signal_file(t_type, sample_rate=rate, bit_depth=bits, duration_sec=dur, output_path=out_f)
+    print(dac_tester.format_dac_card(res))
+    return
+
+  if args.retime_lyrics:
+    import lyrics_retimer
+    rt_params = list(args.retime_lyrics) + list(unknown)
+    lrc_f = rt_params[0]
+    t1_o = None
+    t1_n = None
+    t2_o = None
+    t2_n = None
+    out_f = None
+
+    pos_args = []
+    idx = 1
+    while idx < len(rt_params):
+      arg = rt_params[idx]
+      if arg == "--t1-old" and idx + 1 < len(rt_params):
+        t1_o = float(rt_params[idx + 1])
+        idx += 2
+      elif arg == "--t1-new" and idx + 1 < len(rt_params):
+        t1_n = float(rt_params[idx + 1])
+        idx += 2
+      elif arg == "--t2-old" and idx + 1 < len(rt_params):
+        t2_o = float(rt_params[idx + 1])
+        idx += 2
+      elif arg == "--t2-new" and idx + 1 < len(rt_params):
+        t2_n = float(rt_params[idx + 1])
+        idx += 2
+      elif arg in ("--output", "--out", "--out-lrc") and idx + 1 < len(rt_params):
+        out_f = rt_params[idx + 1]
+        idx += 2
+      elif not arg.startswith("--"):
+        pos_args.append(arg)
+        idx += 1
+      else:
+        idx += 1
+
+    if t1_o is None and len(pos_args) >= 4:
+      t1_o = float(pos_args[0])
+      t1_n = float(pos_args[1])
+      t2_o = float(pos_args[2])
+      t2_n = float(pos_args[3])
+      if len(pos_args) > 4 and out_f is None:
+        out_f = pos_args[4]
+
+    if t1_o is None or t1_n is None or t2_o is None or t2_n is None:
+      print("[-] Error: --retime-lyrics requires <lrc_file> <t1_old> <t1_new> <t2_old> <t2_new> [output_lrc]")
+      print("    Or named flags: --retime-lyrics <file> --t1-old 10.0 --t1-new 10.5 --t2-old 100.0 --t2-new 101.5 [--out-lrc file.lrc]")
+      return
+
+    with open(lrc_f, "r", encoding="utf-8") as f:
+      content = f.read()
+    print(f"[*] Recalibrating lyrics drift for: {lrc_f}...")
+    res = lyrics_retimer.retime_lyrics(content, t1_o, t1_n, t2_o, t2_n, output_path=out_f)
+    print(lyrics_retimer.format_retimer_card(res))
     return
 
   if args.classic:
