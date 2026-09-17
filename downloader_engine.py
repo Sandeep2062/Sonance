@@ -387,6 +387,7 @@ def download_track_with_lyrics(
         # Universal fallback: search YouTube high quality audio via yt-dlp
         try:
             query = f"{artist} - {title} audio"
+            yt_cookie_path = str(Path(__file__).parent.resolve() / "cookies" / "youtube_cookies.txt")
             ydl_opts = {
                 "format": "bestaudio/best",
                 "outtmpl": str(dest_folder / f"{base_name}.%(ext)s"),
@@ -398,6 +399,8 @@ def download_track_with_lyrics(
                 "quiet": True,
                 "no_warnings": True,
             }
+            if os.path.exists(yt_cookie_path) and os.path.getsize(yt_cookie_path) > 100:
+                ydl_opts["cookiefile"] = yt_cookie_path
             with yt_dlp.YoutubeDL(ydl_opts) as ydl:
                 ydl.download([f"ytsearch1:{query}"])
 

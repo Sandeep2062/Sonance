@@ -1314,6 +1314,72 @@
           <p style="font-size:12px; color:var(--text-muted); margin-top:4px;">Authentication & multi-source accounts, output folder, and app configurations.</p>
         </div>
 
+        <!-- Browser Login & Cookie Extractor Card -->
+        <div class="settings-card" style="border-left: 3px solid var(--emerald);">
+          <div class="settings-card-header">
+            <div>
+              <div class="settings-card-title">
+                <span>🌐</span>
+                <span>Browser Login & 1-Click Cookie Extractor</span>
+              </div>
+              <div class="settings-card-sub">Log in via an embedded browser window, or extract cookies directly from Edge, Chrome, or Firefox to unlock YouTube Premium audio, bypass bot checks, and auto-capture Deezer/Spotify sessions.</div>
+            </div>
+            <button class="btn btn-secondary" onclick="updateCookieStatus()" style="font-size:11px; padding:4px 8px;">Refresh Status</button>
+          </div>
+
+          <div style="display:grid; grid-template-columns: 1fr 1fr; gap:14px;">
+            <!-- YouTube Cookie Box -->
+            <div style="background:var(--bg-card); padding:12px; border-radius:8px; border:1px solid var(--border);">
+              <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:8px;">
+                <span style="font-weight:700; font-size:13px;">YouTube & YT Music</span>
+                <span class="auth-status-pill logged-out" id="statusPillYt">Checking...</span>
+              </div>
+              <div style="font-size:11px; color:var(--text-muted); margin-bottom:10px;">Bypasses bot checks & unlocks highest bitrate Opus/AAC streams.</div>
+              <div style="display:flex; gap:6px; flex-wrap:wrap;">
+                <button class="btn btn-primary" style="font-size:11px; padding:5px 10px;" onclick="openWebLogin('youtube')">🌐 Login via Window</button>
+                <button class="btn btn-secondary" style="font-size:11px; padding:5px 10px;" onclick="extractFromBrowser('edge')">⚡ Import Edge</button>
+                <button class="btn btn-secondary" style="font-size:11px; padding:5px 10px;" onclick="extractFromBrowser('chrome')">⚡ Import Chrome</button>
+              </div>
+            </div>
+
+            <!-- Deezer ARL Auto-Capture Box -->
+            <div style="background:var(--bg-card); padding:12px; border-radius:8px; border:1px solid var(--border);">
+              <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:8px;">
+                <span style="font-weight:700; font-size:13px;">Deezer (Auto ARL)</span>
+                <span class="auth-status-pill logged-out" id="statusPillDeezerAuto">Checking...</span>
+              </div>
+              <div style="font-size:11px; color:var(--text-muted); margin-bottom:10px;">Opens Deezer in browser and grabs ARL cookie automatically without DevTools!</div>
+              <div style="display:flex; gap:6px; flex-wrap:wrap;">
+                <button class="btn btn-primary" style="font-size:11px; padding:5px 10px;" onclick="openWebLogin('deezer')">🌐 Login & Auto-Capture ARL</button>
+              </div>
+            </div>
+
+            <!-- Spotify sp_dc Auto-Capture Box -->
+            <div style="background:var(--bg-card); padding:12px; border-radius:8px; border:1px solid var(--border);">
+              <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:8px;">
+                <span style="font-weight:700; font-size:13px;">Spotify (Auto sp_dc)</span>
+                <span class="auth-status-pill logged-out" id="statusPillSpotifyAuto">Checking...</span>
+              </div>
+              <div style="font-size:11px; color:var(--text-muted); margin-bottom:10px;">Captures web session cookie for personal library and playlist access.</div>
+              <div style="display:flex; gap:6px; flex-wrap:wrap;">
+                <button class="btn btn-primary" style="font-size:11px; padding:5px 10px;" onclick="openWebLogin('spotify')">🌐 Login & Auto-Capture Session</button>
+              </div>
+            </div>
+
+            <!-- SoundCloud Token Box -->
+            <div style="background:var(--bg-card); padding:12px; border-radius:8px; border:1px solid var(--border);">
+              <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:8px;">
+                <span style="font-weight:700; font-size:13px;">SoundCloud</span>
+                <span class="auth-status-pill logged-out" id="statusPillSoundCloud">Checking...</span>
+              </div>
+              <div style="font-size:11px; color:var(--text-muted); margin-bottom:10px;">Captures auth token for liked tracks & playlists.</div>
+              <div style="display:flex; gap:6px; flex-wrap:wrap;">
+                <button class="btn btn-primary" style="font-size:11px; padding:5px 10px;" onclick="openWebLogin('soundcloud')">🌐 Login via Window</button>
+              </div>
+            </div>
+          </div>
+        </div>
+
         <!-- Deezer Authentication Card -->
         <div class="settings-card">
           <div class="settings-card-header">
@@ -2442,6 +2508,74 @@
           if (folder) {
             document.getElementById('settingDownloadDir').value = folder;
           }
+        });
+      }
+    }
+
+    // ------------------ Web Login & Cookie Extractor Handlers ------------------
+    function updateCookieStatus() {
+      if (window.pywebview && window.pywebview.api && window.pywebview.api.get_cookie_status) {
+        window.pywebview.api.get_cookie_status().then(status => {
+          if (!status) return;
+
+          // YouTube
+          const ytPill = document.getElementById('statusPillYt');
+          if (ytPill) {
+            ytPill.className = status.youtube.active ? 'auth-status-pill logged-in' : 'auth-status-pill logged-out';
+            ytPill.innerText = status.youtube.badge;
+          }
+
+          // Deezer
+          const deezerPill = document.getElementById('statusPillDeezerAuto');
+          if (deezerPill) {
+            deezerPill.className = status.deezer.active ? 'auth-status-pill logged-in' : 'auth-status-pill logged-out';
+            deezerPill.innerText = status.deezer.badge;
+          }
+
+          // Spotify
+          const spotPill = document.getElementById('statusPillSpotifyAuto');
+          if (spotPill) {
+            spotPill.className = status.spotify.active ? 'auth-status-pill logged-in' : 'auth-status-pill logged-out';
+            spotPill.innerText = status.spotify.badge;
+          }
+
+          // SoundCloud
+          const scPill = document.getElementById('statusPillSoundCloud');
+          if (scPill) {
+            scPill.className = status.soundcloud.active ? 'auth-status-pill logged-in' : 'auth-status-pill logged-out';
+            scPill.innerText = status.soundcloud.badge;
+          }
+        });
+      }
+    }
+
+    function openWebLogin(platform) {
+      if (window.pywebview && window.pywebview.api && window.pywebview.api.open_login_window) {
+        window.pywebview.api.open_login_window(platform).then(res => {
+          alert(`Login window opened for ${platform.toUpperCase()}.\n\nLog into your account in the popup window. When you close the window, Sonance will automatically capture your session cookies and activate high-bitrate streaming!`);
+          setTimeout(updateCookieStatus, 3000);
+        });
+      }
+    }
+
+    function extractFromBrowser(browserName) {
+      if (window.pywebview && window.pywebview.api && window.pywebview.api.extract_browser_cookies) {
+        const btn = event.target;
+        const origText = btn.innerText;
+        btn.innerText = 'Extracting...';
+
+        window.pywebview.api.extract_browser_cookies(browserName).then(res => {
+          btn.innerText = origText;
+          if (res.success) {
+            alert(res.message);
+            updateCookieStatus();
+            loadAuthSettings();
+          } else {
+            alert(`Could not extract cookies: ${res.message || res.error}\n\nTip: You can also use the '🌐 Login via Window' button to log in directly!`);
+          }
+        }).catch(err => {
+          btn.innerText = origText;
+          alert('Extraction failed: ' + err);
         });
       }
     }

@@ -30,6 +30,7 @@ import webview
 
 import lyrics_engine
 import downloader_engine
+import cookie_manager
 
 APP_VERSION = "2.1.0"
 GITHUB_REPO = "Sandeep2062/Sonance"
@@ -427,6 +428,18 @@ class LyricsAPI:
             downloader_engine.save_auth_config(cfg)
             return folder
         return ""
+
+    def open_login_window(self, platform: str) -> Dict[str, Any]:
+        """Opens embedded WebView login for YouTube, Deezer, Spotify, or SoundCloud."""
+        return cookie_manager.open_browser_login(platform)
+
+    def extract_browser_cookies(self, browser_name: str) -> Dict[str, Any]:
+        """Extracts cookies directly from installed browser (Chrome, Edge, Firefox, Brave)."""
+        return cookie_manager.extract_cookies_from_browser(browser_name)
+
+    def get_cookie_status(self) -> Dict[str, Any]:
+        """Checks active cookies status for YouTube, Deezer, Spotify, Qobuz."""
+        return cookie_manager.get_cookie_status()
 
     def _save_last_folder(self, folder: str):
         try:
