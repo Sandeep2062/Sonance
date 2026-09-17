@@ -1,0 +1,34 @@
+GNU GENERAL PUBLIC LICENSE WITH COMMONS CLAUSE
+Version 3, 29 June 2007 / Commons Clause Condition 1.0
+
+Copyright (C) 2024-2026 Sandeep Khadka <https://github.com/Sandeep2062>
+
+Everyone is permitted to copy and distribute verbatim copies of this license document, but changing it is not allowed.
+
+==============================================================================
+COMMONS CLAUSE CONDITION
+==============================================================================
+
+The Software is provided to you by the Licensor under the License below, subject to the following condition:
+
+Without limiting other conditions in the License, the grant of rights under the License will not include, and does not grant to you, the right to Sell the Software.
+
+For purposes of the foregoing, "Sell" means practicing any or all of the rights granted to you under the License to provide to third parties, for a fee or other consideration (including without limitation fees for hosting or consulting/support services related to the Software), a product or service, whose value derives, entirely or substantially, from the functionality of the Software. Any resale, relicensing, or commercial redistribution of the Software or derivative works is strictly prohibited without prior written authorization from Sandeep Khadka.
+
+==============================================================================
+TERMS AND CONDITIONS (GNU General Public License v3.0)
+==============================================================================
+
+1. ATTRIBUTION (CREDIT):
+All copies, distributions, and substantial portions of the Software must retain the above copyright notice, author attribution to Sandeep Khadka, and this license notice.
+
+2. COPYLEFT (CANNOT BE MADE CLOSED-SOURCE):
+If you modify this Software or create derivative works based on it, you must license the entire work, as a whole, under this License. You CANNOT close the source code, distribute proprietary binaries without corresponding source code, or place additional restrictions that contradict this copyleft requirement.
+
+3. NON-COMMERCIAL:
+Under the Commons Clause condition, you cannot monetize, commercialize, or sell the software or services derived substantially from its codebase.
+
+------------------------------------------------------------------------------
+For the full text of the GNU General Public License, see:
+<https://www.gnu.org/licenses/gpl-3.0.html>
+------------------------------------------------------------------------------

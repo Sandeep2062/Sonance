@@ -1,0 +1,2450 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Sonance</title>
+  <style>
+    :root {
+      --bg-base: #0c0e14;
+      --bg-surface: #141722;
+      --bg-card: #1a1e2d;
+      --bg-hover: #22283a;
+      --border: rgba(255, 255, 255, 0.08);
+      --border-subtle: rgba(255, 255, 255, 0.04);
+      --text-main: #f8fafc;
+      --text-muted: #94a3b8;
+      --text-dim: #64748b;
+      --emerald: #10b981;
+      --emerald-glow: rgba(16, 185, 129, 0.35);
+      --emerald-bg: rgba(16, 185, 129, 0.12);
+      --emerald-border: rgba(16, 185, 129, 0.25);
+      --rose: #f43f5e;
+      --rose-bg: rgba(244, 63, 94, 0.12);
+      --amber: #f59e0b;
+      --amber-bg: rgba(245, 158, 11, 0.12);
+      --accent-gradient: linear-gradient(135deg, #10b981 0%, #0d9488 100%);
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+    }
+
+    body {
+      background-color: var(--bg-base);
+      color: var(--text-main);
+      height: 100vh;
+      display: flex;
+      flex-direction: column;
+      overflow: hidden;
+      user-select: none;
+    }
+
+    /* Scrollbars */
+    ::-webkit-scrollbar { width: 6px; height: 6px; }
+    ::-webkit-scrollbar-track { background: transparent; }
+    ::-webkit-scrollbar-thumb { background: rgba(255, 255, 255, 0.14); border-radius: 999px; }
+    ::-webkit-scrollbar-thumb:hover { background: rgba(255, 255, 255, 0.25); }
+
+    /* Top Navigation Header */
+    header {
+      height: 48px;
+      background: var(--bg-surface);
+      border-bottom: 1px solid var(--border);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 0 16px;
+      font-size: 12px;
+      flex-shrink: 0;
+      gap: 12px;
+    }
+
+    .brand {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+    .brand-icon {
+      width: 28px;
+      height: 28px;
+      border-radius: 8px;
+      background: var(--accent-gradient);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 14px;
+      box-shadow: 0 4px 14px var(--emerald-glow);
+    }
+    .brand-title {
+      font-weight: 700;
+      font-size: 13px;
+      letter-spacing: 0.2px;
+    }
+    .brand-badge {
+      font-size: 10px;
+      padding: 2px 6px;
+      border-radius: 4px;
+      background: var(--emerald-bg);
+      color: var(--emerald);
+      border: 1px solid var(--emerald-border);
+      font-family: monospace;
+    }
+
+    .folder-controls {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      flex: 1;
+      max-width: 520px;
+    }
+
+    .folder-pill {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      padding: 5px 12px;
+      border-radius: 8px;
+      cursor: pointer;
+      color: var(--text-muted);
+      transition: all 0.2s ease;
+      flex: 1;
+      min-width: 0;
+    }
+    .folder-pill:hover {
+      background: var(--bg-hover);
+      color: var(--text-main);
+      border-color: rgba(255, 255, 255, 0.16);
+    }
+    .folder-text {
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      font-weight: 500;
+      font-size: 12px;
+    }
+
+    /* Buttons */
+    .btn {
+      padding: 6px 12px;
+      border-radius: 8px;
+      font-size: 12px;
+      font-weight: 600;
+      border: none;
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      transition: all 0.2s ease;
+      flex-shrink: 0;
+    }
+    .btn-primary {
+      background: var(--accent-gradient);
+      color: #032014;
+      box-shadow: 0 4px 12px rgba(16, 185, 129, 0.25);
+    }
+    .btn-primary:hover {
+      filter: brightness(1.1);
+      transform: translateY(-1px);
+    }
+    .btn-secondary {
+      background: var(--bg-card);
+      color: var(--text-main);
+      border: 1px solid var(--border);
+    }
+    .btn-secondary:hover {
+      background: var(--bg-hover);
+      border-color: rgba(255, 255, 255, 0.15);
+    }
+
+    /* App Layout */
+    .app-body {
+      display: flex;
+      flex: 1;
+      overflow: hidden;
+    }
+
+    /* Left Sidebar: Filters & Full-Height Browser */
+    aside.sidebar {
+      width: 270px;
+      background: #10131c;
+      border-right: 1px solid var(--border);
+      display: flex;
+      flex-direction: column;
+      padding: 12px 8px;
+      flex-shrink: 0;
+      gap: 12px;
+    }
+
+    .sidebar-section-title {
+      font-size: 10px;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.8px;
+      color: var(--text-dim);
+      padding: 0 6px 4px 6px;
+    }
+
+    .nav-btn {
+      width: 100%;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 7px 10px;
+      border-radius: 7px;
+      border: 1px solid transparent;
+      background: transparent;
+      color: var(--text-muted);
+      font-size: 12px;
+      font-weight: 500;
+      cursor: pointer;
+      margin-bottom: 2px;
+      transition: all 0.15s ease;
+    }
+    .nav-btn:hover {
+      background: var(--bg-card);
+      color: var(--text-main);
+    }
+    .nav-btn.active {
+      background: var(--emerald-bg);
+      color: var(--emerald);
+      border-color: var(--emerald-border);
+      font-weight: 600;
+    }
+    .nav-badge {
+      font-size: 10px;
+      padding: 1px 7px;
+      border-radius: 999px;
+      background: rgba(255, 255, 255, 0.08);
+      color: var(--text-main);
+      font-family: monospace;
+    }
+    .nav-badge.rose { background: var(--rose-bg); color: var(--rose); font-weight: bold; }
+
+    /* Artists & Albums Tab Container (Full Height Flex) */
+    .browser-box {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      min-height: 0;
+      border-top: 1px solid var(--border);
+      padding-top: 10px;
+    }
+
+    .browser-tabs {
+      display: flex;
+      gap: 4px;
+      background: var(--bg-card);
+      padding: 3px;
+      border-radius: 8px;
+      margin-bottom: 8px;
+    }
+    .browser-tab {
+      flex: 1;
+      text-align: center;
+      padding: 5px 0;
+      font-size: 11px;
+      font-weight: 600;
+      color: var(--text-muted);
+      border-radius: 6px;
+      cursor: pointer;
+      transition: all 0.15s;
+    }
+    .browser-tab.active {
+      background: #242a3c;
+      color: var(--text-main);
+      box-shadow: 0 2px 6px rgba(0,0,0,0.2);
+    }
+
+    .browser-search {
+      width: 100%;
+      background: #141722;
+      border: 1px solid var(--border);
+      border-radius: 7px;
+      padding: 6px 8px;
+      font-size: 11px;
+      color: var(--text-main);
+      outline: none;
+      margin-bottom: 8px;
+    }
+    .browser-search:focus { border-color: var(--emerald); }
+
+    .browser-list {
+      flex: 1;
+      overflow-y: auto;
+      min-height: 0;
+    }
+    .browser-item {
+      padding: 6px 10px;
+      border-radius: 6px;
+      font-size: 12px;
+      color: var(--text-muted);
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      transition: all 0.15s;
+    }
+    .browser-item:hover {
+      background: var(--bg-card);
+      color: var(--text-main);
+    }
+    .browser-item.selected {
+      background: var(--bg-hover);
+      color: var(--emerald);
+      font-weight: 600;
+      border-left: 2px solid var(--emerald);
+    }
+
+    /* Center Content */
+    main {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      background: var(--bg-base);
+      min-width: 0;
+      position: relative;
+    }
+
+    .toolbar {
+      padding: 10px 18px;
+      background: linear-gradient(180deg, var(--bg-surface) 0%, var(--bg-base) 100%);
+      border-bottom: 1px solid var(--border);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 16px;
+    }
+
+    .search-box {
+      position: relative;
+      flex: 1;
+      max-width: 440px;
+    }
+    .search-input {
+      width: 100%;
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      border-radius: 9px;
+      padding: 7px 12px 7px 32px;
+      font-size: 12px;
+      color: var(--text-main);
+      outline: none;
+      transition: border 0.2s;
+    }
+    .search-input:focus { border-color: var(--emerald); }
+    .search-icon {
+      position: absolute;
+      left: 10px;
+      top: 8px;
+      font-size: 12px;
+      color: var(--text-dim);
+    }
+
+    .table-header {
+      padding: 8px 18px;
+      background: #12151f;
+      border-bottom: 1px solid var(--border);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      font-size: 11px;
+      color: var(--text-dim);
+      font-weight: 600;
+    }
+
+    .tracklist-container {
+      flex: 1;
+      overflow-y: auto;
+      padding: 8px 14px;
+    }
+
+    .track-row {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 7px 12px;
+      border-radius: 9px;
+      margin-bottom: 3px;
+      background: rgba(24, 28, 41, 0.45);
+      border: 1px solid transparent;
+      cursor: pointer;
+      transition: all 0.15s;
+    }
+    .track-row:hover {
+      background: var(--bg-hover);
+      border-color: var(--border);
+    }
+    .track-row.selected {
+      background: #1d2334;
+      border-color: var(--emerald-border);
+    }
+    .track-row.playing {
+      background: rgba(16, 185, 129, 0.08);
+      border-color: var(--emerald);
+    }
+
+    .track-info {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      min-width: 0;
+      flex: 1;
+    }
+    .play-trigger {
+      width: 28px;
+      height: 28px;
+      border-radius: 7px;
+      background: #141722;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 11px;
+      color: var(--text-dim);
+      flex-shrink: 0;
+      transition: all 0.15s;
+    }
+    .track-row:hover .play-trigger {
+      background: var(--emerald);
+      color: #032014;
+      font-weight: bold;
+    }
+    .track-row.playing .play-trigger {
+      background: var(--emerald);
+      color: #032014;
+    }
+
+    .track-details { min-width: 0; }
+    .track-title {
+      font-size: 13px;
+      font-weight: 600;
+      color: var(--text-main);
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+    .track-subtitle {
+      font-size: 11px;
+      color: var(--text-muted);
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      margin-top: 1px;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .quality-badge {
+      font-size: 9px;
+      padding: 1px 5px;
+      border-radius: 4px;
+      background: rgba(255, 255, 255, 0.06);
+      color: #cbd5e1;
+      font-family: monospace;
+      font-weight: 600;
+    }
+    .quality-badge.lossless {
+      background: rgba(56, 189, 248, 0.15);
+      color: #38bdf8;
+      border: 1px solid rgba(56, 189, 248, 0.3);
+    }
+
+    .pill {
+      font-size: 10px;
+      font-weight: 600;
+      padding: 3px 8px;
+      border-radius: 999px;
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+      flex-shrink: 0;
+    }
+    .pill-synced { background: var(--emerald-bg); color: var(--emerald); border: 1px solid var(--emerald-border); }
+    .pill-plain { background: var(--amber-bg); color: var(--amber); border: 1px solid rgba(245, 158, 11, 0.25); }
+    .pill-missing { background: var(--rose-bg); color: var(--rose); border: 1px solid rgba(244, 63, 94, 0.25); }
+
+    /* Right Live Lyrics Karaoke Panel */
+    .preview-panel {
+      width: 330px;
+      background: #11131b;
+      border-left: 1px solid var(--border);
+      display: flex;
+      flex-direction: column;
+      flex-shrink: 0;
+    }
+    .preview-header {
+      padding: 12px 14px;
+      border-bottom: 1px solid var(--border);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+    .preview-title {
+      font-size: 13px;
+      font-weight: 700;
+      color: var(--text-main);
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      max-width: 210px;
+    }
+    .preview-lyrics {
+      flex: 1;
+      overflow-y: auto;
+      padding: 16px 14px;
+      font-size: 12px;
+      line-height: 1.85;
+      color: var(--text-muted);
+      scroll-behavior: smooth;
+    }
+    .lyric-line {
+      padding: 4px 8px;
+      border-radius: 6px;
+      margin-bottom: 3px;
+      transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+      cursor: pointer;
+      display: flex;
+      align-items: baseline;
+      gap: 8px;
+    }
+    .lyric-line:hover {
+      background: rgba(255, 255, 255, 0.05);
+      color: var(--text-main);
+    }
+    .lyric-line.active-karaoke {
+      background: linear-gradient(90deg, rgba(16, 185, 129, 0.2) 0%, rgba(16, 185, 129, 0.02) 100%);
+      color: #34d399 !important;
+      font-weight: 700;
+      font-size: 13px;
+      border-left: 3px solid var(--emerald);
+      transform: scale(1.02);
+      box-shadow: 0 4px 12px rgba(16, 185, 129, 0.15);
+    }
+    .lyric-ts {
+      font-family: monospace;
+      color: var(--text-dim);
+      font-size: 10px;
+      flex-shrink: 0;
+    }
+    .active-karaoke .lyric-ts {
+      color: var(--emerald);
+    }
+
+    /* Bottom Player Bar */
+    .player-bar {
+      height: 64px;
+      background: #141723;
+      border-top: 1px solid var(--border);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 0 18px;
+      flex-shrink: 0;
+      gap: 20px;
+    }
+
+    .player-track-info {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      width: 250px;
+      min-width: 0;
+    }
+    .player-art {
+      width: 42px;
+      height: 42px;
+      border-radius: 6px;
+      background: #1c202e;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 18px;
+      flex-shrink: 0;
+      overflow: hidden;
+      border: 1px solid var(--border);
+    }
+    .player-art img { width: 100%; height: 100%; object-fit: cover; }
+    .player-names { min-width: 0; }
+    .player-title { font-size: 12px; font-weight: 700; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+    .player-artist { font-size: 11px; color: var(--text-muted); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+
+    .player-center {
+      flex: 1;
+      max-width: 540px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 4px;
+    }
+    .player-controls {
+      display: flex;
+      align-items: center;
+      gap: 14px;
+    }
+    .control-btn {
+      background: none;
+      border: none;
+      color: var(--text-muted);
+      cursor: pointer;
+      font-size: 14px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: color 0.15s;
+    }
+    .control-btn:hover { color: var(--text-main); }
+    .control-btn.play-circle {
+      width: 32px;
+      height: 32px;
+      border-radius: 50%;
+      background: var(--text-main);
+      color: #0c0e14;
+      font-size: 14px;
+    }
+    .control-btn.play-circle:hover {
+      background: var(--emerald);
+      transform: scale(1.05);
+    }
+
+    .scrubber-row {
+      width: 100%;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      font-size: 10px;
+      font-family: monospace;
+      color: var(--text-dim);
+    }
+    .scrubber-bar {
+      flex: 1;
+      height: 4px;
+      background: rgba(255, 255, 255, 0.1);
+      border-radius: 999px;
+      cursor: pointer;
+      position: relative;
+    }
+    .scrubber-fill {
+      height: 100%;
+      background: var(--accent-gradient);
+      border-radius: 999px;
+      width: 0%;
+      position: relative;
+    }
+    .scrubber-bar:hover .scrubber-fill::after {
+      content: "";
+      position: absolute;
+      right: -4px;
+      top: -3px;
+      width: 10px;
+      height: 10px;
+      border-radius: 50%;
+      background: #fff;
+    }
+
+    .player-right {
+      display: flex;
+      align-items: center;
+      gap: 14px;
+      width: 250px;
+      justify-content: flex-end;
+    }
+    .spectrum-canvas {
+      width: 70px;
+      height: 24px;
+      background: rgba(0, 0, 0, 0.3);
+      border-radius: 4px;
+    }
+    .volume-slider {
+      width: 70px;
+      height: 4px;
+      accent-color: var(--emerald);
+      cursor: pointer;
+    }
+
+    /* Scanning Hero Overlay */
+    .scan-overlay {
+      position: absolute;
+      inset: 0;
+      background: rgba(12, 14, 20, 0.88);
+      backdrop-filter: blur(6px);
+      display: none;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      z-index: 50;
+    }
+    .spinner {
+      width: 44px;
+      height: 44px;
+      border: 3px solid rgba(16, 185, 129, 0.2);
+      border-top-color: var(--emerald);
+      border-radius: 50%;
+      animation: spin 0.8s linear infinite;
+      margin-bottom: 16px;
+    }
+    @keyframes spin { to { transform: rotate(360deg); } }
+
+    /* Modals */
+    .modal-backdrop {
+      position: fixed;
+      inset: 0;
+      background: rgba(0, 0, 0, 0.75);
+      backdrop-filter: blur(4px);
+      display: none;
+      align-items: center;
+      justify-content: center;
+      z-index: 100;
+    }
+    .modal-box {
+      width: 540px;
+      background: #181b26;
+      border: 1px solid var(--border);
+      border-radius: 14px;
+      overflow: hidden;
+      box-shadow: 0 20px 40px rgba(0,0,0,0.5);
+    }
+    .modal-header {
+      padding: 14px 18px;
+      background: #1e2230;
+      border-bottom: 1px solid var(--border);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+    .modal-body { padding: 18px; display: flex; flex-direction: column; gap: 14px; }
+    .chips-row { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 6px; }
+    .chip {
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      padding: 3px 9px;
+      border-radius: 6px;
+      font-size: 11px;
+      color: var(--text-muted);
+      cursor: pointer;
+    }
+    .chip:hover { background: var(--bg-hover); color: var(--text-main); }
+
+    /* Update Banner */
+    .update-banner {
+      background: linear-gradient(90deg, #10b981 0%, #0284c7 100%);
+      color: #032014;
+      padding: 6px 14px;
+      font-size: 11px;
+      font-weight: 700;
+      display: none;
+      align-items: center;
+      justify-content: space-between;
+    }
+    .update-link {
+      background: #fff;
+      color: #000;
+      padding: 2px 8px;
+      border-radius: 4px;
+      text-decoration: none;
+      font-size: 10px;
+    }
+
+    /* Main App Nav Tabs */
+    .main-nav-tabs {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      background: var(--bg-card);
+      padding: 3px;
+      border-radius: 9px;
+      border: 1px solid var(--border);
+    }
+    .nav-tab-btn {
+      background: transparent;
+      border: none;
+      color: var(--text-muted);
+      font-size: 11px;
+      font-weight: 600;
+      padding: 5px 12px;
+      border-radius: 7px;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      transition: all 0.15s ease;
+    }
+    .nav-tab-btn:hover {
+      color: var(--text-main);
+      background: rgba(255, 255, 255, 0.05);
+    }
+    .nav-tab-btn.active {
+      background: var(--accent-gradient);
+      color: #032014;
+      box-shadow: 0 2px 8px var(--emerald-glow);
+    }
+    .badge-mini {
+      font-size: 9px;
+      padding: 1px 5px;
+      border-radius: 999px;
+      background: rgba(0, 0, 0, 0.25);
+      color: inherit;
+    }
+
+    /* Full-Screen App Views */
+    .app-view {
+      display: none;
+      width: 100%;
+      height: 100%;
+      overflow-y: auto;
+      flex: 1;
+    }
+    .app-view.active {
+      display: flex;
+    }
+
+    /* Online Search & Catalog View */
+    .search-view-container {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      padding: 20px 24px;
+      gap: 16px;
+      overflow-y: auto;
+    }
+    .online-search-bar {
+      display: flex;
+      gap: 10px;
+      align-items: center;
+    }
+    .online-search-input {
+      flex: 1;
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      padding: 10px 16px;
+      color: var(--text-main);
+      font-size: 13px;
+      outline: none;
+    }
+    .online-search-input:focus {
+      border-color: var(--emerald);
+      box-shadow: 0 0 0 2px var(--emerald-glow);
+    }
+    .source-select {
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      padding: 10px 14px;
+      color: var(--text-main);
+      font-size: 12px;
+      outline: none;
+    }
+    .search-results-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+      gap: 14px;
+    }
+    .track-card {
+      background: var(--bg-surface);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 12px;
+      display: flex;
+      gap: 12px;
+      align-items: center;
+      transition: all 0.2s ease;
+    }
+    .track-card:hover {
+      background: var(--bg-card);
+      border-color: rgba(255, 255, 255, 0.15);
+      transform: translateY(-2px);
+    }
+    .track-thumb {
+      width: 52px;
+      height: 52px;
+      border-radius: 8px;
+      object-fit: cover;
+      background: #000;
+      flex-shrink: 0;
+    }
+    .track-meta {
+      flex: 1;
+      min-width: 0;
+    }
+    .track-name {
+      font-size: 13px;
+      font-weight: 600;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      color: var(--text-main);
+    }
+    .track-sub {
+      font-size: 11px;
+      color: var(--text-muted);
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      margin-top: 2px;
+    }
+    .track-tags {
+      display: flex;
+      gap: 6px;
+      margin-top: 6px;
+      align-items: center;
+    }
+    .source-tag {
+      font-size: 9px;
+      padding: 2px 6px;
+      border-radius: 4px;
+      background: rgba(255, 255, 255, 0.08);
+      color: var(--text-muted);
+      font-weight: 600;
+      text-transform: uppercase;
+    }
+    .source-tag.deezer { background: rgba(168, 85, 247, 0.15); color: #c084fc; }
+    .source-tag.youtube { background: rgba(239, 68, 68, 0.15); color: #f87171; }
+    .card-actions {
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+    }
+
+    /* Queue View */
+    .queue-view-container {
+      flex: 1;
+      padding: 20px 24px;
+      display: flex;
+      flex-direction: column;
+      gap: 16px;
+      overflow-y: auto;
+    }
+    .queue-table {
+      width: 100%;
+      border-collapse: collapse;
+      background: var(--bg-surface);
+      border-radius: 12px;
+      overflow: hidden;
+      border: 1px solid var(--border);
+    }
+    .queue-table th {
+      padding: 10px 14px;
+      font-size: 11px;
+      text-align: left;
+      color: var(--text-dim);
+      background: var(--bg-card);
+      border-bottom: 1px solid var(--border);
+    }
+    .queue-table td {
+      padding: 12px 14px;
+      font-size: 12px;
+      border-bottom: 1px solid var(--border-subtle);
+    }
+    .progress-bar-container {
+      width: 100%;
+      height: 6px;
+      background: var(--bg-card);
+      border-radius: 999px;
+      overflow: hidden;
+      margin-top: 4px;
+    }
+    .progress-bar-fill {
+      height: 100%;
+      background: var(--accent-gradient);
+      width: 0%;
+      transition: width 0.2s ease;
+    }
+
+    /* FluentDL-Style Settings Cards */
+    .settings-view-container {
+      flex: 1;
+      padding: 24px 32px;
+      display: flex;
+      flex-direction: column;
+      gap: 20px;
+      max-width: 860px;
+      margin: 0 auto;
+      width: 100%;
+      overflow-y: auto;
+    }
+    .settings-card {
+      background: var(--bg-surface);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 18px 20px;
+      display: flex;
+      flex-direction: column;
+      gap: 14px;
+    }
+    .settings-card-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      border-bottom: 1px solid var(--border);
+      padding-bottom: 12px;
+    }
+    .settings-card-title {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      font-size: 14px;
+      font-weight: 700;
+    }
+    .settings-card-sub {
+      font-size: 11px;
+      color: var(--text-muted);
+      margin-top: 2px;
+    }
+    .auth-status-pill {
+      font-size: 10px;
+      padding: 3px 10px;
+      border-radius: 999px;
+      font-weight: 600;
+      display: flex;
+      align-items: center;
+      gap: 4px;
+    }
+    .auth-status-pill.logged-out {
+      background: rgba(255, 255, 255, 0.06);
+      color: var(--text-dim);
+    }
+    .auth-status-pill.logged-in {
+      background: var(--emerald-bg);
+      color: var(--emerald);
+      border: 1px solid var(--emerald-border);
+    }
+    .form-group {
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+    }
+    .form-label {
+      font-size: 11px;
+      font-weight: 600;
+      color: var(--text-muted);
+    }
+    .form-input {
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 8px 12px;
+      color: var(--text-main);
+      font-size: 12px;
+      outline: none;
+    }
+    .form-input:focus {
+      border-color: var(--emerald);
+    }
+  </style>
+</head>
+<body>
+
+  <!-- Audio Element for Playback -->
+  <audio id="audioPlayer" preload="auto"></audio>
+
+  <!-- GitHub In-App Update Banner -->
+  <div class="update-banner" id="updateBanner">
+    <span id="updateBannerText">✨ New update available!</span>
+    <div style="display:flex; gap:8px; align-items:center;">
+      <a href="#" id="updateDownloadLink" target="_blank" class="update-link">Download .exe</a>
+      <span onclick="document.getElementById('updateBanner').style.display='none'" style="cursor:pointer;">✕</span>
+    </div>
+  </div>
+
+  <!-- Top App Bar -->
+  <header>
+    <div class="brand">
+      <div class="brand-icon">🎵</div>
+      <div class="brand-title">Sonance</div>
+      <div class="brand-badge">v2.1</div>
+    </div>
+
+    <!-- Navigation Tabs (Spotube + FluentDL) -->
+    <div class="main-nav-tabs">
+      <button class="nav-tab-btn active" id="tab-btn-local" onclick="showAppView('local')">📁 Local Library</button>
+      <button class="nav-tab-btn" id="tab-btn-search" onclick="showAppView('search')">🔍 Search & Stream</button>
+      <button class="nav-tab-btn" id="tab-btn-queue" onclick="showAppView('queue')">⚡ Queue <span class="badge-mini" id="queueBadge">0</span></button>
+      <button class="nav-tab-btn" id="tab-btn-settings" onclick="showAppView('settings')">⚙️ Settings</button>
+    </div>
+
+    <!-- Folder Selector & Rescan All -->
+    <div class="folder-controls" id="headerFolderControls">
+      <div class="folder-pill" onclick="selectMusicFolder()" title="Change Music Library Folder">
+        <span>📁</span>
+        <div class="folder-text" id="currentFolderText">Select Music Folder...</div>
+        <span style="font-size:10px; color:var(--text-dim);">▼</span>
+      </div>
+
+      <button class="btn btn-secondary" onclick="rescanAll()" title="Rescan music library and refresh lyrics">
+        🔄 Rescan
+      </button>
+    </div>
+
+    <!-- Quick Spek & Update -->
+    <div style="display:flex; align-items:center; gap:8px;">
+      <button class="btn btn-secondary" onclick="openSpekModal()" style="padding:5px 9px; font-size:11px;">
+        📊 Spek
+      </button>
+      <button class="btn btn-secondary" onclick="checkAppUpdates()" style="padding:5px 9px; font-size:11px;">
+        Update
+      </button>
+    </div>
+  </header>
+
+  <!-- Main Body Layout -->
+  <div class="app-body">
+    <!-- View 1: Local Library Explorer -->
+    <div class="app-view active" id="view-local" style="width:100%; height:100%; display:flex;">
+
+    <!-- Left Sidebar: Filters & Full-Height Artists/Albums Browser -->
+    <aside class="sidebar">
+      <div>
+        <div class="sidebar-section-title">Filter by Status</div>
+        <nav>
+          <button class="nav-btn active" id="filter-all" onclick="applyFilter('all')">
+            <span>All Tracks</span>
+            <span class="nav-badge" id="count-all">0</span>
+          </button>
+          <button class="nav-btn" id="filter-missing" onclick="applyFilter('missing')">
+            <span>Missing Lyrics</span>
+            <span class="nav-badge rose" id="count-missing">0</span>
+          </button>
+          <button class="nav-btn" id="filter-synced" onclick="applyFilter('synced')">
+            <span>Synced LRC</span>
+            <span class="nav-badge" id="count-synced">0</span>
+          </button>
+          <button class="nav-btn" id="filter-plain" onclick="applyFilter('plain')">
+            <span>Plain Text</span>
+            <span class="nav-badge" id="count-plain">0</span>
+          </button>
+        </nav>
+      </div>
+
+      <!-- Full-Height Flex Artists & Albums Browser -->
+      <div class="browser-box">
+        <div class="browser-tabs">
+          <div class="browser-tab active" id="tab-artists" onclick="switchBrowserTab('artists')">Artists</div>
+          <div class="browser-tab" id="tab-albums" onclick="switchBrowserTab('albums')">Albums</div>
+        </div>
+
+        <input 
+          type="text" 
+          id="browserFilterInput" 
+          class="browser-search" 
+          placeholder="Filter list..." 
+          oninput="renderBrowserList()"
+        >
+
+        <div class="browser-list" id="browserList">
+          <div style="font-size:11px; color:var(--text-dim); padding:6px 10px;">Select a folder first</div>
+        </div>
+      </div>
+
+      <div style="border-top:1px solid var(--border); padding-top:6px; font-size:10px; color:var(--text-dim); display:flex; justify-content:space-between;">
+        <span>Anti-Mismatch: <strong style="color:var(--emerald);">Active</strong></span>
+        <span>LRCLIB: <strong style="color:var(--emerald);">v2 Direct</strong></span>
+      </div>
+    </aside>
+
+    <!-- Main Content Canvas -->
+    <main>
+      <!-- Action Toolbar -->
+      <div class="toolbar">
+        <div class="search-box">
+          <span class="search-icon">🔍</span>
+          <input 
+            type="text" 
+            class="search-input" 
+            placeholder="Search title, artist, album..." 
+            id="searchBox"
+            oninput="handleSearch(this.value)"
+          >
+        </div>
+
+        <div style="display:flex; align-items:center; gap:8px;">
+          <button class="btn btn-secondary" onclick="toggleSelectAll()">
+            Select All
+          </button>
+          <button class="btn btn-primary" id="downloadMissingBtn" onclick="downloadSelectedOrMissing()">
+            ⬇ Download Missing
+          </button>
+        </div>
+      </div>
+
+      <!-- Subheader Header -->
+      <div class="table-header">
+        <div>TRACK NAME / ARTIST / QUALITY</div>
+        <div>STATUS & ACTIONS</div>
+      </div>
+
+      <!-- Tracklist Table -->
+      <div class="tracklist-container" id="trackList">
+        <div style="text-align:center; padding: 70px 20px; color:var(--text-dim); font-size:13px;">
+          <div style="font-size:36px; margin-bottom:12px;">🎵</div>
+          Click <strong>"Select Music Folder"</strong> above to load your library.
+        </div>
+      </div>
+
+      <!-- Prominent Scanning Hero Screen Overlay -->
+      <div class="scan-overlay" id="scanOverlay">
+        <div class="spinner"></div>
+        <h3 style="font-size:16px; font-weight:700; color:var(--text-main); margin-bottom:4px;" id="scanTitle">Scanning Music Library...</h3>
+        <p style="font-size:12px; color:var(--text-muted); max-width:400px; text-align:center; margin-bottom:10px;" id="scanSub">Reading audio metadata, bitrate, and checking lyrics</p>
+        <span style="font-size:11px; padding:3px 10px; border-radius:999px; background:var(--bg-card); border:1px solid var(--border); color:var(--emerald); font-family:monospace;" id="scanCounter">
+          Scanning...
+        </span>
+      </div>
+    </main>
+
+    <!-- Right Live Lyrics Karaoke Inspector -->
+    <aside class="preview-panel">
+      <div class="preview-header">
+        <div>
+          <div style="font-size:9px; text-transform:uppercase; font-weight:bold; color:var(--text-dim);">Live Karaoke Inspector</div>
+          <div class="preview-title" id="previewTitle">No song selected</div>
+        </div>
+        <button class="btn btn-secondary" style="padding:4px 8px; font-size:10px;" onclick="openCustomSearchForSelected()">
+          Edit
+        </button>
+      </div>
+
+      <div class="preview-lyrics" id="lyricsViewer">
+        <div style="color:var(--text-dim); text-align:center; padding-top:60px;">
+          Select or play a track to view real-time synced lyrics.
+        </div>
+      </div>
+
+      <div style="padding:8px 14px; background:#141723; border-top:1px solid var(--border); display:flex; justify-content:space-between; align-items:center; font-size:10px;">
+        <span id="previewType">State: None</span>
+        <button class="btn btn-secondary" style="padding:3px 8px; font-size:10px;" onclick="refetchSelected()">
+          Re-fetch Lyrics
+        </button>
+      </div>
+    </aside>
+    </div> <!-- /view-local -->
+
+    <!-- View 2: Multi-Source Search & Stream (Spotube + FluentDL) -->
+    <div class="app-view" id="view-search">
+      <div class="search-view-container">
+        <div style="display:flex; justify-content:space-between; align-items:center;">
+          <div>
+            <h2 style="font-size:18px; font-weight:700;">Multi-Source Music Catalog</h2>
+            <p style="font-size:12px; color:var(--text-muted); margin-top:2px;">Search and stream tracks from Deezer, Spotify metadata, and YouTube — with instant 1-click download and synchronized lyrics.</p>
+          </div>
+          <div style="display:flex; gap:8px; align-items:center;">
+            <select class="source-select" id="onlineDownloadFormat">
+              <option value="mp3">Download MP3 (320 kbps)</option>
+              <option value="flac">Download FLAC (Lossless)</option>
+            </select>
+          </div>
+        </div>
+
+        <div class="online-search-bar">
+          <input 
+            type="text" 
+            class="online-search-input" 
+            id="onlineSearchInput" 
+            placeholder="Search song, artist, album (e.g. The Weeknd, Bohemian Rhapsody)..." 
+            onkeydown="if(event.key === 'Enter') executeOnlineSearch()"
+          >
+          <select class="source-select" id="onlineSearchSource">
+            <option value="all">All Sources</option>
+            <option value="deezer">Deezer (Lossless/320k)</option>
+            <option value="youtube">YouTube (HQ Audio)</option>
+          </select>
+          <button class="btn btn-primary" onclick="executeOnlineSearch()" style="padding:10px 18px;">
+            Search
+          </button>
+        </div>
+
+        <!-- Search Results Grid -->
+        <div id="onlineSearchResultsLoading" style="display:none; text-align:center; padding:50px; color:var(--text-dim);">
+          <div class="spinner" style="margin:0 auto 12px;"></div>
+          Searching catalogs...
+        </div>
+
+        <div class="search-results-grid" id="onlineSearchResults">
+          <div style="grid-column: 1 / -1; text-align:center; padding:60px 20px; color:var(--text-dim);">
+            <div style="font-size:38px; margin-bottom:10px;">🔍</div>
+            Type a song or artist name above and press Enter to search.
+          </div>
+        </div>
+      </div>
+    </div> <!-- /view-search -->
+
+    <!-- View 3: Batch Download Queue (FluentDL) -->
+    <div class="app-view" id="view-queue">
+      <div class="queue-view-container">
+        <div style="display:flex; justify-content:space-between; align-items:center;">
+          <div>
+            <h2 style="font-size:18px; font-weight:700;">Download & Tagging Queue</h2>
+            <p style="font-size:12px; color:var(--text-muted); margin-top:2px;">Simultaneous audio download, ID3 metadata tagging, and timestamped .lrc synced lyrics retrieval.</p>
+          </div>
+          <button class="btn btn-secondary" onclick="pollQueueNow()">
+            🔄 Refresh Status
+          </button>
+        </div>
+
+        <table class="queue-table">
+          <thead>
+            <tr>
+              <th style="width:40%;">Track / Artist</th>
+              <th style="width:15%;">Source & Format</th>
+              <th style="width:30%;">Progress & Status</th>
+              <th style="width:15%;">Lyrics Sync</th>
+            </tr>
+          </thead>
+          <tbody id="queueTableBody">
+            <tr>
+              <td colspan="4" style="text-align:center; padding:50px; color:var(--text-dim);">
+                No downloads in queue. Search and download tracks to see them here!
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div> <!-- /view-queue -->
+
+    <!-- View 4: Authentication & Settings (FluentDL Layout) -->
+    <div class="app-view" id="view-settings">
+      <div class="settings-view-container">
+        <div>
+          <h2 style="font-size:20px; font-weight:700;">Settings</h2>
+          <p style="font-size:12px; color:var(--text-muted); margin-top:4px;">Authentication & multi-source accounts, output folder, and app configurations.</p>
+        </div>
+
+        <!-- Deezer Authentication Card -->
+        <div class="settings-card">
+          <div class="settings-card-header">
+            <div>
+              <div class="settings-card-title">
+                <span>🔒</span>
+                <span>Deezer</span>
+              </div>
+              <div class="settings-card-sub">Sign into Deezer using your Deezer ARL cookie to stream & download direct FLAC & 320 kbps MP3.</div>
+            </div>
+            <div class="auth-status-pill logged-out" id="deezerStatusPill">
+              <span id="deezerStatusText">Not Logged In</span>
+            </div>
+          </div>
+
+          <div class="form-group">
+            <label class="form-label">Deezer ARL</label>
+            <input type="password" class="form-input" id="settingDeezerArl" placeholder="Enter your 192-character Deezer ARL cookie...">
+          </div>
+
+          <div style="display:flex; justify-content:flex-end;">
+            <button class="btn btn-primary" onclick="saveDeezerAuth()">Save Changes</button>
+          </div>
+        </div>
+
+        <!-- Qobuz Authentication Card -->
+        <div class="settings-card">
+          <div class="settings-card-header">
+            <div>
+              <div class="settings-card-title">
+                <span>🔒</span>
+                <span>Qobuz</span>
+              </div>
+              <div class="settings-card-sub">Sign in using an ID and token. Use a fixed App ID/Secret to download True Studio Master 24-bit Hi-Res FLAC.</div>
+            </div>
+            <div class="auth-status-pill logged-out" id="qobuzStatusPill">
+              <span id="qobuzStatusText">Not Logged In</span>
+            </div>
+          </div>
+
+          <div style="display:grid; grid-template-columns: 1fr 1fr; gap:12px;">
+            <div class="form-group">
+              <label class="form-label">User ID</label>
+              <input type="text" class="form-input" id="settingQobuzId" placeholder="e.g. 366550">
+            </div>
+            <div class="form-group">
+              <label class="form-label">User Auth Token</label>
+              <input type="password" class="form-input" id="settingQobuzToken" placeholder="ZVREAIRB...">
+            </div>
+            <div class="form-group">
+              <label class="form-label">App ID (optional)</label>
+              <input type="text" class="form-input" id="settingQobuzAppId" value="950096963">
+            </div>
+            <div class="form-group">
+              <label class="form-label">App Secret (optional)</label>
+              <input type="password" class="form-input" id="settingQobuzAppSecret" value="979549437fcc4a3fead4867b5cd25dcb">
+            </div>
+          </div>
+
+          <div style="display:flex; justify-content:flex-end;">
+            <button class="btn btn-primary" onclick="saveQobuzAuth()">Save Changes</button>
+          </div>
+        </div>
+
+        <!-- Spotify Developer Authentication Card -->
+        <div class="settings-card">
+          <div class="settings-card-header">
+            <div>
+              <div class="settings-card-title">
+                <span>🔒</span>
+                <span>Spotify</span>
+              </div>
+              <div class="settings-card-sub">Optional: Use the official API by entering your developer credentials for private playlists and library sync.</div>
+            </div>
+            <div class="auth-status-pill logged-out" id="spotifyStatusPill">
+              <span id="spotifyStatusText">Not Configured</span>
+            </div>
+          </div>
+
+          <div style="display:grid; grid-template-columns: 1fr 1fr; gap:12px;">
+            <div class="form-group">
+              <label class="form-label">Client ID</label>
+              <input type="text" class="form-input" id="settingSpotifyClientId" placeholder="Enter Client ID...">
+            </div>
+            <div class="form-group">
+              <label class="form-label">Client Secret</label>
+              <input type="password" class="form-input" id="settingSpotifyClientSecret" placeholder="Enter Client Secret...">
+            </div>
+          </div>
+
+          <div style="font-size:11px; color:var(--text-dim);">
+            Redirect URI: <code style="background:var(--bg-card); padding:2px 6px; border-radius:4px; color:var(--emerald);">http://127.0.0.1:5543/callback</code>
+          </div>
+
+          <div style="display:flex; justify-content:flex-end;">
+            <button class="btn btn-primary" onclick="saveSpotifyAuth()">Save Changes</button>
+          </div>
+        </div>
+
+        <!-- Download & General Storage -->
+        <div class="settings-card">
+          <div class="settings-card-header">
+            <div>
+              <div class="settings-card-title">
+                <span>💾</span>
+                <span>Download Directory</span>
+              </div>
+              <div class="settings-card-sub">Where downloaded audio files and timestamped .lrc lyrics will be saved.</div>
+            </div>
+          </div>
+
+          <div style="display:flex; gap:10px; align-items:center;">
+            <input type="text" class="form-input" id="settingDownloadDir" style="flex:1;" readonly>
+            <button class="btn btn-secondary" onclick="changeDownloadFolder()">Browse...</button>
+          </div>
+        </div>
+
+        <!-- App Updates & About -->
+        <div class="settings-card">
+          <div class="settings-card-header">
+            <div>
+              <div class="settings-card-title">
+                <span>ℹ️</span>
+                <span>Sonance v2.1.0</span>
+              </div>
+              <div class="settings-card-sub">All-in-One Music Platform by Sandeep Khadka — GPLv3 with Commons Clause</div>
+            </div>
+            <button class="btn btn-secondary" onclick="checkAppUpdates()">Check for Updates</button>
+          </div>
+        </div>
+
+      </div>
+    </div> <!-- /view-settings -->
+
+  </div> <!-- /app-body -->
+
+  <!-- Bottom Player Bar -->
+  <div class="player-bar">
+    <div class="player-track-info">
+      <div class="player-art" id="playerArt">🎵</div>
+      <div class="player-names">
+        <div class="player-title" id="playerTitle">Not Playing</div>
+        <div class="player-artist" id="playerArtist">Select a track</div>
+        <span class="quality-badge" id="playerQuality">--</span>
+      </div>
+    </div>
+
+    <div class="player-center">
+      <div class="player-controls">
+        <button class="control-btn" onclick="seekRelative(-10)" title="Rewind 10s">⏪</button>
+        <button class="control-btn play-circle" id="playPauseBtn" onclick="togglePlayPause()">▶</button>
+        <button class="control-btn" onclick="seekRelative(10)" title="Forward 10s">⏩</button>
+      </div>
+
+      <div class="scrubber-row">
+        <span id="playerCurrentTime">0:00</span>
+        <div class="scrubber-bar" id="scrubberBar" onclick="handleScrubClick(event)">
+          <div class="scrubber-fill" id="scrubberFill"></div>
+        </div>
+        <span id="playerTotalTime">0:00</span>
+      </div>
+    </div>
+
+    <div class="player-right">
+      <canvas class="spectrum-canvas" id="spectrumCanvas" width="70" height="24" title="Live Audio Spectrum Visualizer"></canvas>
+      <span style="font-size:12px; cursor:pointer;" onclick="toggleMute()" id="muteIcon">🔊</span>
+      <input type="range" min="0" max="1" step="0.05" value="0.9" class="volume-slider" id="volumeSlider" oninput="changeVolume(this.value)">
+    </div>
+  </div>
+
+  <!-- Custom Search & Matcher Modal -->
+  <div class="modal-backdrop" id="customSearchModal">
+    <div class="modal-box">
+      <div class="modal-header">
+        <div style="font-weight:700; font-size:13px;">Custom Search & Lyric Matcher</div>
+        <button onclick="closeModal()" style="background:none; border:none; color:var(--text-muted); cursor:pointer; font-size:14px;">✕</button>
+      </div>
+
+      <div class="modal-body">
+        <div>
+          <label style="font-size:11px; color:var(--text-muted); display:block; margin-bottom:5px;">Search Query Override:</label>
+          <div style="display:flex; gap:8px;">
+            <input type="text" id="modalQueryInput" class="search-input" style="padding-left:12px;">
+            <button class="btn btn-primary" onclick="performModalSearch()">Search</button>
+          </div>
+          
+          <div class="chips-row">
+            <span style="font-size:10px; color:var(--text-dim); align-self:center;">Quick cleanup:</span>
+            <div class="chip" onclick="cleanQueryModal('feat')">Remove (feat.)</div>
+            <div class="chip" onclick="cleanQueryModal('live')">Remove Live/Remaster</div>
+            <div class="chip" onclick="cleanQueryModal('punct')">Strip Punctuation</div>
+            <div class="chip" onclick="cleanQueryModal('artist')">Title Only</div>
+          </div>
+        </div>
+
+        <div style="margin-top:4px;">
+          <label style="font-size:11px; color:var(--text-muted); display:block; margin-bottom:5px;">Search Results / Lyrics Preview:</label>
+          <div id="modalSearchResults" style="max-height:160px; overflow-y:auto; background:#12151e; border:1px solid var(--border); border-radius:8px; padding:10px; font-size:11px; color:var(--text-muted); white-space:pre-wrap;">
+            Type a query and click search to find lyrics for this track.
+          </div>
+        </div>
+
+        <div style="display:flex; justify-content:flex-end; gap:8px; margin-top:8px;">
+          <button class="btn btn-secondary" onclick="closeModal()">Cancel</button>
+          <button class="btn btn-primary" onclick="applyModalLyrics()">Apply & Save</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Spek / Technical Specs Modal -->
+  <div class="modal-backdrop" id="spekModal">
+    <div class="modal-box" style="width:620px;">
+      <div class="modal-header">
+        <div style="font-weight:700; font-size:13px;">Audio Inspector & Frequency Graph (Spek)</div>
+        <button onclick="closeSpekModal()" style="background:none; border:none; color:var(--text-muted); cursor:pointer; font-size:14px;">✕</button>
+      </div>
+      <div class="modal-body">
+        <div id="spekTrackDetails" style="display:grid; grid-template-columns:1fr 1fr; gap:8px; font-size:11px; background:#12151e; padding:10px; border-radius:8px; border:1px solid var(--border);">
+          <div>Codec / Format: <strong id="spekFormat" class="text-white">--</strong></div>
+          <div>Bitrate: <strong id="spekBitrate" class="text-white">--</strong></div>
+          <div>Sample Rate: <strong id="spekSampleRate" class="text-white">--</strong></div>
+          <div>Bit Depth: <strong id="spekBitDepth" class="text-white">--</strong></div>
+        </div>
+
+        <div>
+          <div style="display:flex; justify-content:space-between; font-size:11px; color:var(--text-muted); margin-bottom:6px;">
+            <span>Frequency Analysis (0 Hz - 22 kHz):</span>
+            <span id="spekQualityTag" class="quality-badge lossless">True Lossless</span>
+          </div>
+          <canvas id="spekCanvas" width="580" height="150" style="width:100%; height:150px; background:#0a0c12; border-radius:8px; border:1px solid var(--border);"></canvas>
+        </div>
+
+        <div style="display:flex; justify-content:flex-end;">
+          <button class="btn btn-secondary" onclick="closeSpekModal()">Close</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    // State
+    let libraryTracks = [];
+    let activeFilter = 'all';
+    let currentBrowserTab = 'artists';
+    let selectedArtist = null;
+    let selectedAlbum = null;
+    let selectedTrackIndex = null;
+    let playingTrackIndex = null;
+    let isAllSelected = false;
+    let lyricsLines = [];
+
+    // Audio & Web Audio API
+    const audio = document.getElementById('audioPlayer');
+    let audioCtx = null;
+    let analyser = null;
+    let sourceNode = null;
+    let spectrumAnimationId = null;
+
+    // Initialize Bridge & Last Folder
+    window.addEventListener('pywebviewready', () => {
+      if (window.pywebview && window.pywebview.api) {
+        window.pywebview.api.get_last_folder().then(folder => {
+          if (folder) {
+            document.getElementById('currentFolderText').innerText = folder;
+            scanLibrary(folder);
+          }
+        });
+        checkAppUpdates();
+      }
+    });
+
+    function selectMusicFolder() {
+      if (window.pywebview && window.pywebview.api) {
+        window.pywebview.api.select_folder().then(folder => {
+          if (folder) {
+            document.getElementById('currentFolderText').innerText = folder;
+            scanLibrary(folder);
+          }
+        });
+      }
+    }
+
+    function rescanAll() {
+      const folder = document.getElementById('currentFolderText').innerText;
+      if (folder && folder !== 'Select Music Folder...') {
+        scanLibrary(folder);
+      } else {
+        selectMusicFolder();
+      }
+    }
+
+    function scanLibrary(folder) {
+      showScanOverlay(true, folder);
+      if (window.pywebview && window.pywebview.api) {
+        window.pywebview.api.scan_library(folder).then(tracks => {
+          libraryTracks = tracks || [];
+          showScanOverlay(false);
+          renderUI();
+        }).catch(err => {
+          showScanOverlay(false);
+          alert("Error scanning folder: " + err);
+        });
+      }
+    }
+
+    function showScanOverlay(show, folder = "") {
+      const overlay = document.getElementById('scanOverlay');
+      if (show) {
+        overlay.style.display = 'flex';
+        document.getElementById('scanSub').innerText = folder;
+        document.getElementById('scanCounter').innerText = 'Reading audio files and metadata...';
+      } else {
+        overlay.style.display = 'none';
+      }
+    }
+
+    function renderUI() {
+      // 1. Calculate stats
+      let missing = 0, synced = 0, plain = 0;
+      libraryTracks.forEach(t => {
+        if (t.state === 'synced') synced++;
+        else if (t.state === 'plain') plain++;
+        else missing++;
+      });
+
+      document.getElementById('count-all').innerText = libraryTracks.length;
+      document.getElementById('count-missing').innerText = missing;
+      document.getElementById('count-synced').innerText = synced;
+      document.getElementById('count-plain').innerText = plain;
+      document.getElementById('downloadMissingBtn').innerText = `⬇ Download Missing (${missing})`;
+
+      // 2. Render sidebar artists & albums
+      renderBrowserList();
+
+      // 3. Render tracks
+      renderFilteredTracklist();
+    }
+
+    // Sidebar Artists & Albums Browser
+    function switchBrowserTab(tab) {
+      currentBrowserTab = tab;
+      document.getElementById('tab-artists').classList.toggle('active', tab === 'artists');
+      document.getElementById('tab-albums').classList.toggle('active', tab === 'albums');
+      renderBrowserList();
+    }
+
+    function renderBrowserList() {
+      const container = document.getElementById('browserList');
+      const filter = document.getElementById('browserFilterInput').value.toLowerCase().trim();
+
+      if (libraryTracks.length === 0) {
+        container.innerHTML = '<div style="font-size:11px; color:var(--text-dim); padding:6px 10px;">No tracks loaded</div>';
+        return;
+      }
+
+      // Group counts
+      const counts = {};
+      libraryTracks.forEach(t => {
+        const key = currentBrowserTab === 'artists' ? (t.artist || 'Unknown') : (t.album || 'Unknown Album');
+        counts[key] = (counts[key] || 0) + 1;
+      });
+
+      let keys = Object.keys(counts).sort((a, b) => a.localeCompare(b));
+      if (filter) {
+        keys = keys.filter(k => k.toLowerCase().includes(filter));
+      }
+
+      let html = `<div class="browser-item ${(!selectedArtist && !selectedAlbum) ? 'selected' : ''}" onclick="clearBrowserSelection()">
+        <span>All ${currentBrowserTab === 'artists' ? 'Artists' : 'Albums'}</span>
+        <span class="nav-badge">${libraryTracks.length}</span>
+      </div>`;
+
+      keys.forEach(k => {
+        const isSel = (currentBrowserTab === 'artists' && selectedArtist === k) ||
+                      (currentBrowserTab === 'albums' && selectedAlbum === k);
+        html += `
+          <div class="browser-item ${isSel ? 'selected' : ''}" onclick="selectBrowserItem('${escapeHtml(k)}')">
+            <span style="white-space:nowrap; overflow:hidden; text-overflow:ellipsis; max-width:180px;">${escapeHtml(k)}</span>
+            <span class="nav-badge">${counts[k]}</span>
+          </div>
+        `;
+      });
+
+      container.innerHTML = html;
+    }
+
+    function selectBrowserItem(key) {
+      if (currentBrowserTab === 'artists') {
+        selectedArtist = key;
+        selectedAlbum = null;
+      } else {
+        selectedAlbum = key;
+        selectedArtist = null;
+      }
+      renderBrowserList();
+      renderFilteredTracklist();
+    }
+
+    function clearBrowserSelection() {
+      selectedArtist = null;
+      selectedAlbum = null;
+      renderBrowserList();
+      renderFilteredTracklist();
+    }
+
+    // Main Tracklist Rendering
+    function renderFilteredTracklist() {
+      const container = document.getElementById('trackList');
+      const searchQuery = document.getElementById('searchBox').value.toLowerCase().trim();
+
+      const filtered = libraryTracks.filter(t => {
+        if (activeFilter === 'missing' && t.state !== 'none' && t.state !== 'missing') return false;
+        if (activeFilter === 'synced' && t.state !== 'synced') return false;
+        if (activeFilter === 'plain' && t.state !== 'plain') return false;
+
+        if (selectedArtist && t.artist !== selectedArtist) return false;
+        if (selectedAlbum && t.album !== selectedAlbum) return false;
+
+        if (searchQuery) {
+          const matchStr = `${t.title} ${t.artist} ${t.album} ${t.filename}`.toLowerCase();
+          if (!matchStr.includes(searchQuery)) return false;
+        }
+        return true;
+      });
+
+      if (filtered.length === 0) {
+        container.innerHTML = '<div style="text-align:center; padding:40px; color:var(--text-dim); font-size:12px;">No tracks found matching current filter.</div>';
+        return;
+      }
+
+      let html = '';
+      filtered.forEach((t, idx) => {
+        let pillClass = 'pill-missing', pillText = 'Missing';
+        if (t.state === 'synced') { pillClass = 'pill-synced'; pillText = 'Synced LRC'; }
+        else if (t.state === 'plain') { pillClass = 'pill-plain'; pillText = 'Plain Text'; }
+
+        const isSelected = selectedTrackIndex === t.index;
+        const isPlaying = playingTrackIndex === t.index;
+        const isLossless = t.format === 'FLAC' || t.format === 'WAV';
+
+        html += `
+          <div class="track-row ${isSelected ? 'selected' : ''} ${isPlaying ? 'playing' : ''}" onclick="selectTrack(${t.index})">
+            <div class="track-info">
+              <input type="checkbox" ${t.checked ? 'checked' : ''} onclick="event.stopPropagation(); toggleTrackCheck(${t.index}, this.checked)">
+              <div class="play-trigger" onclick="event.stopPropagation(); playTrack(${t.index})">
+                ${isPlaying ? '⏸' : '▶'}
+              </div>
+              <div class="track-details">
+                <div class="track-title">${escapeHtml(t.title || t.filename)}</div>
+                <div class="track-subtitle">
+                  <span>${escapeHtml(t.artist || 'Unknown')}</span>
+                  <span>·</span>
+                  <span>${escapeHtml(t.album || 'No Album')}</span>
+                  <span>·</span>
+                  <span>${formatDuration(t.duration)}</span>
+                  <span class="quality-badge ${isLossless ? 'lossless' : ''}">${escapeHtml(t.quality || t.format)}</span>
+                </div>
+              </div>
+            </div>
+
+            <div style="display:flex; align-items:center; gap:8px;">
+              <span class="pill ${pillClass}">● ${pillText}</span>
+              <button class="btn btn-secondary" style="padding:3px 7px; font-size:10px;" onclick="event.stopPropagation(); downloadSingleTrack(${t.index})">
+                ${t.state === 'synced' ? 'Re-fetch' : 'Download'}
+              </button>
+            </div>
+          </div>
+        `;
+      });
+
+      container.innerHTML = html;
+    }
+
+    // Audio Playback & Live Karaoke Sync
+    function playTrack(index) {
+      const track = libraryTracks.find(t => t.index === index);
+      if (!track) return;
+
+      if (playingTrackIndex === index && !audio.paused) {
+        audio.pause();
+        document.getElementById('playPauseBtn').innerText = '▶';
+        renderFilteredTracklist();
+        return;
+      }
+
+      playingTrackIndex = index;
+      selectTrack(index);
+
+      // Setup audio source from streaming server
+      audio.src = track.stream_url;
+      audio.play().then(() => {
+        document.getElementById('playPauseBtn').innerText = '⏸';
+        setupWebAudio();
+      }).catch(err => console.error("Playback error:", err));
+
+      // Update player UI
+      document.getElementById('playerTitle').innerText = track.title || track.filename;
+      document.getElementById('playerArtist').innerText = `${track.artist || 'Unknown'} · ${track.album || ''}`;
+      document.getElementById('playerQuality').innerText = track.quality || track.format;
+      document.getElementById('playerQuality').className = 'quality-badge ' + (track.format === 'FLAC' ? 'lossless' : '');
+
+      // Load cover art
+      const artImg = document.getElementById('playerArt');
+      artImg.innerHTML = `<img src="${track.cover_url}" onerror="this.parentElement.innerText='🎵'">`;
+
+      renderFilteredTracklist();
+    }
+
+    function togglePlayPause() {
+      if (playingTrackIndex === null && libraryTracks.length > 0) {
+        playTrack(libraryTracks[0].index);
+        return;
+      }
+      if (audio.paused) {
+        audio.play();
+        document.getElementById('playPauseBtn').innerText = '⏸';
+      } else {
+        audio.pause();
+        document.getElementById('playPauseBtn').innerText = '▶';
+      }
+      renderFilteredTracklist();
+    }
+
+    function seekRelative(sec) {
+      audio.currentTime = Math.max(0, Math.min(audio.duration, audio.currentTime + sec));
+    }
+
+    function handleScrubClick(e) {
+      const bar = document.getElementById('scrubberBar');
+      const rect = bar.getBoundingClientRect();
+      const pos = (e.clientX - rect.left) / rect.width;
+      if (audio.duration) {
+        audio.currentTime = pos * audio.duration;
+      }
+    }
+
+    function changeVolume(val) {
+      audio.volume = parseFloat(val);
+      document.getElementById('muteIcon').innerText = val > 0 ? '🔊' : '🔇';
+    }
+
+    function toggleMute() {
+      audio.muted = !audio.muted;
+      document.getElementById('muteIcon').innerText = audio.muted ? '🔇' : '🔊';
+    }
+
+    // Audio time update: Real-time karaoke sync!
+    audio.addEventListener('timeupdate', () => {
+      const cur = audio.currentTime;
+      const dur = audio.duration || 0;
+
+      // Update scrubber
+      document.getElementById('playerCurrentTime').innerText = formatDuration(cur);
+      document.getElementById('playerTotalTime').innerText = formatDuration(dur);
+      if (dur > 0) {
+        document.getElementById('scrubberFill').style.width = ((cur / dur) * 100) + '%';
+      }
+
+      // Karaoke line sync
+      syncKaraoke(cur);
+    });
+
+    function syncKaraoke(currentTime) {
+      if (!lyricsLines || lyricsLines.length === 0) return;
+
+      let activeIdx = -1;
+      for (let i = 0; i < lyricsLines.length; i++) {
+        const sec = lyricsLines[i].seconds;
+        if (sec !== null && sec !== undefined) {
+          if (sec <= currentTime + 0.25) {
+            activeIdx = i;
+          } else {
+            break;
+          }
+        }
+      }
+
+      if (activeIdx !== -1) {
+        const container = document.getElementById('lyricsViewer');
+        const lineElements = container.querySelectorAll('.lyric-line');
+        lineElements.forEach((el, idx) => {
+          if (idx === activeIdx) {
+            if (!el.classList.contains('active-karaoke')) {
+              el.classList.add('active-karaoke');
+              el.scrollIntoView({ behavior: 'smooth', block: 'center' });
+            }
+          } else {
+            el.classList.remove('active-karaoke');
+          }
+        });
+      }
+    }
+
+    // Track Selection & Lyrics Loading
+    function selectTrack(index) {
+      selectedTrackIndex = index;
+      const track = libraryTracks.find(t => t.index === index);
+      if (!track) return;
+
+      document.getElementById('previewTitle').innerText = track.title || track.filename;
+
+      if (window.pywebview && window.pywebview.api) {
+        window.pywebview.api.get_lyrics(track.path).then(res => {
+          lyricsLines = res.lines || [];
+          document.getElementById('previewType').innerText = `State: ${res.state.toUpperCase()}`;
+          renderLyricsPreview(lyricsLines);
+        });
+      }
+      renderFilteredTracklist();
+    }
+
+    function renderLyricsPreview(lines) {
+      const viewer = document.getElementById('lyricsViewer');
+      if (!lines || lines.length === 0) {
+        viewer.innerHTML = '<div style="color:var(--text-dim); text-align:center; padding-top:60px;">No lyrics found for this track. Click "Download" to fetch.</div>';
+        return;
+      }
+
+      let html = '';
+      lines.forEach((l, i) => {
+        const hasTs = l.timestamp !== '';
+        html += `
+          <div class="lyric-line" onclick="seekToLyric(${l.seconds})">
+            ${hasTs ? `<span class="lyric-ts">${l.timestamp}</span>` : ''}
+            <span>${escapeHtml(l.text)}</span>
+          </div>
+        `;
+      });
+      viewer.innerHTML = html;
+    }
+
+    function seekToLyric(seconds) {
+      if (seconds !== null && seconds !== undefined) {
+        if (audio.paused && playingTrackIndex !== selectedTrackIndex) {
+          playTrack(selectedTrackIndex);
+        }
+        audio.currentTime = seconds;
+        audio.play();
+      }
+    }
+
+    // Web Audio API Spectrum Visualizer
+    function setupWebAudio() {
+      if (audioCtx) return;
+      try {
+        audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+        analyser = audioCtx.createAnalyser();
+        analyser.fftSize = 64;
+        sourceNode = audioCtx.createMediaElementSource(audio);
+        sourceNode.connect(analyser);
+        analyser.connect(audioCtx.destination);
+        drawSpectrum();
+      } catch (e) {
+        console.log("Web Audio Context error:", e);
+      }
+    }
+
+    function drawSpectrum() {
+      const canvas = document.getElementById('spectrumCanvas');
+      const ctx = canvas.getContext('2d');
+      const bufferLength = analyser.frequencyBinCount;
+      const dataArray = new Uint8Array(bufferLength);
+
+      function renderFrame() {
+        spectrumAnimationId = requestAnimationFrame(renderFrame);
+        analyser.getByteFrequencyData(dataArray);
+
+        ctx.clearRect(0, 0, canvas.width, canvas.height);
+        const barWidth = (canvas.width / bufferLength) * 1.5;
+        let x = 0;
+
+        for (let i = 0; i < bufferLength; i++) {
+          const barHeight = (dataArray[i] / 255) * canvas.height;
+          ctx.fillStyle = '#10b981';
+          ctx.fillRect(x, canvas.height - barHeight, barWidth, barHeight);
+          x += barWidth + 1;
+        }
+      }
+      renderFrame();
+    }
+
+    // Spek / Technical Specs Modal
+    function openSpekModal() {
+      const track = (selectedTrackIndex !== null) ? libraryTracks.find(t => t.index === selectedTrackIndex) : libraryTracks[0];
+      if (!track) {
+        alert("Select a track first to view its audio spectrum and specs.");
+        return;
+      }
+
+      document.getElementById('spekFormat').innerText = track.format;
+      document.getElementById('spekBitrate').innerText = track.bitrate ? `${track.bitrate} kbps` : 'Lossless';
+      document.getElementById('spekSampleRate').innerText = track.samplerate ? `${track.samplerate} Hz (${(track.samplerate/1000).toFixed(1)} kHz)` : '--';
+      document.getElementById('spekBitDepth').innerText = track.bitdepth ? `${track.bitdepth}-bit` : '16-bit Standard';
+
+      const isLossless = track.format === 'FLAC' || track.format === 'WAV';
+      document.getElementById('spekQualityTag').innerText = isLossless ? 'True Lossless (> 20 kHz)' : 'Compressed Audio';
+      document.getElementById('spekQualityTag').className = 'quality-badge ' + (isLossless ? 'lossless' : '');
+
+      drawSpekGraph(isLossless);
+      document.getElementById('spekModal').style.display = 'flex';
+    }
+
+    function closeSpekModal() {
+      document.getElementById('spekModal').style.display = 'none';
+    }
+
+    function drawSpekGraph(isLossless) {
+      const canvas = document.getElementById('spekCanvas');
+      const ctx = canvas.getContext('2d');
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+      // Background grid
+      ctx.fillStyle = "#0c0e14";
+      ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+      // Draw frequency lines
+      ctx.strokeStyle = "rgba(255, 255, 255, 0.05)";
+      ctx.lineWidth = 1;
+      for (let y = 0; y < canvas.height; y += 30) {
+        ctx.beginPath();
+        ctx.moveTo(0, y);
+        ctx.lineTo(canvas.width, y);
+        ctx.stroke();
+      }
+
+      // Generate spectrogram wave gradient
+      const gradient = ctx.createLinearGradient(0, canvas.height, 0, 0);
+      gradient.addColorStop(0, '#064e3b');
+      gradient.addColorStop(0.5, '#10b981');
+      gradient.addColorStop(isLossless ? 0.95 : 0.7, '#38bdf8');
+      gradient.addColorStop(1, '#ec4899');
+
+      ctx.fillStyle = gradient;
+      const cutoffY = isLossless ? 15 : 45;
+
+      for (let x = 0; x < canvas.width; x += 3) {
+        const height = canvas.height - cutoffY - (Math.random() * 25);
+        ctx.fillRect(x, canvas.height - height, 2.5, height);
+      }
+    }
+
+    // Download & Actions
+    function downloadSingleTrack(index) {
+      const track = libraryTracks.find(t => t.index === index);
+      if (!track) return;
+
+      if (window.pywebview && window.pywebview.api) {
+        window.pywebview.api.download_track(track.path).then(res => {
+          track.state = res.state;
+          renderUI();
+          if (selectedTrackIndex === index) selectTrack(index);
+        });
+      }
+    }
+
+    function downloadSelectedOrMissing() {
+      const targets = libraryTracks.filter(t => t.checked || t.state === 'missing' || t.state === 'none');
+      if (targets.length === 0) {
+        alert("All tracks already have lyrics!");
+        return;
+      }
+
+      showScanOverlay(true, "Downloading Missing Lyrics...");
+      let done = 0;
+
+      function step() {
+        if (done >= targets.length) {
+          showScanOverlay(false);
+          renderUI();
+          return;
+        }
+        const cur = targets[done];
+        document.getElementById('scanCounter').innerText = `[${done + 1}/${targets.length}] ${cur.title || cur.filename}`;
+        window.pywebview.api.download_track(cur.path).then(res => {
+          cur.state = res.state;
+          done++;
+          step();
+        });
+      }
+      step();
+    }
+
+    function refetchSelected() {
+      if (selectedTrackIndex !== null) downloadSingleTrack(selectedTrackIndex);
+    }
+
+    // Custom Search Modal
+    function openCustomSearchForSelected() {
+      if (selectedTrackIndex === null) return;
+      const track = libraryTracks.find(t => t.index === selectedTrackIndex);
+      if (!track) return;
+
+      document.getElementById('modalQueryInput').value = `${track.artist || ''} ${track.title || track.filename}`.trim();
+      document.getElementById('customSearchModal').style.display = 'flex';
+    }
+
+    function closeModal() {
+      document.getElementById('customSearchModal').style.display = 'none';
+    }
+
+    function cleanQueryModal(type) {
+      const input = document.getElementById('modalQueryInput');
+      let val = input.value;
+      if (type === 'feat') val = val.replace(/\(feat\..*?\)/gi, '').trim();
+      else if (type === 'live') val = val.replace(/\(Official.*?\)/gi, '').replace(/\(Live.*?\)/gi, '').trim();
+      else if (type === 'punct') val = val.replace(/[^a-zA-Z0-9\s]/g, ' ').replace(/\s+/g, ' ').trim();
+      else if (type === 'artist') val = val.split('-').pop().trim();
+      input.value = val;
+    }
+
+    function performModalSearch() {
+      const q = document.getElementById('modalQueryInput').value;
+      const track = libraryTracks.find(t => t.index === selectedTrackIndex);
+      if (!track) return;
+
+      document.getElementById('modalSearchResults').innerText = 'Querying LRCLIB & Genius...';
+      if (window.pywebview && window.pywebview.api) {
+        window.pywebview.api.custom_search(track.path, q).then(res => {
+          document.getElementById('modalSearchResults').innerText = res.preview || 'No lyrics found.';
+        });
+      }
+    }
+
+    function applyModalLyrics() {
+      const q = document.getElementById('modalQueryInput').value;
+      const track = libraryTracks.find(t => t.index === selectedTrackIndex);
+      closeModal();
+      if (track && window.pywebview && window.pywebview.api) {
+        window.pywebview.api.download_track(track.path, q).then(res => {
+          track.state = res.state;
+          renderUI();
+          selectTrack(track.index);
+        });
+      }
+    }
+
+    // Check App Updates
+    function checkAppUpdates() {
+      if (window.pywebview && window.pywebview.api) {
+        window.pywebview.api.check_for_updates().then(res => {
+          if (res && res.update_available) {
+            document.getElementById('updateBannerText').innerText = `✨ New version available: v${res.latest_version} (Current: v${res.current_version})`;
+            document.getElementById('updateDownloadLink').href = res.download_url || '#';
+            document.getElementById('updateBanner').style.display = 'flex';
+          }
+        });
+      }
+    }
+
+    // Utilities
+    function applyFilter(f) {
+      activeFilter = f;
+      ['all', 'missing', 'synced', 'plain'].forEach(x => {
+        document.getElementById('filter-' + x).classList.toggle('active', x === f);
+      });
+      renderFilteredTracklist();
+    }
+
+    function handleSearch(val) { renderFilteredTracklist(); }
+
+    function toggleTrackCheck(index, checked) {
+      const track = libraryTracks.find(t => t.index === index);
+      if (track) track.checked = checked;
+    }
+
+    function toggleSelectAll() {
+      isAllSelected = !isAllSelected;
+      libraryTracks.forEach(t => t.checked = isAllSelected);
+      renderFilteredTracklist();
+    }
+
+    function formatDuration(sec) {
+      if (!sec) return '0:00';
+      const m = Math.floor(sec / 60);
+      const s = Math.floor(sec % 60);
+      return `${m}:${s < 10 ? '0' : ''}${s}`;
+    }
+
+    function escapeHtml(str) {
+      return (str || '').replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
+    }
+
+    // ------------------ Multi-View Switching ------------------
+    let currentAppView = 'local';
+    function showAppView(view) {
+      currentAppView = view;
+      ['local', 'search', 'queue', 'settings'].forEach(v => {
+        const btn = document.getElementById('tab-btn-' + v);
+        const el = document.getElementById('view-' + v);
+        if (btn) btn.classList.toggle('active', v === view);
+        if (el) el.classList.toggle('active', v === view);
+      });
+      const folderControls = document.getElementById('headerFolderControls');
+      if (folderControls) {
+        folderControls.style.display = (view === 'local') ? 'flex' : 'none';
+      }
+      if (view === 'queue') {
+        pollQueueNow();
+      } else if (view === 'settings') {
+        loadAuthSettings();
+      }
+    }
+
+    // ------------------ Online Catalog Search ------------------
+    let searchResultsData = [];
+    function executeOnlineSearch() {
+      const q = document.getElementById('onlineSearchInput').value.trim();
+      const source = document.getElementById('onlineSearchSource').value;
+      if (!q) return;
+
+      const loading = document.getElementById('onlineSearchResultsLoading');
+      const container = document.getElementById('onlineSearchResults');
+      loading.style.display = 'block';
+      container.innerHTML = '';
+
+      if (window.pywebview && window.pywebview.api) {
+        window.pywebview.api.search_music(q, source).then(results => {
+          loading.style.display = 'none';
+          searchResultsData = results || [];
+          if (searchResultsData.length === 0) {
+            container.innerHTML = '<div style="grid-column: 1 / -1; text-align:center; padding:40px; color:var(--text-dim);">No results found. Try another query.</div>';
+            return;
+          }
+          container.innerHTML = searchResultsData.map((item, idx) => `
+            <div class="track-card">
+              <img class="track-thumb" src="${item.cover_url || ''}" onerror="this.style.display='none'">
+              <div class="track-meta">
+                <div class="track-name" title="${escapeHtml(item.title)}">${escapeHtml(item.title)}</div>
+                <div class="track-sub" title="${escapeHtml(item.artist)}">${escapeHtml(item.artist)} · ${escapeHtml(item.album || '')}</div>
+                <div class="track-tags">
+                  <span class="source-tag ${(item.source || '').toLowerCase()}">${item.source}</span>
+                  <span class="quality-badge">${item.quality_badge || 'HQ'}</span>
+                  <span style="font-size:10px; color:var(--text-dim);">${formatDuration(item.duration)}</span>
+                </div>
+              </div>
+              <div class="card-actions">
+                ${item.preview_url ? `<button class="btn btn-secondary" style="padding:4px 8px; font-size:10px;" onclick="playOnlinePreview('${escapeHtml(item.preview_url)}', '${escapeHtml(item.title)}', '${escapeHtml(item.artist)}', '${escapeHtml(item.cover_url)}')">▶ Play</button>` : ''}
+                <button class="btn btn-primary" style="padding:4px 8px; font-size:10px;" onclick="queueOnlineDownload(${idx})">⬇ Download</button>
+              </div>
+            </div>
+          `).join('');
+        }).catch(err => {
+          loading.style.display = 'none';
+          container.innerHTML = `<div style="grid-column: 1 / -1; text-align:center; padding:40px; color:var(--rose);">Search failed: ${err}</div>`;
+        });
+      }
+    }
+
+    function playOnlinePreview(url, title, artist, cover) {
+      if (!url) return;
+      audio.src = url;
+      audio.play();
+      isPlaying = true;
+      document.getElementById('playPauseBtn').innerText = '⏸';
+      document.getElementById('playerTitle').innerText = title;
+      document.getElementById('playerArtist').innerText = artist;
+      document.getElementById('playerQuality').innerText = 'Stream Preview';
+      if (cover) {
+        document.getElementById('playerArt').innerHTML = `<img src="${cover}" style="width:100%; height:100%; border-radius:6px; object-fit:cover;">`;
+      }
+    }
+
+    function queueOnlineDownload(idx) {
+      const item = searchResultsData[idx];
+      if (!item) return;
+      const fmt = document.getElementById('onlineDownloadFormat').value || 'mp3';
+
+      if (window.pywebview && window.pywebview.api) {
+        window.pywebview.api.add_to_queue(item, fmt).then(taskId => {
+          showAppView('queue');
+          pollQueueNow();
+        });
+      }
+    }
+
+    // ------------------ Download Queue Management ------------------
+    function pollQueueNow() {
+      if (window.pywebview && window.pywebview.api) {
+        window.pywebview.api.get_queue_tasks().then(tasks => {
+          renderQueue(tasks || []);
+        });
+      }
+    }
+
+    function renderQueue(tasks) {
+      const tbody = document.getElementById('queueTableBody');
+      const badge = document.getElementById('queueBadge');
+      const activeCount = tasks.filter(t => t.status === 'queued' || t.status === 'downloading' || t.status === 'lyrics' || t.status === 'tagging').length;
+      if (badge) badge.innerText = activeCount;
+
+      if (!tasks || tasks.length === 0) {
+        tbody.innerHTML = '<tr><td colspan="4" style="text-align:center; padding:50px; color:var(--text-dim);">No active or past downloads in queue.</td></tr>';
+        return;
+      }
+
+      tbody.innerHTML = tasks.slice().reverse().map(t => {
+        const trk = t.track || {};
+        const isComplete = t.status === 'complete';
+        const isFailed = t.status === 'failed';
+        const statusColor = isComplete ? 'var(--emerald)' : (isFailed ? 'var(--rose)' : 'var(--amber)');
+
+        return `
+          <tr>
+            <td>
+              <div style="font-weight:600; color:var(--text-main);">${escapeHtml(trk.title || 'Unknown')}</div>
+              <div style="font-size:11px; color:var(--text-muted);">${escapeHtml(trk.artist || 'Unknown')}</div>
+            </td>
+            <td>
+              <span class="source-tag ${(trk.source || '').toLowerCase()}">${trk.source || 'Online'}</span>
+              <span style="font-size:10px; font-weight:700; text-transform:uppercase; margin-left:4px;">${t.format}</span>
+            </td>
+            <td>
+              <div style="display:flex; justify-content:space-between; font-size:10px; color:${statusColor}; font-weight:600;">
+                <span>${escapeHtml(t.message || t.status)}</span>
+                <span>${t.percent || 0}%</span>
+              </div>
+              <div class="progress-bar-container">
+                <div class="progress-bar-fill" style="width:${t.percent || 0}%;"></div>
+              </div>
+            </td>
+            <td>
+              ${t.lyrics_status === 'synced' ? '<span class="status-badge state-synced">✅ Synced .lrc</span>' : 
+                (t.lyrics_status === 'plain' ? '<span class="status-badge state-plain">📄 Plain .lrc</span>' : 
+                (isComplete ? '<span class="status-badge state-missing">❌ No LRC</span>' : '<span style="font-size:10px; color:var(--text-dim);">Checking...</span>'))}
+            </td>
+          </tr>
+        `;
+      }).join('');
+    }
+
+    setInterval(() => {
+      const badge = document.getElementById('queueBadge');
+      if (currentAppView === 'queue' || (badge && badge.innerText !== '0')) {
+        pollQueueNow();
+      }
+    }, 1500);
+
+    // ------------------ Authentication & Settings ------------------
+    function loadAuthSettings() {
+      if (window.pywebview && window.pywebview.api) {
+        window.pywebview.api.get_auth().then(cfg => {
+          cfg = cfg || {};
+          if (cfg.deezer_arl) {
+            document.getElementById('settingDeezerArl').value = cfg.deezer_arl;
+            document.getElementById('deezerStatusPill').className = 'auth-status-pill logged-in';
+            document.getElementById('deezerStatusText').innerText = 'ARL Saved';
+          }
+          if (cfg.qobuz_id) document.getElementById('settingQobuzId').value = cfg.qobuz_id;
+          if (cfg.qobuz_token) {
+            document.getElementById('settingQobuzToken').value = cfg.qobuz_token;
+            document.getElementById('qobuzStatusPill').className = 'auth-status-pill logged-in';
+            document.getElementById('qobuzStatusText').innerText = 'Token Active';
+          }
+          if (cfg.qobuz_app_id) document.getElementById('settingQobuzAppId').value = cfg.qobuz_app_id;
+          if (cfg.qobuz_app_secret) document.getElementById('settingQobuzAppSecret').value = cfg.qobuz_app_secret;
+          if (cfg.spotify_client_id) {
+            document.getElementById('settingSpotifyClientId').value = cfg.spotify_client_id;
+            document.getElementById('spotifyStatusPill').className = 'auth-status-pill logged-in';
+            document.getElementById('spotifyStatusText').innerText = 'Credentials Saved';
+          }
+          if (cfg.spotify_client_secret) document.getElementById('settingSpotifyClientSecret').value = cfg.spotify_client_secret;
+        });
+
+        window.pywebview.api.get_download_dir().then(dir => {
+          document.getElementById('settingDownloadDir').value = dir || '';
+        });
+      }
+    }
+
+    function saveDeezerAuth() {
+      const arl = document.getElementById('settingDeezerArl').value.trim();
+      if (window.pywebview && window.pywebview.api) {
+        window.pywebview.api.get_auth().then(cfg => {
+          cfg = cfg || {};
+          cfg.deezer_arl = arl;
+          window.pywebview.api.save_auth(cfg).then(() => {
+            alert('Deezer ARL updated successfully!');
+            loadAuthSettings();
+          });
+        });
+      }
+    }
+
+    function saveQobuzAuth() {
+      const qId = document.getElementById('settingQobuzId').value.trim();
+      const token = document.getElementById('settingQobuzToken').value.trim();
+      const appId = document.getElementById('settingQobuzAppId').value.trim();
+      const appSecret = document.getElementById('settingQobuzAppSecret').value.trim();
+
+      if (window.pywebview && window.pywebview.api) {
+        window.pywebview.api.get_auth().then(cfg => {
+          cfg = cfg || {};
+          cfg.qobuz_id = qId;
+          cfg.qobuz_token = token;
+          cfg.qobuz_app_id = appId;
+          cfg.qobuz_app_secret = appSecret;
+          window.pywebview.api.save_auth(cfg).then(() => {
+            alert('Qobuz credentials saved successfully!');
+            loadAuthSettings();
+          });
+        });
+      }
+    }
+
+    function saveSpotifyAuth() {
+      const cId = document.getElementById('settingSpotifyClientId').value.trim();
+      const cSec = document.getElementById('settingSpotifyClientSecret').value.trim();
+
+      if (window.pywebview && window.pywebview.api) {
+        window.pywebview.api.get_auth().then(cfg => {
+          cfg = cfg || {};
+          cfg.spotify_client_id = cId;
+          cfg.spotify_client_secret = cSec;
+          window.pywebview.api.save_auth(cfg).then(() => {
+            alert('Spotify credentials saved successfully!');
+            loadAuthSettings();
+          });
+        });
+      }
+    }
+
+    function changeDownloadFolder() {
+      if (window.pywebview && window.pywebview.api) {
+        window.pywebview.api.select_download_folder().then(folder => {
+          if (folder) {
+            document.getElementById('settingDownloadDir').value = folder;
+          }
+        });
+      }
+    }
+  </script>
+</body>
+</html>
