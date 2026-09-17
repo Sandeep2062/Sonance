@@ -73,7 +73,18 @@ Sonance brings together three distinct open-source powerhouses:
 - **Hardware DSP**: 10-Band BiquadFilterNodes (32 Hz to 16 kHz) with 8 studio presets (`Bass Boost`, `Rock`, `Pop`, `Jazz`, `Electronic`, `Classical`, `Vocal Booster`, `Flat`).
 - **Discord Rich Presence**: Live playback profile card with track title, artist, album art, remaining time bar, and profile buttons.
 
-### 🔄 6. In-App Updates & Releases
+### 🏷️ 6. Mp3tag Studio Visual Metadata & Cover Art Editor
+- **Full Tag Editor (ID3v2.4 / Vorbis / MP4 / OGG)**: Visual metadata editing per-song directly from your local library.
+- **Embedded Cover Art Manager**: Extract embedded album art as high-res preview, replace artwork from disk, or strip unwanted covers.
+- **1-Click MusicBrainz & Deezer Auto-Fill**: Automatically fills missing album title, release year, genre, and high-resolution cover art directly from online open-music databases.
+
+### 🎵 7. MusicBee-Grade Playback Engine & Live Sync Tuner
+- **Live Lyrics Timing Offset Synchronizer**: Instant `[-0.5s]`, `[-0.1s]`, `[+0.1s]`, `[+0.5s]` live adjustment bar during playback, with 1-click permanent `.lrc` file saving.
+- **DJ Crossfade & Gapless Transition**: 0 to 12 second smooth volume crossfade between consecutive tracks, plus intelligent zero-gap transition.
+- **Sleep Timer**: 15m, 30m, 45m, 60m, Custom, or "End of Current Track" presets with a gentle 30-second volume fade-out.
+- **Smart Stream & Offline Cache**: Pre-caches streamed tracks locally with deterministic SHA-256 hashing for instant offline replay and zero buffering.
+
+### 🔄 8. In-App Updates & Releases
 - Automatic update detection checking against [GitHub Releases](https://github.com/Sandeep2062/Sonance/releases).
 - Every release includes SHA-256 and MD5 checksum manifests (`RELEASE.sha256sum`, `RELEASE.md5sum`).
 
