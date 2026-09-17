@@ -132,7 +132,14 @@ Sonance brings together three distinct open-source powerhouses:
 - **Universal Multi-Format Playlist Converter (`playlist_converter.py`)**: Bidirectional playlist converter supporting `.m3u`, `.m3u8`, `.pls`, `.wpl` (Windows Media), `.xspf` (VLC/XML), and Spotify public playlist URL importing into local manifests or download queues. CLI: `python sonance.py --convert-playlist <input_file_or_url> [output_format] [output_file]`.
 - **Bit-Perfect DAC Stream Telemetry**: Live bottom bar telemetry displaying DAC resolution: `24-bit / 96.0 kHz Hi-Res Direct`, `16-bit / 44.1 kHz Lossless`, or `Cloud Stream Direct`.
 
-### 🔄 15. In-App Updates & Releases
+### 🎚️ 15. Stem Separator Studio, Lossless Authenticity Auditor & DJ Camelot Mixing
+- **AI & Spectral Audio Stem Separator Studio (`vocal_separator.py`)**: Split any track into isolated, pristine stems: 2-Stem (**Vocals / Acapella** + **Instrumental / Backing**) or 4-Stem (**Vocals**, **Instrumental Backing**, **Bassline**, and **Drums & Percussion**). Features high-efficiency center-channel phase cancellation, formant bandpass filtering, pure-Python/NumPy fallback, and FFmpeg pipeline exporting to FLAC, WAV, or MP3. CLI: `python sonance.py --split-stems <audio_file> [out_dir] [2stems|4stems] [format]`.
+- **Lossless Audio Authenticity Auditor & Brickwall Cutoff Inspector (`audio_auditor.py`)**: Detects "Fake Lossless" files (low-bitrate 128 kbps or 192 kbps lossy MP3s upscaled and re-encoded into FLAC or WAV containers) using FFT brickwall frequency analysis. Scans for telltale 16.0 kHz cutoffs (128k MP3), 19.5 kHz roll-offs (320k MP3), and ultrasonic bandwidth (> 20 kHz genuine CD / > 24 kHz Hi-Res Studio Master) with an authenticity confidence score (0-100%). CLI: `python sonance.py --audit <file_or_dir>`.
+- **DJ Camelot Harmonic Key & BPM Beatmatcher Engine (`dj_mixer.py`)**: High-precision tempo tracking (BPM) via spectral onset autocorrelation and musical key detection using 12-semitone chromagram pitch-class profiling with Krumhansl-Schmuckler tonal correlation. Maps keys directly to standard Camelot Wheel codes (e.g. `8A / Am`, `8B / C`) and displays live harmonic mixing compatibility recommendations for seamless DJ transitions ($\pm 1$ step energy boost/drop, relative Major/Minor mood shift). CLI: `python sonance.py --analyze-key <audio_file>`.
+- **Synchronized Guitar Chord Studio & Tab Companion (`chord_studio.py`)**: Displays real-time synchronized guitar chord progressions (`[Am]`, `[C]`, `[G]`, `[F]`) right above or alongside karaoke lyric lines in the Karaoke Stage. Includes interactive fretboard diagrams (6-string EADGBE fingerings) for 40+ popular chord voicings.
+- **Live DJ Telemetry Badge**: Real-time tempo and key badge in the bottom player bar (`⚡ 128 BPM · 8A (Am)`) with 1-click access to harmonic transition pairings.
+
+### 🔄 16. In-App Updates & Releases
 - Automatic update detection checking against [GitHub Releases](https://github.com/Sandeep2062/Sonance/releases).
 - Every release includes SHA-256 and MD5 checksum manifests (`RELEASE.sha256sum`, `RELEASE.md5sum`).
 
