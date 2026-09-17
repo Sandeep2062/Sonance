@@ -64,7 +64,16 @@ Sonance brings together three distinct open-source powerhouses:
 - **Dual Storage**: Saves the timestamped `.lrc` file right alongside the audio file AND embeds the synchronized lyrics into the audio file tags.
 - **Local Library Explorer**: Full-height artist & album tree browser, missing lyrics detector, and 1-click batch missing lyrics downloader.
 
-### 🔄 4. In-App Updates & Releases
+### 📻 4. Social Scrobbling & Artist Insights (Last.fm & ListenBrainz)
+- **Live Scrobbling**: Real-time "Now Playing" updates and automatic scrobble submissions after 50% or 4 minutes.
+- **Artist Insights Modal**: View rich biographies, genre tags, listener statistics, and similar track recommendations.
+- **Open-Source Compatibility**: Support for both Last.fm and decentralized ListenBrainz profiles.
+
+### 🎚️ 5. 10-Band Studio Equalizer (DSP) & Discord RPC
+- **Hardware DSP**: 10-Band BiquadFilterNodes (32 Hz to 16 kHz) with 8 studio presets (`Bass Boost`, `Rock`, `Pop`, `Jazz`, `Electronic`, `Classical`, `Vocal Booster`, `Flat`).
+- **Discord Rich Presence**: Live playback profile card with track title, artist, album art, remaining time bar, and profile buttons.
+
+### 🔄 6. In-App Updates & Releases
 - Automatic update detection checking against [GitHub Releases](https://github.com/Sandeep2062/Sonance/releases).
 - Every release includes SHA-256 and MD5 checksum manifests (`RELEASE.sha256sum`, `RELEASE.md5sum`).
 
