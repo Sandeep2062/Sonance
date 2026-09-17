@@ -1083,6 +1083,9 @@
 
     <!-- Quick Sleep, Equalizer, Spek & Update -->
     <div style="display:flex; align-items:center; gap:8px;">
+      <button class="btn btn-secondary" onclick="openRemoteModal()" style="padding:5px 9px; font-size:11px;" id="remoteHeaderBtn" title="Wi-Fi Mobile Remote Controller & Cast">
+        📲 Remote
+      </button>
       <button class="btn btn-secondary" onclick="openLibraryDoctorModal()" style="padding:5px 9px; font-size:11px;" title="Scan Library Health & Clean Duplicates">
         🩺 Doctor
       </button>
@@ -1148,6 +1151,17 @@
         </div>
         <div id="sidebarPlaylistsList" style="max-height:85px; overflow-y:auto; font-size:11px; display:flex; flex-direction:column; gap:2px;">
           <div style="font-size:10px; color:var(--text-dim); padding:2px 4px;">No playlists yet</div>
+        </div>
+      </div>
+
+      <!-- Smart Dynamic Playlists Section (Phase 8) -->
+      <div style="margin-top:8px; margin-bottom:4px;">
+        <div class="sidebar-section-title" style="display:flex; justify-content:space-between; align-items:center;">
+          <span>Smart Playlists</span>
+          <span style="font-size:9px; color:var(--emerald); background:rgba(16,185,129,0.1); border:1px solid rgba(16,185,129,0.3); padding:1px 5px; border-radius:4px;">⚡ Dynamic</span>
+        </div>
+        <div id="sidebarSmartPlaylistsList" style="max-height:105px; overflow-y:auto; font-size:11px; display:flex; flex-direction:column; gap:2px;">
+          <div style="font-size:10px; color:var(--text-dim); padding:2px 4px;">Loading smart playlists...</div>
         </div>
       </div>
 
@@ -1719,6 +1733,22 @@
     </div>
 
     <div class="player-right">
+      <div style="position:relative; display:inline-block;">
+        <button class="btn btn-secondary" id="speedStudioBtn" onclick="toggleSpeedStudioPopup()" style="padding:3px 7px; font-size:10px;" title="Playback Speed & Pitch DSP (Nightcore / Slowed+Reverb)">⚡ 1.0x</button>
+        <div id="speedStudioPopup" style="display:none; position:absolute; bottom:38px; right:0; background:#181b26; border:1px solid var(--border); border-radius:10px; padding:10px; width:190px; box-shadow:0 12px 32px rgba(0,0,0,0.7); z-index:9999; font-size:11px;">
+          <div style="font-weight:700; margin-bottom:6px; display:flex; justify-content:space-between; align-items:center;">
+            <span>Speed & Creative DSP</span>
+            <span id="speedValueLabel" style="color:var(--emerald);">1.0x</span>
+          </div>
+          <input type="range" id="speedStudioSlider" min="0.5" max="2.0" step="0.05" value="1.0" oninput="setPlaybackSpeed(parseFloat(this.value))" style="width:100%; accent-color:var(--emerald); margin-bottom:8px;">
+          <div style="display:grid; grid-template-columns:1fr 1fr; gap:4px;">
+            <button class="btn btn-secondary" style="padding:3px 5px; font-size:10px;" onclick="applySpeedPreset(1.0, 'Normal')">Master 1.0x</button>
+            <button class="btn btn-secondary" style="padding:3px 5px; font-size:10px;" onclick="applySpeedPreset(1.25, 'Nightcore')">⚡ Nightcore</button>
+            <button class="btn btn-secondary" style="padding:3px 5px; font-size:10px;" onclick="applySpeedPreset(0.85, 'Slowed')">🌧️ Slow+Reverb</button>
+            <button class="btn btn-secondary" style="padding:3px 5px; font-size:10px;" onclick="applySpeedPreset(0.75, 'Practice')">Slow 0.75x</button>
+          </div>
+        </div>
+      </div>
       <button class="btn btn-secondary" id="autoDjBtn" onclick="toggleAutoDj()" style="padding:3px 8px; font-size:10px;" title="Auto-DJ / Infinite Radio Mode (Discovers & queues matching tracks)">⚡ Auto-DJ</button>
       <canvas class="spectrum-canvas" id="spectrumCanvas" width="70" height="24" title="Live Audio Spectrum Visualizer"></canvas>
       <span style="font-size:12px; cursor:pointer;" onclick="toggleMute()" id="muteIcon">🔊</span>
@@ -2192,6 +2222,57 @@
     </div>
   </div>
 
+  <!-- Mobile Web Remote Controller Modal (Phase 8) -->
+  <div class="modal-backdrop" id="remoteServerModal">
+    <div class="modal-box" style="max-width:440px;">
+      <div class="modal-header">
+        <div style="display:flex; align-items:center; gap:8px;">
+          <span style="font-size:18px;">📲</span>
+          <div>
+            <div style="font-weight:700; font-size:14px;">Wi-Fi Mobile Remote & Cast</div>
+            <div style="font-size:10px; color:var(--text-dim);">Control playback & read live lyrics from any phone or tablet</div>
+          </div>
+        </div>
+        <button onclick="closeRemoteModal()" style="background:none; border:none; color:var(--text-muted); cursor:pointer; font-size:16px;">✕</button>
+      </div>
+
+      <div class="modal-body" style="text-align:center;">
+        <!-- Status Indicator -->
+        <div style="display:inline-flex; align-items:center; gap:6px; background:rgba(16,185,129,0.15); border:1px solid var(--emerald); padding:4px 12px; border-radius:999px; margin-bottom:14px;">
+          <span style="width:8px; height:8px; border-radius:50%; background:var(--emerald);" id="remoteStatusDot"></span>
+          <span style="font-size:11px; font-weight:600; color:var(--emerald);" id="remoteStatusText">Server Active</span>
+        </div>
+
+        <!-- Connection URL -->
+        <div style="background:rgba(0,0,0,0.4); border:1px solid var(--border); border-radius:10px; padding:12px; margin-bottom:16px;">
+          <div style="font-size:11px; color:var(--text-muted); margin-bottom:4px;">Open this URL on any device connected to your Wi-Fi:</div>
+          <a id="remoteUrlLink" href="#" target="_blank" style="font-size:16px; font-weight:700; color:var(--cyan); text-decoration:none; word-break:break-all;">http://192.168.1.x:5050</a>
+          <div style="display:flex; justify-content:center; gap:8px; margin-top:10px;">
+            <button class="btn btn-secondary" onclick="copyRemoteUrl()" style="padding:4px 10px; font-size:11px;">📋 Copy Link</button>
+            <button class="btn btn-secondary" onclick="openRemoteInBrowser()" style="padding:4px 10px; font-size:11px;">🌐 Open Locally</button>
+          </div>
+        </div>
+
+        <!-- QR Code Display -->
+        <div style="display:flex; flex-direction:column; align-items:center; margin-bottom:16px;">
+          <div style="background:#fff; padding:8px; border-radius:12px; display:inline-block; box-shadow:0 8px 24px rgba(0,0,0,0.5);">
+            <div id="remoteQrContainer" style="width:160px; height:160px; display:flex; align-items:center; justify-content:center; overflow:hidden;"></div>
+          </div>
+          <span style="font-size:11px; color:var(--text-dim); margin-top:8px;">Scan with your phone's camera to connect instantly</span>
+        </div>
+
+        <div style="display:flex; justify-content:center; gap:10px;">
+          <button class="btn btn-secondary" id="toggleRemoteServerBtn" onclick="toggleRemoteServerAction()" style="padding:6px 14px;">
+            Stop Remote Server
+          </button>
+          <button class="btn btn-primary" onclick="closeRemoteModal()" style="padding:6px 14px;">
+            Done
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+
   <script>
     // State
     let libraryTracks = [];
@@ -2227,6 +2308,8 @@
         refreshCacheStats();
         initAutoDjSettings();
         initNormalizerSettings();
+        refreshSmartPlaylists();
+        checkRemoteServerStatus();
       }
     });
 
@@ -2257,6 +2340,7 @@
           libraryTracks = tracks || [];
           showScanOverlay(false);
           renderUI();
+          refreshSmartPlaylists(folder);
         }).catch(err => {
           showScanOverlay(false);
           alert("Error scanning folder: " + err);
@@ -2654,6 +2738,12 @@
 
       // Karaoke line sync (with live fine-tuning offset)
       syncKaraoke(cur);
+
+      // Phase 8: Throttled Mobile Remote state broadcast
+      if (typeof broadcastRemoteState === 'function' && (Date.now() - lastRemoteBroadcastTime > 800)) {
+        lastRemoteBroadcastTime = Date.now();
+        broadcastRemoteState();
+      }
 
       // DJ Crossfade Engine
       if (crossfadeSeconds > 0 && dur > crossfadeSeconds + 3 && (dur - cur) <= crossfadeSeconds && !isCrossfading) {
@@ -4486,17 +4576,360 @@
       }
     }
 
-    // Global Keyboard Shortcuts (F11 & Escape)
+    // =========================================================================
+    // Phase 8: Speed & Pitch DSP Studio (0.5x - 2.0x, Nightcore & Slowed+Reverb)
+    // =========================================================================
+    let currentPlaybackSpeed = 1.0;
+    let currentDspPreset = 'Normal';
+    let reverbConvolver = null;
+    let reverbWetGain = null;
+    let reverbDryGain = null;
+
+    function toggleSpeedStudioPopup() {
+      const popup = document.getElementById('speedStudioPopup');
+      if (!popup) return;
+      popup.style.display = popup.style.display === 'none' ? 'block' : 'none';
+    }
+
+    function setPlaybackSpeed(speed) {
+      currentPlaybackSpeed = Math.round(speed * 100) / 100;
+      audio.playbackRate = currentPlaybackSpeed;
+      const label = document.getElementById('speedValueLabel');
+      const btn = document.getElementById('speedStudioBtn');
+      const slider = document.getElementById('speedStudioSlider');
+      if (label) label.innerText = `${currentPlaybackSpeed.toFixed(2)}x`;
+      if (btn) btn.innerText = `⚡ ${currentPlaybackSpeed.toFixed(2)}x`;
+      if (slider) slider.value = currentPlaybackSpeed;
+    }
+
+    function applySpeedPreset(speed, presetName) {
+      currentDspPreset = presetName;
+      setPlaybackSpeed(speed);
+      setupWebAudio();
+
+      if (presetName === 'Slowed') {
+        enableReverb(true);
+      } else {
+        enableReverb(false);
+      }
+
+      const popup = document.getElementById('speedStudioPopup');
+      if (popup) popup.style.display = 'none';
+    }
+
+    function createSyntheticImpulse(ctx, duration = 2.4, decay = 2.0) {
+      const sampleRate = ctx.sampleRate;
+      const length = Math.floor(sampleRate * duration);
+      const impulse = ctx.createBuffer(2, length, sampleRate);
+      const left = impulse.getChannelData(0);
+      const right = impulse.getChannelData(1);
+      for (let i = 0; i < length; i++) {
+        const mult = Math.exp(- (i / length) * decay);
+        left[i] = (Math.random() * 2 - 1) * mult;
+        right[i] = (Math.random() * 2 - 1) * mult;
+      }
+      return impulse;
+    }
+
+    function enableReverb(enable) {
+      if (!audioCtx) return;
+      try {
+        if (!reverbConvolver) {
+          reverbConvolver = audioCtx.createConvolver();
+          reverbConvolver.buffer = createSyntheticImpulse(audioCtx);
+          reverbWetGain = audioCtx.createGain();
+          reverbDryGain = audioCtx.createGain();
+
+          if (dynamicsCompressor) {
+            dynamicsCompressor.connect(reverbConvolver);
+            reverbConvolver.connect(reverbWetGain);
+            reverbWetGain.connect(analyser);
+          }
+        }
+        if (enable) {
+          reverbWetGain.gain.setValueAtTime(0.45, audioCtx.currentTime);
+        } else {
+          reverbWetGain.gain.setValueAtTime(0.0, audioCtx.currentTime);
+        }
+      } catch (e) {
+        console.error("Reverb DSP error:", e);
+      }
+    }
+
+    // =========================================================================
+    // Phase 8: Wi-Fi Mobile Remote Controller & Cast
+    // =========================================================================
+    let remoteServerRunning = false;
+    let remoteServerUrl = '';
+    let lastRemoteBroadcastTime = 0;
+
+    function checkRemoteServerStatus() {
+      if (window.pywebview && window.pywebview.api && window.pywebview.api.get_remote_server_info) {
+        window.pywebview.api.get_remote_server_info().then(info => {
+          if (info) {
+            remoteServerRunning = !!info.running;
+            remoteServerUrl = info.url || '';
+            updateRemoteModalUI(info);
+          }
+        });
+      }
+    }
+
+    function openRemoteModal() {
+      document.getElementById('remoteServerModal').style.display = 'flex';
+      if (window.pywebview && window.pywebview.api && window.pywebview.api.toggle_remote_server) {
+        if (!remoteServerRunning) {
+          window.pywebview.api.toggle_remote_server(true).then(res => {
+            if (res && res.success) {
+              remoteServerRunning = true;
+              remoteServerUrl = res.url;
+              updateRemoteModalUI(res);
+            }
+          });
+        } else {
+          checkRemoteServerStatus();
+        }
+      }
+    }
+
+    function closeRemoteModal() {
+      document.getElementById('remoteServerModal').style.display = 'none';
+    }
+
+    function toggleRemoteServerAction() {
+      if (window.pywebview && window.pywebview.api && window.pywebview.api.toggle_remote_server) {
+        const targetState = !remoteServerRunning;
+        window.pywebview.api.toggle_remote_server(targetState).then(res => {
+          remoteServerRunning = targetState;
+          remoteServerUrl = res.url || '';
+          updateRemoteModalUI(res);
+        });
+      }
+    }
+
+    function updateRemoteModalUI(info) {
+      const dot = document.getElementById('remoteStatusDot');
+      const text = document.getElementById('remoteStatusText');
+      const link = document.getElementById('remoteUrlLink');
+      const toggleBtn = document.getElementById('toggleRemoteServerBtn');
+      const qrBox = document.getElementById('remoteQrContainer');
+
+      if (info && info.running && info.url) {
+        if (dot) dot.style.background = 'var(--emerald)';
+        if (text) {
+          text.innerText = 'Server Active';
+          text.style.color = 'var(--emerald)';
+        }
+        if (link) {
+          link.innerText = info.url;
+          link.href = info.url;
+        }
+        if (toggleBtn) toggleBtn.innerText = 'Stop Remote Server';
+        if (qrBox && info.qr_svg) {
+          qrBox.innerHTML = info.qr_svg;
+        }
+      } else {
+        if (dot) dot.style.background = '#94a3b8';
+        if (text) {
+          text.innerText = 'Server Stopped';
+          text.style.color = '#94a3b8';
+        }
+        if (link) {
+          link.innerText = 'Server Inactive';
+          link.href = '#';
+        }
+        if (toggleBtn) toggleBtn.innerText = 'Start Remote Server';
+        if (qrBox) {
+          qrBox.innerHTML = '<span style="font-size:11px; color:#64748b;">Server Stopped</span>';
+        }
+      }
+    }
+
+    function copyRemoteUrl() {
+      if (remoteServerUrl) {
+        navigator.clipboard.writeText(remoteServerUrl).then(() => {
+          alert(`📋 Link copied: ${remoteServerUrl}\n\nOpen this on your phone to control Sonance!`);
+        });
+      }
+    }
+
+    function openRemoteInBrowser() {
+      if (remoteServerUrl) {
+        window.open(remoteServerUrl, '_blank');
+      }
+    }
+
+    function broadcastRemoteState() {
+      if (!remoteServerRunning) return;
+      if (window.pywebview && window.pywebview.api && window.pywebview.api.update_remote_state) {
+        const curTrack = (playingTrackIndex !== null) ? libraryTracks.find(t => t.index === playingTrackIndex) : null;
+        const miniLyric = document.getElementById('miniKaraokeLine');
+        const activeLyricText = miniLyric ? miniLyric.innerText : '';
+
+        const payload = {
+          is_playing: !audio.paused,
+          title: curTrack ? (curTrack.title || curTrack.filename) : 'No Track Playing',
+          artist: curTrack ? (curTrack.artist || 'Unknown') : 'Sonance Desktop',
+          album: curTrack ? (curTrack.album || '') : '',
+          cover_url: curTrack ? (curTrack.cover_url || '') : '',
+          duration: audio.duration || 0,
+          position: audio.currentTime || 0,
+          volume: masterVolume,
+          current_lyric: activeLyricText,
+          current_index: (playingTrackIndex !== null) ? libraryTracks.findIndex(t => t.index === playingTrackIndex) : 0,
+          queue: libraryTracks.slice(0, 30).map(t => ({
+            title: t.title || t.filename,
+            artist: t.artist || 'Unknown',
+            duration: t.duration || 0
+          }))
+        };
+        window.pywebview.api.update_remote_state(payload);
+      }
+    }
+
+    // Remote action receiver from mobile devices
+    window.handleRemoteAction = function(action, value) {
+      if (action === 'play_pause') {
+        togglePlayPause();
+      } else if (action === 'next') {
+        playNextTrack();
+      } else if (action === 'prev') {
+        playPreviousTrack();
+      } else if (action === 'seek') {
+        if (audio.duration && !isNaN(value)) {
+          audio.currentTime = Math.max(0, Math.min(audio.duration, parseFloat(value)));
+        }
+      } else if (action === 'volume') {
+        if (!isNaN(value)) {
+          changeVolume(parseFloat(value));
+          document.getElementById('volumeSlider').value = masterVolume;
+        }
+      } else if (action === 'play_index') {
+        if (value >= 0 && value < libraryTracks.length) {
+          playTrack(libraryTracks[value].index);
+        }
+      }
+      broadcastRemoteState();
+    };
+
+    // =========================================================================
+    // Phase 8: Smart Dynamic Auto-Playlists
+    // =========================================================================
+    let smartPlaylistsData = [];
+    let currentSmartPlaylistId = null;
+
+    function refreshSmartPlaylists(folder = null) {
+      if (window.pywebview && window.pywebview.api && window.pywebview.api.get_smart_playlists) {
+        window.pywebview.api.get_smart_playlists(folder).then(playlists => {
+          smartPlaylistsData = playlists || [];
+          renderSmartPlaylistsUI();
+        }).catch(err => console.error("Smart playlists error:", err));
+      }
+    }
+
+    function renderSmartPlaylistsUI() {
+      const container = document.getElementById('sidebarSmartPlaylistsList');
+      if (!container) return;
+      if (smartPlaylistsData.length === 0) {
+        container.innerHTML = '<div style="font-size:10px; color:var(--text-dim); padding:2px 4px;">No tracks in library</div>';
+        return;
+      }
+
+      container.innerHTML = smartPlaylistsData.map(p => `
+        <div class="nav-btn ${currentSmartPlaylistId === p.id ? 'active' : ''}" onclick="selectSmartPlaylist('${p.id}')" style="padding:4px 8px; border-radius:6px; font-size:11px; cursor:pointer; display:flex; justify-content:space-between; align-items:center;">
+          <div style="display:flex; align-items:center; gap:6px; overflow:hidden;">
+            <span>${p.icon}</span>
+            <span style="white-space:nowrap; overflow:hidden; text-overflow:ellipsis;">${escapeHtml(p.name)}</span>
+          </div>
+          <span class="nav-badge" style="font-size:9px; padding:1px 5px;">${p.count}</span>
+        </div>
+      `).join('');
+    }
+
+    function selectSmartPlaylist(playlistId) {
+      currentSmartPlaylistId = playlistId;
+      renderSmartPlaylistsUI();
+
+      if (window.pywebview && window.pywebview.api && window.pywebview.api.get_smart_playlist_tracks) {
+        window.pywebview.api.get_smart_playlist_tracks(playlistId).then(tracks => {
+          if (!tracks || tracks.length === 0) {
+            alert("No tracks matched this smart playlist.");
+            return;
+          }
+          libraryTracks = tracks.map((t, idx) => ({
+            ...t,
+            index: idx,
+            state: t.has_lrc ? 'synced' : 'missing',
+            stream_url: `http://127.0.0.1:8765/stream?path=${encodeURIComponent(t.path)}`,
+            cover_url: `http://127.0.0.1:8765/cover?path=${encodeURIComponent(t.path)}`,
+            is_favorite: false,
+            checked: false,
+          }));
+
+          const meta = smartPlaylistsData.find(p => p.id === playlistId);
+          const pName = meta ? meta.name : 'Smart Playlist';
+          document.getElementById('currentFolderText').innerText = `⚡ Smart: ${pName} (${tracks.length} songs)`;
+          renderFilteredTracklist();
+        });
+      }
+    }
+
+    // =========================================================================
+    // Phase 8: Desktop Keyboard Shortcuts & Hardware Media Keys
+    // =========================================================================
     window.addEventListener('keydown', (e) => {
-      if (e.key === 'F11') {
+      const tag = document.activeElement ? document.activeElement.tagName.toLowerCase() : '';
+      if (tag === 'input' || tag === 'textarea' || tag === 'select') return;
+
+      if (e.code === 'Space') {
+        e.preventDefault();
+        togglePlayPause();
+      } else if (e.code === 'ArrowLeft') {
+        e.preventDefault();
+        seekRelative(-5);
+      } else if (e.code === 'ArrowRight') {
+        e.preventDefault();
+        seekRelative(5);
+      } else if (e.code === 'ArrowUp') {
+        e.preventDefault();
+        changeVolume(Math.min(1.0, masterVolume + 0.05));
+        document.getElementById('volumeSlider').value = masterVolume;
+      } else if (e.code === 'ArrowDown') {
+        e.preventDefault();
+        changeVolume(Math.max(0.0, masterVolume - 0.05));
+        document.getElementById('volumeSlider').value = masterVolume;
+      } else if (e.code === 'KeyM') {
+        e.preventDefault();
+        toggleMute();
+      } else if (e.code === 'KeyL') {
+        e.preventDefault();
+        showAppView(currentAppView === 'karaoke' ? 'local' : 'karaoke');
+      } else if (e.code === 'KeyV') {
+        e.preventDefault();
+        if (visualizerActive) closeVisualizerModal();
+        else openVisualizerModal();
+      } else if (e.key === 'F11') {
         e.preventDefault();
         if (visualizerActive) closeVisualizerModal();
         else openVisualizerModal();
       } else if (e.key === 'Escape') {
         if (visualizerActive) closeVisualizerModal();
         if (isMiniPlayerActive) toggleMiniPlayer(false);
+        closeRemoteModal();
+        closeLibraryDoctorModal();
+        const popup = document.getElementById('speedStudioPopup');
+        if (popup) popup.style.display = 'none';
       }
     });
+
+    if ('mediaSession' in navigator) {
+      try {
+        navigator.mediaSession.setActionHandler('play', () => togglePlayPause());
+        navigator.mediaSession.setActionHandler('pause', () => togglePlayPause());
+        navigator.mediaSession.setActionHandler('previoustrack', () => playPreviousTrack());
+        navigator.mediaSession.setActionHandler('nexttrack', () => playNextTrack());
+      } catch (e) {}
+    }
   </script>
 </body>
 </html>

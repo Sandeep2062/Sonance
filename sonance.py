@@ -9,6 +9,16 @@ https://github.com/Sandeep2062/Sonance
 
 import sys
 import argparse
+
+if sys.platform == "win32":
+  try:
+    if hasattr(sys.stdout, "reconfigure"):
+      sys.stdout.reconfigure(encoding="utf-8")
+    if hasattr(sys.stderr, "reconfigure"):
+      sys.stderr.reconfigure(encoding="utf-8")
+  except Exception:
+    pass
+
 import modern_lyrics_downloader
 import cookie_manager
 import discord_rpc
@@ -59,6 +69,18 @@ Examples:
       nargs="?",
       const=".",
       help="Scan music library with Sonance Library Doctor to detect duplicates & health score",
+  )
+  parser.add_argument(
+      "--remote",
+      action="store_true",
+      help="Start embedded Wi-Fi mobile remote web server on launch",
+  )
+  parser.add_argument(
+      "--smart-playlists",
+      metavar="FOLDER",
+      nargs="?",
+      const=".",
+      help="List smart dynamic playlists and track counts for FOLDER",
   )
   parser.add_argument(
       "--version",
@@ -131,11 +153,28 @@ Examples:
           print(f"    - {status} {tr['filename']} ({tr['quality']}, {tr['size_mb']}MB)")
     return
 
+  if args.smart_playlists is not None:
+    import smart_playlists
+    folder = args.smart_playlists or "."
+    print(f"[*] Scanning smart dynamic playlists in: {folder}")
+    lists = smart_playlists.get_smart_playlists(folder)
+    print("\n=== Sonance Smart Playlists ===")
+    for p in lists:
+      print(f"  {p['icon']} {p['name']} ({p['count']} tracks)")
+      print(f"     Description: {p['description']}")
+    return
+
   if args.classic:
     print("[*] Launching Sonance (Classic Tkinter UI)...")
     import lyrics_downloader_ultimate
   else:
     print("[*] Starting Sonance Music Platform...")
+    if args.remote:
+      import remote_server
+      res = remote_server.remote_server.start()
+      if res.get("success"):
+        print(f"[+] Wi-Fi Mobile Remote active: {res.get('url')}")
+
     # Attempt Discord RPC connection in background
     try:
       discord_rpc.rpc_manager.connect()

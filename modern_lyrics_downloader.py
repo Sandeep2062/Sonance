@@ -41,6 +41,8 @@ import tag_editor
 import cache_manager
 import auto_dj
 import library_doctor
+import remote_server
+import smart_playlists
 
 APP_VERSION = "2.1.0"
 GITHUB_REPO = "Sandeep2062/Sonance"
@@ -208,6 +210,15 @@ class LyricsAPI:
 
     def set_window(self, window: webview.Window):
         self._window = window
+        # Connect mobile remote action handler to desktop UI
+        def _handle_remote(action: str, value: Any):
+            if self._window:
+                try:
+                    js = f"window.handleRemoteAction && window.handleRemoteAction({json.dumps(action)}, {json.dumps(value)});"
+                    self._window.evaluate_js(js)
+                except Exception:
+                    pass
+        remote_server.global_remote_state.action_handler = _handle_remote
 
     def select_folder(self) -> str:
         """Opens native OS folder picker without deprecation warnings."""
@@ -618,6 +629,39 @@ class LyricsAPI:
     def delete_duplicate_file(self, file_path: str) -> Dict[str, Any]:
         """Removes a duplicate audio file and deletes any corresponding .lrc file."""
         return library_doctor.delete_audio_file(file_path)
+
+    # ------------------ Phase 8: Mobile Web Remote ------------------
+    def get_remote_server_info(self) -> Dict[str, Any]:
+        """Returns Wi-Fi mobile remote status, LAN URL, and connection port."""
+        return remote_server.remote_server.get_info()
+
+    def toggle_remote_server(self, enable: bool) -> Dict[str, Any]:
+        """Starts or stops the embedded Wi-Fi mobile remote server."""
+        if enable:
+            return remote_server.remote_server.start()
+        else:
+            return remote_server.remote_server.stop()
+
+    def update_remote_state(self, state: Dict[str, Any]) -> Dict[str, Any]:
+        """Updates playback state broadcasted to connected mobile devices."""
+        remote_server.global_remote_state.update(state)
+        return {"success": True}
+
+    # ------------------ Phase 8: Smart Dynamic Playlists ------------------
+    def get_smart_playlists(self, folder: Optional[str] = None) -> List[Dict[str, Any]]:
+        """Returns list of smart dynamic playlists with live item counts."""
+        target = folder or self._current_folder
+        return smart_playlists.get_smart_playlists(target)
+
+    def get_smart_playlist_tracks(self, playlist_id: str, folder: Optional[str] = None) -> List[Dict[str, Any]]:
+        """Returns tracks matching the smart dynamic playlist."""
+        target = folder or self._current_folder
+        return smart_playlists.get_smart_playlist_tracks(playlist_id, target)
+
+    def export_smart_playlist(self, playlist_id: str, output_path: str, folder: Optional[str] = None) -> Dict[str, Any]:
+        """Exports smart playlist tracks to a standard .m3u8 file."""
+        target = folder or self._current_folder
+        return smart_playlists.export_smart_playlist_m3u8(playlist_id, target, output_path)
 
     def _save_last_folder(self, folder: str):
         try:
