@@ -49,6 +49,8 @@ import listening_stats
 import lyrics_creator
 import audio_fingerprint
 import discography_scraper
+import cue_splitter
+import audio_cutter
 
 APP_VERSION = "2.1.0"
 GITHUB_REPO = "Sandeep2062/Sonance"
@@ -790,6 +792,64 @@ class LyricsAPI:
         except Exception:
             pass
         return {"has_bookmark": False, "position": 0}
+
+    # ------------------ Phase 11: CUE Sheet Splitter & Parser ------------------
+    def parse_cue_sheet(self, cue_path: str) -> Dict[str, Any]:
+        """Parses a .cue index sheet and resolves virtual tracks."""
+        return cue_splitter.parse_cue_file(cue_path)
+
+    def split_cue_sheet(
+        self,
+        cue_path: str,
+        output_dir: Optional[str] = None,
+        output_format: str = "flac",
+        bitrate: str = "320k"
+    ) -> Dict[str, Any]:
+        """Splits an album audio file into individual tagged track files."""
+        return cue_splitter.split_cue_sheet(cue_path, output_dir, output_format, bitrate)
+
+    # ------------------ Phase 11: Studio Audio Ringtone & Clip Cutter ----------
+    def trim_audio_clip(
+        self,
+        file_path: str,
+        start_sec: float,
+        end_sec: float,
+        fade_in: float = 0.5,
+        fade_out: float = 0.5,
+        format_name: str = "mp3",
+        bitrate: str = "320k",
+        output_path: Optional[str] = None
+    ) -> Dict[str, Any]:
+        """Trims a high-quality audio clip or ringtone with fade envelopes."""
+        return audio_cutter.trim_audio_clip(
+            file_path, start_sec, end_sec, fade_in, fade_out, format_name, bitrate, output_path
+        )
+
+    def select_cue_file(self) -> str:
+        """Opens native OS file picker for .cue sheet files."""
+        if not self._window:
+            return ""
+        open_dialog = getattr(webview.FileDialog, "OPEN", getattr(webview, "OPEN_DIALOG", None))
+        result = self._window.create_file_dialog(
+            open_dialog,
+            file_types=('CUE Sheet Files (*.cue)', 'All files (*.*)')
+        )
+        if result and len(result) > 0:
+            return result[0]
+        return ""
+
+    def select_audio_file(self) -> str:
+        """Opens native OS file picker for audio files."""
+        if not self._window:
+            return ""
+        open_dialog = getattr(webview.FileDialog, "OPEN", getattr(webview, "OPEN_DIALOG", None))
+        result = self._window.create_file_dialog(
+            open_dialog,
+            file_types=('Audio Files (*.mp3;*.flac;*.wav;*.m4a;*.ogg;*.opus;*.aac)', 'All files (*.*)')
+        )
+        if result and len(result) > 0:
+            return result[0]
+        return ""
 
     def _save_last_folder(self, folder: str):
         try:

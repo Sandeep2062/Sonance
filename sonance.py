@@ -104,6 +104,18 @@ Examples:
       help="Inspect complete album discography and tracklists for an artist",
   )
   parser.add_argument(
+      "--cue-split",
+      nargs="+",
+      metavar="PARAM",
+      help="Split CUE sheet album image: --cue-split <cue_file> [output_dir] [format] [bitrate]",
+  )
+  parser.add_argument(
+      "--trim",
+      nargs="+",
+      metavar="PARAM",
+      help="Trim audio clip: --trim <audio_file> <start_sec> <end_sec> [output_format] [output_file]",
+  )
+  parser.add_argument(
       "--version",
       action="version",
       version=f"Sonance v{modern_lyrics_downloader.APP_VERSION}",
@@ -263,6 +275,41 @@ Examples:
       print()
     else:
       print(f"[-] Failed: {res.get('error')}")
+  if args.cue_split:
+    import cue_splitter
+    cue_file = args.cue_split[0]
+    out_dir = args.cue_split[1] if len(args.cue_split) > 1 else None
+    out_fmt = args.cue_split[2] if len(args.cue_split) > 2 else "flac"
+    out_bitrate = args.cue_split[3] if len(args.cue_split) > 3 else "320k"
+
+    print(f"[*] Parsing CUE Sheet: {cue_file}")
+    res = cue_splitter.split_cue_sheet(cue_file, output_dir=out_dir, output_format=out_fmt, bitrate=out_bitrate)
+    if res.get("success"):
+      print(f"[+] CUE Split Succeeded! Processed {res.get('track_count', 0)} tracks into: {res.get('output_directory')}")
+      for t in res.get("tracks", []):
+        print(f"    Track {t.get('track_number'):02d}: {t.get('title')} ({t.get('duration_str')}) -> {os.path.basename(t.get('file', ''))}")
+    else:
+      print(f"[-] CUE Split failed: {res.get('error')}")
+    return
+
+  if args.trim:
+    import audio_cutter
+    src = args.trim[0]
+    try:
+      start_sec = float(args.trim[1])
+      end_sec = float(args.trim[2])
+    except (IndexError, ValueError):
+      print("[-] Error: start_sec and end_sec must be valid numeric seconds.")
+      return
+    out_fmt = args.trim[3] if len(args.trim) > 3 else "mp3"
+    out_file = args.trim[4] if len(args.trim) > 4 else None
+
+    print(f"[*] Trimming audio: {src} [{start_sec}s -> {end_sec}s] to format: {out_fmt.upper()}")
+    res = audio_cutter.trim_audio_clip(src, start_sec, end_sec, output_format=out_fmt, output_path=out_file)
+    if res.get("success"):
+      print(f"[+] Audio clip exported successfully: {res.get('output_path')} ({res.get('duration')}s)")
+    else:
+      print(f"[-] Audio trimming failed: {res.get('error')}")
     return
 
   if args.classic:

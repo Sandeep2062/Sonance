@@ -49,6 +49,25 @@
     ::-webkit-scrollbar-thumb { background: rgba(255, 255, 255, 0.14); border-radius: 999px; }
     ::-webkit-scrollbar-thumb:hover { background: rgba(255, 255, 255, 0.25); }
 
+    /* Ambient Fluid Album Art Mesh Backdrop (Phase 11) */
+    #ambientMeshCanvas {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100vw;
+      height: 100vh;
+      pointer-events: none;
+      z-index: 0;
+      opacity: 0.25;
+      filter: blur(80px);
+      transform: scale(1.15);
+      transition: opacity 0.8s ease;
+    }
+    header, .app-body, .player-bar {
+      position: relative;
+      z-index: 1;
+    }
+
     /* Top Navigation Header */
     header {
       height: 48px;
@@ -1086,6 +1105,12 @@
       <button class="btn btn-secondary" onclick="openDiscographyModal()" style="padding:5px 9px; font-size:11px;" id="discographyHeaderBtn" title="Artist Discography & Full-Album Downloader">
         📚 Discography
       </button>
+      <button class="btn btn-secondary" onclick="openCueModal()" style="padding:5px 9px; font-size:11px;" id="cueHeaderBtn" title="CUE Sheet Album Lossless Splitter & Virtual Tracks">
+        💿 CUE
+      </button>
+      <button class="btn btn-secondary" onclick="openCutterModal()" style="padding:5px 9px; font-size:11px;" id="cutterHeaderBtn" title="Visual Waveform Audio Cutter & Ringtone Studio">
+        ✂️ Cutter
+      </button>
       <button class="btn btn-secondary" onclick="openLrcStudioModal()" style="padding:5px 9px; font-size:11px;" id="lrcStudioHeaderBtn" title="Interactive LRC Studio & Live Time-Stamper">
         ✍️ LRC Studio
       </button>
@@ -1121,6 +1146,9 @@
       </button>
     </div>
   </header>
+
+  <!-- Ambient Fluid Album Art Mesh Backdrop (Phase 11) -->
+  <canvas id="ambientMeshCanvas" width="320" height="200"></canvas>
 
   <!-- Main Body Layout -->
   <div class="app-body">
@@ -1761,10 +1789,30 @@
             <button class="btn btn-secondary" style="padding:3px 5px; font-size:10px;" onclick="applySpeedPreset(0.85, 'Slowed')">🌧️ Slow+Reverb</button>
             <button class="btn btn-secondary" style="padding:3px 5px; font-size:10px;" onclick="applySpeedPreset(0.75, 'Practice')">Slow 0.75x</button>
           </div>
+          <div style="margin-top:8px; padding-top:8px; border-top:1px solid var(--border); display:flex; justify-content:space-between; align-items:center;">
+            <span style="font-size:10px; color:var(--text-muted);" title="Automatically skip or fast-forward long silences in podcasts & audiobooks">⏩ Skip Silence</span>
+            <input type="checkbox" id="silenceSkipperToggle" onchange="toggleSilenceSkipper(this.checked)" style="accent-color:var(--emerald); cursor:pointer;">
+          </div>
         </div>
       </div>
       <button class="btn btn-secondary" id="autoDjBtn" onclick="toggleAutoDj()" style="padding:3px 8px; font-size:10px;" title="Auto-DJ / Infinite Radio Mode (Discovers & queues matching tracks)">⚡ Auto-DJ</button>
       <canvas class="spectrum-canvas" id="spectrumCanvas" width="70" height="24" title="Live Audio Spectrum Visualizer"></canvas>
+      <!-- Phase 11: Hardware Audio Output DAC & Sink Selector -->
+      <div style="position:relative; display:inline-block;">
+        <button class="btn btn-secondary" id="audioDeviceBtn" onclick="toggleAudioDevicePopup()" style="padding:3px 7px; font-size:10px;" title="Hardware Audio Output DAC & Sink Selector">🎧 DAC</button>
+        <div id="audioDevicePopup" style="display:none; position:absolute; bottom:38px; right:0; background:#181b26; border:1px solid var(--border); border-radius:10px; padding:10px; width:230px; box-shadow:0 12px 32px rgba(0,0,0,0.7); z-index:9999; font-size:11px;">
+          <div style="font-weight:700; margin-bottom:6px; display:flex; justify-content:space-between; align-items:center;">
+            <span>Audio Output Device</span>
+            <button onclick="refreshAudioOutputDevices()" style="background:none; border:none; color:var(--text-dim); cursor:pointer; font-size:11px;" title="Refresh Devices">🔄</button>
+          </div>
+          <select id="audioOutputDeviceSelect" onchange="changeAudioOutputDevice(this.value)" style="width:100%; background:#12151e; color:var(--text-white); border:1px solid var(--border); border-radius:6px; padding:4px 6px; font-size:11px; margin-bottom:6px;">
+            <option value="default">Default System Audio</option>
+          </select>
+          <div style="font-size:9px; color:var(--text-dim); line-height:1.3;">
+            Direct hardware routing to external DACs, Bluetooth headphones, and studio monitors.
+          </div>
+        </div>
+      </div>
       <span style="font-size:12px; cursor:pointer;" onclick="toggleMute()" id="muteIcon">🔊</span>
       <input type="range" min="0" max="1" step="0.05" value="0.9" class="volume-slider" id="volumeSlider" oninput="changeVolume(this.value)">
     </div>
@@ -2568,6 +2616,200 @@
     </div>
   </div>
 
+  <!-- CUE Sheet Album Lossless Splitter & Virtual Track Studio Modal (Phase 11) -->
+  <div class="modal-backdrop" id="cueModal">
+    <div class="modal-box" style="width:840px; max-width:95vw; max-height:88vh; display:flex; flex-direction:column;">
+      <div class="modal-header">
+        <div style="display:flex; align-items:center; gap:8px;">
+          <span style="font-size:18px;">💿</span>
+          <div>
+            <div style="font-weight:700; font-size:14px; color:#fff;">CUE Sheet Album Lossless Splitter & Virtual Tracks</div>
+            <div style="font-size:10px; color:var(--text-dim);">Lossless sample-accurate Red Book CD splitting, virtual track playback, and tag preservation</div>
+          </div>
+        </div>
+        <button onclick="closeCueModal()" style="background:none; border:none; color:var(--text-muted); cursor:pointer; font-size:16px;">✕</button>
+      </div>
+
+      <div class="modal-body" style="flex:1; display:flex; flex-direction:column; overflow:hidden; padding:16px; gap:12px;">
+        <div style="display:flex; gap:8px; align-items:center;">
+          <input type="text" id="cueFilePathInput" class="search-input" placeholder="Path to .cue sheet file (e.g. C:/Music/Album/album.cue)..." style="flex:1; padding:7px 10px; font-size:12px;" onkeydown="if(event.key==='Enter') parseCueFileAction()">
+          <button class="btn btn-secondary" onclick="browseCueFileAction()" style="font-size:11px;">📁 Browse .cue</button>
+          <button class="btn btn-primary" onclick="parseCueFileAction()" style="font-size:11px;">🔍 Parse CUE</button>
+        </div>
+
+        <div id="cueAlbumCard" style="display:none; background:#121522; border:1px solid var(--border); border-radius:10px; padding:12px;">
+          <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:8px;">
+            <div>
+              <div id="cueAlbumTitle" style="font-size:14px; font-weight:800; color:#fff;">Album Title</div>
+              <div id="cueAlbumMeta" style="font-size:11px; color:var(--text-dim);">Artist Name · Year · Genre</div>
+            </div>
+            <div id="cueAudioStatus" style="font-size:11px; padding:3px 8px; border-radius:4px; background:var(--emerald-bg); color:var(--emerald); border:1px solid var(--emerald-border);">
+              Audio Linked
+            </div>
+          </div>
+          <div style="font-size:10px; color:var(--text-dim); overflow:hidden; text-overflow:ellipsis; white-space:nowrap;" id="cueAudioPath">
+            Source: C:/...
+          </div>
+        </div>
+
+        <div style="flex:1; overflow-y:auto; border:1px solid var(--border); border-radius:8px; background:#0e111a;">
+          <table style="width:100%; border-collapse:collapse; font-size:11px; text-align:left;">
+            <thead>
+              <tr style="background:#151926; color:var(--text-dim); border-bottom:1px solid var(--border);">
+                <th style="padding:8px 12px; width:45px;">#</th>
+                <th style="padding:8px 12px;">Title</th>
+                <th style="padding:8px 12px;">Artist</th>
+                <th style="padding:8px 12px; width:80px;">Start</th>
+                <th style="padding:8px 12px; width:80px;">Duration</th>
+                <th style="padding:8px 12px; width:120px; text-align:right;">Action</th>
+              </tr>
+            </thead>
+            <tbody id="cueTracklistTbody">
+              <tr>
+                <td colspan="6" style="text-align:center; padding:40px; color:var(--text-dim);">
+                  Select and parse a .cue sheet file to preview tracks and split album.
+                </td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+
+        <div id="cueSplitControls" style="background:#141824; border:1px solid var(--border); border-radius:8px; padding:10px 14px; display:flex; justify-content:space-between; align-items:center; gap:12px;">
+          <div style="display:flex; align-items:center; gap:10px; flex:1;">
+            <label style="font-size:11px; color:var(--text-dim);">Output Format:</label>
+            <select id="cueOutputFormat" style="background:#0c0e14; color:var(--text-white); border:1px solid var(--border); border-radius:6px; padding:4px 8px; font-size:11px;">
+              <option value="flac">FLAC (Lossless)</option>
+              <option value="wav">WAV (Uncompressed)</option>
+              <option value="mp3">MP3 (320 kbps)</option>
+              <option value="m4a">M4A (AAC 320k)</option>
+            </select>
+            <label style="font-size:11px; color:var(--text-dim); margin-left:6px;">Output Dir:</label>
+            <input type="text" id="cueOutputDir" class="search-input" placeholder="Default: same folder as CUE sheet" style="flex:1; padding:4px 8px; font-size:11px;">
+          </div>
+          <button class="btn btn-primary" id="cueSplitBtn" onclick="executeCueSplitAction()" style="font-size:11px; padding:6px 14px; white-space:nowrap;">
+            ✂️ Split All Tracks
+          </button>
+        </div>
+        <div id="cueStatusMsg" style="font-size:11px; color:var(--emerald); display:none;"></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Visual Waveform Audio Cutter & Ringtone Studio Modal (Phase 11) -->
+  <div class="modal-backdrop" id="cutterModal">
+    <div class="modal-box" style="width:780px; max-width:95vw; max-height:88vh; display:flex; flex-direction:column;">
+      <div class="modal-header">
+        <div style="display:flex; align-items:center; gap:8px;">
+          <span style="font-size:18px;">✂️</span>
+          <div>
+            <div style="font-weight:700; font-size:14px; color:#fff;">Visual Waveform Audio Cutter & Ringtone Studio</div>
+            <div style="font-size:10px; color:var(--text-dim);">Millisecond-accurate audio trimming, fade envelopes, and iPhone/Android ringtone export</div>
+          </div>
+        </div>
+        <button onclick="closeCutterModal()" style="background:none; border:none; color:var(--text-muted); cursor:pointer; font-size:16px;">✕</button>
+      </div>
+
+      <div class="modal-body" style="flex:1; display:flex; flex-direction:column; overflow:hidden; padding:16px; gap:14px;">
+        <div style="display:flex; gap:8px; align-items:center;">
+          <input type="text" id="cutterSourceInput" class="search-input" placeholder="Audio file path..." style="flex:1; padding:7px 10px; font-size:12px;">
+          <button class="btn btn-secondary" onclick="browseCutterFileAction()" style="font-size:11px;">📁 Browse File</button>
+          <button class="btn btn-secondary" onclick="loadCurrentTrackToCutter()" style="font-size:11px;">🎵 Use Playing Track</button>
+        </div>
+
+        <div id="cutterTrackBanner" style="display:flex; justify-content:space-between; align-items:center; background:#121522; border:1px solid var(--border); border-radius:8px; padding:10px 14px;">
+          <div>
+            <div id="cutterTrackTitle" style="font-size:13px; font-weight:700; color:#fff;">No Track Loaded</div>
+            <div id="cutterTrackDetails" style="font-size:10px; color:var(--text-dim);">Select a file or use currently playing song</div>
+          </div>
+          <div style="text-align:right;">
+            <div style="font-size:10px; color:var(--text-dim);">Selection Duration</div>
+            <div id="cutterDurationBadge" style="font-size:14px; font-weight:800; color:var(--emerald);">00:30.00</div>
+          </div>
+        </div>
+
+        <div style="background:#0c0e14; border:1px solid var(--border); border-radius:10px; padding:16px; position:relative;">
+          <div style="display:flex; justify-content:space-between; font-size:10px; color:var(--text-dim); margin-bottom:6px;">
+            <span id="cutterTimeStartLabel">0:00.0</span>
+            <span id="cutterPlayheadLabel" style="color:var(--emerald);">Playhead: 0:00.0</span>
+            <span id="cutterTimeEndLabel">0:00.0</span>
+          </div>
+          
+          <div style="position:relative; height:70px; background:#131724; border-radius:6px; overflow:hidden; cursor:pointer;" id="cutterCanvasContainer" onclick="handleCutterCanvasClick(event)">
+            <canvas id="cutterWaveformCanvas" width="700" height="70" style="width:100%; height:100%; display:block;"></canvas>
+            <div id="cutterSelectionBox" style="position:absolute; top:0; bottom:0; left:10%; width:40%; background:rgba(16, 185, 129, 0.22); border-left:3px solid var(--emerald); border-right:3px solid var(--emerald); pointer-events:none;"></div>
+          </div>
+
+          <div style="margin-top:10px; display:grid; grid-template-columns:1fr 1fr; gap:16px;">
+            <div>
+              <div style="display:flex; justify-content:space-between; font-size:10px; color:var(--text-dim); margin-bottom:3px;">
+                <span>Start Point (s)</span>
+                <button class="btn btn-secondary" style="padding:1px 6px; font-size:9px;" onclick="setCutterStartToCurrentTime()">Set to Playhead</button>
+              </div>
+              <input type="range" id="cutterStartSlider" min="0" max="100" step="0.1" value="0" oninput="onCutterRangeSliderChange('start', parseFloat(this.value))" style="width:100%; accent-color:var(--emerald);">
+              <input type="number" id="cutterStartNum" step="0.1" min="0" value="0.0" onchange="onCutterNumChange('start', parseFloat(this.value))" style="width:80px; background:#12151e; color:#fff; border:1px solid var(--border); border-radius:4px; padding:2px 6px; font-size:11px; margin-top:4px;">
+            </div>
+            <div>
+              <div style="display:flex; justify-content:space-between; font-size:10px; color:var(--text-dim); margin-bottom:3px;">
+                <span>End Point (s)</span>
+                <button class="btn btn-secondary" style="padding:1px 6px; font-size:9px;" onclick="setCutterEndToCurrentTime()">Set to Playhead</button>
+              </div>
+              <input type="range" id="cutterEndSlider" min="0" max="100" step="0.1" value="30" oninput="onCutterRangeSliderChange('end', parseFloat(this.value))" style="width:100%; accent-color:var(--emerald);">
+              <input type="number" id="cutterEndNum" step="0.1" min="0" value="30.0" onchange="onCutterNumChange('end', parseFloat(this.value))" style="width:80px; background:#12151e; color:#fff; border:1px solid var(--border); border-radius:4px; padding:2px 6px; font-size:11px; margin-top:4px;">
+            </div>
+          </div>
+        </div>
+
+        <div style="background:#141824; border:1px solid var(--border); border-radius:8px; padding:12px; display:grid; grid-template-columns:1fr 1fr; gap:16px;">
+          <div>
+            <div style="font-size:11px; font-weight:700; color:#fff; margin-bottom:8px;">🌊 Fade Envelopes</div>
+            <div style="display:flex; gap:12px;">
+              <div style="flex:1;">
+                <label style="font-size:10px; color:var(--text-dim); display:block; margin-bottom:3px;">Fade-In Curve:</label>
+                <select id="cutterFadeInSelect" style="width:100%; background:#0c0e14; color:#fff; border:1px solid var(--border); border-radius:4px; padding:4px 6px; font-size:11px;">
+                  <option value="0">None (0.0s)</option>
+                  <option value="0.5" selected>0.5s (Smooth)</option>
+                  <option value="1.0">1.0s (Studio)</option>
+                  <option value="2.0">2.0s (Slow)</option>
+                </select>
+              </div>
+              <div style="flex:1;">
+                <label style="font-size:10px; color:var(--text-dim); display:block; margin-bottom:3px;">Fade-Out Curve:</label>
+                <select id="cutterFadeOutSelect" style="width:100%; background:#0c0e14; color:#fff; border:1px solid var(--border); border-radius:4px; padding:4px 6px; font-size:11px;">
+                  <option value="0">None (0.0s)</option>
+                  <option value="0.5">0.5s</option>
+                  <option value="1.0" selected>1.0s (Studio)</option>
+                  <option value="2.0">2.0s (Gradual)</option>
+                  <option value="3.0">3.0s (Long Outro)</option>
+                </select>
+              </div>
+            </div>
+          </div>
+
+          <div>
+            <div style="font-size:11px; font-weight:700; color:#fff; margin-bottom:8px;">📦 Format & Destination</div>
+            <div style="display:flex; gap:8px;">
+              <select id="cutterExportFormat" style="flex:1; background:#0c0e14; color:#fff; border:1px solid var(--border); border-radius:4px; padding:4px 6px; font-size:11px;">
+                <option value="mp3">MP3 (320 kbps HD)</option>
+                <option value="m4r">iPhone Ringtone (.m4r)</option>
+                <option value="wav">WAV (Uncompressed)</option>
+                <option value="m4a">M4A (AAC 320k)</option>
+              </select>
+              <button class="btn btn-secondary" onclick="previewCutterSelection()" id="cutterPreviewBtn" style="font-size:11px; padding:5px 10px;">▶️ Preview Clip</button>
+            </div>
+          </div>
+        </div>
+
+        <div style="display:flex; justify-content:space-between; align-items:center;">
+          <span id="cutterStatusMsg" style="font-size:11px; color:var(--emerald);"></span>
+          <div style="display:flex; gap:8px;">
+            <button class="btn btn-secondary" onclick="closeCutterModal()">Cancel</button>
+            <button class="btn btn-primary" id="cutterExportBtn" onclick="executeCutterExportAction()" style="padding:6px 16px;">💾 Export Clip / Ringtone</button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
   <!-- Podcast & Long Mix Bookmark Resumption Toast (Phase 10) -->
   <div id="podcastResumeToast" style="display:none; position:fixed; bottom:85px; right:20px; z-index:9999; background:#131722; border:1px solid var(--border); box-shadow:0 8px 24px rgba(0,0,0,0.6); border-radius:10px; padding:10px 14px; align-items:center; gap:10px; backdrop-filter:blur(10px);">
     <span style="font-size:16px;">⏱️</span>
@@ -2912,6 +3154,11 @@
       // Phase 10: Check Podcast / Long Track Bookmark
       if (typeof checkPlaybackBookmark === 'function') {
         checkPlaybackBookmark(track);
+      }
+
+      // Phase 11: Update Ambient Fluid Mesh Backdrop
+      if (typeof updateAmbientColorsFromTrack === 'function') {
+        updateAmbientColorsFromTrack(track);
       }
 
       renderFilteredTracklist();
@@ -3560,6 +3807,10 @@
       function renderFrame() {
         spectrumAnimationId = requestAnimationFrame(renderFrame);
         analyser.getByteFrequencyData(dataArray);
+
+        if (typeof checkSilenceSkipper === 'function') {
+          checkSilenceSkipper(dataArray);
+        }
 
         ctx.clearRect(0, 0, canvas.width, canvas.height);
         const barWidth = (canvas.width / bufferLength) * 1.5;
@@ -5370,9 +5621,13 @@
         closeListeningStatsModal();
         closeLrcStudioModal();
         closeDiscographyModal();
+        closeCueModal();
+        closeCutterModal();
         dismissPodcastResumeToast();
         const popup = document.getElementById('speedStudioPopup');
         if (popup) popup.style.display = 'none';
+        const devPopup = document.getElementById('audioDevicePopup');
+        if (devPopup) devPopup.style.display = 'none';
       }
     });
 
@@ -6173,6 +6428,688 @@
       pendingBookmarkTrack = null;
       pendingBookmarkPos = 0;
     }
+
+    // =========================================================================
+    // Phase 11: Hardware Audio Output Device Selector (DAC & Sink Selector)
+    // =========================================================================
+    function toggleAudioDevicePopup() {
+      const popup = document.getElementById('audioDevicePopup');
+      if (!popup) return;
+      if (popup.style.display === 'none' || !popup.style.display) {
+        refreshAudioOutputDevices();
+        popup.style.display = 'block';
+      } else {
+        popup.style.display = 'none';
+      }
+    }
+
+    async function refreshAudioOutputDevices() {
+      const select = document.getElementById('audioOutputDeviceSelect');
+      if (!select) return;
+
+      if (!navigator.mediaDevices || !navigator.mediaDevices.enumerateDevices) {
+        select.innerHTML = '<option value="default">Default Audio Device (Unsupported)</option>';
+        return;
+      }
+
+      try {
+        const devices = await navigator.mediaDevices.enumerateDevices();
+        const audioOutputs = devices.filter(d => d.kind === 'audiooutput');
+
+        select.innerHTML = '';
+        if (audioOutputs.length === 0) {
+          select.innerHTML = '<option value="default">Default System Audio</option>';
+          return;
+        }
+
+        audioOutputs.forEach(device => {
+          const opt = document.createElement('option');
+          opt.value = device.deviceId;
+          opt.text = device.label || `Audio Output (${device.deviceId.substring(0, 8)}...)`;
+          select.appendChild(opt);
+        });
+      } catch (err) {
+        console.warn("Could not enumerate audio devices:", err);
+        select.innerHTML = '<option value="default">Default System Audio</option>';
+      }
+    }
+
+    async function changeAudioOutputDevice(sinkId) {
+      try {
+        if (typeof audio.setSinkId === 'function') {
+          await audio.setSinkId(sinkId);
+          console.log(`Audio output sink routed to: ${sinkId}`);
+        } else if (audioCtx && typeof audioCtx.setSinkId === 'function') {
+          await audioCtx.setSinkId(sinkId);
+          console.log(`AudioContext sink routed to: ${sinkId}`);
+        } else {
+          alert("Direct Hardware Sink Routing (setSinkId) is not supported in this webview environment. Default system audio output will be used.");
+        }
+      } catch (err) {
+        console.error("Failed to set audio sink ID:", err);
+        alert(`Could not switch audio output device: ${err.message}`);
+      }
+    }
+
+    // =========================================================================
+    // Phase 11: Podcast & Audiobook Silence Skipper DSP
+    // =========================================================================
+    let silenceSkipperEnabled = false;
+    let silenceDurationMs = 0;
+    let lastSilenceCheckTime = Date.now();
+
+    function toggleSilenceSkipper(enabled) {
+      silenceSkipperEnabled = enabled;
+      const toggle = document.getElementById('silenceSkipperToggle');
+      if (toggle) toggle.checked = enabled;
+    }
+
+    function checkSilenceSkipper(freqData) {
+      if (!silenceSkipperEnabled || audio.paused || !audio.duration) {
+        silenceDurationMs = 0;
+        return;
+      }
+      const now = Date.now();
+      const dt = Math.min(100, now - lastSilenceCheckTime);
+      lastSilenceCheckTime = now;
+
+      if (!freqData || freqData.length === 0) return;
+
+      let sum = 0;
+      for (let i = 0; i < freqData.length; i++) {
+        sum += freqData[i];
+      }
+      const avg = sum / freqData.length;
+
+      // When average amplitude is below speech threshold (< 4 out of 255)
+      if (avg < 4) {
+        silenceDurationMs += dt;
+        // Skip pauses longer than 1.2s (1200ms)
+        if (silenceDurationMs >= 1200) {
+          if (audio.currentTime + 0.5 < audio.duration) {
+            audio.currentTime += 0.4;
+            silenceDurationMs = 0;
+          }
+        }
+      } else {
+        silenceDurationMs = 0;
+      }
+    }
+
+    // =========================================================================
+    // Phase 11: Ambient Fluid Album Art Mesh Canvas Backdrop
+    // =========================================================================
+    let ambientCanvas = null;
+    let ambientCtx = null;
+    let ambientAnimId = null;
+    let ambientOrbs = [
+      { x: 0.25, y: 0.35, vx: 0.0004, vy: 0.0003, r: 0.55, color: [16, 185, 129] },
+      { x: 0.75, y: 0.25, vx: -0.0003, vy: 0.0004, r: 0.65, color: [13, 148, 136] },
+      { x: 0.45, y: 0.75, vx: 0.0003, vy: -0.0004, r: 0.75, color: [99, 102, 241] },
+      { x: 0.15, y: 0.65, vx: -0.0002, vy: 0.0002, r: 0.50, color: [244, 63, 94] }
+    ];
+    let ambientTargetColors = [
+      [16, 185, 129],
+      [13, 148, 136],
+      [99, 102, 241],
+      [244, 63, 94]
+    ];
+
+    function initAmbientCanvas() {
+      ambientCanvas = document.getElementById('ambientMeshCanvas');
+      if (!ambientCanvas) return;
+      ambientCtx = ambientCanvas.getContext('2d');
+      if (!ambientAnimId) {
+        animateAmbientMesh();
+      }
+    }
+
+    function animateAmbientMesh() {
+      if (!ambientCtx || !ambientCanvas) return;
+      ambientAnimId = requestAnimationFrame(animateAmbientMesh);
+
+      const w = ambientCanvas.width;
+      const h = ambientCanvas.height;
+      ambientCtx.clearRect(0, 0, w, h);
+
+      // Smoothly interpolate orb colors toward target colors
+      for (let i = 0; i < ambientOrbs.length; i++) {
+        const orb = ambientOrbs[i];
+        const tgt = ambientTargetColors[i] || [16, 185, 129];
+        for (let c = 0; c < 3; c++) {
+          orb.color[c] += (tgt[c] - orb.color[c]) * 0.04;
+        }
+
+        // Wobble positions
+        orb.x += orb.vx;
+        orb.y += orb.vy;
+        if (orb.x < 0.05 || orb.x > 0.95) orb.vx = -orb.vx;
+        if (orb.y < 0.05 || orb.y > 0.95) orb.vy = -orb.vy;
+
+        // Draw soft radial gradient orb
+        const cx = orb.x * w;
+        const cy = orb.y * h;
+        const radius = orb.r * Math.min(w, h);
+        const rgb = `${Math.round(orb.color[0])}, ${Math.round(orb.color[1])}, ${Math.round(orb.color[2])}`;
+
+        const grad = ambientCtx.createRadialGradient(cx, cy, 0, cx, cy, radius);
+        grad.addColorStop(0, `rgba(${rgb}, 0.85)`);
+        grad.addColorStop(0.5, `rgba(${rgb}, 0.35)`);
+        grad.addColorStop(1, `rgba(${rgb}, 0)`);
+
+        ambientCtx.fillStyle = grad;
+        ambientCtx.fillRect(0, 0, w, h);
+      }
+    }
+
+    function updateAmbientColorsFromTrack(track) {
+      if (!track) return;
+      if (track.cover_url && !track.cover_url.startsWith('data:image/svg')) {
+        const img = new Image();
+        img.crossOrigin = 'Anonymous';
+        img.onload = () => {
+          try {
+            const offscreen = document.createElement('canvas');
+            offscreen.width = 16;
+            offscreen.height = 16;
+            const oCtx = offscreen.getContext('2d');
+            oCtx.drawImage(img, 0, 0, 16, 16);
+            const data = oCtx.getImageData(0, 0, 16, 16).data;
+
+            const samples = [
+              [data[4 * 8], data[4 * 8 + 1], data[4 * 8 + 2]],
+              [data[4 * 40], data[4 * 40 + 1], data[4 * 40 + 2]],
+              [data[4 * 120], data[4 * 120 + 1], data[4 * 120 + 2]],
+              [data[4 * 200], data[4 * 200 + 1], data[4 * 200 + 2]]
+            ];
+
+            for (let i = 0; i < 4; i++) {
+              if (samples[i] && (samples[i][0] || samples[i][1] || samples[i][2])) {
+                ambientTargetColors[i] = samples[i];
+              }
+            }
+          } catch (e) {
+            // Fallback gracefully
+          }
+        };
+        img.src = track.cover_url;
+      } else {
+        // Generate pseudo-palette from track title
+        const hash = (track.title || track.filename || 'Sonance').split('').reduce((acc, c) => acc + c.charCodeAt(0), 0);
+        const hue1 = hash % 360;
+        const hue2 = (hue1 + 90) % 360;
+        const hue3 = (hue1 + 180) % 360;
+        const hue4 = (hue1 + 270) % 360;
+
+        function hslToRgb(h, s, l) {
+          s /= 100; l /= 100;
+          const k = n => (n + h / 30) % 12;
+          const a = s * Math.min(l, 1 - l);
+          const f = n => l - a * Math.max(-1, Math.min(k(n) - 3, Math.min(9 - k(n), 1)));
+          return [Math.round(255 * f(0)), Math.round(255 * f(8)), Math.round(255 * f(4))];
+        }
+
+        ambientTargetColors = [
+          hslToRgb(hue1, 70, 50),
+          hslToRgb(hue2, 70, 45),
+          hslToRgb(hue3, 70, 55),
+          hslToRgb(hue4, 70, 40)
+        ];
+      }
+    }
+
+    // =========================================================================
+    // Phase 11: CUE Sheet Lossless Album Splitter & Virtual Tracks
+    // =========================================================================
+    let currentCueData = null;
+
+    function openCueModal() {
+      document.getElementById('cueModal').style.display = 'flex';
+      const input = document.getElementById('cueFilePathInput');
+      if (input && !input.value) {
+        const lastFolder = document.getElementById('currentFolderText')?.innerText;
+        if (lastFolder && lastFolder !== 'Select Music Folder...') {
+          document.getElementById('cueOutputDir').value = lastFolder;
+        }
+      }
+    }
+
+    function closeCueModal() {
+      document.getElementById('cueModal').style.display = 'none';
+      const msg = document.getElementById('cueStatusMsg');
+      if (msg) msg.style.display = 'none';
+    }
+
+    function browseCueFileAction() {
+      if (window.pywebview && window.pywebview.api && window.pywebview.api.select_cue_file) {
+        window.pywebview.api.select_cue_file().then(file => {
+          if (file) {
+            document.getElementById('cueFilePathInput').value = file;
+            parseCueFileAction();
+          }
+        });
+      } else {
+        const p = prompt("Enter path to .cue sheet file:");
+        if (p) {
+          document.getElementById('cueFilePathInput').value = p.trim();
+          parseCueFileAction();
+        }
+      }
+    }
+
+    function parseCueFileAction() {
+      const cuePath = document.getElementById('cueFilePathInput').value.trim();
+      if (!cuePath) {
+        alert("Please select or enter a .cue file path first.");
+        return;
+      }
+
+      const tbody = document.getElementById('cueTracklistTbody');
+      tbody.innerHTML = '<tr><td colspan="6" style="text-align:center; padding:30px; color:var(--text-dim);">Parsing CUE sheet and scanning audio file...</td></tr>';
+
+      if (window.pywebview && window.pywebview.api && window.pywebview.api.parse_cue_sheet) {
+        window.pywebview.api.parse_cue_sheet(cuePath).then(res => {
+          if (res && res.success) {
+            currentCueData = res;
+            renderCueSheetData(res);
+          } else {
+            tbody.innerHTML = `<tr><td colspan="6" style="text-align:center; padding:30px; color:var(--rose);">Error parsing CUE: ${res?.error || 'Unknown error'}</td></tr>`;
+          }
+        });
+      }
+    }
+
+    function renderCueSheetData(data) {
+      const card = document.getElementById('cueAlbumCard');
+      card.style.display = 'block';
+      document.getElementById('cueAlbumTitle').innerText = data.album_title;
+      document.getElementById('cueAlbumMeta').innerText = `${data.album_artist} · ${data.year || 'Unknown Year'} · ${data.genre || 'Various'} · ${data.total_tracks} Tracks`;
+
+      const audioStatus = document.getElementById('cueAudioStatus');
+      const audioPath = document.getElementById('cueAudioPath');
+      if (data.audio_exists) {
+        audioStatus.innerText = 'Audio Linked';
+        audioStatus.style.background = 'var(--emerald-bg)';
+        audioStatus.style.color = 'var(--emerald)';
+        audioStatus.style.borderColor = 'var(--emerald-border)';
+        audioPath.innerText = `Source Audio: ${data.audio_file}`;
+      } else {
+        audioStatus.innerText = 'Missing Master Audio';
+        audioStatus.style.background = 'var(--rose-bg)';
+        audioStatus.style.color = 'var(--rose)';
+        audioStatus.style.borderColor = 'rgba(244,63,94,0.3)';
+        audioPath.innerText = `Master file declared as "${data.audio_file}" not found in folder.`;
+      }
+
+      const tbody = document.getElementById('cueTracklistTbody');
+      tbody.innerHTML = '';
+
+      if (!data.tracks || data.tracks.length === 0) {
+        tbody.innerHTML = '<tr><td colspan="6" style="text-align:center; padding:30px; color:var(--text-dim);">No audio tracks found in CUE sheet.</td></tr>';
+        return;
+      }
+
+      data.tracks.forEach(t => {
+        const tr = document.createElement('tr');
+        tr.style.borderBottom = '1px solid var(--border-subtle)';
+        tr.style.cursor = 'pointer';
+        tr.innerHTML = `
+          <td style="padding:8px 12px; color:var(--text-dim);">${t.track_number}</td>
+          <td style="padding:8px 12px; font-weight:600; color:#fff;">${t.title}</td>
+          <td style="padding:8px 12px; color:var(--text-muted);">${t.artist}</td>
+          <td style="padding:8px 12px; color:var(--text-dim); font-family:monospace;">${formatTime(t.start_sec)}</td>
+          <td style="padding:8px 12px; color:var(--text-dim); font-family:monospace;">${t.duration_str}</td>
+          <td style="padding:8px 12px; text-align:right;">
+            <button class="btn btn-secondary" onclick="playVirtualCueTrack(${t.track_number})" style="padding:2px 8px; font-size:10px;">▶️ Virtual Play</button>
+          </td>
+        `;
+        tbody.appendChild(tr);
+      });
+    }
+
+    function playVirtualCueTrack(trackNum) {
+      if (!currentCueData || !currentCueData.tracks) return;
+      const track = currentCueData.tracks.find(t => t.track_number === trackNum);
+      if (!track) return;
+
+      if (!currentCueData.audio_exists) {
+        alert("Cannot play virtual track: Master album audio file was not found!");
+        return;
+      }
+
+      const matchingTrack = libraryTracks.find(t => t.path === currentCueData.audio_file);
+      if (matchingTrack) {
+        playingTrackIndex = matchingTrack.index;
+        audio.src = matchingTrack.stream_url;
+        audio.currentTime = track.start_sec;
+        audio.play();
+        document.getElementById('playerTitle').innerText = `${track.title} [CUE Track #${track.track_number}]`;
+        document.getElementById('playerArtist').innerText = `${track.artist} · ${currentCueData.album_title}`;
+        document.getElementById('playPauseBtn').innerText = '⏸';
+      } else {
+        audio.src = `http://127.0.0.1:8765/stream?path=${encodeURIComponent(currentCueData.audio_file)}`;
+        audio.currentTime = track.start_sec;
+        audio.play();
+        document.getElementById('playerTitle').innerText = `${track.title} [CUE Track #${track.track_number}]`;
+        document.getElementById('playerArtist').innerText = `${track.artist} · ${currentCueData.album_title}`;
+        document.getElementById('playPauseBtn').innerText = '⏸';
+      }
+      closeCueModal();
+    }
+
+    function executeCueSplitAction() {
+      const cuePath = document.getElementById('cueFilePathInput').value.trim();
+      if (!cuePath) {
+        alert("Please select a .cue sheet file first.");
+        return;
+      }
+
+      const outFmt = document.getElementById('cueOutputFormat').value;
+      const outDir = document.getElementById('cueOutputDir').value.trim() || null;
+      const btn = document.getElementById('cueSplitBtn');
+      const msg = document.getElementById('cueStatusMsg');
+
+      btn.disabled = true;
+      btn.innerText = '✂️ Splitting Album...';
+      msg.style.display = 'block';
+      msg.innerText = 'Processing lossless sample-accurate split with FFmpeg...';
+      msg.style.color = 'var(--emerald)';
+
+      if (window.pywebview && window.pywebview.api && window.pywebview.api.split_cue_sheet) {
+        window.pywebview.api.split_cue_sheet(cuePath, outDir, outFmt).then(res => {
+          btn.disabled = false;
+          btn.innerText = '✂️ Split All Tracks';
+          if (res && res.success) {
+            msg.innerText = `✅ Successfully split ${res.track_count} tracks into: ${res.output_directory}`;
+            alert(`🎉 CUE Split Complete!\n\n${res.track_count} tracks were losslessly split and tagged in:\n${res.output_directory}`);
+            const lastFolder = document.getElementById('currentFolderText')?.innerText;
+            if (lastFolder && lastFolder !== 'Select Music Folder...') {
+              scanLibrary(lastFolder);
+            }
+          } else {
+            msg.innerText = `❌ Failed: ${res?.error || 'Unknown error'}`;
+            msg.style.color = 'var(--rose)';
+            alert(`CUE Split Error: ${res?.error || 'Unknown error'}`);
+          }
+        });
+      }
+    }
+
+    // =========================================================================
+    // Phase 11: Visual Waveform Audio Cutter & Ringtone Studio
+    // =========================================================================
+    let cutterCurrentTrack = null;
+    let cutterDuration = 60.0;
+    let cutterStartSec = 0.0;
+    let cutterEndSec = 30.0;
+    let cutterIsPreviewing = false;
+    let cutterPreviewTimer = null;
+
+    function openCutterModal() {
+      document.getElementById('cutterModal').style.display = 'flex';
+      if (!cutterCurrentTrack && playingTrackIndex !== null) {
+        loadCurrentTrackToCutter();
+      } else {
+        renderCutterWaveform();
+      }
+    }
+
+    function closeCutterModal() {
+      document.getElementById('cutterModal').style.display = 'none';
+      stopCutterPreview();
+    }
+
+    function browseCutterFileAction() {
+      if (window.pywebview && window.pywebview.api && window.pywebview.api.select_audio_file) {
+        window.pywebview.api.select_audio_file().then(file => {
+          if (file) {
+            document.getElementById('cutterSourceInput').value = file;
+            cutterCurrentTrack = {
+              path: file,
+              title: file.split(/[\\/]/).pop(),
+              duration: audio.duration || 180.0
+            };
+            cutterDuration = cutterCurrentTrack.duration || 180.0;
+            initCutterSliders();
+            renderCutterTrackBanner();
+            renderCutterWaveform();
+          }
+        });
+      } else {
+        const p = prompt("Enter audio file path:");
+        if (p) {
+          document.getElementById('cutterSourceInput').value = p.trim();
+          cutterCurrentTrack = {
+            path: p.trim(),
+            title: p.trim().split(/[\\/]/).pop(),
+            duration: 180.0
+          };
+          cutterDuration = 180.0;
+          initCutterSliders();
+          renderCutterTrackBanner();
+          renderCutterWaveform();
+        }
+      }
+    }
+
+    function loadCurrentTrackToCutter() {
+      if (playingTrackIndex === null && libraryTracks.length > 0) {
+        cutterCurrentTrack = libraryTracks[0];
+      } else if (playingTrackIndex !== null) {
+        cutterCurrentTrack = libraryTracks.find(t => t.index === playingTrackIndex);
+      }
+
+      if (!cutterCurrentTrack) {
+        alert("No audio track is currently loaded.");
+        return;
+      }
+
+      document.getElementById('cutterSourceInput').value = cutterCurrentTrack.path;
+      cutterDuration = cutterCurrentTrack.duration || (audio.duration || 180.0);
+      initCutterSliders();
+      renderCutterTrackBanner();
+      renderCutterWaveform();
+    }
+
+    function initCutterSliders() {
+      const sSlider = document.getElementById('cutterStartSlider');
+      const eSlider = document.getElementById('cutterEndSlider');
+      const sNum = document.getElementById('cutterStartNum');
+      const eNum = document.getElementById('cutterEndNum');
+
+      sSlider.max = cutterDuration;
+      eSlider.max = cutterDuration;
+      sNum.max = cutterDuration;
+      eNum.max = cutterDuration;
+
+      cutterStartSec = 0.0;
+      cutterEndSec = Math.min(30.0, cutterDuration);
+
+      sSlider.value = cutterStartSec;
+      sNum.value = cutterStartSec.toFixed(1);
+      eSlider.value = cutterEndSec;
+      eNum.value = cutterEndSec.toFixed(1);
+
+      updateCutterSelectionDisplay();
+    }
+
+    function renderCutterTrackBanner() {
+      if (!cutterCurrentTrack) return;
+      document.getElementById('cutterTrackTitle').innerText = cutterCurrentTrack.title || cutterCurrentTrack.filename;
+      document.getElementById('cutterTrackDetails').innerText = `${cutterCurrentTrack.artist || 'Unknown'} · Duration: ${formatTime(cutterDuration)}`;
+      document.getElementById('cutterTimeStartLabel').innerText = '0:00.0';
+      document.getElementById('cutterTimeEndLabel').innerText = formatTime(cutterDuration);
+    }
+
+    function onCutterRangeSliderChange(type, val) {
+      if (type === 'start') {
+        cutterStartSec = Math.min(val, cutterEndSec - 0.5);
+        document.getElementById('cutterStartNum').value = cutterStartSec.toFixed(1);
+      } else {
+        cutterEndSec = Math.max(val, cutterStartSec + 0.5);
+        document.getElementById('cutterEndNum').value = cutterEndSec.toFixed(1);
+      }
+      updateCutterSelectionDisplay();
+    }
+
+    function onCutterNumChange(type, val) {
+      if (type === 'start') {
+        cutterStartSec = Math.max(0, Math.min(val, cutterEndSec - 0.5));
+        document.getElementById('cutterStartSlider').value = cutterStartSec;
+      } else {
+        cutterEndSec = Math.min(cutterDuration, Math.max(val, cutterStartSec + 0.5));
+        document.getElementById('cutterEndSlider').value = cutterEndSec;
+      }
+      updateCutterSelectionDisplay();
+    }
+
+    function setCutterStartToCurrentTime() {
+      cutterStartSec = Math.max(0, Math.min(audio.currentTime, cutterEndSec - 0.5));
+      document.getElementById('cutterStartSlider').value = cutterStartSec;
+      document.getElementById('cutterStartNum').value = cutterStartSec.toFixed(1);
+      updateCutterSelectionDisplay();
+    }
+
+    function setCutterEndToCurrentTime() {
+      cutterEndSec = Math.min(cutterDuration, Math.max(audio.currentTime, cutterStartSec + 0.5));
+      document.getElementById('cutterEndSlider').value = cutterEndSec;
+      document.getElementById('cutterEndNum').value = cutterEndSec.toFixed(1);
+      updateCutterSelectionDisplay();
+    }
+
+    function updateCutterSelectionDisplay() {
+      const duration = Math.max(0, cutterEndSec - cutterStartSec);
+      const mins = Math.floor(duration / 60);
+      const secs = (duration % 60).toFixed(2);
+      document.getElementById('cutterDurationBadge').innerText = `${mins.toString().padStart(2, '0')}:${secs.padStart(5, '0')}`;
+
+      const box = document.getElementById('cutterSelectionBox');
+      if (box && cutterDuration > 0) {
+        const leftPct = (cutterStartSec / cutterDuration) * 100;
+        const widthPct = (duration / cutterDuration) * 100;
+        box.style.left = `${leftPct}%`;
+        box.style.width = `${widthPct}%`;
+      }
+    }
+
+    function handleCutterCanvasClick(e) {
+      const container = document.getElementById('cutterCanvasContainer');
+      const rect = container.getBoundingClientRect();
+      const clickX = e.clientX - rect.left;
+      const pct = Math.max(0, Math.min(1, clickX / rect.width));
+      const targetTime = pct * cutterDuration;
+
+      const distStart = Math.abs(targetTime - cutterStartSec);
+      const distEnd = Math.abs(targetTime - cutterEndSec);
+      if (distStart < distEnd) {
+        onCutterRangeSliderChange('start', targetTime);
+        document.getElementById('cutterStartSlider').value = targetTime;
+      } else {
+        onCutterRangeSliderChange('end', targetTime);
+        document.getElementById('cutterEndSlider').value = targetTime;
+      }
+    }
+
+    function renderCutterWaveform() {
+      const canvas = document.getElementById('cutterWaveformCanvas');
+      if (!canvas) return;
+      const ctx = canvas.getContext('2d');
+      const w = canvas.width;
+      const h = canvas.height;
+      ctx.clearRect(0, 0, w, h);
+
+      const barCount = 120;
+      const barWidth = w / barCount;
+      for (let i = 0; i < barCount; i++) {
+        const seed = Math.sin(i * 0.15) * 0.4 + Math.cos(i * 0.35) * 0.3 + 0.3;
+        const barHeight = Math.max(4, seed * (h - 10));
+        const y = (h - barHeight) / 2;
+
+        ctx.fillStyle = '#22283a';
+        ctx.fillRect(i * barWidth, y, barWidth - 1, barHeight);
+      }
+      updateCutterSelectionDisplay();
+    }
+
+    function previewCutterSelection() {
+      if (cutterIsPreviewing) {
+        stopCutterPreview();
+        return;
+      }
+
+      const btn = document.getElementById('cutterPreviewBtn');
+      audio.currentTime = cutterStartSec;
+      audio.play();
+      cutterIsPreviewing = true;
+      btn.innerText = '⏹️ Stop Preview';
+
+      const checkInterval = setInterval(() => {
+        if (!cutterIsPreviewing || audio.paused || audio.currentTime >= cutterEndSec) {
+          stopCutterPreview();
+          clearInterval(checkInterval);
+        } else {
+          document.getElementById('cutterPlayheadLabel').innerText = `Playhead: ${formatTime(audio.currentTime)}`;
+        }
+      }, 100);
+      cutterPreviewTimer = checkInterval;
+    }
+
+    function stopCutterPreview() {
+      cutterIsPreviewing = false;
+      if (cutterPreviewTimer) {
+        clearInterval(cutterPreviewTimer);
+        cutterPreviewTimer = null;
+      }
+      const btn = document.getElementById('cutterPreviewBtn');
+      if (btn) btn.innerText = '▶️ Preview Clip';
+    }
+
+    function executeCutterExportAction() {
+      const src = document.getElementById('cutterSourceInput').value.trim();
+      if (!src) {
+        alert("Please select an audio file to trim.");
+        return;
+      }
+
+      const fmt = document.getElementById('cutterExportFormat').value;
+      const fadeIn = parseFloat(document.getElementById('cutterFadeInSelect').value);
+      const fadeOut = parseFloat(document.getElementById('cutterFadeOutSelect').value);
+      const btn = document.getElementById('cutterExportBtn');
+      const msg = document.getElementById('cutterStatusMsg');
+
+      btn.disabled = true;
+      btn.innerText = '⏳ Trimming Audio...';
+      msg.innerText = 'Exporting high-quality audio clip with FFmpeg...';
+      msg.style.color = 'var(--emerald)';
+
+      if (window.pywebview && window.pywebview.api && window.pywebview.api.trim_audio_clip) {
+        window.pywebview.api.trim_audio_clip(
+          src,
+          cutterStartSec,
+          cutterEndSec,
+          fadeIn,
+          fadeOut,
+          fmt,
+          "320k"
+        ).then(res => {
+          btn.disabled = false;
+          btn.innerText = '💾 Export Clip / Ringtone';
+          if (res && res.success) {
+            msg.innerText = `✅ Clip Exported: ${res.output_path}`;
+            alert(`🎉 Audio Clip Exported Successfully!\n\nDestination:\n${res.output_path}\nDuration: ${res.duration}s`);
+          } else {
+            msg.innerText = `❌ Error: ${res?.error || 'Export failed'}`;
+            msg.style.color = 'var(--rose)';
+            alert(`Trimming Error: ${res?.error || 'Export failed'}`);
+          }
+        });
+      }
+    }
+
+    // Auto-init Phase 11 features on DOM ready
+    window.addEventListener('DOMContentLoaded', () => {
+      initAmbientCanvas();
+    });
   </script>
 </body>
 </html>
