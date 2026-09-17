@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../core/theme/app_theme.dart';
+import '../../core/services/update_service.dart';
 import '../../features/auth/auth_provider.dart';
 
 class SettingsView extends ConsumerStatefulWidget {
@@ -214,6 +215,77 @@ class _SettingsViewState extends ConsumerState<SettingsView> {
                         },
                         child: const Text('Save Changes', style: TextStyle(color: Colors.black, fontWeight: FontWeight.bold)),
                       ),
+                    ),
+                  ],
+                ),
+
+                const SizedBox(height: 20),
+
+                // Updates & About Card
+                _buildCard(
+                  title: 'Sonance v2.1.0',
+                  subtitle: 'The ultimate unified music suite — GPLv3 with Commons Clause by Sandeep Khadka.',
+                  status: 'Latest',
+                  isLoggedIn: true,
+                  children: [
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: [
+                        const Text('Check GitHub releases for updates and new features.'),
+                        ElevatedButton.icon(
+                          icon: const Icon(Icons.system_update_alt, size: 16),
+                          label: const Text('Check for Updates'),
+                          onPressed: () async {
+                            ScaffoldMessenger.of(context).showSnackBar(
+                              const SnackBar(content: Text('Checking for updates...')),
+                            );
+                            final info = await UpdateService.checkForUpdates();
+                            if (!context.mounted) return;
+
+                            if (info.updateAvailable) {
+                              showDialog(
+                                context: context,
+                                builder: (ctx) => AlertDialog(
+                                  title: Text('New Version Available: v${info.latestVersion}'),
+                                  content: Column(
+                                    mainAxisSize: MainAxisSize.min,
+                                    crossAxisAlignment: CrossAxisAlignment.start,
+                                    children: [
+                                      Text('Current version: v${info.currentVersion}'),
+                                      const SizedBox(height: 10),
+                                      const Text('Changelog:', style: TextStyle(fontWeight: FontWeight.bold)),
+                                      Text(info.changelog, style: const TextStyle(fontSize: 12, color: Colors.grey)),
+                                    ],
+                                  ),
+                                  actions: [
+                                    TextButton(onPressed: () => Navigator.pop(ctx), child: const Text('Later')),
+                                    ElevatedButton(
+                                      style: ElevatedButton.styleFrom(backgroundColor: SonanceTheme.emerald),
+                                      onPressed: () {
+                                        Navigator.pop(ctx);
+                                        if (info.downloadUrl != null) {
+                                          UpdateService.downloadAndInstallUpdate(
+                                            info.downloadUrl!,
+                                            info.expectedSha256,
+                                            (pct, msg) {
+                                              ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(msg)));
+                                            },
+                                          );
+                                        }
+                                      },
+                                      child: const Text('Update Now', style: TextStyle(color: Colors.black)),
+                                    ),
+                                  ],
+                                ),
+                              );
+                            } else {
+                              ScaffoldMessenger.of(context).showSnackBar(
+                                const SnackBar(content: Text('You are on the latest version of Sonance!')),
+                              );
+                            }
+                          },
+                        ),
+                      ],
                     ),
                   ],
                 ),

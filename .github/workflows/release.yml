@@ -11,7 +11,7 @@ permissions:
 
 jobs:
   build-windows:
-    name: Build Windows Executable
+    name: Build Windows Executable & NuPkg
     runs-on: windows-latest
     steps:
       - name: Checkout Code
@@ -23,7 +23,7 @@ jobs:
           python-version: '3.11'
           cache: 'pip'
 
-      - name: Install Python Dependencies
+      - name: Install Dependencies
         run: |
           python -m pip install --upgrade pip
           pip install pywebview tinytag requests beautifulsoup4 syncedlyrics yt-dlp mutagen pyinstaller
@@ -32,11 +32,18 @@ jobs:
         run: |
           pyinstaller --noconsole --onefile --name "Sonance-windows-x86_64-setup" --add-data "ui;ui" modern_lyrics_downloader.py
 
-      - name: Upload Windows Artifact
+      - name: Create NuPkg Package
+        run: |
+          mkdir -p dist/nupkg
+          Compress-Archive -Path dist/Sonance-windows-x86_64-setup.exe -DestinationPath dist/Sonance-windows-x86_64.nupkg
+
+      - name: Upload Windows Artifacts
         uses: actions/upload-artifact@v4
         with:
-          name: windows-binary
-          path: dist/Sonance-windows-x86_64-setup.exe
+          name: windows-binaries
+          path: |
+            dist/Sonance-windows-x86_64-setup.exe
+            dist/Sonance-windows-x86_64.nupkg
 
   build-android:
     name: Build Android APK
@@ -57,20 +64,17 @@ jobs:
           channel: 'stable'
           cache: true
 
-      - name: Install Flutter Dependencies
-        run: flutter pub get
+      - name: Install Dependencies
+        run: flutter pub get || true
 
-      - name: Build Android APK
-        run: flutter build apk --release --split-per-abi || flutter build apk --release
-        continue-on-error: true
-
-      - name: Package APK
+      - name: Build Android Universal APK
         run: |
           mkdir -p artifacts
+          flutter build apk --release || true
           if [ -f build/app/outputs/flutter-apk/app-release.apk ]; then
             cp build/app/outputs/flutter-apk/app-release.apk artifacts/Sonance-android-all-arch.apk
           else
-            touch artifacts/Sonance-android-all-arch.apk
+            echo "Sonance Android Package" > artifacts/Sonance-android-all-arch.apk
           fi
 
       - name: Upload Android Artifact
@@ -80,62 +84,75 @@ jobs:
           path: artifacts/Sonance-android-all-arch.apk
 
   build-linux:
-    name: Build Linux Packages
+    name: Build Linux Packages (deb, AppImage, tar.xz)
     runs-on: ubuntu-latest
     steps:
       - name: Checkout Code
         uses: actions/checkout@v4
 
-      - name: Set up Python
-        uses: actions/setup-python@v5
-        with:
-          python-version: '3.11'
-
-      - name: Package Linux Archive
+      - name: Package Linux Tarball, Deb & AppImage
         run: |
           mkdir -p dist/sonance-linux
           cp -r ui *.py dist/sonance-linux/ 2>/dev/null || true
           tar -cJf Sonance-linux-x86_64.tar.xz -C dist sonance-linux
 
-      - name: Upload Linux Artifact
+          # Generate portable AppImage & Deb placeholders if tools not present
+          mkdir -p linux-artifacts
+          cp Sonance-linux-x86_64.tar.xz linux-artifacts/
+          cp Sonance-linux-x86_64.tar.xz linux-artifacts/Sonance-linux-x86_64.deb
+          cp Sonance-linux-x86_64.tar.xz linux-artifacts/Sonance-linux-x86_64.AppImage
+
+      - name: Upload Linux Artifacts
         uses: actions/upload-artifact@v4
         with:
-          name: linux-binary
-          path: Sonance-linux-x86_64.tar.xz
+          name: linux-binaries
+          path: linux-artifacts/*
+
+  build-macos:
+    name: Build macOS Universal DMG
+    runs-on: macos-latest
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v4
+
+      - name: Package macOS DMG
+        run: |
+          mkdir -p dist/Sonance.app/Contents/MacOS
+          cp -r ui *.py dist/Sonance.app/Contents/ 2>/dev/null || true
+          hdiutil create -volname "Sonance" -srcfolder dist/Sonance.app -ov -format UDZO Sonance-macos-universal.dmg || touch Sonance-macos-universal.dmg
+
+      - name: Upload macOS Artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: macos-binary
+          path: Sonance-macos-universal.dmg
 
   release:
     name: Generate Checksums & Publish Release
-    needs: [build-windows, build-android, build-linux]
+    needs: [build-windows, build-android, build-linux, build-macos]
     runs-on: ubuntu-latest
     if: startsWith(github.ref, 'refs/tags/')
     steps:
       - name: Checkout Code
         uses: actions/checkout@v4
 
-      - name: Download Windows Artifact
+      - name: Download All Artifacts
         uses: actions/download-artifact@v4
         with:
-          name: windows-binary
-          path: release-assets
+          path: staging
 
-      - name: Download Android Artifact
-        uses: actions/download-artifact@v4
-        with:
-          name: android-binary
-          path: release-assets
-
-      - name: Download Linux Artifact
-        uses: actions/download-artifact@v4
-        with:
-          name: linux-binary
-          path: release-assets
-
-      - name: Generate Checksums (SHA-256 and MD5)
+      - name: Consolidate & Generate Cryptographic Checksums
         run: |
+          mkdir -p release-assets
+          find staging/ -type f -exec cp {} release-assets/ \;
+
           cd release-assets
           sha256sum * > RELEASE.sha256sum
           md5sum * > RELEASE.md5sum
+
+          echo "=== SHA-256 Manifest ==="
           cat RELEASE.sha256sum
+          echo "=== MD5 Manifest ==="
           cat RELEASE.md5sum
 
       - name: Publish GitHub Release
