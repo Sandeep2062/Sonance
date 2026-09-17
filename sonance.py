@@ -192,6 +192,29 @@ Examples:
       help="Unpack monolithic FLAC into individual tracks: --unpack-album <monolithic_flac> [output_dir]",
   )
   parser.add_argument(
+      "--dr-meter",
+      metavar="FILE_OR_DIR",
+      help="Measure official TT Dynamic Range and Crest Factor (Pleasurize Music Foundation DR4-DR18+)",
+  )
+  parser.add_argument(
+      "--sync-device",
+      nargs="+",
+      metavar="PARAM",
+      help="Sync music to portable DAP/USB device: --sync-device <target_path> <source_dir> [--mode copy|mp3_320] [--playlist <name>]",
+  )
+  parser.add_argument(
+      "--loop",
+      nargs="+",
+      metavar="PARAM",
+      help="Create seamless A-B phrase practice loop: --loop <audio_file> <start_sec> <end_sec> [repeats] [--count-in] [output_file]",
+  )
+  parser.add_argument(
+      "--align-words",
+      nargs="+",
+      metavar="PARAM",
+      help="Generate Enhanced Word-by-Word ELRC lyrics: --align-words <lrc_file> [audio_file] [output_elrc]",
+  )
+  parser.add_argument(
       "--version",
       action="version",
       version=f"Sonance v{modern_lyrics_downloader.APP_VERSION}",
@@ -637,6 +660,130 @@ Examples:
       print(f"[+] Successfully extracted {res.get('tracks_extracted')} tracks to: {res.get('output_dir')}")
     else:
       print(f"[-] Unpacking failed: {res.get('error')}")
+    return
+
+  if args.dr_meter:
+    import dr_meter
+    target = args.dr_meter
+    if os.path.isdir(target):
+      print(f"[*] Measuring Album Dynamic Range for: {target}...")
+      res = dr_meter.analyze_album_dynamic_range(target)
+      if res.get("success"):
+        print(res["report_text"])
+      else:
+        print(f"[-] DR analysis failed: {res.get('error')}")
+    else:
+      print(f"[*] Measuring Track Dynamic Range for: {target}...")
+      res = dr_meter.analyze_track_dynamic_range(target)
+      if res.get("success"):
+        print(f"[+] File:          {res['filename']}")
+        print(f"[+] Dynamic Range: {res['dr_badge']} ({res['tier']} - {res['rating']})")
+        print(f"[+] Peak Level:    {res['peak_db']} dBFS")
+        print(f"[+] Total RMS:     {res['rms_db']} dBFS")
+        print(f"[+] Crest Factor:  {res['crest_factor_db']} dB")
+        print(f"[+] Summary:       {res['description']}")
+      else:
+        print(f"[-] DR analysis failed: {res.get('error')}")
+    return
+
+  if args.sync_device:
+    import device_sync
+    if len(args.sync_device) < 2:
+      print("[-] Error: --sync-device requires <target_dir> and <source_dir_or_file>.")
+      return
+    target = args.sync_device[0]
+    source = args.sync_device[1]
+    mode = "copy"
+    pl_name = "Sonance Sync"
+    idx = 2
+    while idx < len(args.sync_device):
+      if args.sync_device[idx] == "--mode" and idx + 1 < len(args.sync_device):
+        mode = args.sync_device[idx + 1]
+        idx += 2
+      elif args.sync_device[idx] == "--playlist" and idx + 1 < len(args.sync_device):
+        pl_name = args.sync_device[idx + 1]
+        idx += 2
+      else:
+        idx += 1
+
+    tracks_to_sync = []
+    if os.path.isdir(source):
+      for root, _, files in os.walk(source):
+        for f in sorted(files):
+          if os.path.splitext(f)[1].lower() in device_sync.AUDIO_EXTS:
+            tracks_to_sync.append(os.path.join(root, f))
+    elif os.path.isfile(source):
+      tracks_to_sync.append(source)
+
+    print(f"[*] Syncing {len(tracks_to_sync)} tracks to portable storage {target} (Mode: {mode})...")
+    res = device_sync.sync_tracks_to_device(
+        tracks_to_sync,
+        target,
+        playlist_name=pl_name,
+        transcode_mode=mode,
+        progress_callback=lambda c, t, f: print(f"    [{c}/{t}] Syncing: {f}"),
+    )
+    if res.get("success"):
+      print(f"[+] Successfully synced {res.get('total_synced')}/{res.get('total_requested')} tracks.")
+      print(f"[+] Synced Companion Lyrics (.lrc): {res.get('lyrics_copied')}")
+      if res.get("playlist_file"):
+        print(f"[+] Created Device Playlist: {res.get('playlist_file')}")
+    else:
+      print(f"[-] Sync failed: {res.get('error')}")
+    return
+
+  if args.loop:
+    import ab_looper
+    if len(args.loop) < 3:
+      print("[-] Error: --loop requires <audio_file> <start_sec> <end_sec>.")
+      return
+    audio_f = args.loop[0]
+    start_s = float(args.loop[1])
+    end_s = float(args.loop[2])
+    rep = 4
+    count_in = False
+    out_f = None
+    idx = 3
+    while idx < len(args.loop):
+      a = args.loop[idx]
+      if a == "--count-in":
+        count_in = True
+      elif a.isdigit():
+        rep = int(a)
+      elif not out_f:
+        out_f = a
+      idx += 1
+
+    print(f"[*] Rendering A-B loop for {audio_f} [{start_s}s -> {end_s}s] ({rep} repeats)...")
+    res = ab_looper.create_ab_loop(audio_f, start_s, end_s, repeats=rep, add_count_in=count_in, output_path=out_f)
+    if res.get("success"):
+      print(f"[+] Success! Loop exported to: {res.get('output_file')}")
+      print(f"    • Duration: {res.get('total_duration_sec')}s (Slice: {res.get('slice_duration_sec')}s x {res.get('repeats')})")
+    else:
+      print(f"[-] Looper error: {res.get('error')}")
+    return
+
+  if args.align_words:
+    import word_aligner
+    lrc_f = args.align_words[0]
+    audio_f = args.align_words[1] if len(args.align_words) > 1 and os.path.isfile(args.align_words[1]) else None
+    out_f = args.align_words[2] if len(args.align_words) > 2 else (os.path.splitext(lrc_f)[0] + ".elrc")
+
+    if not os.path.isfile(lrc_f):
+      print(f"[-] Error: LRC file not found: {lrc_f}")
+      return
+
+    with open(lrc_f, "r", encoding="utf-8") as f:
+      content = f.read()
+
+    print(f"[*] Aligning words in {lrc_f} to Enhanced LRC...")
+    res = word_aligner.generate_enhanced_lrc(content, audio_path=audio_f)
+    if res.get("success"):
+      word_aligner.save_enhanced_lrc(res["enhanced_lrc"], out_f)
+      print(f"[+] Success! Aligned {res.get('total_words_aligned')} words across {res.get('total_lines')} lines.")
+      print(f"[+] Saved Enhanced LRC to: {out_f}")
+    else:
+      print("[-] Alignment failed.")
     return
 
   if args.classic:

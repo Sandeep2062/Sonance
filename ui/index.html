@@ -1135,6 +1135,18 @@
       <button class="btn btn-secondary" onclick="openPitchModal()" style="padding:5px 9px; font-size:11px;" id="pitchHeaderBtn" title="Karaoke Vocal Pitch Transposer & Key Shifter">
         🎼 Transpose
       </button>
+      <button class="btn btn-secondary" onclick="openDrMeterModal()" style="padding:5px 9px; font-size:11px;" id="drMeterHeaderBtn" title="TT Dynamic Range (DR) Meter & Loudness War Analyzer">
+        📊 DR Meter
+      </button>
+      <button class="btn btn-secondary" onclick="openDeviceSyncModal()" style="padding:5px 9px; font-size:11px;" id="deviceSyncHeaderBtn" title="Portable DAP, Walkman & USB Flash Storage Synchronizer">
+        📱 DAP Sync
+      </button>
+      <button class="btn btn-secondary" onclick="openAbLooperModal()" style="padding:5px 9px; font-size:11px;" id="abLooperHeaderBtn" title="Musician A-B Phrase Looper & Metronome Practice Studio">
+        🔁 A-B Loop
+      </button>
+      <button class="btn btn-secondary" onclick="openWordAlignerModal()" style="padding:5px 9px; font-size:11px;" id="wordAlignerHeaderBtn" title="Word-by-Word Enhanced LRC (ELRC) Syllable Aligner">
+        ✨ Syllable Aligner
+      </button>
       <button class="btn btn-secondary" onclick="openLrcStudioModal()" style="padding:5px 9px; font-size:11px;" id="lrcStudioHeaderBtn" title="Interactive LRC Studio & Live Time-Stamper">
         ✍️ LRC Studio
       </button>
@@ -3562,6 +3574,306 @@
     </div>
   </div>
 
+  <!-- Phase 16: TT Dynamic Range (DR) Meter Modal -->
+  <div class="modal-backdrop" id="drMeterModal" style="display:none;">
+    <div class="modal-box" style="width:680px; max-width:92vw; display:flex; flex-direction:column; max-height:88vh;">
+      <div class="modal-header">
+        <div style="display:flex; align-items:center; gap:8px;">
+          <span style="font-size:18px;">📊</span>
+          <div>
+            <div style="font-weight:700; font-size:14px; color:#fff;">TT Dynamic Range (DR) Meter & Loudness War Studio</div>
+            <div style="font-size:10px; color:var(--text-dim);">Pleasurize Music Foundation standard (DR4 to DR18+) Crest Factor analyzer</div>
+          </div>
+        </div>
+        <button onclick="closeDrMeterModal()" style="background:none; border:none; color:var(--text-muted); cursor:pointer; font-size:16px;">✕</button>
+      </div>
+
+      <div class="modal-body" style="padding:16px; display:flex; flex-direction:column; gap:12px; overflow-y:auto;">
+        <div style="background:#121522; border:1px solid var(--border); border-radius:8px; padding:12px; display:flex; justify-content:space-between; align-items:center;">
+          <div>
+            <div style="font-size:10px; color:var(--text-dim); text-transform:uppercase;">Target Audio File</div>
+            <div id="drMeterTrackTitle" style="font-weight:700; font-size:13px; color:#fff; max-width:400px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;">--</div>
+          </div>
+          <div style="display:flex; gap:8px;">
+            <button class="btn btn-primary" onclick="runDrMeterAnalysis(false)" id="measureTrackDrBtn" style="font-size:11px; padding:6px 12px;">⚡ Measure Track</button>
+            <button class="btn btn-secondary" onclick="runDrMeterAnalysis(true)" id="measureAlbumDrBtn" style="font-size:11px; padding:6px 12px;">📁 Measure Entire Album</button>
+          </div>
+        </div>
+
+        <div style="display:grid; grid-template-columns:130px 1fr; gap:14px; background:#10131d; border:1px solid var(--border); border-radius:10px; padding:16px; align-items:center;">
+          <div style="text-align:center; padding:12px; background:#141724; border-radius:8px; border:1px solid rgba(255,255,255,0.06);">
+            <div id="drMeterScoreBadge" style="font-size:32px; font-weight:800; color:var(--emerald); font-family:monospace;">DR--</div>
+            <div id="drMeterTierText" style="font-size:10px; font-weight:700; color:var(--text-muted); margin-top:2px;">OFFICIAL DR</div>
+          </div>
+          <div>
+            <div id="drMeterRatingText" style="font-size:14px; font-weight:700; color:#fff; margin-bottom:4px;">No track measured yet</div>
+            <div id="drMeterDescText" style="font-size:11px; color:var(--text-dim); margin-bottom:10px;">Select an audio file and click Measure to analyze peak, RMS, and dynamic compression.</div>
+
+            <!-- Dynamic Range Spectrum Bar -->
+            <div style="height:8px; border-radius:4px; background:linear-gradient(90deg, #dc2626 0%, #ef4444 30%, #f59e0b 55%, #3b82f6 75%, #10b981 100%); width:100%; position:relative;">
+              <div id="drMeterMarker" style="position:absolute; top:-4px; left:50%; width:4px; height:16px; background:#fff; border-radius:2px; box-shadow:0 0 8px #fff; display:none;"></div>
+            </div>
+            <div style="display:flex; justify-content:space-between; font-size:9px; color:var(--text-dim); margin-top:4px;">
+              <span>Brickwall (DR4)</span>
+              <span>Loudness War (DR7)</span>
+              <span>Standard (DR10)</span>
+              <span>Audiophile Master (DR14+)</span>
+            </div>
+          </div>
+        </div>
+
+        <div style="display:grid; grid-template-columns:1fr 1fr 1fr; gap:10px;">
+          <div style="background:#121522; border:1px solid var(--border); border-radius:8px; padding:10px; text-align:center;">
+            <div style="font-size:10px; color:var(--text-dim);">TRUE PEAK</div>
+            <div id="drMeterPeakVal" style="font-size:16px; font-weight:700; color:#fff; font-family:monospace; margin-top:2px;">-- dBFS</div>
+          </div>
+          <div style="background:#121522; border:1px solid var(--border); border-radius:8px; padding:10px; text-align:center;">
+            <div style="font-size:10px; color:var(--text-dim);">TOTAL RMS</div>
+            <div id="drMeterRmsVal" style="font-size:16px; font-weight:700; color:#fff; font-family:monospace; margin-top:2px;">-- dBFS</div>
+          </div>
+          <div style="background:#121522; border:1px solid var(--border); border-radius:8px; padding:10px; text-align:center;">
+            <div style="font-size:10px; color:var(--text-dim);">CREST FACTOR</div>
+            <div id="drMeterCrestVal" style="font-size:16px; font-weight:700; color:var(--cyan); font-family:monospace; margin-top:2px;">-- dB</div>
+          </div>
+        </div>
+
+        <div id="drMeterReportContainer" style="display:none; flex-direction:column; gap:6px;">
+          <div style="font-size:11px; font-weight:700; color:var(--text-muted);">Album DR Report Table:</div>
+          <pre id="drMeterReportText" style="background:#0b0d14; border:1px solid var(--border); border-radius:6px; padding:10px; font-family:monospace; font-size:10px; color:#94a3b8; overflow-x:auto; max-height:160px;"></pre>
+        </div>
+      </div>
+
+      <div style="padding:10px 16px; background:#121520; border-top:1px solid var(--border); display:flex; justify-content:space-between; align-items:center;">
+        <span style="font-size:10px; color:var(--text-dim);">Standard Pleasurize Music Foundation TT Dynamic Range Algorithm</span>
+        <button class="btn btn-secondary" onclick="closeDrMeterModal()">Close</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Phase 16: Portable DAP & USB Flash Storage Synchronizer Modal -->
+  <div class="modal-backdrop" id="deviceSyncModal" style="display:none;">
+    <div class="modal-box" style="width:620px; max-width:92vw; display:flex; flex-direction:column;">
+      <div class="modal-header">
+        <div style="display:flex; align-items:center; gap:8px;">
+          <span style="font-size:18px;">📱</span>
+          <div>
+            <div style="font-weight:700; font-size:14px; color:#fff;">Portable DAP & USB Device Synchronizer</div>
+            <div style="font-size:10px; color:var(--text-dim);">Sync music, synced lyrics & playlists to Walkman, FiiO, Astell&Kern, and SD cards</div>
+          </div>
+        </div>
+        <button onclick="closeDeviceSyncModal()" style="background:none; border:none; color:var(--text-muted); cursor:pointer; font-size:16px;">✕</button>
+      </div>
+
+      <div class="modal-body" style="padding:16px; display:flex; flex-direction:column; gap:12px;">
+        <div>
+          <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:4px;">
+            <label style="font-size:11px; color:var(--text-dim);">Target Portable Storage / DAP:</label>
+            <button class="btn btn-secondary" onclick="refreshDapDeviceList()" style="font-size:10px; padding:2px 8px;">🔄 Refresh Drives</button>
+          </div>
+          <select id="dapDeviceSelect" class="search-input" style="width:100%; font-size:11px; padding:7px 10px;">
+            <option value="">Scanning for removable drives...</option>
+          </select>
+        </div>
+
+        <div style="display:grid; grid-template-columns:1fr 1fr; gap:12px;">
+          <div>
+            <label style="font-size:11px; color:var(--text-dim); display:block; margin-bottom:4px;">Sync Source:</label>
+            <select id="dapSourceSelect" class="search-input" style="width:100%; font-size:11px; padding:6px 8px;">
+              <option value="current_playlist">Current Playing Queue</option>
+              <option value="favorites">Favorites & Top Starred</option>
+              <option value="all_library">Entire Music Library</option>
+            </select>
+          </div>
+
+          <div>
+            <label style="font-size:11px; color:var(--text-dim); display:block; margin-bottom:4px;">On-The-Fly Transcoding:</label>
+            <select id="dapTranscodeSelect" class="search-input" style="width:100%; font-size:11px; padding:6px 8px;">
+              <option value="copy" selected>Direct Copy (Bit-Perfect Lossless/Original)</option>
+              <option value="mp3_320">Transcode to MP3 320 kbps (High Quality)</option>
+              <option value="mp3_256">Transcode to MP3 256 kbps (Balanced)</option>
+              <option value="aac_256">Transcode to AAC 256 kbps (Apple/Sony)</option>
+            </select>
+          </div>
+        </div>
+
+        <div style="background:#121522; border:1px solid var(--border); border-radius:8px; padding:10px; display:flex; flex-direction:column; gap:8px;">
+          <div style="display:flex; justify-content:space-between; align-items:center;">
+            <div>
+              <div style="font-size:11px; font-weight:700; color:#fff;">Sync Companion Lyrics (.lrc)</div>
+              <div style="font-size:10px; color:var(--text-dim);">Enables on-screen synchronized lyrics on portable DAP displays</div>
+            </div>
+            <input type="checkbox" id="dapLyricsToggle" checked style="accent-color:var(--emerald);">
+          </div>
+          <div style="display:flex; justify-content:space-between; align-items:center;">
+            <div>
+              <div style="font-size:11px; font-weight:700; color:#fff;">Generate Device .m3u8 Playlist</div>
+              <div style="font-size:10px; color:var(--text-dim);">Creates DAP-compatible playlist file in Target/Playlists/ directory</div>
+            </div>
+            <input type="checkbox" id="dapPlaylistToggle" checked style="accent-color:var(--emerald);">
+          </div>
+        </div>
+
+        <!-- Sync Progress Bar -->
+        <div id="dapSyncProgressContainer" style="display:none; flex-direction:column; gap:4px;">
+          <div style="display:flex; justify-content:space-between; font-size:11px;">
+            <span id="dapSyncStatusText" style="color:var(--cyan);">Syncing tracks...</span>
+            <span id="dapSyncCountText" style="color:#fff; font-family:monospace;">0 / 0</span>
+          </div>
+          <div style="height:6px; background:#1e2336; border-radius:3px; overflow:hidden;">
+            <div id="dapSyncProgressBar" style="height:100%; width:0%; background:linear-gradient(90deg, var(--cyan), var(--emerald)); transition:width 0.2s;"></div>
+          </div>
+        </div>
+
+        <div style="display:flex; justify-content:flex-end; gap:8px; margin-top:4px;">
+          <button class="btn btn-primary" id="startDapSyncBtn" onclick="runDeviceSyncAction()" style="font-size:11px; padding:7px 18px;">
+            ⚡ Start Synchronization
+          </button>
+        </div>
+      </div>
+
+      <div style="padding:10px 16px; background:#121520; border-top:1px solid var(--border); display:flex; justify-content:space-between; align-items:center;">
+        <span style="font-size:10px; color:var(--text-dim);">FAT32 / exFAT path sanitization prevents device filesystem errors</span>
+        <button class="btn btn-secondary" onclick="closeDeviceSyncModal()">Close</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Phase 16: Musician A-B Phrase Looper & Metronome Studio Modal -->
+  <div class="modal-backdrop" id="abLooperModal" style="display:none;">
+    <div class="modal-box" style="width:600px; max-width:92vw; display:flex; flex-direction:column;">
+      <div class="modal-header">
+        <div style="display:flex; align-items:center; gap:8px;">
+          <span style="font-size:18px;">🔁</span>
+          <div>
+            <div style="font-weight:700; font-size:14px; color:#fff;">Musician A-B Phrase Looper & Practice Studio</div>
+            <div style="font-size:10px; color:var(--text-dim);">Seamless A-B phrase repetition with click metronome & sample export</div>
+          </div>
+        </div>
+        <button onclick="closeAbLooperModal()" style="background:none; border:none; color:var(--text-muted); cursor:pointer; font-size:16px;">✕</button>
+      </div>
+
+      <div class="modal-body" style="padding:16px; display:flex; flex-direction:column; gap:12px;">
+        <div style="background:#121522; border:1px solid var(--border); border-radius:8px; padding:12px;">
+          <div style="font-size:10px; color:var(--text-dim); text-transform:uppercase;">Active Song</div>
+          <div id="abLooperTrackTitle" style="font-weight:700; font-size:13px; color:#fff;">--</div>
+        </div>
+
+        <div style="display:grid; grid-template-columns:1fr 1fr; gap:12px;">
+          <div style="background:#141724; border:1px solid var(--border); border-radius:8px; padding:12px; text-align:center;">
+            <div style="font-size:10px; color:var(--text-dim); font-weight:700;">POINT A (START)</div>
+            <input type="number" id="abPointAInput" value="0.0" step="0.1" min="0" class="search-input" style="width:90px; text-align:center; font-size:16px; font-weight:700; font-family:monospace; margin:8px 0;" onchange="syncAbLoopInputs()">
+            <div style="font-size:10px; color:var(--text-dim);">seconds</div>
+            <button class="btn btn-secondary" onclick="setAbLoopPoint('A')" style="font-size:10px; padding:4px 10px; margin-top:6px; width:100%;">📍 Set A from Player</button>
+          </div>
+
+          <div style="background:#141724; border:1px solid var(--border); border-radius:8px; padding:12px; text-align:center;">
+            <div style="font-size:10px; color:var(--text-dim); font-weight:700;">POINT B (END)</div>
+            <input type="number" id="abPointBInput" value="5.0" step="0.1" min="0" class="search-input" style="width:90px; text-align:center; font-size:16px; font-weight:700; font-family:monospace; margin:8px 0;" onchange="syncAbLoopInputs()">
+            <div style="font-size:10px; color:var(--text-dim);">seconds</div>
+            <button class="btn btn-secondary" onclick="setAbLoopPoint('B')" style="font-size:10px; padding:4px 10px; margin-top:6px; width:100%;">📍 Set B from Player</button>
+          </div>
+        </div>
+
+        <!-- In-App Seamless Playback Looping Button -->
+        <div style="background:#10131e; border:1px solid var(--border); border-radius:8px; padding:12px; display:flex; justify-content:space-between; align-items:center;">
+          <div>
+            <div style="font-size:12px; font-weight:700; color:#fff;" id="abLoopActiveTitle">Seamless Playback Looping</div>
+            <div style="font-size:10px; color:var(--text-dim);">Wraps player playhead back to Point A automatically when reaching Point B</div>
+          </div>
+          <button class="btn btn-secondary" id="toggleAbLoopBtn" onclick="toggleInAppAbLoop()" style="font-size:11px; padding:6px 14px;">
+            🔁 Enable A-B Loop
+          </button>
+        </div>
+
+        <!-- Metronome & Export Options -->
+        <div style="display:grid; grid-template-columns:1fr 1fr; gap:12px;">
+          <div style="background:#121522; border:1px solid var(--border); border-radius:8px; padding:10px; display:flex; justify-content:space-between; align-items:center;">
+            <div>
+              <div style="font-size:11px; font-weight:700; color:#fff;">Metronome Count-In</div>
+              <div style="font-size:10px; color:var(--text-dim);">4-beat click track before loop</div>
+            </div>
+            <input type="checkbox" id="abCountInToggle" style="accent-color:var(--emerald);">
+          </div>
+
+          <div>
+            <label style="font-size:11px; color:var(--text-dim); display:block; margin-bottom:4px;">Export Repetitions:</label>
+            <select id="abRepeatsSelect" class="search-input" style="width:100%; font-size:11px; padding:6px 8px;">
+              <option value="1">1x (Single Clean Phrase Sample)</option>
+              <option value="4" selected>4x Loop Repeats (Practice Track)</option>
+              <option value="8">8x Loop Repeats</option>
+              <option value="16">16x Extended Loop Track</option>
+            </select>
+          </div>
+        </div>
+
+        <div style="display:flex; justify-content:space-between; align-items:center; margin-top:4px;">
+          <span id="abLoopStatusText" style="font-size:11px; color:var(--text-dim);">Loop interval: 5.00s</span>
+          <button class="btn btn-primary" onclick="runExportAbLoopAction()" id="exportAbLoopBtn" style="font-size:11px; padding:7px 16px;">
+            💾 Export Loop Sample
+          </button>
+        </div>
+      </div>
+
+      <div style="padding:10px 16px; background:#121520; border-top:1px solid var(--border); display:flex; justify-content:space-between; align-items:center;">
+        <span style="font-size:10px; color:var(--text-dim);">Micro-cosine crossfade eliminates digital boundary clicks</span>
+        <button class="btn btn-secondary" onclick="closeAbLooperModal()">Close</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Phase 16: Enhanced Word-by-Word ELRC Syllable Aligner Modal -->
+  <div class="modal-backdrop" id="wordAlignerModal" style="display:none;">
+    <div class="modal-box" style="width:700px; max-width:92vw; display:flex; flex-direction:column; max-height:88vh;">
+      <div class="modal-header">
+        <div style="display:flex; align-items:center; gap:8px;">
+          <span style="font-size:18px;">✨</span>
+          <div>
+            <div style="font-weight:700; font-size:14px; color:#fff;">Word-by-Word ELRC Syllable Aligner Studio</div>
+            <div style="font-size:10px; color:var(--text-dim);">Apple Music & Spotify Sing style word-level timestamping (<mm:ss.xx> tags)</div>
+          </div>
+        </div>
+        <button onclick="closeWordAlignerModal()" style="background:none; border:none; color:var(--text-muted); cursor:pointer; font-size:16px;">✕</button>
+      </div>
+
+      <div class="modal-body" style="padding:16px; display:flex; flex-direction:column; gap:12px; overflow-y:auto;">
+        <div style="background:#121522; border:1px solid var(--border); border-radius:8px; padding:12px; display:flex; justify-content:space-between; align-items:center;">
+          <div>
+            <div style="font-size:10px; color:var(--text-dim); text-transform:uppercase;">Active Song & Lyrics Source</div>
+            <div id="wordAlignerTrackTitle" style="font-weight:700; font-size:13px; color:#fff; max-width:400px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;">--</div>
+          </div>
+          <button class="btn btn-primary" onclick="runAutoAlignWordsAction()" id="autoAlignWordsBtn" style="font-size:11px; padding:6px 14px;">
+            ⚡ Auto-Align Transients
+          </button>
+        </div>
+
+        <div>
+          <label style="font-size:11px; color:var(--text-dim); display:block; margin-bottom:4px;">Input Standard LRC / Plain Lyrics:</label>
+          <textarea id="wordAlignerInputText" class="search-input" style="width:100%; height:90px; font-family:monospace; font-size:11px; padding:8px; line-height:1.5; resize:vertical;" placeholder="Paste standard [mm:ss.xx] LRC or lyrics text here..."></textarea>
+        </div>
+
+        <div>
+          <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:4px;">
+            <label style="font-size:11px; color:var(--emerald); font-weight:700;">Generated Enhanced LRC (ELRC) Preview:</label>
+            <span id="wordAlignerSummaryBadge" style="font-size:10px; color:var(--text-dim);">0 words aligned</span>
+          </div>
+          <textarea id="wordAlignerOutputText" class="search-input" readonly style="width:100%; height:120px; font-family:monospace; font-size:11px; padding:8px; line-height:1.5; color:#38bdf8; background:#0b0d14; resize:vertical;"></textarea>
+        </div>
+
+        <div style="display:flex; justify-content:space-between; align-items:center; margin-top:4px;">
+          <span id="wordAlignerStatusText" style="font-size:11px; color:var(--text-dim);">Acoustic onset detection snaps words to vocal transient attacks.</span>
+          <button class="btn btn-primary" onclick="saveEnhancedLrcAction()" id="saveElrcBtn" style="font-size:11px; padding:7px 18px;">
+            💾 Save Companion .elrc
+          </button>
+        </div>
+      </div>
+
+      <div style="padding:10px 16px; background:#121520; border-top:1px solid var(--border); display:flex; justify-content:space-between; align-items:center;">
+        <span style="font-size:10px; color:var(--text-dim);">Compatible with Sonance glowing syllable sweep and mobile sync</span>
+        <button class="btn btn-secondary" onclick="closeWordAlignerModal()">Close</button>
+      </div>
+    </div>
+  </div>
+
   <!-- Podcast & Long Mix Bookmark Resumption Toast (Phase 10) -->
   <div id="podcastResumeToast" style="display:none; position:fixed; bottom:85px; right:20px; z-index:9999; background:#131722; border:1px solid var(--border); box-shadow:0 8px 24px rgba(0,0,0,0.6); border-radius:10px; padding:10px 14px; align-items:center; gap:10px; backdrop-filter:blur(10px);">
     <span style="font-size:16px;">⏱️</span>
@@ -4059,6 +4371,15 @@
     audio.addEventListener('timeupdate', () => {
       const cur = audio.currentTime;
       const dur = audio.duration || 0;
+
+      // Phase 16: In-App A-B Loop playback enforcement
+      if (window.isAbLoopActive && window.abLoopPointB > window.abLoopPointA) {
+        if (cur >= window.abLoopPointB || cur < window.abLoopPointA - 0.2) {
+          audio.currentTime = window.abLoopPointA;
+          if (typeof notifyAbLoopIteration === 'function') notifyAbLoopIteration();
+          return;
+        }
+      }
 
       // Update scrubber
       document.getElementById('playerCurrentTime').innerText = formatDuration(cur);
@@ -6517,6 +6838,10 @@
         closeOrganizerModal();
         closePitchModal();
         closeResamplerModal();
+        closeDrMeterModal();
+        closeDeviceSyncModal();
+        closeAbLooperModal();
+        closeWordAlignerModal();
         dismissPodcastResumeToast();
         const popup = document.getElementById('speedStudioPopup');
         if (popup) popup.style.display = 'none';
@@ -9397,6 +9722,397 @@
           btn.innerHTML = '⚡ Resample & Export';
           status.innerText = `✕ Error: ${err.message || err}`;
           status.style.color = 'var(--rose)';
+        });
+      }
+    }
+
+    // =========================================================================
+    // Phase 16: TT Dynamic Range Meter, DAP Sync, A-B Looper & Word Aligner
+    // =========================================================================
+
+    // --- 1. TT Dynamic Range (DR) Meter ---
+    function openDrMeterModal() {
+      const modal = document.getElementById('drMeterModal');
+      if (!modal) return;
+      const track = (playingTrackIndex !== null) ? libraryTracks.find(t => t.index === playingTrackIndex)
+                  : (selectedTrackIndex !== null) ? libraryTracks.find(t => t.index === selectedTrackIndex) : null;
+      document.getElementById('drMeterTrackTitle').innerText = track ? `${track.artist} - ${track.title}` : 'No track selected (will measure active library)';
+      modal.style.display = 'flex';
+    }
+
+    function closeDrMeterModal() {
+      const modal = document.getElementById('drMeterModal');
+      if (modal) modal.style.display = 'none';
+    }
+
+    function runDrMeterAnalysis(isAlbum) {
+      const track = (playingTrackIndex !== null) ? libraryTracks.find(t => t.index === playingTrackIndex)
+                  : (selectedTrackIndex !== null) ? libraryTracks.find(t => t.index === selectedTrackIndex) : null;
+
+      let targetPath = null;
+      if (isAlbum) {
+        targetPath = document.getElementById('currentFolderText').innerText;
+        if (!targetPath || targetPath === 'No folder selected') {
+          if (track && track.path) {
+            const lastSep = Math.max(track.path.lastIndexOf('/'), track.path.lastIndexOf('\\'));
+            targetPath = (lastSep > 0) ? track.path.substring(0, lastSep) : null;
+          }
+        }
+      } else {
+        targetPath = track ? track.path : null;
+      }
+
+      if (!targetPath) {
+        alert('Please play or select an audio track first.');
+        return;
+      }
+
+      const scoreBadge = document.getElementById('drMeterScoreBadge');
+      const tierText = document.getElementById('drMeterTierText');
+      const ratingText = document.getElementById('drMeterRatingText');
+      const descText = document.getElementById('drMeterDescText');
+      const peakVal = document.getElementById('drMeterPeakVal');
+      const rmsVal = document.getElementById('drMeterRmsVal');
+      const crestVal = document.getElementById('drMeterCrestVal');
+      const marker = document.getElementById('drMeterMarker');
+      const reportCont = document.getElementById('drMeterReportContainer');
+      const reportText = document.getElementById('drMeterReportText');
+
+      ratingText.innerText = isAlbum ? 'Analyzing album dynamic range across tracks...' : 'Computing True Peak & top-20% block RMS...';
+      descText.innerText = 'Applying Pleasurize Music Foundation algorithm...';
+      scoreBadge.innerText = '...';
+      scoreBadge.style.color = 'var(--cyan)';
+
+      if (window.pywebview && window.pywebview.api && window.pywebview.api.measure_dynamic_range) {
+        window.pywebview.api.measure_dynamic_range(targetPath).then(res => {
+          if (res && res.success) {
+            const dr = isAlbum ? res.album_dr : res.dr;
+            scoreBadge.innerText = `DR${dr}`;
+            scoreBadge.style.color = res.color || '#10b981';
+            tierText.innerText = (res.tier || 'DR').toUpperCase();
+            ratingText.innerText = res.rating || `DR${dr}`;
+            ratingText.style.color = res.color || '#fff';
+            descText.innerText = res.description || '';
+
+            if (isAlbum) {
+              peakVal.innerText = `${res.track_count} Tracks`;
+              rmsVal.innerText = `Album Master`;
+              crestVal.innerText = `DR${res.album_dr}`;
+              if (res.report_text) {
+                reportText.innerText = res.report_text;
+                reportCont.style.display = 'flex';
+              }
+            } else {
+              peakVal.innerText = `${res.peak_db} dBFS`;
+              rmsVal.innerText = `${res.rms_db} dBFS`;
+              crestVal.innerText = `${res.crest_factor_db} dB`;
+              reportCont.style.display = 'none';
+            }
+
+            // Position marker on spectrum (DR0 -> 0%, DR20 -> 100%)
+            const pct = Math.min(100, Math.max(0, (dr / 18.0) * 100));
+            marker.style.left = `${pct}%`;
+            marker.style.display = 'block';
+          } else {
+            alert('✕ DR analysis error: ' + (res ? res.error : 'Unknown error'));
+            scoreBadge.innerText = 'ERR';
+            scoreBadge.style.color = 'var(--rose)';
+          }
+        }).catch(err => {
+          alert('✕ DR analysis error: ' + (err.message || err));
+        });
+      }
+    }
+
+    // --- 2. Portable DAP & USB Storage Synchronizer ---
+    function openDeviceSyncModal() {
+      const modal = document.getElementById('deviceSyncModal');
+      if (modal) modal.style.display = 'flex';
+      refreshDapDeviceList();
+    }
+
+    function closeDeviceSyncModal() {
+      const modal = document.getElementById('deviceSyncModal');
+      if (modal) modal.style.display = 'none';
+    }
+
+    function refreshDapDeviceList() {
+      const sel = document.getElementById('dapDeviceSelect');
+      sel.innerHTML = '<option value="">Scanning for removable drives...</option>';
+
+      if (window.pywebview && window.pywebview.api && window.pywebview.api.get_portable_devices) {
+        window.pywebview.api.get_portable_devices().then(devs => {
+          sel.innerHTML = '';
+          if (!devs || devs.length === 0) {
+            sel.innerHTML = '<option value="">No removable drives found (Insert USB drive / DAP)</option>';
+            return;
+          }
+          devs.forEach(d => {
+            const opt = document.createElement('option');
+            opt.value = d.path;
+            opt.innerText = `${d.display_name} [${d.filesystem}]`;
+            sel.appendChild(opt);
+          });
+        });
+      }
+    }
+
+    function runDeviceSyncAction() {
+      const sel = document.getElementById('dapDeviceSelect');
+      const targetDir = sel.value;
+      if (!targetDir) {
+        alert('Please select a target portable storage device.');
+        return;
+      }
+
+      const source = document.getElementById('dapSourceSelect').value;
+      const transcode = document.getElementById('dapTranscodeSelect').value;
+      const btn = document.getElementById('startDapSyncBtn');
+      const progCont = document.getElementById('dapSyncProgressContainer');
+      const progBar = document.getElementById('dapSyncProgressBar');
+      const statusText = document.getElementById('dapSyncStatusText');
+      const countText = document.getElementById('dapSyncCountText');
+
+      // Gather track paths
+      let tracksToSync = [];
+      if (source === 'current_playlist' && playlist.length > 0) {
+        tracksToSync = playlist.map(t => t.path).filter(Boolean);
+      } else if (source === 'favorites' && typeof favoriteTracks !== 'undefined') {
+        tracksToSync = Array.from(favoriteTracks).map(idx => (libraryTracks[idx] ? libraryTracks[idx].path : null)).filter(Boolean);
+      } else {
+        tracksToSync = libraryTracks.map(t => t.path).filter(Boolean);
+      }
+
+      if (tracksToSync.length === 0) {
+        alert('No tracks found to sync. Add tracks to queue or library first.');
+        return;
+      }
+
+      btn.disabled = true;
+      btn.innerText = '⏳ Syncing...';
+      progCont.style.display = 'flex';
+      progBar.style.width = '10%';
+      statusText.innerText = `Syncing ${tracksToSync.length} tracks to ${targetDir}...`;
+      countText.innerText = `0 / ${tracksToSync.length}`;
+
+      if (window.pywebview && window.pywebview.api && window.pywebview.api.sync_to_portable_device) {
+        window.pywebview.api.sync_to_portable_device(targetDir, tracksToSync, 'Sonance Sync', transcode).then(res => {
+          btn.disabled = false;
+          btn.innerText = '⚡ Start Synchronization';
+          progBar.style.width = '100%';
+
+          if (res && res.success) {
+            statusText.innerText = `✓ Successfully synced ${res.total_synced} tracks!`;
+            statusText.style.color = 'var(--emerald)';
+            alert(`✓ Portable Sync Complete!\n\nTarget: ${res.target_root}\nTracks: ${res.total_synced} / ${res.total_requested}\nCompanion Lyrics Synced: ${res.lyrics_copied}\nPlaylist: ${res.playlist_file || 'None'}`);
+          } else {
+            statusText.innerText = `✕ Sync failed: ${(res ? res.error : 'Unknown error')}`;
+            statusText.style.color = 'var(--rose)';
+          }
+        }).catch(err => {
+          btn.disabled = false;
+          btn.innerText = '⚡ Start Synchronization';
+          statusText.innerText = `✕ Error: ${err.message || err}`;
+        });
+      }
+    }
+
+    // --- 3. Musician A-B Phrase Looper ---
+    window.isAbLoopActive = false;
+    window.abLoopPointA = 0.0;
+    window.abLoopPointB = 5.0;
+    window.abLoopCount = 0;
+
+    function openAbLooperModal() {
+      const modal = document.getElementById('abLooperModal');
+      if (!modal) return;
+      const track = (playingTrackIndex !== null) ? libraryTracks.find(t => t.index === playingTrackIndex)
+                  : (selectedTrackIndex !== null) ? libraryTracks.find(t => t.index === selectedTrackIndex) : null;
+      document.getElementById('abLooperTrackTitle').innerText = track ? `${track.artist} - ${track.title}` : 'No track loaded';
+
+      const cur = audio.currentTime || 0;
+      const dur = audio.duration || 10.0;
+      window.abLoopPointA = Math.max(0.0, Math.round(cur * 10) / 10);
+      window.abLoopPointB = Math.min(dur, Math.round((cur + 5.0) * 10) / 10);
+      document.getElementById('abPointAInput').value = window.abLoopPointA;
+      document.getElementById('abPointBInput').value = window.abLoopPointB;
+      syncAbLoopInputs();
+      modal.style.display = 'flex';
+    }
+
+    function closeAbLooperModal() {
+      const modal = document.getElementById('abLooperModal');
+      if (modal) modal.style.display = 'none';
+    }
+
+    function setAbLoopPoint(point) {
+      const cur = Math.max(0.0, Math.round(audio.currentTime * 10) / 10);
+      if (point === 'A') {
+        window.abLoopPointA = cur;
+        document.getElementById('abPointAInput').value = cur;
+      } else {
+        window.abLoopPointB = cur;
+        document.getElementById('abPointBInput').value = cur;
+      }
+      syncAbLoopInputs();
+    }
+
+    function syncAbLoopInputs() {
+      window.abLoopPointA = parseFloat(document.getElementById('abPointAInput').value) || 0.0;
+      window.abLoopPointB = parseFloat(document.getElementById('abPointBInput').value) || 5.0;
+      const diff = Math.max(0, window.abLoopPointB - window.abLoopPointA).toFixed(2);
+      document.getElementById('abLoopStatusText').innerText = `Loop interval: ${diff}s (${window.abLoopPointA}s -> ${window.abLoopPointB}s)`;
+    }
+
+    function toggleInAppAbLoop() {
+      window.isAbLoopActive = !window.isAbLoopActive;
+      const btn = document.getElementById('toggleAbLoopBtn');
+      const title = document.getElementById('abLoopActiveTitle');
+
+      if (window.isAbLoopActive) {
+        btn.innerText = '⏹️ Disable A-B Loop';
+        btn.className = 'btn btn-primary';
+        title.innerText = 'Seamless Playback Looping (Active)';
+        title.style.color = 'var(--emerald)';
+        window.abLoopCount = 0;
+        audio.currentTime = window.abLoopPointA;
+        if (audio.paused) audio.play();
+      } else {
+        btn.innerText = '🔁 Enable A-B Loop';
+        btn.className = 'btn btn-secondary';
+        title.innerText = 'Seamless Playback Looping';
+        title.style.color = '#fff';
+      }
+    }
+
+    function notifyAbLoopIteration() {
+      window.abLoopCount++;
+      const btn = document.getElementById('toggleAbLoopBtn');
+      if (btn && window.isAbLoopActive) {
+        btn.innerText = `⏹️ Looping (${window.abLoopCount}x)`;
+      }
+    }
+
+    function runExportAbLoopAction() {
+      const track = (playingTrackIndex !== null) ? libraryTracks.find(t => t.index === playingTrackIndex)
+                  : (selectedTrackIndex !== null) ? libraryTracks.find(t => t.index === selectedTrackIndex) : null;
+      if (!track || !track.path) {
+        alert('Please play or select an audio file first.');
+        return;
+      }
+
+      const pointA = window.abLoopPointA;
+      const pointB = window.abLoopPointB;
+      const repeats = parseInt(document.getElementById('abRepeatsSelect').value);
+      const countIn = document.getElementById('abCountInToggle').checked;
+      const btn = document.getElementById('exportAbLoopBtn');
+
+      btn.disabled = true;
+      btn.innerText = '⏳ Slicing & Rendering...';
+
+      if (window.pywebview && window.pywebview.api && window.pywebview.api.render_ab_loop) {
+        window.pywebview.api.render_ab_loop(track.path, pointA, pointB, repeats, countIn).then(res => {
+          btn.disabled = false;
+          btn.innerText = '💾 Export Loop Sample';
+
+          if (res && res.success) {
+            alert(`✓ A-B Loop Exported Successfully!\n\nFile: ${res.output_file}\nDuration: ${res.total_duration_sec}s (${res.repeats}x repeats)\nCount-In: ${res.count_in ? 'Yes (4 beats)' : 'No'}`);
+          } else {
+            alert('✕ Loop export error: ' + (res ? res.error : 'Unknown error'));
+          }
+        }).catch(err => {
+          btn.disabled = false;
+          btn.innerText = '💾 Export Loop Sample';
+          alert('✕ Error: ' + (err.message || err));
+        });
+      }
+    }
+
+    // --- 4. Enhanced Word-by-Word ELRC Syllable Aligner ---
+    function openWordAlignerModal() {
+      const modal = document.getElementById('wordAlignerModal');
+      if (!modal) return;
+      const track = (playingTrackIndex !== null) ? libraryTracks.find(t => t.index === playingTrackIndex)
+                  : (selectedTrackIndex !== null) ? libraryTracks.find(t => t.index === selectedTrackIndex) : null;
+      document.getElementById('wordAlignerTrackTitle').innerText = track ? `${track.artist} - ${track.title}` : 'No track loaded';
+
+      // Auto-fill input text with current song's lyrics if available
+      if (currentLyrics && currentLyrics.length > 0) {
+        const rawLrc = currentLyrics.map(l => `[${formatDuration(l.time)}] ${l.text}`).join('\n');
+        document.getElementById('wordAlignerInputText').value = rawLrc;
+      }
+      modal.style.display = 'flex';
+    }
+
+    function closeWordAlignerModal() {
+      const modal = document.getElementById('wordAlignerModal');
+      if (modal) modal.style.display = 'none';
+    }
+
+    function runAutoAlignWordsAction() {
+      const input = document.getElementById('wordAlignerInputText').value.trim();
+      if (!input) {
+        alert('Please provide standard [mm:ss.xx] LRC or lyrics text.');
+        return;
+      }
+
+      const track = (playingTrackIndex !== null) ? libraryTracks.find(t => t.index === playingTrackIndex)
+                  : (selectedTrackIndex !== null) ? libraryTracks.find(t => t.index === selectedTrackIndex) : null;
+      const audioPath = track ? track.path : null;
+
+      const btn = document.getElementById('autoAlignWordsBtn');
+      const status = document.getElementById('wordAlignerStatusText');
+      const badge = document.getElementById('wordAlignerSummaryBadge');
+      const output = document.getElementById('wordAlignerOutputText');
+
+      btn.disabled = true;
+      btn.innerText = '⏳ Aligning...';
+      status.innerText = 'Calculating spectral flux transients and syllable weights...';
+
+      if (window.pywebview && window.pywebview.api && window.pywebview.api.align_word_lyrics) {
+        window.pywebview.api.align_word_lyrics(input, audioPath).then(res => {
+          btn.disabled = false;
+          btn.innerText = '⚡ Auto-Align Transients';
+
+          if (res && res.success) {
+            output.value = res.enhanced_lrc;
+            badge.innerText = `${res.total_words_aligned} words aligned across ${res.total_lines} lines`;
+            status.innerText = '✓ Enhanced word timestamps computed successfully!';
+            status.style.color = 'var(--emerald)';
+          } else {
+            status.innerText = '✕ Alignment failed: ' + (res ? res.error : 'Unknown');
+            status.style.color = 'var(--rose)';
+          }
+        }).catch(err => {
+          btn.disabled = false;
+          btn.innerText = '⚡ Auto-Align Transients';
+          status.innerText = '✕ Error: ' + (err.message || err);
+        });
+      }
+    }
+
+    function saveEnhancedLrcAction() {
+      const output = document.getElementById('wordAlignerOutputText').value.trim();
+      if (!output) {
+        alert('Please run Auto-Align first to generate Enhanced LRC content.');
+        return;
+      }
+
+      const track = (playingTrackIndex !== null) ? libraryTracks.find(t => t.index === playingTrackIndex)
+                  : (selectedTrackIndex !== null) ? libraryTracks.find(t => t.index === selectedTrackIndex) : null;
+      if (!track || !track.path) {
+        alert('Please select or play an audio track to save companion .elrc.');
+        return;
+      }
+
+      const lastDot = track.path.lastIndexOf('.');
+      const elrcPath = (lastDot > 0 ? track.path.substring(0, lastDot) : track.path) + '.elrc';
+
+      if (window.pywebview && window.pywebview.api && window.pywebview.api.align_word_lyrics) {
+        window.pywebview.api.align_word_lyrics(output, null, elrcPath).then(res => {
+          alert(`✓ Enhanced LRC Saved!\n\nCompanion File: ${elrcPath}`);
+        }).catch(err => {
+          alert('✕ Error saving .elrc: ' + (err.message || err));
         });
       }
     }

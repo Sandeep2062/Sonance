@@ -66,6 +66,10 @@ import audio_resampler
 import pitch_shifter
 import library_organizer
 import album_packer
+import dr_meter
+import device_sync
+import ab_looper
+import word_aligner
 
 APP_VERSION = "2.1.0"
 GITHUB_REPO = "Sandeep2062/Sonance"
@@ -992,6 +996,36 @@ class LyricsAPI:
     def unpack_monolithic_album(self, album_file: str, cue_file: Optional[str] = None, output_dir: Optional[str] = None) -> Dict[str, Any]:
         """Unpacks a monolithic album image into separate tagged tracks."""
         return album_packer.unpack_album(album_file, cue_file, output_dir)
+
+    # ------------------ Phase 16: Dynamic Range (DR) Meter ----------------------
+    def measure_dynamic_range(self, path: str) -> Dict[str, Any]:
+        """Measures Pleasurize Music Foundation TT Dynamic Range and Crest Factor."""
+        if os.path.isdir(path):
+            return dr_meter.analyze_album_dynamic_range(path)
+        return dr_meter.analyze_track_dynamic_range(path)
+
+    # ------------------ Phase 16: Portable DAP & USB Synchronizer ---------------
+    def get_portable_devices(self) -> List[Dict[str, Any]]:
+        """Returns detected removable USB drives, DAPs, and SD cards."""
+        return device_sync.detect_portable_drives()
+
+    def sync_to_portable_device(self, target_dir: str, track_paths: List[str], playlist_name: str = "Sonance Sync", transcode_mode: str = "copy", bitrate: str = "320k") -> Dict[str, Any]:
+        """Synchronizes tracks to portable device storage with optional transcoding and M3U8 creation."""
+        return device_sync.sync_tracks_to_device(track_paths, target_dir, playlist_name=playlist_name, transcode_mode=transcode_mode, bitrate=bitrate)
+
+    # ------------------ Phase 16: Musician A-B Phrase Looper --------------------
+    def render_ab_loop(self, audio_path: str, start_sec: float, end_sec: float, repeats: int = 4, add_count_in: bool = False, bpm: float = 120.0, output_path: Optional[str] = None) -> Dict[str, Any]:
+        """Extracts and renders seamless de-clicked A-B phrase loop with count-in metronome."""
+        return ab_looper.create_ab_loop(audio_path, start_sec, end_sec, repeats=repeats, add_count_in=add_count_in, bpm=bpm, output_path=output_path)
+
+    # ------------------ Phase 16: Word-by-Word ELRC Syllable Aligner ------------
+    def align_word_lyrics(self, lrc_text: str, audio_path: Optional[str] = None, output_path: Optional[str] = None) -> Dict[str, Any]:
+        """Aligns line-level lyrics to word/syllable level Enhanced LRC with acoustic transients."""
+        res = word_aligner.generate_enhanced_lrc(lrc_text, audio_path=audio_path)
+        if res.get("success") and output_path:
+            word_aligner.save_enhanced_lrc(res["enhanced_lrc"], output_path)
+            res["output_file"] = output_path
+        return res
 
     def _save_last_folder(self, folder: str):
         try:
