@@ -97,7 +97,14 @@ Sonance brings together three distinct open-source powerhouses:
 - **Speed & Creative DSP Studio**: Dynamic audio playback rate slider (0.5x to 2.0x) and studio presets: **Master 1.0x**, **Nightcore 1.25x**, **Slowed + Reverb 0.85x** (powered by a synthetic stereo Web Audio convolver impulse response), and **Practice 0.75x**.
 - **Desktop Keyboard Hotkeys & Hardware Media Keys**: Control playback anywhere with `Space` (Play/Pause), `Left`/`Right` (Seek $\pm 5$s), `Up`/`Down` (Volume $\pm 5\%$), `M` (Mute), `L` (Lyrics), `V` (Visualizer), `F11` (Fullscreen), and standard OS hardware media keys (`MediaPlayPause`, `MediaTrackNext`, `MediaTrackPrevious`).
 
-### 🔄 10. In-App Updates & Releases
+### 🎤 10. Karaoke Sing DSP, Multilingual Lyrics Studio, Audio Transcoder & Wrapped Stats
+- **Karaoke Vocal Reducer DSP (`🎤 Sing`)**: Real-time Web Audio Out-of-Phase Stereo (OOPS) center-channel vocal cancellation suppressing lead vocals on-the-fly while keeping stereo backing tracks and instruments vibrant.
+- **Multilingual Lyrics Translation & Romanization Studio**: Instant Japanese Romaji (Hiragana/Katakana conversion) and Korean Latin Revised Romanization, with dual-line phonetic rendering in both the Fullscreen Karaoke Stage and Floating Mini-Player.
+- **Lossless & Hi-Res Batch Audio Transcoder**: High-performance batch conversion engine between FLAC, WAV, MP3 (320k/256k/192k/128k), M4A, and OGG while preserving full ID3v2.4/Vorbis tags, embedded high-resolution album cover art, and companion `.lrc` lyrics files. Also accessible via CLI: `python sonance.py --transcode <source> [out_dir] [format] [bitrate]`.
+- **Listening Stats Studio & "Sonance Wrapped"**: 100% private, local playback tracker computing total play counts, listening hours, active streaks, top artists, top songs, and audio quality distribution (% Lossless vs 320k vs streaming). Export summaries with 1 click or view in terminal via `python sonance.py --stats`.
+- **Interactive Waveform Timeline**: Dynamic audio energy waveform scrubber canvas rendered live across the player progress bar.
+
+### 🔄 11. In-App Updates & Releases
 - Automatic update detection checking against [GitHub Releases](https://github.com/Sandeep2062/Sonance/releases).
 - Every release includes SHA-256 and MD5 checksum manifests (`RELEASE.sha256sum`, `RELEASE.md5sum`).
 
@@ -124,11 +131,11 @@ pip install pywebview tinytag requests beautifulsoup4 syncedlyrics yt-dlp mutage
 
 ### 3. Launch Sonance
 ```bash
-# Launch the modern WebView desktop application
-python modern_lyrics_downloader.py
+# Launch modern desktop workstation (Default launcher)
+python sonance.py
 
-# Or launch the lightweight classic tkinter GUI
-python lyrics_downloader_ultimate.py
+# Or launch classic tkinter GUI
+python sonance.py --classic
 ```
 
 ---
