@@ -94,6 +94,16 @@ Examples:
       help="Batch convert audio files: --transcode <source> [output_dir] [format] [bitrate]",
   )
   parser.add_argument(
+      "--identify",
+      metavar="AUDIO_FILE",
+      help="Identify an unknown audio file via acoustic fingerprints & catalog matching",
+  )
+  parser.add_argument(
+      "--discography",
+      metavar="ARTIST_NAME",
+      help="Inspect complete album discography and tracklists for an artist",
+  )
+  parser.add_argument(
       "--version",
       action="version",
       version=f"Sonance v{modern_lyrics_downloader.APP_VERSION}",
@@ -221,6 +231,38 @@ Examples:
     print(f"[*] Converting {len(files)} audio tracks...")
     res = audio_transcoder.batch_transcode(files, fmt, bitrate, out)
     print(f"[+] Transcode Complete: {res['success_count']} succeeded, {res['fail_count']} failed.")
+    return
+
+  if args.identify:
+    import audio_fingerprint
+    print(f"[*] Identifying audio file: {args.identify}...")
+    res = audio_fingerprint.identify_track(args.identify)
+    if res.get("success"):
+      t = res["track"]
+      print(f"[+] Recognized Track: {t.get('title')} - {t.get('artist')}")
+      print(f"    Album: {t.get('album')} ({t.get('year')})")
+      print(f"    Genre: {t.get('genre') or 'Unknown'} | Track #{t.get('track_number')}")
+      print(f"    Confidence: {int(t.get('confidence', 0) * 100)}% ({t.get('source')})")
+      if t.get("cover_url"):
+        print(f"    Cover Art: {t.get('cover_url')}")
+    else:
+      print(f"[-] Identification failed: {res.get('error')}")
+    return
+
+  if args.discography:
+    import discography_scraper
+    print(f"[*] Fetching discography for '{args.discography}'...")
+    res = discography_scraper.get_full_discography(args.discography)
+    if res.get("success"):
+      art = res["artist"]
+      print(f"\n=== 📚 Discography: {art['name']} ({res['total_albums']} albums found) ===")
+      for alb in res["albums"]:
+        print(f"\n  💿 {alb['title']} [{alb['type']}] ({alb['year']}) - {len(alb.get('tracks', []))} tracks")
+        for trk in alb.get("tracks", []):
+          print(f"     {trk['track_number']:02d}. {trk['title']} ({trk['duration_str']})")
+      print()
+    else:
+      print(f"[-] Failed: {res.get('error')}")
     return
 
   if args.classic:

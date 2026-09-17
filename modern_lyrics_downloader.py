@@ -46,6 +46,9 @@ import smart_playlists
 import lyrics_translation
 import audio_transcoder
 import listening_stats
+import lyrics_creator
+import audio_fingerprint
+import discography_scraper
 
 APP_VERSION = "2.1.0"
 GITHUB_REPO = "Sandeep2062/Sonance"
@@ -711,6 +714,82 @@ class LyricsAPI:
     def clear_listening_history(self) -> Dict[str, Any]:
         """Resets local listening history."""
         return listening_stats.clear_listening_history()
+
+    # ------------------ Phase 10: Interactive LRC Creator Studio ------------------
+    def parse_lyrics_for_creator(self, raw_text: str) -> List[Dict[str, Any]]:
+        """Parses plain lyrics into structured items for real-time stamping."""
+        return lyrics_creator.parse_plain_lyrics(raw_text)
+
+    def save_created_lrc(
+        self,
+        audio_path: str,
+        lines: List[Dict[str, Any]],
+        title: str = "",
+        artist: str = "",
+        album: str = ""
+    ) -> Dict[str, Any]:
+        """Builds and saves stamped RFC-compliant .lrc lyrics to disk and metadata."""
+        lrc_text = lyrics_creator.build_lrc_string(lines, title, artist, album)
+        return lyrics_creator.save_lrc_file(audio_path, lrc_text)
+
+    def shift_created_lrc_lines(self, lines: List[Dict[str, Any]], offset_seconds: float) -> List[Dict[str, Any]]:
+        """Shifts timestamped lines forward or backward."""
+        return lyrics_creator.shift_all_timestamps(lines, offset_seconds)
+
+    # ------------------ Phase 10: Acoustic Audio Fingerprinting ------------------
+    def identify_audio_track(self, file_path: str) -> Dict[str, Any]:
+        """Identifies an unknown audio file via acoustic properties and catalog query."""
+        return audio_fingerprint.identify_track(file_path)
+
+    # ------------------ Phase 10: Artist Discography & Album Downloader -----------
+    def get_artist_discography(self, artist_name: str, max_albums: int = 15) -> Dict[str, Any]:
+        """Fetches complete discography with studio albums, EPs, and tracklists."""
+        return discography_scraper.get_full_discography(artist_name, include_tracks=True, max_albums=max_albums)
+
+    def get_album_tracks(self, album_id: str) -> List[Dict[str, Any]]:
+        """Fetches tracklist for an album ID."""
+        return discography_scraper.get_album_tracklist(album_id)
+
+    # ------------------ Phase 10: Podcast & Audiobook Bookmarking -----------------
+    def save_playback_bookmark(self, file_path: str, position_sec: float) -> Dict[str, Any]:
+        """Saves current playback position for long files (>15 min) or podcasts."""
+        try:
+            bm_file = APP_DIR / "cache" / "playback_bookmarks.json"
+            bm_file.parent.mkdir(parents=True, exist_ok=True)
+            data = {}
+            if bm_file.exists():
+                with open(bm_file, "r", encoding="utf-8") as f:
+                    data = json.load(f)
+            data[file_path] = {
+                "position": round(position_sec, 1),
+                "timestamp": round(position_sec, 1)
+            }
+            with open(bm_file, "w", encoding="utf-8") as f:
+                json.dump(data, f, indent=2)
+            return {"success": True}
+        except Exception as e:
+            return {"success": False, "error": str(e)}
+
+    def get_playback_bookmark(self, file_path: str) -> Dict[str, Any]:
+        """Retrieves saved bookmark for an audio file."""
+        try:
+            bm_file = APP_DIR / "cache" / "playback_bookmarks.json"
+            if bm_file.exists():
+                with open(bm_file, "r", encoding="utf-8") as f:
+                    data = json.load(f)
+                    rec = data.get(file_path)
+                    if rec and rec.get("position", 0) > 15:
+                        pos = rec["position"]
+                        mins = int(pos // 60)
+                        secs = int(pos % 60)
+                        return {
+                            "has_bookmark": True,
+                            "position": pos,
+                            "position_str": f"{mins}:{secs:02d}"
+                        }
+        except Exception:
+            pass
+        return {"has_bookmark": False, "position": 0}
 
     def _save_last_folder(self, folder: str):
         try:

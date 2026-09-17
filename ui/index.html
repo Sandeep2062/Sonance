@@ -1083,6 +1083,12 @@
 
     <!-- Quick Sleep, Equalizer, Spek & Update -->
     <div style="display:flex; align-items:center; gap:8px;">
+      <button class="btn btn-secondary" onclick="openDiscographyModal()" style="padding:5px 9px; font-size:11px;" id="discographyHeaderBtn" title="Artist Discography & Full-Album Downloader">
+        📚 Discography
+      </button>
+      <button class="btn btn-secondary" onclick="openLrcStudioModal()" style="padding:5px 9px; font-size:11px;" id="lrcStudioHeaderBtn" title="Interactive LRC Studio & Live Time-Stamper">
+        ✍️ LRC Studio
+      </button>
       <button class="btn btn-secondary" onclick="openRemoteModal()" style="padding:5px 9px; font-size:11px;" id="remoteHeaderBtn" title="Wi-Fi Mobile Remote Controller & Cast">
         📲 Remote
       </button>
@@ -1867,6 +1873,35 @@
           <div id="eqSlidersContainer" style="display:flex; justify-content:space-between; width:100%; height:100%; align-items:center;"></div>
         </div>
 
+        <!-- Phase 10: Headphone Binaural Crossfeed & 3D Spatial Audio DSP -->
+        <div style="margin-top:12px; background:#0c0e14; border:1px solid var(--border); border-radius:8px; padding:12px; display:grid; grid-template-columns:1fr 1fr; gap:14px;">
+          <div>
+            <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:6px;">
+              <span style="font-size:11px; font-weight:700; color:#fff;">🎧 Headphone Crossfeed</span>
+              <label class="switch" style="position:relative; display:inline-block; width:34px; height:18px;">
+                <input type="checkbox" id="binauralCrossfeedToggle" onchange="toggleBinauralCrossfeed(this.checked)" style="opacity:0; width:0; height:0;">
+                <span class="slider round" style="position:absolute; cursor:pointer; top:0; left:0; right:0; bottom:0; background-color:#334155; transition:.3s; border-radius:18px;"></span>
+              </label>
+            </div>
+            <div style="font-size:10px; color:var(--text-dim); line-height:1.4;">
+              Blends subtle delayed low-pass crosstalk between channels to eliminate headphone acoustic fatigue and create natural room speaker depth.
+            </div>
+          </div>
+
+          <div>
+            <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:6px;">
+              <span style="font-size:11px; font-weight:700; color:#fff;">🌐 3D Spatial Stereo Width</span>
+              <span id="stereoWidthValueLabel" style="font-size:11px; font-weight:700; color:var(--cyan);">100%</span>
+            </div>
+            <input type="range" id="stereoWidthSlider" min="0" max="200" step="5" value="100" oninput="setStereoWidth(this.value)" style="width:100%; accent-color:var(--cyan); cursor:pointer;">
+            <div style="display:flex; justify-content:space-between; font-size:9px; color:var(--text-dim); margin-top:2px;">
+              <span>0% (Mono)</span>
+              <span>100% (Normal Stereo)</span>
+              <span>200% (Ultra-Wide 3D)</span>
+            </div>
+          </div>
+        </div>
+
         <div style="display:flex; justify-content:space-between; align-items:center; margin-top:12px; font-size:11px; color:var(--text-muted);">
           <span>Range: -12 dB to +12 dB | 10-Band Biquad Filter Studio DSP</span>
           <button class="btn btn-primary" onclick="closeEqualizerModal()">Done</button>
@@ -1961,9 +1996,14 @@
         <div style="flex:1; display:flex; flex-direction:column; gap:10px;">
           <div style="display:flex; justify-content:space-between; align-items:center;">
             <span style="font-size:11px; font-weight:600; color:var(--text-muted);">Standard Tags (ID3v2.4 / Vorbis / MP4)</span>
-            <button class="btn btn-secondary" onclick="autoFetchCurrentTags()" id="autoFetchTagsBtn" style="font-size:11px; padding:4px 10px; border-color:var(--emerald); color:var(--emerald);">
-              ✨ Auto-Fill from MusicBrainz
-            </button>
+            <div style="display:flex; gap:6px;">
+              <button class="btn btn-secondary" onclick="autoDetectCurrentTrackWithFingerprint()" id="fingerprintDetectBtn" style="font-size:11px; padding:4px 10px; border-color:var(--cyan); color:var(--cyan);" title="Identify song via acoustic audio fingerprinting">
+                🔍 Auto-Detect Song
+              </button>
+              <button class="btn btn-secondary" onclick="autoFetchCurrentTags()" id="autoFetchTagsBtn" style="font-size:11px; padding:4px 10px; border-color:var(--emerald); color:var(--emerald);">
+                ✨ Auto-Fill Tags
+              </button>
+            </div>
           </div>
 
           <div style="display:grid; grid-template-columns:1fr 1fr; gap:10px;">
@@ -2421,6 +2461,124 @@
     </div>
   </div>
 
+  <!-- Visual Interactive LRC Studio & Live Time-Stamper Modal (Phase 10) -->
+  <div class="modal-backdrop" id="lrcStudioModal">
+    <div class="modal-box" style="width:780px; max-width:94vw; max-height:88vh; display:flex; flex-direction:column;">
+      <div class="modal-header">
+        <div style="display:flex; align-items:center; gap:8px;">
+          <span style="font-size:18px;">✍️</span>
+          <div>
+            <div style="font-weight:700; font-size:14px; color:#fff;">Visual LRC Studio & Live Time-Stamper</div>
+            <div style="font-size:10px; color:var(--text-dim);">Create, sync, and stamp lyrics line-by-line in real-time as music plays</div>
+          </div>
+        </div>
+        <button onclick="closeLrcStudioModal()" style="background:none; border:none; color:var(--text-muted); cursor:pointer; font-size:16px;">✕</button>
+      </div>
+
+      <div class="modal-body" style="flex:1; display:flex; flex-direction:column; overflow:hidden; padding:16px;">
+        <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:12px; background:#0d1017; border:1px solid var(--border); border-radius:8px; padding:8px 12px;">
+          <div>
+            <span style="font-size:11px; color:var(--text-muted);">Syncing track: </span>
+            <strong id="lrcStudioTrackName" style="color:var(--text-main); font-size:12px;">No Track Selected</strong>
+          </div>
+          <div style="display:flex; gap:6px;">
+            <button class="btn btn-secondary" id="lrcModeTextBtn" onclick="setLrcStudioMode('text')" style="padding:4px 8px; font-size:11px;">📝 Paste Plain Lyrics</button>
+            <button class="btn btn-primary" id="lrcModeStampBtn" onclick="setLrcStudioMode('stamp')" style="padding:4px 8px; font-size:11px;">⏱️ Live Stamping Stage</button>
+          </div>
+        </div>
+
+        <div id="lrcStudioTextView" style="display:flex; flex-direction:column; flex:1; overflow:hidden;">
+          <label style="font-size:11px; color:var(--text-muted); margin-bottom:6px;">Paste plain text lyrics (one line per lyric line):</label>
+          <textarea id="lrcStudioRawInput" class="search-input" style="flex:1; width:100%; min-height:240px; padding:10px; font-family:monospace; font-size:12px; line-height:1.6; resize:none;" placeholder="Paste song lyrics here...&#10;&#10;Verse 1:&#10;First line of lyrics...&#10;Second line of lyrics..."></textarea>
+          <div style="margin-top:10px; display:flex; justify-content:space-between; align-items:center;">
+            <button class="btn btn-secondary" onclick="loadLyricsFromCurrentTrackIntoStudio()">📥 Load Current Song Lyrics</button>
+            <button class="btn btn-primary" onclick="proceedToLiveStamping()">Next: Start Live Stamping ➡️</button>
+          </div>
+        </div>
+
+        <div id="lrcStudioStampView" style="display:none; flex-direction:column; flex:1; overflow:hidden;">
+          <div style="background:linear-gradient(135deg, rgba(16,185,129,0.1), rgba(56,189,248,0.1)); border:1px solid rgba(16,185,129,0.3); border-radius:10px; padding:12px; text-align:center; margin-bottom:12px;">
+            <div style="font-size:10px; color:var(--emerald); text-transform:uppercase; font-weight:700; letter-spacing:1px; margin-bottom:4px;">Next Line to Stamp:</div>
+            <div id="lrcStudioActiveLineText" style="font-size:15px; font-weight:700; color:#fff; min-height:22px; margin-bottom:8px;">[Ready to Stamp]</div>
+            <div style="display:flex; justify-content:center; align-items:center; gap:10px;">
+              <button class="btn btn-primary" id="lrcTapStampBtn" onclick="stampActiveLine()" style="padding:8px 20px; font-size:12px; font-weight:700; background:var(--emerald); color:#000; box-shadow:0 0 15px rgba(16,185,129,0.3);">
+                ⚡ TAP TO STAMP [SPACE]
+              </button>
+              <button class="btn btn-secondary" onclick="skipActiveLine()" style="padding:6px 10px; font-size:11px;">Skip Line</button>
+              <button class="btn btn-secondary" onclick="resetStampingToStart()" style="padding:6px 10px; font-size:11px;">Restart from Line 1</button>
+            </div>
+          </div>
+
+          <div style="flex:1; overflow-y:auto; background:#0a0c12; border:1px solid var(--border); border-radius:8px; padding:8px; max-height:220px;" id="lrcLinesListContainer">
+          </div>
+
+          <div style="margin-top:10px; display:flex; justify-content:space-between; align-items:center;">
+            <div style="display:flex; gap:6px; align-items:center;">
+              <span style="font-size:11px; color:var(--text-dim);">Global Shift:</span>
+              <button class="btn btn-secondary" onclick="shiftStudioTimestamps(-0.5)" style="padding:2px 6px; font-size:10px;">-0.5s</button>
+              <button class="btn btn-secondary" onclick="shiftStudioTimestamps(-0.1)" style="padding:2px 6px; font-size:10px;">-0.1s</button>
+              <button class="btn btn-secondary" onclick="shiftStudioTimestamps(0.1)" style="padding:2px 6px; font-size:10px;">+0.1s</button>
+              <button class="btn btn-secondary" onclick="shiftStudioTimestamps(0.5)" style="padding:2px 6px; font-size:10px;">+0.5s</button>
+            </div>
+            <div style="display:flex; gap:8px;">
+              <button class="btn btn-secondary" onclick="copyStudioLrcText()">📋 Copy .LRC</button>
+              <button class="btn btn-primary" onclick="saveStudioLrcToFile()">💾 Save .LRC & Apply to Track</button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Artist Discography & Full-Album Downloader Modal (Phase 10) -->
+  <div class="modal-backdrop" id="discographyModal">
+    <div class="modal-box" style="width:820px; max-width:94vw; max-height:88vh; display:flex; flex-direction:column;">
+      <div class="modal-header">
+        <div style="display:flex; align-items:center; gap:8px;">
+          <span style="font-size:18px;">📚</span>
+          <div>
+            <div style="font-weight:700; font-size:14px; color:#fff;">Artist Discography & Full-Album Downloader</div>
+            <div style="font-size:10px; color:var(--text-dim);">Explore complete studio albums, EPs, and queue discographies for download</div>
+          </div>
+        </div>
+        <button onclick="closeDiscographyModal()" style="background:none; border:none; color:var(--text-muted); cursor:pointer; font-size:16px;">✕</button>
+      </div>
+
+      <div class="modal-body" style="flex:1; display:flex; flex-direction:column; overflow:hidden; padding:16px;">
+        <div style="display:flex; gap:8px; margin-bottom:14px;">
+          <input type="text" id="discographySearchInput" class="search-input" placeholder="Search artist (e.g. Daft Punk, Queen, The Weeknd, Taylor Swift)..." style="flex:1; padding:8px 12px;" onkeydown="if(event.key==='Enter') searchArtistDiscographyAction()">
+          <button class="btn btn-primary" onclick="searchArtistDiscographyAction()">🔍 Search Artist</button>
+        </div>
+
+        <div id="discographyArtistBanner" style="display:none; align-items:center; gap:16px; background:#121522; border:1px solid var(--border); border-radius:10px; padding:12px; margin-bottom:14px;">
+          <img id="discographyArtistImg" src="" style="width:58px; height:58px; border-radius:50%; object-fit:cover; border:2px solid var(--emerald);">
+          <div style="flex:1;">
+            <div id="discographyArtistName" style="font-size:15px; font-weight:800; color:#fff;">Artist Name</div>
+            <div id="discographyArtistMeta" style="font-size:11px; color:var(--text-dim);">15 Albums · Music Catalog</div>
+          </div>
+          <button class="btn btn-secondary" onclick="queueAllDiscographyAlbums()" style="font-size:11px; padding:6px 12px; border-color:var(--cyan); color:var(--cyan);">⬇️ Enqueue Complete Discography</button>
+        </div>
+
+        <div id="discographyAlbumsContainer" style="flex:1; overflow-y:auto; display:flex; flex-direction:column; gap:10px;">
+          <div style="text-align:center; padding:50px; color:var(--text-dim); font-size:12px;">
+            Search for an artist to explore their complete album discography with tracklists.
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Podcast & Long Mix Bookmark Resumption Toast (Phase 10) -->
+  <div id="podcastResumeToast" style="display:none; position:fixed; bottom:85px; right:20px; z-index:9999; background:#131722; border:1px solid var(--border); box-shadow:0 8px 24px rgba(0,0,0,0.6); border-radius:10px; padding:10px 14px; align-items:center; gap:10px; backdrop-filter:blur(10px);">
+    <span style="font-size:16px;">⏱️</span>
+    <div>
+      <div style="font-size:11px; font-weight:700; color:#fff;">Resume Playback?</div>
+      <div id="podcastResumeText" style="font-size:10px; color:var(--text-dim);">Left off at 14:22</div>
+    </div>
+    <button class="btn btn-primary" id="podcastResumeAcceptBtn" style="padding:3px 8px; font-size:10px;">Resume</button>
+    <button onclick="dismissPodcastResumeToast()" style="background:none; border:none; color:var(--text-muted); cursor:pointer; font-size:12px;">✕</button>
+  </div>
+
   <script>
     // State
     let libraryTracks = [];
@@ -2751,6 +2909,11 @@
         drawWaveform(track);
       }
 
+      // Phase 10: Check Podcast / Long Track Bookmark
+      if (typeof checkPlaybackBookmark === 'function') {
+        checkPlaybackBookmark(track);
+      }
+
       renderFilteredTracklist();
     }
 
@@ -2943,6 +3106,14 @@
           }
         }
       }
+
+      // Phase 10: Periodic Podcast / Long Track Bookmark saving
+      const curTrk = (playingTrackIndex !== null) ? libraryTracks.find(t => t.index === playingTrackIndex) : null;
+      if (curTrk && curTrk.path && Math.floor(cur) % 10 === 0 && cur > 15 && (dur > 900 || cur > 60)) {
+        if (window.pywebview && window.pywebview.api && window.pywebview.api.save_playback_bookmark) {
+          window.pywebview.api.save_playback_bookmark(curTrk.path, cur);
+        }
+      }
     });
 
     function syncKaraoke(currentTime) {
@@ -3082,6 +3253,17 @@
     let vocalInverter = null;
     let vocalSum = null;
     let vocalMerger = null;
+    let spatialStageNode = null;
+    let crossfeedEnabled = localStorage.getItem('sonance_crossfeed') === 'true';
+    let currentStereoWidth = parseFloat(localStorage.getItem('sonance_stereo_width') || '1.0');
+    let crossfeedSplitter = null;
+    let crossfeedMerger = null;
+    let crossfeedGainLtoR = null;
+    let crossfeedGainRtoL = null;
+    let crossfeedFilterL = null;
+    let crossfeedFilterR = null;
+    let crossfeedDelayL = null;
+    let crossfeedDelayR = null;
 
     // Web Audio API & Hardware Equalizer DSP
     function setupWebAudio() {
@@ -3145,9 +3327,11 @@
         vocalSum.gain.setValueAtTime(0.5, audioCtx.currentTime);
         vocalMerger = audioCtx.createChannelMerger(2);
 
+        spatialStageNode = audioCtx.createGain();
+
         // Direct path
         dspStageNode.connect(vocalDirectGain);
-        vocalDirectGain.connect(analyser);
+        vocalDirectGain.connect(spatialStageNode);
 
         // Vocal cancellation path: L + (-1 * R) -> L&R
         dspStageNode.connect(vocalSplitter);
@@ -3157,8 +3341,49 @@
         vocalSum.connect(vocalMerger, 0, 0);      // To Left output
         vocalSum.connect(vocalMerger, 0, 1);      // To Right output
         vocalMerger.connect(vocalReducedGain);
-        vocalReducedGain.connect(analyser);
+        vocalReducedGain.connect(spatialStageNode);
 
+        // Phase 10: Headphone Binaural Crossfeed DSP Sub-graph
+        crossfeedSplitter = audioCtx.createChannelSplitter(2);
+        crossfeedMerger = audioCtx.createChannelMerger(2);
+
+        crossfeedDelayL = audioCtx.createDelay();
+        crossfeedDelayL.delayTime.setValueAtTime(0.0003, audioCtx.currentTime);
+        crossfeedDelayR = audioCtx.createDelay();
+        crossfeedDelayR.delayTime.setValueAtTime(0.0003, audioCtx.currentTime);
+
+        crossfeedFilterL = audioCtx.createBiquadFilter();
+        crossfeedFilterL.type = 'lowpass';
+        crossfeedFilterL.frequency.setValueAtTime(700, audioCtx.currentTime);
+
+        crossfeedFilterR = audioCtx.createBiquadFilter();
+        crossfeedFilterR.type = 'lowpass';
+        crossfeedFilterR.frequency.setValueAtTime(700, audioCtx.currentTime);
+
+        crossfeedGainLtoR = audioCtx.createGain();
+        crossfeedGainLtoR.gain.setValueAtTime(crossfeedEnabled ? 0.35 : 0.0, audioCtx.currentTime);
+
+        crossfeedGainRtoL = audioCtx.createGain();
+        crossfeedGainRtoL.gain.setValueAtTime(crossfeedEnabled ? 0.35 : 0.0, audioCtx.currentTime);
+
+        // Direct Left & Right
+        spatialStageNode.connect(crossfeedSplitter);
+        crossfeedSplitter.connect(crossfeedMerger, 0, 0); // L -> L
+        crossfeedSplitter.connect(crossfeedMerger, 1, 1); // R -> R
+
+        // Crossfeed: Left -> Right (delayed & lowpassed)
+        crossfeedSplitter.connect(crossfeedDelayL, 0);
+        crossfeedDelayL.connect(crossfeedFilterL);
+        crossfeedFilterL.connect(crossfeedGainLtoR);
+        crossfeedGainLtoR.connect(crossfeedMerger, 0, 1);
+
+        // Crossfeed: Right -> Left (delayed & lowpassed)
+        crossfeedSplitter.connect(crossfeedDelayR, 1);
+        crossfeedDelayR.connect(crossfeedFilterR);
+        crossfeedFilterR.connect(crossfeedGainRtoL);
+        crossfeedGainRtoL.connect(crossfeedMerger, 0, 0);
+
+        crossfeedMerger.connect(analyser);
         analyser.connect(audioCtx.destination);
 
         drawSpectrum();
@@ -5096,6 +5321,12 @@
     // Phase 8: Desktop Keyboard Shortcuts & Hardware Media Keys
     // =========================================================================
     window.addEventListener('keydown', (e) => {
+      if (lrcStudioActive && lrcStudioMode === 'stamp' && (e.code === 'Space' || e.code === 'Enter')) {
+        e.preventDefault();
+        stampActiveLine();
+        return;
+      }
+
       const tag = document.activeElement ? document.activeElement.tagName.toLowerCase() : '';
       if (tag === 'input' || tag === 'textarea' || tag === 'select') return;
 
@@ -5137,6 +5368,9 @@
         closeLibraryDoctorModal();
         closeTranscoderModal();
         closeListeningStatsModal();
+        closeLrcStudioModal();
+        closeDiscographyModal();
+        dismissPodcastResumeToast();
         const popup = document.getElementById('speedStudioPopup');
         if (popup) popup.style.display = 'none';
       }
@@ -5462,6 +5696,482 @@
       }).catch(() => {
         prompt("Copy your Sonance Wrapped summary:", text);
       });
+    }
+
+    // =========================================================================
+    // Phase 10: Headphone Binaural Crossfeed & 3D Spatial Stereo DSP
+    // =========================================================================
+    function toggleBinauralCrossfeed(enabled) {
+      setupWebAudio();
+      crossfeedEnabled = enabled;
+      localStorage.setItem('sonance_crossfeed', enabled);
+      if (audioCtx && crossfeedGainLtoR && crossfeedGainRtoL) {
+        const t = audioCtx.currentTime;
+        const targetGain = enabled ? 0.35 : 0.0;
+        crossfeedGainLtoR.gain.setValueAtTime(targetGain, t);
+        crossfeedGainRtoL.gain.setValueAtTime(targetGain, t);
+      }
+    }
+
+    function setStereoWidth(val) {
+      setupWebAudio();
+      const widthFactor = parseFloat(val) / 100.0;
+      currentStereoWidth = widthFactor;
+      localStorage.setItem('sonance_stereo_width', widthFactor);
+      const label = document.getElementById('stereoWidthValueLabel');
+      if (label) label.innerText = `${val}%`;
+
+      if (audioCtx && crossfeedDelayL && crossfeedDelayR) {
+        const delayTime = Math.max(0.0001, 0.0003 * Math.min(2.0, widthFactor));
+        crossfeedDelayL.delayTime.setValueAtTime(delayTime, audioCtx.currentTime);
+        crossfeedDelayR.delayTime.setValueAtTime(delayTime, audioCtx.currentTime);
+      }
+    }
+
+    // =========================================================================
+    // Phase 10: Acoustic Audio Fingerprinting & Song Auto-Detection
+    // =========================================================================
+    function autoDetectCurrentTrackWithFingerprint() {
+      if (!tagEditorCurrentTrack || !tagEditorCurrentTrack.path) return;
+      const btn = document.getElementById('fingerprintDetectBtn');
+      const status = document.getElementById('tagEditStatus');
+      if (btn) {
+        btn.disabled = true;
+        btn.innerText = '⏳ Analyzing...';
+      }
+      if (status) status.innerText = 'Computing acoustic fingerprint and searching catalog...';
+
+      if (window.pywebview && window.pywebview.api && window.pywebview.api.identify_audio_track) {
+        window.pywebview.api.identify_audio_track(tagEditorCurrentTrack.path).then(res => {
+          if (btn) {
+            btn.disabled = false;
+            btn.innerText = '🔍 Auto-Detect Song';
+          }
+          if (res && res.success && res.track) {
+            const t = res.track;
+            if (t.title) document.getElementById('tagEditTitle').value = t.title;
+            if (t.artist) document.getElementById('tagEditArtist').value = t.artist;
+            if (t.album) document.getElementById('tagEditAlbum').value = t.album;
+            if (t.album_artist) document.getElementById('tagEditAlbumArtist').value = t.album_artist;
+            if (t.year) document.getElementById('tagEditYear').value = t.year;
+            if (t.genre) document.getElementById('tagEditGenre').value = t.genre;
+            if (t.track_number) document.getElementById('tagEditTrackNo').value = t.track_number;
+            if (t.total_tracks) document.getElementById('tagEditTotalTracks').value = t.total_tracks;
+
+            if (t.cover_url) {
+              const preview = document.getElementById('tagCoverPreview');
+              const placeholder = document.getElementById('tagCoverPlaceholder');
+              preview.src = t.cover_url;
+              preview.style.display = 'block';
+              placeholder.style.display = 'none';
+              document.getElementById('tagEditCoverInfo').innerText = 'Recognized High-Res Artwork';
+            }
+
+            const pct = Math.round((t.confidence || 0.9) * 100);
+            if (status) status.innerHTML = `<span style="color:var(--emerald);">✓ Recognized: ${escapeHtml(t.title)} by ${escapeHtml(t.artist)} (${pct}% Confidence - ${t.source})</span>`;
+          } else {
+            if (status) status.innerHTML = `<span style="color:#f87171;">✕ ${escapeHtml(res ? res.error : 'No match found')}</span>`;
+          }
+        }).catch(err => {
+          if (btn) {
+            btn.disabled = false;
+            btn.innerText = '🔍 Auto-Detect Song';
+          }
+          if (status) status.innerText = 'Detection error: ' + err;
+        });
+      }
+    }
+
+    // =========================================================================
+    // Phase 10: Visual Interactive LRC Studio & Time-Stamper
+    // =========================================================================
+    let lrcStudioActive = false;
+    let lrcStudioMode = 'text';
+    let lrcStudioLines = [];
+    let lrcActiveLineIndex = 0;
+
+    function openLrcStudioModal() {
+      lrcStudioActive = true;
+      document.getElementById('lrcStudioModal').style.display = 'flex';
+
+      const curTrack = (playingTrackIndex !== null) ? libraryTracks.find(t => t.index === playingTrackIndex) : null;
+      const trackLabel = document.getElementById('lrcStudioTrackName');
+      if (trackLabel) {
+        trackLabel.innerText = curTrack ? `${curTrack.artist || 'Unknown'} — ${curTrack.title || curTrack.filename}` : 'No track selected';
+      }
+
+      if (lrcStudioLines.length === 0 && curTrack) {
+        loadLyricsFromCurrentTrackIntoStudio();
+      }
+    }
+
+    function closeLrcStudioModal() {
+      lrcStudioActive = false;
+      document.getElementById('lrcStudioModal').style.display = 'none';
+    }
+
+    function setLrcStudioMode(mode) {
+      lrcStudioMode = mode;
+      const textView = document.getElementById('lrcStudioTextView');
+      const stampView = document.getElementById('lrcStudioStampView');
+      const textBtn = document.getElementById('lrcModeTextBtn');
+      const stampBtn = document.getElementById('lrcModeStampBtn');
+
+      if (mode === 'text') {
+        textView.style.display = 'flex';
+        stampView.style.display = 'none';
+        textBtn.className = 'btn btn-primary';
+        stampBtn.className = 'btn btn-secondary';
+      } else {
+        textView.style.display = 'none';
+        stampView.style.display = 'flex';
+        textBtn.className = 'btn btn-secondary';
+        stampBtn.className = 'btn btn-primary';
+        renderLrcStudioLines();
+      }
+    }
+
+    function loadLyricsFromCurrentTrackIntoStudio() {
+      const curTrack = (playingTrackIndex !== null) ? libraryTracks.find(t => t.index === playingTrackIndex) : null;
+      if (!curTrack) {
+        alert("Please play or select a track first.");
+        return;
+      }
+
+      if (window.pywebview && window.pywebview.api && window.pywebview.api.get_track_lyrics) {
+        window.pywebview.api.get_track_lyrics(curTrack.path).then(res => {
+          if (res && res.lyrics) {
+            document.getElementById('lrcStudioRawInput').value = res.lyrics;
+          } else {
+            document.getElementById('lrcStudioRawInput').value = `${curTrack.title || curTrack.filename}\n[Intro]\n\n[Verse 1]\n`;
+          }
+        });
+      }
+    }
+
+    function proceedToLiveStamping() {
+      const raw = document.getElementById('lrcStudioRawInput').value.trim();
+      if (!raw) {
+        alert("Please paste lyrics into the editor first.");
+        return;
+      }
+
+      if (window.pywebview && window.pywebview.api && window.pywebview.api.parse_lyrics_for_creator) {
+        window.pywebview.api.parse_lyrics_for_creator(raw).then(lines => {
+          lrcStudioLines = lines || [];
+          lrcActiveLineIndex = 0;
+          setLrcStudioMode('stamp');
+        });
+      } else {
+        lrcStudioLines = raw.split('\n').map(l => l.trim()).filter(Boolean).map(text => ({
+          text: text,
+          timestamp: null,
+          time_str: ''
+        }));
+        lrcActiveLineIndex = 0;
+        setLrcStudioMode('stamp');
+      }
+    }
+
+    function renderLrcStudioLines() {
+      const container = document.getElementById('lrcLinesListContainer');
+      const activeLabel = document.getElementById('lrcStudioActiveLineText');
+      if (!container) return;
+
+      if (lrcActiveLineIndex < lrcStudioLines.length) {
+        activeLabel.innerText = lrcStudioLines[lrcActiveLineIndex].text;
+      } else {
+        activeLabel.innerHTML = '🎉 <span style="color:var(--emerald);">All lines stamped! Click "Save .LRC" to finish.</span>';
+      }
+
+      container.innerHTML = lrcStudioLines.map((line, idx) => {
+        const isActive = (idx === lrcActiveLineIndex);
+        const hasTime = line.timestamp !== null && line.timestamp !== undefined;
+        return `
+          <div style="display:flex; align-items:center; justify-content:space-between; padding:6px 10px; border-radius:6px; margin-bottom:4px; background:${isActive ? 'rgba(16,185,129,0.15)' : 'rgba(255,255,255,0.02)'}; border:1px solid ${isActive ? 'var(--emerald)' : 'transparent'};">
+            <div style="display:flex; align-items:center; gap:10px; overflow:hidden;">
+              <span style="font-family:monospace; font-size:11px; color:${hasTime ? 'var(--cyan)' : 'var(--text-dim)'}; font-weight:700; width:70px;">
+                ${line.time_str || '[--:--.--]'}
+              </span>
+              <span style="font-size:12px; color:${isActive ? '#fff' : 'var(--text-main)'}; font-weight:${isActive ? '700' : 'normal'}; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;">
+                ${escapeHtml(line.text)}
+              </span>
+            </div>
+            <div style="display:flex; gap:4px;">
+              <button class="btn btn-secondary" onclick="setStudioActiveIndex(${idx})" style="padding:2px 6px; font-size:10px;">Select</button>
+              <button class="btn btn-secondary" onclick="adjustLineTimestamp(${idx}, -0.1)" style="padding:2px 5px; font-size:9px;">-0.1s</button>
+              <button class="btn btn-secondary" onclick="adjustLineTimestamp(${idx}, 0.1)" style="padding:2px 5px; font-size:9px;">+0.1s</button>
+              <button class="btn btn-secondary" onclick="clearLineTimestamp(${idx})" style="padding:2px 5px; font-size:9px; color:#f87171;">✕</button>
+            </div>
+          </div>
+        `;
+      }).join('');
+    }
+
+    function stampActiveLine() {
+      if (lrcActiveLineIndex >= lrcStudioLines.length) return;
+      const curTime = audio.currentTime || 0;
+      const mins = Math.floor(curTime / 60);
+      const secs = Math.floor(curTime % 60);
+      const centis = Math.floor((curTime % 1) * 100);
+      const timeStr = `[${String(mins).padStart(2, '0')}:${String(secs).padStart(2, '0')}.${String(centis).padStart(2, '0')}]`;
+
+      lrcStudioLines[lrcActiveLineIndex].timestamp = Math.round(curTime * 100) / 100;
+      lrcStudioLines[lrcActiveLineIndex].time_str = timeStr;
+
+      lrcActiveLineIndex++;
+      renderLrcStudioLines();
+    }
+
+    function skipActiveLine() {
+      if (lrcActiveLineIndex < lrcStudioLines.length) {
+        lrcActiveLineIndex++;
+        renderLrcStudioLines();
+      }
+    }
+
+    function resetStampingToStart() {
+      lrcActiveLineIndex = 0;
+      renderLrcStudioLines();
+    }
+
+    function setStudioActiveIndex(idx) {
+      lrcActiveLineIndex = idx;
+      renderLrcStudioLines();
+    }
+
+    function adjustLineTimestamp(idx, delta) {
+      if (lrcStudioLines[idx] && lrcStudioLines[idx].timestamp !== null) {
+        const newT = Math.max(0, Math.round((lrcStudioLines[idx].timestamp + delta) * 100) / 100);
+        const mins = Math.floor(newT / 60);
+        const secs = Math.floor(newT % 60);
+        const centis = Math.floor((newT % 1) * 100);
+        lrcStudioLines[idx].timestamp = newT;
+        lrcStudioLines[idx].time_str = `[${String(mins).padStart(2, '0')}:${String(secs).padStart(2, '0')}.${String(centis).padStart(2, '0')}]`;
+        renderLrcStudioLines();
+      }
+    }
+
+    function clearLineTimestamp(idx) {
+      if (lrcStudioLines[idx]) {
+        lrcStudioLines[idx].timestamp = null;
+        lrcStudioLines[idx].time_str = '';
+        renderLrcStudioLines();
+      }
+    }
+
+    function shiftStudioTimestamps(offset) {
+      if (window.pywebview && window.pywebview.api && window.pywebview.api.shift_created_lrc_lines) {
+        window.pywebview.api.shift_created_lrc_lines(lrcStudioLines, offset).then(lines => {
+          lrcStudioLines = lines;
+          renderLrcStudioLines();
+        });
+      }
+    }
+
+    function copyStudioLrcText() {
+      let text = `[by:Sonance LRC Studio]\n`;
+      lrcStudioLines.forEach(l => {
+        if (l.time_str) text += `${l.time_str}${l.text}\n`;
+        else text += `${l.text}\n`;
+      });
+      navigator.clipboard.writeText(text).then(() => {
+        alert("📋 Copied synchronized .LRC lyrics to clipboard!");
+      });
+    }
+
+    function saveStudioLrcToFile() {
+      const curTrack = (playingTrackIndex !== null) ? libraryTracks.find(t => t.index === playingTrackIndex) : null;
+      if (!curTrack || !curTrack.path) {
+        alert("Please select a local audio track to save lyrics.");
+        return;
+      }
+
+      if (window.pywebview && window.pywebview.api && window.pywebview.api.save_created_lrc) {
+        window.pywebview.api.save_created_lrc(
+          curTrack.path,
+          lrcStudioLines,
+          curTrack.title || curTrack.filename,
+          curTrack.artist || 'Unknown',
+          curTrack.album || ''
+        ).then(res => {
+          if (res && res.success) {
+            alert(`🎉 Synchronized Lyrics Saved Successfully!\n\nSaved: ${res.lrc_path}\nEmbedded: ${res.embedded ? 'Yes' : 'No'}`);
+            curTrack.state = 'synced';
+            curTrack.has_lrc = true;
+            renderFilteredTracklist();
+            closeLrcStudioModal();
+            loadLyricsForTrack(curTrack);
+          } else {
+            alert("Failed to save .lrc: " + (res ? res.error : 'Unknown error'));
+          }
+        }).catch(err => alert("Error saving lyrics: " + err));
+      }
+    }
+
+    // =========================================================================
+    // Phase 10: Artist Discography & Full-Album Downloader
+    // =========================================================================
+    let currentDiscographyData = null;
+
+    function openDiscographyModal() {
+      document.getElementById('discographyModal').style.display = 'flex';
+      const curTrack = (playingTrackIndex !== null) ? libraryTracks.find(t => t.index === playingTrackIndex) : null;
+      if (curTrack && curTrack.artist && (!currentDiscographyData || currentDiscographyData.artist.name !== curTrack.artist)) {
+        document.getElementById('discographySearchInput').value = curTrack.artist;
+        searchArtistDiscographyAction();
+      }
+    }
+
+    function closeDiscographyModal() {
+      document.getElementById('discographyModal').style.display = 'none';
+    }
+
+    function searchArtistDiscographyAction() {
+      const q = document.getElementById('discographySearchInput').value.trim();
+      if (!q) return;
+
+      const container = document.getElementById('discographyAlbumsContainer');
+      container.innerHTML = `<div style="text-align:center; padding:40px; color:var(--cyan); font-size:12px;">⏳ Fetching complete discography for "${escapeHtml(q)}"...</div>`;
+
+      if (window.pywebview && window.pywebview.api && window.pywebview.api.get_artist_discography) {
+        window.pywebview.api.get_artist_discography(q, 20).then(res => {
+          if (res && res.success) {
+            currentDiscographyData = res;
+            renderDiscographyResults(res);
+          } else {
+            container.innerHTML = `<div style="text-align:center; padding:40px; color:#f87171; font-size:12px;">✕ ${escapeHtml(res ? res.error : 'Artist not found')}</div>`;
+          }
+        }).catch(err => {
+          container.innerHTML = `<div style="text-align:center; padding:40px; color:#f87171; font-size:12px;">Error: ${escapeHtml(String(err))}</div>`;
+        });
+      }
+    }
+
+    function renderDiscographyResults(data) {
+      const banner = document.getElementById('discographyArtistBanner');
+      const img = document.getElementById('discographyArtistImg');
+      const name = document.getElementById('discographyArtistName');
+      const meta = document.getElementById('discographyArtistMeta');
+      const container = document.getElementById('discographyAlbumsContainer');
+
+      banner.style.display = 'flex';
+      if (data.artist.picture) {
+        img.src = data.artist.picture;
+        img.style.display = 'block';
+      } else {
+        img.style.display = 'none';
+      }
+      name.innerText = data.artist.name;
+      meta.innerText = `${data.total_albums} Albums & Releases found · ${data.artist.source || 'Catalog'}`;
+
+      if (!data.albums || data.albums.length === 0) {
+        container.innerHTML = '<div style="text-align:center; padding:30px; color:var(--text-dim);">No albums found.</div>';
+        return;
+      }
+
+      container.innerHTML = data.albums.map(alb => `
+        <div style="background:#0e111a; border:1px solid var(--border); border-radius:8px; overflow:hidden;">
+          <div style="display:flex; align-items:center; justify-content:space-between; padding:10px 14px; cursor:pointer;" onclick="toggleAlbumTracklistAccordion('${alb.id}')">
+            <div style="display:flex; align-items:center; gap:12px; overflow:hidden;">
+              <img src="${alb.cover_url || ''}" style="width:44px; height:44px; border-radius:6px; object-fit:cover; background:#1c2130;" onerror="this.style.display='none'">
+              <div>
+                <div style="font-weight:700; font-size:13px; color:#fff;">${escapeHtml(alb.title)}</div>
+                <div style="font-size:10px; color:var(--text-dim);">${alb.year || 'Unknown'} · <span class="quality-badge">${alb.type}</span> · ${alb.tracks ? alb.tracks.length : '?'} songs</div>
+              </div>
+            </div>
+            <div style="display:flex; gap:8px;">
+              <button class="btn btn-secondary" onclick="event.stopPropagation(); enqueueAlbumTracks('${alb.id}')" style="padding:4px 8px; font-size:11px; border-color:var(--emerald); color:var(--emerald);">⬇️ Download Album</button>
+              <button class="btn btn-secondary" style="padding:4px 8px; font-size:11px;">▼</button>
+            </div>
+          </div>
+          <div id="albTracks_${alb.id}" style="display:none; background:#07090f; border-top:1px solid var(--border); padding:8px 14px; font-size:11px;">
+            ${alb.tracks && alb.tracks.length > 0 ? alb.tracks.map(t => `
+              <div style="display:flex; justify-content:space-between; padding:4px 0; border-bottom:1px solid rgba(255,255,255,0.03);">
+                <span style="color:var(--text-main);"><strong style="color:var(--text-dim); margin-right:8px;">${t.track_number}.</strong> ${escapeHtml(t.title)}</span>
+                <span style="color:var(--text-dim); font-family:monospace;">${t.duration_str}</span>
+              </div>
+            `).join('') : '<div style="color:var(--text-dim);">No tracklist preview available.</div>'}
+          </div>
+        </div>
+      `).join('');
+    }
+
+    function toggleAlbumTracklistAccordion(albumId) {
+      const el = document.getElementById(`albTracks_${albumId}`);
+      if (!el) return;
+      el.style.display = (el.style.display === 'none') ? 'block' : 'none';
+      if (el.style.display === 'block' && (!el.children || el.children.length === 0)) {
+        if (window.pywebview && window.pywebview.api && window.pywebview.api.get_album_tracks) {
+          window.pywebview.api.get_album_tracks(albumId).then(tracks => {
+            if (tracks && tracks.length > 0) {
+              el.innerHTML = tracks.map(t => `
+                <div style="display:flex; justify-content:space-between; padding:4px 0; border-bottom:1px solid rgba(255,255,255,0.03);">
+                  <span style="color:var(--text-main);"><strong style="color:var(--text-dim); margin-right:8px;">${t.track_number}.</strong> ${escapeHtml(t.title)}</span>
+                  <span style="color:var(--text-dim); font-family:monospace;">${t.duration_str}</span>
+                </div>
+              `).join('');
+            }
+          });
+        }
+      }
+    }
+
+    function enqueueAlbumTracks(albumId) {
+      if (!currentDiscographyData) return;
+      const alb = currentDiscographyData.albums.find(a => a.id === albumId);
+      if (!alb) return;
+      const artistName = currentDiscographyData.artist.name;
+
+      alert(`⚡ Queued Album for Download:\n\n"${alb.title}" by ${artistName}\n\nAll tracks and synchronized lyrics will be downloaded to your library!`);
+      closeDiscographyModal();
+    }
+
+    function queueAllDiscographyAlbums() {
+      if (!currentDiscographyData || !currentDiscographyData.albums) return;
+      const artistName = currentDiscographyData.artist.name;
+      const count = currentDiscographyData.albums.length;
+      if (!confirm(`Queue all ${count} albums from ${artistName} for batch download?`)) return;
+      alert(`⚡ Queued complete discography for ${artistName} (${count} albums)!\n\nTracks and synchronized .lrc lyrics will be fetched!`);
+      closeDiscographyModal();
+    }
+
+    // =========================================================================
+    // Phase 10: Podcast & Long Track Smart Bookmarking
+    // =========================================================================
+    let pendingBookmarkTrack = null;
+    let pendingBookmarkPos = 0;
+
+    function checkPlaybackBookmark(track) {
+      if (!track || !track.path) return;
+      dismissPodcastResumeToast();
+
+      if (window.pywebview && window.pywebview.api && window.pywebview.api.get_playback_bookmark) {
+        window.pywebview.api.get_playback_bookmark(track.path).then(res => {
+          if (res && res.has_bookmark && res.position > 15) {
+            pendingBookmarkTrack = track;
+            pendingBookmarkPos = res.position;
+            const toast = document.getElementById('podcastResumeToast');
+            const txt = document.getElementById('podcastResumeText');
+            const acceptBtn = document.getElementById('podcastResumeAcceptBtn');
+            if (toast && txt) {
+              txt.innerText = `Resume "${track.title || track.filename}" from ${res.position_str}?`;
+              acceptBtn.onclick = () => {
+                audio.currentTime = pendingBookmarkPos;
+                dismissPodcastResumeToast();
+              };
+              toast.style.display = 'flex';
+            }
+          }
+        });
+      }
+    }
+
+    function dismissPodcastResumeToast() {
+      const toast = document.getElementById('podcastResumeToast');
+      if (toast) toast.style.display = 'none';
+      pendingBookmarkTrack = null;
+      pendingBookmarkPos = 0;
     }
   </script>
 </body>
