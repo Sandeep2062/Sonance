@@ -17,7 +17,7 @@ import importlib
 from pathlib import Path
 from typing import Dict, Any, List, Optional, Tuple
 
-APP_VERSION = "2.7.0"
+APP_VERSION = "2.8.0"
 WORKSTATION_NAME = "Sonance Audiophile Workstation"
 ROOT_DIR = Path(__file__).parent.resolve()
 
@@ -76,6 +76,13 @@ CORE_PHASE_MODULES = [
     ("binaural_virtualizer", "Phase 26: Binaural 3D Ambisonic Room & Headphone Virtualizer"),
     ("audio_noisegate", "Phase 26: Broadcast Audio Noise Gate & Downward Expander"),
     ("tape_echo_delay", "Phase 26: Stereo Ping-Pong & Multi-Tap BBD Tape Echo Studio"),
+
+    # Phase 27: Release Packager & Offline Manual
+    ("release_packager", "Phase 27: Universal Workstation Release Packaging & Manifest Auditor"),
+    ("docs_generator", "Phase 27: Offline Audiophile Guide & Workstation Manual Generator"),
+
+    # Phase 28: VST3 & CLAP Audio Plugin Host & Rack
+    ("plugin_host", "Phase 28: VST3 & CLAP Audio Plugin Host & Multi-Slot Rack Studio"),
 ]
 
 # File classification patterns

@@ -112,8 +112,9 @@ import audio_noisegate
 import tape_echo_delay
 import release_packager
 import docs_generator
+import plugin_host
 
-APP_VERSION = "2.7.0"
+APP_VERSION = "2.8.0"
 GITHUB_REPO = "Sandeep2062/Sonance"
 APP_DIR = Path(__file__).parent.resolve()
 UI_PATH = APP_DIR / "ui" / "index.html"
@@ -1792,6 +1793,28 @@ class LyricsAPI:
         import webbrowser
         webbrowser.open(f"file://{os.path.abspath(manual_path)}")
         return {"success": True, "path": str(manual_path)}
+
+    # ------------------ Phase 28: VST3 & CLAP Audio Plugin Host & Rack ------------------
+    def scan_system_plugins(self, custom_dirs: Optional[List[str]] = None) -> List[Dict[str, Any]]:
+        """Scans host system and virtual registry for VST3 and CLAP audio plugins."""
+        return plugin_host.scan_installed_plugins(custom_dirs=custom_dirs)
+
+    def process_vst_rack(
+        self,
+        input_path: str,
+        output_path: Optional[str] = None,
+        rack_slots: Optional[List[Dict[str, Any]]] = None,
+    ) -> Dict[str, Any]:
+        """Processes audio file through a serial multi-slot VST3/CLAP effect rack chain."""
+        return plugin_host.process_plugin_rack(
+            input_path=input_path,
+            output_path=output_path,
+            rack_slots=rack_slots,
+        )
+
+    def get_vst_factory_presets(self) -> Dict[str, Any]:
+        """Returns factory rack chain presets."""
+        return plugin_host.FACTORY_PRESETS
 
     def _save_last_folder(self, folder: str):
         try:

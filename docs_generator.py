@@ -12,7 +12,7 @@ import webbrowser
 from pathlib import Path
 from typing import Dict, Any, Optional
 
-APP_VERSION = "2.7.0"
+APP_VERSION = "2.8.0"
 WORKSTATION_NAME = "Sonance Audiophile Workstation"
 ROOT_DIR = Path(__file__).parent.resolve()
 DEFAULT_MANUAL_PATH = ROOT_DIR / "ui" / "manual.html"
@@ -286,7 +286,17 @@ PHASES_DATA = [
         "cli": "python sonance.py --package-release [--zip] [--verify-only] | --generate-manual [--open]",
         "desc": "Grand Finale milestone: Verifies codebase integrity across all 27 phases, computes cryptographic SHA-256 and MD5 manifests, and generates this standalone offline engineering manual.",
         "dsp_math": "Cryptographic integrity: SHA256(Block_i) = Merkle-Damgard compression over 512-bit message blocks",
-        "features": ["42-module automated syntax and importability auditor", "Linux-standard RELEASE.sha256sum & RELEASE.md5sum generator", "Structured RELEASE.manifest.json packaging metadata", "Single-file, 100% offline interactive DSP manual & documentation"]
+        "features": ["45-module automated syntax and importability auditor", "Linux-standard RELEASE.sha256sum & RELEASE.md5sum generator", "Structured RELEASE.manifest.json packaging metadata", "Single-file, 100% offline interactive DSP manual & documentation"]
+    },
+    {
+        "phase": 28,
+        "title": "VST3 & CLAP Audio Plugin Host & Multi-Slot Rack Studio",
+        "category": "Studio FX & Plugin Architecture",
+        "modules": ["plugin_host.py"],
+        "cli": "python sonance.py --vst-scan | --vst-rack input.wav [output.wav] --preset mastering_bus",
+        "desc": "Universal plugin host and multi-slot serial effect rack capable of scanning system VST3/CLAP plugins or chaining built-in 64-bit virtual studio models (Pultec EQP-1A, Teletronix LA-2A, Triode Valve Exciter, Haas Stereo Expander, Lexicon 480L Plate Reverb).",
+        "dsp_math": "Serial rack transfer function: Y(z) = [ prod_{k=1}^N H_k(z) ] * X(z); Haas delay Delta t = 1.2ms; T4 optical decay: env(t) = 0.6 * e^{-t/60ms} + 0.4 * e^{-t/1.2s}",
+        "features": ["System VST3 and CLAP directory scanner for host plugins", "5 built-in 64-bit virtual studio audio FX engines", "3-slot serial mastering rack with individual dry/wet, bypass, and gain staging", "Master ITU-R BS.1770 true-peak safety limiter (-0.2 dBFS)"]
     }
 ]
 

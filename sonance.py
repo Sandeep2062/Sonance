@@ -473,6 +473,17 @@ Examples:
       help="Offline audiophile guide & workstation handbook generator: --generate-manual [output_path] [--open]",
   )
   parser.add_argument(
+      "--vst-scan",
+      action="store_true",
+      help="Scan host system and virtual registry for installed VST3 and CLAP audio plugins",
+  )
+  parser.add_argument(
+      "--vst-rack",
+      nargs="*",
+      metavar="PARAM",
+      help="VST3 & CLAP audio effect rack chain: --vst-rack <audio_file> [output_file] [--preset mastering_bus|vocal_magic|analog_space]",
+  )
+  parser.add_argument(
       "--version",
       action="version",
       version=f"Sonance v{modern_lyrics_downloader.APP_VERSION}",
@@ -2557,6 +2568,67 @@ Examples:
       import webbrowser
       webbrowser.open(f"file://{os.path.abspath(res['output_path'])}")
     return
+
+  if args.vst_scan:
+    import plugin_host
+    print("=" * 70)
+    print("  SONANCE AUDIOPHILE WORKSTATION v2.8.0")
+    print("  Phase 28: VST3 & CLAP Audio Plugin Scanner")
+    print("=" * 70)
+    plugins = plugin_host.scan_installed_plugins()
+    print(f"[+] Total Available Plugins Found: {len(plugins)}")
+    print("-" * 70)
+    for p in plugins:
+      origin = "[VIRTUAL]" if p.get("is_virtual") else "[HOST]"
+      print(f"  {origin:<9} | {p['format']:<12} | {p['name']:<35} | {p['category']}")
+    print("=" * 70)
+    return
+
+  if args.vst_rack is not None:
+    import plugin_host
+    rack_params = list(args.vst_rack) + list(unknown)
+    if not rack_params:
+      print("[-] Error: --vst-rack requires an input audio file.")
+      print("    Usage: python sonance.py --vst-rack <audio_file> [output_file] [--preset mastering_bus|vocal_magic|analog_space]")
+      return
+    inp = rack_params[0]
+    out = None
+    preset_name = "mastering_bus"
+
+    idx = 1
+    while idx < len(rack_params):
+      arg = rack_params[idx]
+      if arg == "--preset" and idx + 1 < len(rack_params):
+        preset_name = rack_params[idx + 1]
+        idx += 2
+      elif not arg.startswith("-") and out is None:
+        out = arg
+        idx += 1
+      else:
+        idx += 1
+
+    print("=" * 70)
+    print("  SONANCE AUDIOPHILE WORKSTATION v2.8.0")
+    print("  Phase 28: VST3 & CLAP Audio Plugin Host & Rack Studio")
+    print("=" * 70)
+    print(f"[*] Processing {inp} through VST rack preset '{preset_name}'...")
+
+    slots = plugin_host.FACTORY_PRESETS.get(preset_name, plugin_host.FACTORY_PRESETS["mastering_bus"])["slots"]
+    res = plugin_host.process_plugin_rack(inp, output_path=out, rack_slots=slots)
+
+    print(f"[+] Input File    : {res['input_path']}")
+    print(f"[+] Output File   : {res['output_path']}")
+    print(f"[+] In Peak/RMS   : {res['in_peak_dbfs']:.2f} dBFS / {res['in_rms_dbfs']:.2f} dBFS")
+    print(f"[+] Out Peak/RMS  : {res['out_peak_dbfs']:.2f} dBFS / {res['out_rms_dbfs']:.2f} dBFS")
+    print(f"[+] Crest Factor  : {res['crest_factor_db']:.2f} dB")
+    print(f"[+] Render Time   : {res['elapsed_sec']:.2f}s ({res['duration_sec']:.1f}s @ {res['sample_rate']} Hz)")
+    print("-" * 70)
+    print("  RACK CHAIN SLOTS:")
+    for s in res["slot_reports"]:
+      print(f"    Slot {s['slot']}: {s['plugin_id']} -> {s['status']} (Mix: {s['dry_wet']})")
+    print("=" * 70)
+    return
+
 
   if args.classic:
     print("[*] Launching Sonance (Classic Tkinter UI)...")

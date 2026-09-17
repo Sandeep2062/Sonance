@@ -1273,6 +1273,9 @@
       <button class="btn btn-secondary" onclick="openManualModal()" style="padding:5px 9px; font-size:11px;" id="manualHeaderBtn" title="Offline Audiophile Guide & Workstation Manual">
         📖 Manual
       </button>
+      <button class="btn btn-secondary" onclick="openVstModal()" style="padding:5px 9px; font-size:11px;" id="vstHeaderBtn" title="VST3 & CLAP Audio Plugin Host & Rack Studio">
+        🔌 VST Rack
+      </button>
       <button class="btn btn-secondary" onclick="openLrcStudioModal()" style="padding:5px 9px; font-size:11px;" id="lrcStudioHeaderBtn" title="Interactive LRC Studio & Live Time-Stamper">
         ✍️ LRC Studio
       </button>
@@ -7032,6 +7035,145 @@
     </div>
   </div>
 
+  <!-- Phase 28: VST3 & CLAP Audio Plugin Host & Multi-Slot Rack Studio Modal -->
+  <div class="modal-backdrop" id="vstModal" style="display:none;">
+    <div class="modal-card" style="width:840px; max-width:96vw; background:#161926; border:1px solid var(--border); border-radius:12px; box-shadow:0 12px 36px rgba(0,0,0,0.7); overflow:hidden;">
+      <div style="padding:16px 20px; background:#121520; border-bottom:1px solid var(--border); display:flex; justify-content:space-between; align-items:center;">
+        <div class="modal-title" style="font-size:14px; font-weight:700; display:flex; align-items:center; gap:8px;">
+          <span>🔌</span>
+          <span>VST3 &amp; CLAP Audio Plugin Host &amp; Multi-Slot Rack Studio</span>
+        </div>
+        <button onclick="closeVstModal()" style="background:none; border:none; color:var(--text-muted); font-size:16px; cursor:pointer;">✕</button>
+      </div>
+
+      <div style="padding:20px; max-height:75vh; overflow-y:auto; display:flex; flex-direction:column; gap:16px;">
+        <div style="font-size:11px; color:var(--text-dim); line-height:1.5;">
+          Chain external 3rd-party VST3 / CLAP plugins or studio built-in virtual engines (Pultec EQP-1A, Teletronix LA-2A Opto Compressor, Triode Valve Exciter, Haas Stereo Expander, Lexicon 480L Plate Reverb) in a serial mastering rack with individual dry/wet, bypass, and gain trim.
+        </div>
+
+        <div>
+          <label style="font-size:11px; font-weight:600; color:var(--text-muted); display:block; margin-bottom:6px;">Target Audio File:</label>
+          <div style="display:flex; gap:8px;">
+            <input type="text" id="vstTargetInput" class="search-input" style="width:100%; font-size:11px;" placeholder="Path to input audio file...">
+            <button class="btn btn-secondary" onclick="loadActiveTrackForVst()" style="font-size:11px; padding:6px 12px; white-space:nowrap;">Active Track</button>
+          </div>
+        </div>
+
+        <div>
+          <label style="font-size:11px; font-weight:600; color:var(--text-muted); display:block; margin-bottom:6px;">Custom Export Destination (Optional):</label>
+          <input type="text" id="vstOutputInput" class="search-input" style="width:100%; font-size:11px;" placeholder="Auto-generated if empty: <original>_vstrack.wav">
+        </div>
+
+        <div style="background:#121520; padding:12px 14px; border-radius:8px; border:1px solid var(--border); display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:8px;">
+          <div style="display:flex; align-items:center; gap:8px;">
+            <span style="font-size:11px; font-weight:600; color:var(--cyan);">Rack Presets:</span>
+            <button class="btn btn-secondary" onclick="applyVstPreset('mastering_bus')" style="font-size:10px; padding:4px 8px;">Mastering Bus</button>
+            <button class="btn btn-secondary" onclick="applyVstPreset('vocal_magic')" style="font-size:10px; padding:4px 8px;">Vocal Polish</button>
+            <button class="btn btn-secondary" onclick="applyVstPreset('analog_space')" style="font-size:10px; padding:4px 8px;">Analog Space</button>
+          </div>
+          <button class="btn btn-secondary" onclick="scanVstPlugins()" id="scanVstBtn" style="font-size:10px; padding:4px 10px;">
+            🔍 Re-Scan System Plugins
+          </button>
+        </div>
+
+        <!-- Multi-Slot Rack Chain -->
+        <div style="display:flex; flex-direction:column; gap:12px;">
+          <!-- Slot 1 -->
+          <div style="background:#0f121c; border:1px solid var(--border); border-radius:8px; padding:12px;">
+            <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:8px;">
+              <span style="font-size:11px; font-weight:700; color:var(--cyan);">SLOT 1: EQUALIZER / TONE</span>
+              <label style="font-size:11px; color:var(--text-dim); display:flex; align-items:center; gap:6px; cursor:pointer;">
+                <input type="checkbox" id="vstSlot1Bypass"> Bypass
+              </label>
+            </div>
+            <div style="display:grid; grid-template-columns: 2fr 1fr; gap:12px; align-items:center;">
+              <select id="vstSlot1Select" class="search-input" style="font-size:11px;">
+                <option value="virtual-vst3-pultec-eq">Sonance Pultec EQP-1A Passive Program Equalizer (Virtual-VST3)</option>
+                <option value="virtual-vst3-la2a-compressor">Sonance Teletronix LA-2A Optical Leveling Amplifier (Virtual-VST3)</option>
+                <option value="virtual-vst3-triode-exciter">Sonance Triode Valve &amp; Harmonic Exciter (Virtual-VST3)</option>
+                <option value="virtual-vst3-haas-expander">Sonance Binaural Haas Stereophonic Expander (Virtual-VST3)</option>
+                <option value="virtual-clap-lexicon-reverb">Sonance Lexicon 480L Algorithmic Plate Reverb (Virtual-CLAP)</option>
+              </select>
+              <div>
+                <div style="display:flex; justify-content:space-between; font-size:10px; color:var(--text-muted); margin-bottom:2px;">
+                  <span>Dry/Wet</span>
+                  <span id="vstSlot1MixVal" style="color:var(--cyan);">100%</span>
+                </div>
+                <input type="range" id="vstSlot1Mix" min="0" max="100" value="100" style="width:100%;" oninput="document.getElementById('vstSlot1MixVal').innerText = this.value + '%'">
+              </div>
+            </div>
+          </div>
+
+          <!-- Slot 2 -->
+          <div style="background:#0f121c; border:1px solid var(--border); border-radius:8px; padding:12px;">
+            <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:8px;">
+              <span style="font-size:11px; font-weight:700; color:var(--cyan);">SLOT 2: DYNAMICS &amp; SATURATION</span>
+              <label style="font-size:11px; color:var(--text-dim); display:flex; align-items:center; gap:6px; cursor:pointer;">
+                <input type="checkbox" id="vstSlot2Bypass"> Bypass
+              </label>
+            </div>
+            <div style="display:grid; grid-template-columns: 2fr 1fr; gap:12px; align-items:center;">
+              <select id="vstSlot2Select" class="search-input" style="font-size:11px;">
+                <option value="virtual-vst3-la2a-compressor">Sonance Teletronix LA-2A Optical Leveling Amplifier (Virtual-VST3)</option>
+                <option value="virtual-vst3-pultec-eq">Sonance Pultec EQP-1A Passive Program Equalizer (Virtual-VST3)</option>
+                <option value="virtual-vst3-triode-exciter">Sonance Triode Valve &amp; Harmonic Exciter (Virtual-VST3)</option>
+                <option value="virtual-vst3-haas-expander">Sonance Binaural Haas Stereophonic Expander (Virtual-VST3)</option>
+                <option value="virtual-clap-lexicon-reverb">Sonance Lexicon 480L Algorithmic Plate Reverb (Virtual-CLAP)</option>
+              </select>
+              <div>
+                <div style="display:flex; justify-content:space-between; font-size:10px; color:var(--text-muted); margin-bottom:2px;">
+                  <span>Dry/Wet</span>
+                  <span id="vstSlot2MixVal" style="color:var(--cyan);">85%</span>
+                </div>
+                <input type="range" id="vstSlot2Mix" min="0" max="100" value="85" style="width:100%;" oninput="document.getElementById('vstSlot2MixVal').innerText = this.value + '%'">
+              </div>
+            </div>
+          </div>
+
+          <!-- Slot 3 -->
+          <div style="background:#0f121c; border:1px solid var(--border); border-radius:8px; padding:12px;">
+            <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:8px;">
+              <span style="font-size:11px; font-weight:700; color:var(--cyan);">SLOT 3: HARMONICS &amp; SPATIAL AMBIENCE</span>
+              <label style="font-size:11px; color:var(--text-dim); display:flex; align-items:center; gap:6px; cursor:pointer;">
+                <input type="checkbox" id="vstSlot3Bypass"> Bypass
+              </label>
+            </div>
+            <div style="display:grid; grid-template-columns: 2fr 1fr; gap:12px; align-items:center;">
+              <select id="vstSlot3Select" class="search-input" style="font-size:11px;">
+                <option value="virtual-vst3-triode-exciter">Sonance Triode Valve &amp; Harmonic Exciter (Virtual-VST3)</option>
+                <option value="virtual-vst3-haas-expander">Sonance Binaural Haas Stereophonic Expander (Virtual-VST3)</option>
+                <option value="virtual-clap-lexicon-reverb">Sonance Lexicon 480L Algorithmic Plate Reverb (Virtual-CLAP)</option>
+                <option value="virtual-vst3-pultec-eq">Sonance Pultec EQP-1A Passive Program Equalizer (Virtual-VST3)</option>
+                <option value="virtual-vst3-la2a-compressor">Sonance Teletronix LA-2A Optical Leveling Amplifier (Virtual-VST3)</option>
+              </select>
+              <div>
+                <div style="display:flex; justify-content:space-between; font-size:10px; color:var(--text-muted); margin-bottom:2px;">
+                  <span>Dry/Wet</span>
+                  <span id="vstSlot3MixVal" style="color:var(--cyan);">40%</span>
+                </div>
+                <input type="range" id="vstSlot3Mix" min="0" max="100" value="40" style="width:100%;" oninput="document.getElementById('vstSlot3MixVal').innerText = this.value + '%'">
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div style="display:flex; justify-content:space-between; align-items:center; margin-top:4px;">
+          <span id="vstStatusText" style="font-size:11px; color:var(--text-dim);">Ready to process VST effect rack chain</span>
+          <button class="btn btn-primary" onclick="runVstRackAction()" id="processVstBtn" style="font-size:12px; padding:7px 18px;">
+            ⚡ Process VST Rack Chain
+          </button>
+        </div>
+
+        <div id="vstOutputCard" style="background:#0b0d14; border:1px solid var(--border); border-radius:8px; padding:12px; font-family:monospace; font-size:11px; line-height:1.45; color:var(--cyan); min-height:80px; white-space:pre-wrap; overflow-x:auto;">Select audio file and click Process VST Rack Chain.</div>
+      </div>
+
+      <div style="padding:10px 16px; background:#121520; border-top:1px solid var(--border); display:flex; justify-content:space-between; align-items:center;">
+        <span style="font-size:10px; color:var(--text-dim);">VST3 &amp; CLAP 64-Bit Studio Rack Architecture</span>
+        <button class="btn btn-secondary" onclick="closeVstModal()">Close</button>
+      </div>
+    </div>
+  </div>
+
   <!-- Podcast & Long Mix Bookmark Resumption Toast (Phase 10) -->
   <div id="podcastResumeToast" style="display:none; position:fixed; bottom:85px; right:20px; z-index:9999; background:#131722; border:1px solid var(--border); box-shadow:0 8px 24px rgba(0,0,0,0.6); border-radius:10px; padding:10px 14px; align-items:center; gap:10px; backdrop-filter:blur(10px);">
     <span style="font-size:16px;">⏱️</span>
@@ -10042,6 +10184,7 @@
         closeEchoModal();
         closeReleaseModal();
         closeManualModal();
+        closeVstModal();
         dismissPodcastResumeToast();
         const popup = document.getElementById('speedStudioPopup');
         if (popup) popup.style.display = 'none';
@@ -17686,6 +17829,204 @@
         });
       } else {
         window.open('manual.html', '_blank');
+      }
+    }
+
+    // ------------------ Phase 28: VST3 & CLAP Audio Plugin Host & Rack ------------------
+    function openVstModal() {
+      const modal = document.getElementById('vstModal');
+      if (modal) modal.style.display = 'flex';
+    }
+
+    function closeVstModal() {
+      const modal = document.getElementById('vstModal');
+      if (modal) modal.style.display = 'none';
+    }
+
+    function loadActiveTrackForVst() {
+      if (state.currentTrack && state.currentTrack.path) {
+        const inp = document.getElementById('vstTargetInput');
+        if (inp) inp.value = state.currentTrack.path;
+      } else {
+        showToast('No active track loaded in player');
+      }
+    }
+
+    function scanVstPlugins() {
+      const btn = document.getElementById('scanVstBtn');
+      if (btn) {
+        btn.disabled = true;
+        btn.innerText = '🔍 Scanning...';
+      }
+      if (window.pywebview && window.pywebview.api && window.pywebview.api.scan_system_plugins) {
+        window.pywebview.api.scan_system_plugins().then(plugins => {
+          if (btn) {
+            btn.disabled = false;
+            btn.innerText = '🔍 Re-Scan System Plugins';
+          }
+          if (Array.isArray(plugins)) {
+            // Update slot dropdowns
+            ['vstSlot1Select', 'vstSlot2Select', 'vstSlot3Select'].forEach(selId => {
+              const sel = document.getElementById(selId);
+              if (sel) {
+                const curVal = sel.value;
+                sel.innerHTML = '';
+                plugins.forEach(p => {
+                  const opt = document.createElement('option');
+                  opt.value = p.id;
+                  opt.innerText = `${p.name} (${p.format})`;
+                  sel.appendChild(opt);
+                });
+                if (curVal) sel.value = curVal;
+              }
+            });
+            showToast(`Scanned ${plugins.length} VST3 / CLAP plugins!`);
+          }
+        }).catch(err => {
+          if (btn) {
+            btn.disabled = false;
+            btn.innerText = '🔍 Re-Scan System Plugins';
+          }
+          showToast('Scan error: ' + (err.message || err));
+        });
+      } else {
+        if (btn) {
+          btn.disabled = false;
+          btn.innerText = '🔍 Re-Scan System Plugins';
+        }
+        showToast('5 virtual studio plugin engines available!');
+      }
+    }
+
+    function applyVstPreset(name) {
+      if (name === 'mastering_bus') {
+        const s1 = document.getElementById('vstSlot1Select'); if (s1) s1.value = 'virtual-vst3-pultec-eq';
+        const m1 = document.getElementById('vstSlot1Mix'); if (m1) { m1.value = 100; document.getElementById('vstSlot1MixVal').innerText = '100%'; }
+        const b1 = document.getElementById('vstSlot1Bypass'); if (b1) b1.checked = false;
+
+        const s2 = document.getElementById('vstSlot2Select'); if (s2) s2.value = 'virtual-vst3-la2a-compressor';
+        const m2 = document.getElementById('vstSlot2Mix'); if (m2) { m2.value = 85; document.getElementById('vstSlot2MixVal').innerText = '85%'; }
+        const b2 = document.getElementById('vstSlot2Bypass'); if (b2) b2.checked = false;
+
+        const s3 = document.getElementById('vstSlot3Select'); if (s3) s3.value = 'virtual-vst3-triode-exciter';
+        const m3 = document.getElementById('vstSlot3Mix'); if (m3) { m3.value = 40; document.getElementById('vstSlot3MixVal').innerText = '40%'; }
+        const b3 = document.getElementById('vstSlot3Bypass'); if (b3) b3.checked = false;
+        showToast('Loaded Mastering Bus preset');
+      } else if (name === 'vocal_magic') {
+        const s1 = document.getElementById('vstSlot1Select'); if (s1) s1.value = 'virtual-vst3-la2a-compressor';
+        const m1 = document.getElementById('vstSlot1Mix'); if (m1) { m1.value = 100; document.getElementById('vstSlot1MixVal').innerText = '100%'; }
+        const b1 = document.getElementById('vstSlot1Bypass'); if (b1) b1.checked = false;
+
+        const s2 = document.getElementById('vstSlot2Select'); if (s2) s2.value = 'virtual-vst3-pultec-eq';
+        const m2 = document.getElementById('vstSlot2Mix'); if (m2) { m2.value = 100; document.getElementById('vstSlot2MixVal').innerText = '100%'; }
+        const b2 = document.getElementById('vstSlot2Bypass'); if (b2) b2.checked = false;
+
+        const s3 = document.getElementById('vstSlot3Select'); if (s3) s3.value = 'virtual-clap-lexicon-reverb';
+        const m3 = document.getElementById('vstSlot3Mix'); if (m3) { m3.value = 22; document.getElementById('vstSlot3MixVal').innerText = '22%'; }
+        const b3 = document.getElementById('vstSlot3Bypass'); if (b3) b3.checked = false;
+        showToast('Loaded Vocal Polish preset');
+      } else if (name === 'analog_space') {
+        const s1 = document.getElementById('vstSlot1Select'); if (s1) s1.value = 'virtual-vst3-triode-exciter';
+        const m1 = document.getElementById('vstSlot1Mix'); if (m1) { m1.value = 80; document.getElementById('vstSlot1MixVal').innerText = '80%'; }
+        const b1 = document.getElementById('vstSlot1Bypass'); if (b1) b1.checked = false;
+
+        const s2 = document.getElementById('vstSlot2Select'); if (s2) s2.value = 'virtual-vst3-haas-expander';
+        const m2 = document.getElementById('vstSlot2Mix'); if (m2) { m2.value = 90; document.getElementById('vstSlot2MixVal').innerText = '90%'; }
+        const b2 = document.getElementById('vstSlot2Bypass'); if (b2) b2.checked = false;
+
+        const s3 = document.getElementById('vstSlot3Select'); if (s3) s3.value = 'virtual-clap-lexicon-reverb';
+        const m3 = document.getElementById('vstSlot3Mix'); if (m3) { m3.value = 15; document.getElementById('vstSlot3MixVal').innerText = '15%'; }
+        const b3 = document.getElementById('vstSlot3Bypass'); if (b3) b3.checked = false;
+        showToast('Loaded Analog Space preset');
+      }
+    }
+
+    function runVstRackAction() {
+      const inp = (document.getElementById('vstTargetInput').value || '').trim();
+      const out = (document.getElementById('vstOutputInput').value || '').trim() || null;
+      const btn = document.getElementById('processVstBtn');
+      const st = document.getElementById('vstStatusText');
+      const outCard = document.getElementById('vstOutputCard');
+
+      if (!inp) {
+        showToast('Please specify input audio file');
+        return;
+      }
+
+      const slots = [
+        {
+          plugin_id: document.getElementById('vstSlot1Select').value,
+          bypass: document.getElementById('vstSlot1Bypass').checked,
+          dry_wet: parseFloat(document.getElementById('vstSlot1Mix').value),
+          pre_gain_db: 0.0,
+          post_gain_db: 0.0,
+          params: {}
+        },
+        {
+          plugin_id: document.getElementById('vstSlot2Select').value,
+          bypass: document.getElementById('vstSlot2Bypass').checked,
+          dry_wet: parseFloat(document.getElementById('vstSlot2Mix').value),
+          pre_gain_db: 0.0,
+          post_gain_db: 0.0,
+          params: {}
+        },
+        {
+          plugin_id: document.getElementById('vstSlot3Select').value,
+          bypass: document.getElementById('vstSlot3Bypass').checked,
+          dry_wet: parseFloat(document.getElementById('vstSlot3Mix').value),
+          pre_gain_db: 0.0,
+          post_gain_db: 0.0,
+          params: {}
+        }
+      ];
+
+      if (btn) {
+        btn.disabled = true;
+        btn.innerText = '⚡ Processing Rack...';
+      }
+      if (st) {
+        st.innerText = 'Passing audio through VST rack chain...';
+        st.style.color = 'var(--cyan)';
+      }
+      if (outCard) outCard.innerText = 'Processing audio through serial VST3/CLAP rack slots...';
+
+      if (window.pywebview && window.pywebview.api && window.pywebview.api.process_vst_rack) {
+        window.pywebview.api.process_vst_rack(inp, out, slots).then(res => {
+          if (btn) {
+            btn.disabled = false;
+            btn.innerText = '⚡ Process VST Rack Chain';
+          }
+          if (res) {
+            if (st) {
+              st.innerText = '✓ VST Rack Chain rendered successfully!';
+              st.style.color = 'var(--emerald)';
+            }
+            let card = `VST3 & CLAP MULTI-SLOT RACK REPORT\n`;
+            card += `Input File       : ${res.input_path}\n`;
+            card += `Output File      : ${res.output_path}\n`;
+            card += `Duration / Rate  : ${res.duration_sec.toFixed(2)}s @ ${res.sample_rate} Hz\n`;
+            card += `Render Time      : ${res.elapsed_sec.toFixed(2)}s\n`;
+            card += `In Peak / RMS    : ${res.in_peak_dbfs.toFixed(2)} dBFS / ${res.in_rms_dbfs.toFixed(2)} dBFS\n`;
+            card += `Out Peak / RMS   : ${res.out_peak_dbfs.toFixed(2)} dBFS / ${res.out_rms_dbfs.toFixed(2)} dBFS\n`;
+            card += `Crest Factor     : ${res.crest_factor_db.toFixed(2)} dB\n`;
+            card += `\nCHAIN SLOTS:\n`;
+            (res.slot_reports || []).forEach(s => {
+              card += `  Slot ${s.slot}: ${s.plugin_id} -> ${s.status} (Mix: ${s.dry_wet})\n`;
+            });
+            if (outCard) outCard.innerText = card;
+            showToast('VST rack chain processed!');
+          }
+        }).catch(err => {
+          if (btn) {
+            btn.disabled = false;
+            btn.innerText = '⚡ Process VST Rack Chain';
+          }
+          if (st) {
+            st.innerText = 'Error processing rack';
+            st.style.color = 'var(--rose)';
+          }
+          if (outCard) outCard.innerText = '✕ Error: ' + (err.message || err);
+        });
       }
     }
 
