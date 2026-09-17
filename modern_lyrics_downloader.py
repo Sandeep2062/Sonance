@@ -94,6 +94,10 @@ import audio_upsampler
 import cue_fixer
 import room_ir_synthesizer
 import lrc_to_ass_converter
+import dsd_converter
+import subsample_delay
+import mastering_limiter
+import album_art_studio
 
 APP_VERSION = "2.1.0"
 GITHUB_REPO = "Sandeep2062/Sonance"
@@ -1420,6 +1424,65 @@ class LyricsAPI:
             style_preset=style_preset,
             primary_color_hex=primary_color,
             export_srt=export_srt,
+        )
+
+    # ------------------ Phase 23: DSD to PCM & DoP Decimator Studio -------------------
+    def convert_dsd_stream(
+        self,
+        input_path: str,
+        target_sr: int = 88200,
+        output_path: Optional[str] = None,
+        dop_mode: bool = False,
+    ) -> Dict[str, Any]:
+        """Converts 1-bit DSD stream to Hi-Res PCM or DoP v1.1 USB DAC stream."""
+        return dsd_converter.process_dsd_stream(
+            input_path=input_path, target_pcm_rate=target_sr, output_path=output_path, dop_mode=dop_mode
+        )
+
+    # ------------------ Phase 23: Sub-Sample Phase & Delay Aligner --------------------
+    def align_subsample_phase(
+        self,
+        input_path: str,
+        output_path: Optional[str] = None,
+        max_delay_ms: float = 10.0,
+        target_channel: str = "auto",
+    ) -> Dict[str, Any]:
+        """Measures and aligns sub-sample inter-channel time delay to eliminate comb filtering."""
+        return subsample_delay.align_audio_phase(
+            input_path=input_path,
+            output_path=output_path,
+            max_delay_ms=max_delay_ms,
+            target_channel=target_channel,
+        )
+
+    # ------------------ Phase 23: Mastering Brickwall Limiter & True-Peak -------------
+    def apply_mastering_limiter(
+        self,
+        input_path: str,
+        output_path: Optional[str] = None,
+        ceiling_db: float = -1.0,
+        threshold_db: float = -3.0,
+        release_ms: float = 120.0,
+    ) -> Dict[str, Any]:
+        """Applies lookahead true-peak brickwall limiting with 4x oversampled ISP detection."""
+        return mastering_limiter.process_mastering_limiter(
+            input_path=input_path,
+            output_path=output_path,
+            ceiling_db=ceiling_db,
+            threshold_db=threshold_db,
+            release_ms=release_ms,
+        )
+
+    # ------------------ Phase 23: Album Art Studio & Cover Optimizer ------------------
+    def manage_album_artwork(
+        self,
+        target_path: str,
+        action: str = "report",
+        export_companion: bool = False,
+    ) -> Dict[str, Any]:
+        """Audits, extracts companion cover.jpg, or strips bloated embedded album art."""
+        return album_art_studio.scan_and_manage_artwork(
+            target_path=target_path, action=action, export_companion=export_companion
         )
 
     def _save_last_folder(self, folder: str):

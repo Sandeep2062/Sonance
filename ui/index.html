@@ -1219,6 +1219,18 @@
       <button class="btn btn-secondary" onclick="openAssSubtitlesModal()" style="padding:5px 9px; font-size:11px;" id="assSubtitlesHeaderBtn" title="Word-by-Word LRC to Karaoke Subtitle Styler & ASS Converter">
         🎨 ASS Subtitles
       </button>
+      <button class="btn btn-secondary" onclick="openDsdModal()" style="padding:5px 9px; font-size:11px;" id="dsdHeaderBtn" title="Audiophile DSD to PCM Decimator & DoP Stream Studio">
+        📻 DSD Studio
+      </button>
+      <button class="btn btn-secondary" onclick="openPhaseAlignModal()" style="padding:5px 9px; font-size:11px;" id="phaseAlignHeaderBtn" title="Sub-Sample Fractional Delay & Phase Alignment Studio">
+        ⏱️ Phase Align
+      </button>
+      <button class="btn btn-secondary" onclick="openMasterLimiterModal()" style="padding:5px 9px; font-size:11px;" id="masterLimiterHeaderBtn" title="Mastering Brickwall Limiter & True-Peak ISP Studio">
+        🛡️ Brickwall Limiter
+      </button>
+      <button class="btn btn-secondary" onclick="openAlbumArtModal()" style="padding:5px 9px; font-size:11px;" id="albumArtHeaderBtn" title="Album Art Optimizer, Cover Normalizer & Bloat Reducer">
+        🖼️ Art Studio
+      </button>
       <button class="btn btn-secondary" onclick="openLrcStudioModal()" style="padding:5px 9px; font-size:11px;" id="lrcStudioHeaderBtn" title="Interactive LRC Studio & Live Time-Stamper">
         ✍️ LRC Studio
       </button>
@@ -5690,9 +5702,247 @@
         <div id="assSubtitlesOutputCard" style="background:#0b0d14; border:1px solid var(--border); border-radius:8px; padding:12px; font-family:monospace; font-size:11px; line-height:1.45; color:var(--cyan); min-height:80px; white-space:pre-wrap; overflow-x:auto;">Select LRC lyrics file and click Convert to ASS Subtitles.</div>
       </div>
 
+  <!-- Phase 23: Audiophile DSD to PCM Decimator & DoP Stream Studio Modal -->
+  <div class="modal-backdrop" id="dsdModal" style="display:none;">
+    <div class="modal-card" style="width:720px; max-width:95vw; background:#161926; border:1px solid var(--border); border-radius:12px; box-shadow:0 12px 36px rgba(0,0,0,0.7); overflow:hidden;">
+      <div style="padding:16px 20px; background:#121520; border-bottom:1px solid var(--border); display:flex; justify-content:space-between; align-items:center;">
+        <div class="modal-title" style="font-size:14px; font-weight:700; display:flex; align-items:center; gap:8px;">
+          <span>📻</span>
+          <span>Audiophile DSD to PCM Decimator &amp; DoP Stream Studio</span>
+        </div>
+        <button onclick="closeDsdModal()" style="background:none; border:none; color:var(--text-muted); font-size:16px; cursor:pointer;">✕</button>
+      </div>
+
+      <div style="padding:20px; max-height:75vh; overflow-y:auto; display:flex; flex-direction:column; gap:16px;">
+        <div style="font-size:11px; color:var(--text-dim); line-height:1.5;">
+          Processes 1-bit Delta-Sigma DSD64 (2.8224 MHz) and DSD128 (5.6448 MHz) bitstreams (.dsf / .dff). Features multi-stage Kaiser FIR decimation filtering to eliminate ultrasonic quantization noise above 30 kHz, or packages directly into DSD-over-PCM (DoP v1.1) with 0x05/0xFA sync markers for native USB DAC bit-perfect playback.
+        </div>
+
+        <div>
+          <label style="font-size:11px; font-weight:600; color:var(--text-muted); display:block; margin-bottom:6px;">Target DSD File (.dsf, .dff) or 'test' for reference stream:</label>
+          <div style="display:flex; gap:8px;">
+            <input type="text" id="dsdTargetInput" class="search-input" style="width:100%; font-size:11px;" placeholder="Path to .dsf / .dff file or type 'test'...">
+            <button class="btn btn-secondary" onclick="loadActiveTrackForDsd()" style="font-size:11px; padding:6px 12px; white-space:nowrap;">Active Track</button>
+          </div>
+        </div>
+
+        <div style="display:grid; grid-template-columns:1fr 1fr; gap:12px;">
+          <div>
+            <label style="font-size:11px; font-weight:600; color:var(--text-muted); display:block; margin-bottom:6px;">Target PCM Sample Rate:</label>
+            <select id="dsdSrSelect" class="search-input" style="width:100%; font-size:11px;">
+              <option value="88200" selected>88.2 kHz (2x CD / Low Jitter Decimation)</option>
+              <option value="176400">176.4 kHz (4x CD / Reference Master)</option>
+              <option value="352800">352.8 kHz (DXD Equivalent Decimation)</option>
+            </select>
+          </div>
+
+          <div style="display:flex; flex-direction:column; justify-content:center; gap:6px;">
+            <label style="font-size:11px; font-weight:600; color:var(--text-muted);">Transmission Mode:</label>
+            <div style="display:flex; align-items:center; gap:8px;">
+              <input type="checkbox" id="dsdDopCheck" style="accent-color:var(--primary); cursor:pointer;">
+              <label for="dsdDopCheck" style="font-size:11px; color:var(--text-dim); cursor:pointer;">DoP v1.1 (DSD-over-PCM for external USB DAC)</label>
+            </div>
+          </div>
+        </div>
+
+        <div>
+          <label style="font-size:11px; font-weight:600; color:var(--text-muted); display:block; margin-bottom:6px;">Output File (Optional, auto-generated if blank):</label>
+          <input type="text" id="dsdOutputInput" class="search-input" style="width:100%; font-size:11px;" placeholder="Custom output .wav path...">
+        </div>
+
+        <div style="display:flex; justify-content:space-between; align-items:center; margin-top:4px;">
+          <span id="dsdStatusText" style="font-size:11px; color:var(--text-dim);">Ready to process DSD stream</span>
+          <button class="btn btn-primary" onclick="runDsdConvertAction()" id="processDsdBtn" style="font-size:12px; padding:7px 18px;">
+            📻 Convert DSD Stream
+          </button>
+        </div>
+
+        <div id="dsdOutputCard" style="background:#0b0d14; border:1px solid var(--border); border-radius:8px; padding:12px; font-family:monospace; font-size:11px; line-height:1.45; color:var(--emerald); min-height:80px; white-space:pre-wrap; overflow-x:auto;">Select DSD file and click Convert DSD Stream.</div>
+      </div>
+
       <div style="padding:10px 16px; background:#121520; border-top:1px solid var(--border); display:flex; justify-content:space-between; align-items:center;">
-        <span style="font-size:10px; color:var(--text-dim);">Includes syllable sweep tags for VLC, MPV, Aegisub, and HandBrake</span>
-        <button class="btn btn-secondary" onclick="closeAssSubtitlesModal()">Close</button>
+        <span style="font-size:10px; color:var(--text-dim);">Includes 35 kHz ultrasonic Kaiser FIR filtering to eliminate Delta-Sigma hash</span>
+        <button class="btn btn-secondary" onclick="closeDsdModal()">Close</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Phase 23: Sub-Sample Fractional Delay & Stereo Phase Alignment Modal -->
+  <div class="modal-backdrop" id="phaseAlignModal" style="display:none;">
+    <div class="modal-card" style="width:720px; max-width:95vw; background:#161926; border:1px solid var(--border); border-radius:12px; box-shadow:0 12px 36px rgba(0,0,0,0.7); overflow:hidden;">
+      <div style="padding:16px 20px; background:#121520; border-bottom:1px solid var(--border); display:flex; justify-content:space-between; align-items:center;">
+        <div class="modal-title" style="font-size:14px; font-weight:700; display:flex; align-items:center; gap:8px;">
+          <span>⏱️</span>
+          <span>Sub-Sample Fractional Delay &amp; Phase Alignment Studio</span>
+        </div>
+        <button onclick="closePhaseAlignModal()" style="background:none; border:none; color:var(--text-muted); font-size:16px; cursor:pointer;">✕</button>
+      </div>
+
+      <div style="padding:20px; max-height:75vh; overflow-y:auto; display:flex; flex-direction:column; gap:16px;">
+        <div style="font-size:11px; color:var(--text-dim); line-height:1.5;">
+          Eliminates acoustic comb filtering, hollow midrange, and smeared transients caused by physical microphone distance offsets. Detects inter-channel delay down to sub-samples via cross-correlation with parabolic peak interpolation, and shifts channels using a windowed sinc fractional delay filter.
+        </div>
+
+        <div>
+          <label style="font-size:11px; font-weight:600; color:var(--text-muted); display:block; margin-bottom:6px;">Target Stereo Audio Track:</label>
+          <div style="display:flex; gap:8px;">
+            <input type="text" id="phaseAlignTargetInput" class="search-input" style="width:100%; font-size:11px;" placeholder="Path to stereo audio file...">
+            <button class="btn btn-secondary" onclick="loadActiveTrackForPhaseAlign()" style="font-size:11px; padding:6px 12px; white-space:nowrap;">Active Track</button>
+          </div>
+        </div>
+
+        <div style="display:grid; grid-template-columns:1fr 1fr; gap:12px;">
+          <div>
+            <label style="font-size:11px; font-weight:600; color:var(--text-muted); display:block; margin-bottom:6px;">Max Delay Search Window (ms):</label>
+            <input type="number" id="phaseAlignWindowInput" class="search-input" style="width:100%; font-size:11px;" value="10.0" step="1.0" min="1.0" max="50.0">
+          </div>
+
+          <div>
+            <label style="font-size:11px; font-weight:600; color:var(--text-muted); display:block; margin-bottom:6px;">Channel to Shift:</label>
+            <select id="phaseAlignChannelSelect" class="search-input" style="width:100%; font-size:11px;">
+              <option value="auto" selected>Auto-detect lagging channel (Recommended)</option>
+              <option value="left">Left Channel Only</option>
+              <option value="right">Right Channel Only</option>
+            </select>
+          </div>
+        </div>
+
+        <div>
+          <label style="font-size:11px; font-weight:600; color:var(--text-muted); display:block; margin-bottom:6px;">Output Aligned WAV (Optional):</label>
+          <input type="text" id="phaseAlignOutputInput" class="search-input" style="width:100%; font-size:11px;" placeholder="Custom output path...">
+        </div>
+
+        <div style="display:flex; justify-content:space-between; align-items:center; margin-top:4px;">
+          <span id="phaseAlignStatusText" style="font-size:11px; color:var(--text-dim);">Ready to measure phase alignment</span>
+          <button class="btn btn-primary" onclick="runPhaseAlignAction()" id="processPhaseAlignBtn" style="font-size:12px; padding:7px 18px;">
+            ⏱️ Measure &amp; Align Phase
+          </button>
+        </div>
+
+        <div id="phaseAlignOutputCard" style="background:#0b0d14; border:1px solid var(--border); border-radius:8px; padding:12px; font-family:monospace; font-size:11px; line-height:1.45; color:var(--cyan); min-height:80px; white-space:pre-wrap; overflow-x:auto;">Select stereo audio file and click Measure &amp; Align Phase.</div>
+      </div>
+
+      <div style="padding:10px 16px; background:#121520; border-top:1px solid var(--border); display:flex; justify-content:space-between; align-items:center;">
+        <span style="font-size:10px; color:var(--text-dim);">Fractional sinc interpolation maintains 100% high-frequency clarity</span>
+        <button class="btn btn-secondary" onclick="closePhaseAlignModal()">Close</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Phase 23: Mastering Brickwall Limiter & True-Peak (ISP) Studio Modal -->
+  <div class="modal-backdrop" id="masterLimiterModal" style="display:none;">
+    <div class="modal-card" style="width:720px; max-width:95vw; background:#161926; border:1px solid var(--border); border-radius:12px; box-shadow:0 12px 36px rgba(0,0,0,0.7); overflow:hidden;">
+      <div style="padding:16px 20px; background:#121520; border-bottom:1px solid var(--border); display:flex; justify-content:space-between; align-items:center;">
+        <div class="modal-title" style="font-size:14px; font-weight:700; display:flex; align-items:center; gap:8px;">
+          <span>🛡️</span>
+          <span>Mastering Brickwall Limiter &amp; True-Peak (ISP) Studio</span>
+        </div>
+        <button onclick="closeMasterLimiterModal()" style="background:none; border:none; color:var(--text-muted); font-size:16px; cursor:pointer;">✕</button>
+      </div>
+
+      <div style="padding:20px; max-height:75vh; overflow-y:auto; display:flex; flex-direction:column; gap:16px;">
+        <div style="font-size:11px; color:var(--text-dim); line-height:1.5;">
+          Broadcast-grade mastering limiter with 4x oversampled Inter-Sample Peak (ISP) detection. Features a lookahead delay buffer (4ms) ensuring absolute 0.000000 clipping prevention, program-dependent dual-stage release recovery, and streaming compliance for Spotify, Apple Music, and YouTube.
+        </div>
+
+        <div>
+          <label style="font-size:11px; font-weight:600; color:var(--text-muted); display:block; margin-bottom:6px;">Target Audio File:</label>
+          <div style="display:flex; gap:8px;">
+            <input type="text" id="masterLimiterTargetInput" class="search-input" style="width:100%; font-size:11px;" placeholder="Path to audio file...">
+            <button class="btn btn-secondary" onclick="loadActiveTrackForMasterLimiter()" style="font-size:11px; padding:6px 12px; white-space:nowrap;">Active Track</button>
+          </div>
+        </div>
+
+        <div style="display:grid; grid-template-columns:1fr 1fr 1fr; gap:12px;">
+          <div>
+            <label style="font-size:11px; font-weight:600; color:var(--text-muted); display:block; margin-bottom:6px;">Peak Ceiling (dBFS):</label>
+            <select id="masterLimiterCeilingSelect" class="search-input" style="width:100%; font-size:11px;">
+              <option value="-1.0" selected>-1.0 dBFS (Spotify &amp; Apple Music)</option>
+              <option value="-0.3">-0.3 dBFS (Hi-Res Audio)</option>
+              <option value="-0.1">-0.1 dBFS (Red Book CD Master)</option>
+              <option value="-2.0">-2.0 dBFS (Loud Club Masters)</option>
+            </select>
+          </div>
+
+          <div>
+            <label style="font-size:11px; font-weight:600; color:var(--text-muted); display:block; margin-bottom:6px;">Drive Threshold (dBFS):</label>
+            <input type="number" id="masterLimiterThreshInput" class="search-input" style="width:100%; font-size:11px;" value="-3.0" step="0.5" min="-18.0" max="0.0">
+          </div>
+
+          <div>
+            <label style="font-size:11px; font-weight:600; color:var(--text-muted); display:block; margin-bottom:6px;">Release Time (ms):</label>
+            <input type="number" id="masterLimiterReleaseInput" class="search-input" style="width:100%; font-size:11px;" value="120" step="10" min="20" max="500">
+          </div>
+        </div>
+
+        <div>
+          <label style="font-size:11px; font-weight:600; color:var(--text-muted); display:block; margin-bottom:6px;">Output Mastered WAV (Optional):</label>
+          <input type="text" id="masterLimiterOutputInput" class="search-input" style="width:100%; font-size:11px;" placeholder="Custom output path...">
+        </div>
+
+        <div style="display:flex; justify-content:space-between; align-items:center; margin-top:4px;">
+          <span id="masterLimiterStatusText" style="font-size:11px; color:var(--text-dim);">Ready to master audio</span>
+          <button class="btn btn-primary" onclick="runMasterLimiterAction()" id="processMasterLimiterBtn" style="font-size:12px; padding:7px 18px;">
+            🛡️ Apply Brickwall Limiter
+          </button>
+        </div>
+
+        <div id="masterLimiterOutputCard" style="background:#0b0d14; border:1px solid var(--border); border-radius:8px; padding:12px; font-family:monospace; font-size:11px; line-height:1.45; color:var(--emerald); min-height:80px; white-space:pre-wrap; overflow-x:auto;">Select track and click Apply Brickwall Limiter.</div>
+      </div>
+
+      <div style="padding:10px 16px; background:#121520; border-top:1px solid var(--border); display:flex; justify-content:space-between; align-items:center;">
+        <span style="font-size:10px; color:var(--text-dim);">Guarantees zero sample overs and compliant True-Peak ceiling</span>
+        <button class="btn btn-secondary" onclick="closeMasterLimiterModal()">Close</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Phase 23: Album Art Optimizer, Cover Normalizer & Bloat Reducer Modal -->
+  <div class="modal-backdrop" id="albumArtModal" style="display:none;">
+    <div class="modal-card" style="width:720px; max-width:95vw; background:#161926; border:1px solid var(--border); border-radius:12px; box-shadow:0 12px 36px rgba(0,0,0,0.7); overflow:hidden;">
+      <div style="padding:16px 20px; background:#121520; border-bottom:1px solid var(--border); display:flex; justify-content:space-between; align-items:center;">
+        <div class="modal-title" style="font-size:14px; font-weight:700; display:flex; align-items:center; gap:8px;">
+          <span>🖼️</span>
+          <span>Album Art Optimizer, Cover Normalizer &amp; Bloat Reducer</span>
+        </div>
+        <button onclick="closeAlbumArtModal()" style="background:none; border:none; color:var(--text-muted); font-size:16px; cursor:pointer;">✕</button>
+      </div>
+
+      <div style="padding:20px; max-height:75vh; overflow-y:auto; display:flex; flex-direction:column; gap:16px;">
+        <div style="font-size:11px; color:var(--text-dim); line-height:1.5;">
+          Audits and manages album cover art across your library. Sniffs binary image headers to inspect embedded art format (PNG, JPEG, WebP) and dimensions without external dependencies. Pinpoints oversized embedded images that bloat tags, extracts external companion 'cover.jpg' for DAPs &amp; MusicBee, and strips bloated embedded art.
+        </div>
+
+        <div>
+          <label style="font-size:11px; font-weight:600; color:var(--text-muted); display:block; margin-bottom:6px;">Target Audio File or Music Directory:</label>
+          <div style="display:flex; gap:8px;">
+            <input type="text" id="albumArtTargetInput" class="search-input" style="width:100%; font-size:11px;" placeholder="Path to file or folder...">
+            <button class="btn btn-secondary" onclick="loadActiveTrackForAlbumArt()" style="font-size:11px; padding:6px 12px; white-space:nowrap;">Active Track</button>
+          </div>
+        </div>
+
+        <div>
+          <label style="font-size:11px; font-weight:600; color:var(--text-muted); display:block; margin-bottom:6px;">Action Mode:</label>
+          <select id="albumArtActionSelect" class="search-input" style="width:100%; font-size:11px;">
+            <option value="report" selected>Audit &amp; Report Art Health (Inspect dimensions &amp; find bloated files)</option>
+            <option value="extract">Extract companion 'cover.jpg' / 'folder.jpg' for DAPs &amp; MusicBee</option>
+            <option value="strip">Strip bloated embedded artwork from files (Reclaim disk space)</option>
+          </select>
+        </div>
+
+        <div style="display:flex; justify-content:space-between; align-items:center; margin-top:4px;">
+          <span id="albumArtStatusText" style="font-size:11px; color:var(--text-dim);">Ready to audit album artwork</span>
+          <button class="btn btn-primary" onclick="runAlbumArtAction()" id="processAlbumArtBtn" style="font-size:12px; padding:7px 18px;">
+            🖼️ Run Art Studio Action
+          </button>
+        </div>
+
+        <div id="albumArtOutputCard" style="background:#0b0d14; border:1px solid var(--border); border-radius:8px; padding:12px; font-family:monospace; font-size:11px; line-height:1.45; color:var(--cyan); min-height:80px; white-space:pre-wrap; overflow-x:auto;">Select audio file or folder and click Run Art Studio Action.</div>
+      </div>
+
+      <div style="padding:10px 16px; background:#121520; border-top:1px solid var(--border); display:flex; justify-content:space-between; align-items:center;">
+        <span style="font-size:10px; color:var(--text-dim);">Supports FLAC, MP3, M4A, OGG, and WAV tags</span>
+        <button class="btn btn-secondary" onclick="closeAlbumArtModal()">Close</button>
       </div>
     </div>
   </div>
@@ -8689,6 +8939,10 @@
         closeCueFixerModal();
         closeRoomIrModal();
         closeAssSubtitlesModal();
+        closeDsdModal();
+        closePhaseAlignModal();
+        closeMasterLimiterModal();
+        closeAlbumArtModal();
         dismissPodcastResumeToast();
         const popup = document.getElementById('speedStudioPopup');
         if (popup) popup.style.display = 'none';
@@ -14629,6 +14883,341 @@
           if (btn) {
             btn.disabled = false;
             btn.innerText = '🎨 Convert to ASS Subtitles';
+          }
+          if (out) out.innerText = '✕ Error: ' + (err.message || err);
+        });
+    // ------------------ Phase 23: DSD to PCM Decimator & DoP Studio -------------------
+    function openDsdModal() {
+      const modal = document.getElementById('dsdModal');
+      if (modal) modal.style.display = 'flex';
+      const input = document.getElementById('dsdTargetInput');
+      if (input && !input.value && currentTrack && currentTrack.file_path) {
+        if (currentTrack.file_path.toLowerCase().match(/\.(dsf|dff)$/)) {
+          input.value = currentTrack.file_path;
+        }
+      }
+    }
+
+    function closeDsdModal() {
+      const modal = document.getElementById('dsdModal');
+      if (modal) modal.style.display = 'none';
+    }
+
+    function loadActiveTrackForDsd() {
+      const input = document.getElementById('dsdTargetInput');
+      if (currentTrack && currentTrack.file_path) {
+        if (input) input.value = currentTrack.file_path;
+        showToast('Loaded active track for DSD conversion.');
+      } else {
+        showToast('No active audio track playing.', true);
+      }
+    }
+
+    function runDsdConvertAction() {
+      const inp = document.getElementById('dsdTargetInput')?.value?.trim();
+      const sr = parseInt(document.getElementById('dsdSrSelect')?.value || '88200', 10);
+      const dop = !!document.getElementById('dsdDopCheck')?.checked;
+      const outPath = document.getElementById('dsdOutputInput')?.value?.trim() || null;
+      const btn = document.getElementById('processDsdBtn');
+      const st = document.getElementById('dsdStatusText');
+      const out = document.getElementById('dsdOutputCard');
+
+      if (!inp) {
+        showToast('Please specify a DSD file or "test".', true);
+        return;
+      }
+
+      if (btn) {
+        btn.disabled = true;
+        btn.innerText = '⏳ Processing DSD...';
+      }
+      if (st) {
+        st.innerText = `Filtering ultrasonic quantization noise and decimating to ${dop ? 'DoP 176.4k' : sr + ' Hz'}...`;
+        st.style.color = 'var(--cyan)';
+      }
+
+      if (window.pywebview && window.pywebview.api && window.pywebview.api.convert_dsd_stream) {
+        window.pywebview.api.convert_dsd_stream(inp, sr, outPath, dop).then(res => {
+          if (btn) {
+            btn.disabled = false;
+            btn.innerText = '📻 Convert DSD Stream';
+          }
+          if (res && res.success) {
+            if (st) {
+              st.innerText = '✓ DSD stream conversion complete!';
+              st.style.color = 'var(--emerald)';
+            }
+            let card = `DSD TO PCM DECIMATION COMPLETE\n`;
+            card += `DSD Format   : ${res.dsd_format} (${res.dsd_sample_rate.toLocaleString()} Hz 1-bit)\n`;
+            card += `Target Rate  : ${res.target_sample_rate.toLocaleString()} Hz | ${res.bit_depth}-bit PCM (${res.channels} Ch)\n`;
+            card += `Process Mode : ${res.processing_mode}\n`;
+            card += `Ultrasonic   : ${res.ultrasonic_filter}\n`;
+            card += `Audio Peak   : ${res.peak_dbfs} dBFS (${res.duration_sec}s duration)\n`;
+            card += `Master Saved : ${res.output_path}\n`;
+            if (out) out.innerText = card;
+          } else {
+            if (st) {
+              st.innerText = '✕ DSD conversion failed: ' + (res ? res.error : 'Unknown');
+              st.style.color = 'var(--rose)';
+            }
+          }
+        }).catch(err => {
+          if (btn) {
+            btn.disabled = false;
+            btn.innerText = '📻 Convert DSD Stream';
+          }
+          if (out) out.innerText = '✕ Error: ' + (err.message || err);
+        });
+      }
+    }
+
+    // ------------------ Phase 23: Sub-Sample Phase & Delay Aligner --------------------
+    function openPhaseAlignModal() {
+      const modal = document.getElementById('phaseAlignModal');
+      if (modal) modal.style.display = 'flex';
+      const input = document.getElementById('phaseAlignTargetInput');
+      if (input && !input.value && currentTrack && currentTrack.file_path) {
+        input.value = currentTrack.file_path;
+      }
+    }
+
+    function closePhaseAlignModal() {
+      const modal = document.getElementById('phaseAlignModal');
+      if (modal) modal.style.display = 'none';
+    }
+
+    function loadActiveTrackForPhaseAlign() {
+      const input = document.getElementById('phaseAlignTargetInput');
+      if (currentTrack && currentTrack.file_path) {
+        if (input) input.value = currentTrack.file_path;
+        showToast('Loaded active track for phase alignment.');
+      } else {
+        showToast('No active audio track playing.', true);
+      }
+    }
+
+    function runPhaseAlignAction() {
+      const inp = document.getElementById('phaseAlignTargetInput')?.value?.trim();
+      const maxMs = parseFloat(document.getElementById('phaseAlignWindowInput')?.value || '10.0');
+      const chan = document.getElementById('phaseAlignChannelSelect')?.value || 'auto';
+      const outPath = document.getElementById('phaseAlignOutputInput')?.value?.trim() || null;
+      const btn = document.getElementById('processPhaseAlignBtn');
+      const st = document.getElementById('phaseAlignStatusText');
+      const out = document.getElementById('phaseAlignOutputCard');
+
+      if (!inp) {
+        showToast('Please specify a stereo audio track.', true);
+        return;
+      }
+
+      if (btn) {
+        btn.disabled = true;
+        btn.innerText = '⏳ Aligning Phase...';
+      }
+      if (st) {
+        st.innerText = 'Calculating cross-correlation and sub-sample parabolic interpolation...';
+        st.style.color = 'var(--cyan)';
+      }
+
+      if (window.pywebview && window.pywebview.api && window.pywebview.api.align_subsample_phase) {
+        window.pywebview.api.align_subsample_phase(inp, outPath, maxMs, chan).then(res => {
+          if (btn) {
+            btn.disabled = false;
+            btn.innerText = '⏱️ Measure & Align Phase';
+          }
+          if (res && res.success) {
+            if (st) {
+              st.innerText = '✓ Phase alignment and delay correction complete!';
+              st.style.color = 'var(--emerald)';
+            }
+            let card = `SUB-SAMPLE PHASE ALIGNMENT COMPLETE\n`;
+            card += `Input Track  : ${res.input_file}\n`;
+            card += `Inter-Ch ITD : ${res.delay_samples} samples (${res.delay_us} µs / ${res.delay_ms} ms)\n`;
+            card += `Physical Dist: ${res.distance_mm} mm acoustic microphone offset\n`;
+            card += `Correction   : ${res.channel_shifted}\n`;
+            card += `Coherence r  : ${res.correlation_before} -> ${res.correlation_after} (Gain: +${res.coherence_gain_percent}%)\n`;
+            card += `Aligned WAV  : ${res.output_path}\n`;
+            if (out) out.innerText = card;
+          } else {
+            if (st) {
+              st.innerText = '✕ Phase alignment failed: ' + (res ? res.error : 'Unknown');
+              st.style.color = 'var(--rose)';
+            }
+          }
+        }).catch(err => {
+          if (btn) {
+            btn.disabled = false;
+            btn.innerText = '⏱️ Measure & Align Phase';
+          }
+          if (out) out.innerText = '✕ Error: ' + (err.message || err);
+        });
+      }
+    }
+
+    // ------------------ Phase 23: Mastering Brickwall Limiter & True-Peak -------------
+    function openMasterLimiterModal() {
+      const modal = document.getElementById('masterLimiterModal');
+      if (modal) modal.style.display = 'flex';
+      const input = document.getElementById('masterLimiterTargetInput');
+      if (input && !input.value && currentTrack && currentTrack.file_path) {
+        input.value = currentTrack.file_path;
+      }
+    }
+
+    function closeMasterLimiterModal() {
+      const modal = document.getElementById('masterLimiterModal');
+      if (modal) modal.style.display = 'none';
+    }
+
+    function loadActiveTrackForMasterLimiter() {
+      const input = document.getElementById('masterLimiterTargetInput');
+      if (currentTrack && currentTrack.file_path) {
+        if (input) input.value = currentTrack.file_path;
+        showToast('Loaded active track for mastering limiter.');
+      } else {
+        showToast('No active audio track playing.', true);
+      }
+    }
+
+    function runMasterLimiterAction() {
+      const inp = document.getElementById('masterLimiterTargetInput')?.value?.trim();
+      const ceil = parseFloat(document.getElementById('masterLimiterCeilingSelect')?.value || '-1.0');
+      const thresh = parseFloat(document.getElementById('masterLimiterThreshInput')?.value || '-3.0');
+      const rel = parseFloat(document.getElementById('masterLimiterReleaseInput')?.value || '120');
+      const outPath = document.getElementById('masterLimiterOutputInput')?.value?.trim() || null;
+      const btn = document.getElementById('processMasterLimiterBtn');
+      const st = document.getElementById('masterLimiterStatusText');
+      const out = document.getElementById('masterLimiterOutputCard');
+
+      if (!inp) {
+        showToast('Please specify an audio track to master.', true);
+        return;
+      }
+
+      if (btn) {
+        btn.disabled = true;
+        btn.innerText = '⏳ Brickwall Limiting...';
+      }
+      if (st) {
+        st.innerText = `Analyzing 4x oversampled ISPs and applying lookahead ceiling ${ceil} dBFS...`;
+        st.style.color = 'var(--cyan)';
+      }
+
+      if (window.pywebview && window.pywebview.api && window.pywebview.api.apply_mastering_limiter) {
+        window.pywebview.api.apply_mastering_limiter(inp, outPath, ceil, thresh, rel).then(res => {
+          if (btn) {
+            btn.disabled = false;
+            btn.innerText = '🛡️ Apply Brickwall Limiter';
+          }
+          if (res && res.success) {
+            if (st) {
+              st.innerText = '✓ Mastering limiting complete (0.000000 sample overs)!';
+              st.style.color = 'var(--emerald)';
+            }
+            let card = `MASTERING BRICKWALL LIMITER COMPLETE\n`;
+            card += `Track File   : ${res.input_file}\n`;
+            card += `Ceiling      : ${res.ceiling_dbfs} dBFS (Drive Boost: +${res.drive_gain_db} dB)\n`;
+            card += `Input True-Pk: ${res.in_true_peak_dbfs} dBFS (Caught ${res.isps_prevented} inter-sample peaks)\n`;
+            card += `Output True-Pk: ${res.out_true_peak_dbfs} dBFS (Strict Brickwall Compliance)\n`;
+            card += `Max Gain Red : ${res.max_gain_reduction_db} dB (Avg GR: ${res.avg_gain_reduction_db} dB)\n`;
+            card += `Crest Factor : ${res.crest_factor_db} dB\n`;
+            card += `Mastered WAV : ${res.output_path}\n`;
+            if (out) out.innerText = card;
+          } else {
+            if (st) {
+              st.innerText = '✕ Limiting failed: ' + (res ? res.error : 'Unknown');
+              st.style.color = 'var(--rose)';
+            }
+          }
+        }).catch(err => {
+          if (btn) {
+            btn.disabled = false;
+            btn.innerText = '🛡️ Apply Brickwall Limiter';
+          }
+          if (out) out.innerText = '✕ Error: ' + (err.message || err);
+        });
+      }
+    }
+
+    // ------------------ Phase 23: Album Art Studio & Cover Optimizer ------------------
+    function openAlbumArtModal() {
+      const modal = document.getElementById('albumArtModal');
+      if (modal) modal.style.display = 'flex';
+      const input = document.getElementById('albumArtTargetInput');
+      if (input && !input.value && currentTrack && currentTrack.file_path) {
+        input.value = currentTrack.file_path;
+      }
+    }
+
+    function closeAlbumArtModal() {
+      const modal = document.getElementById('albumArtModal');
+      if (modal) modal.style.display = 'none';
+    }
+
+    function loadActiveTrackForAlbumArt() {
+      const input = document.getElementById('albumArtTargetInput');
+      if (currentTrack && currentTrack.file_path) {
+        if (input) input.value = currentTrack.file_path;
+        showToast('Loaded active track for album art studio.');
+      } else {
+        showToast('No active audio track playing.', true);
+      }
+    }
+
+    function runAlbumArtAction() {
+      const tgt = document.getElementById('albumArtTargetInput')?.value?.trim();
+      const act = document.getElementById('albumArtActionSelect')?.value || 'report';
+      const btn = document.getElementById('processAlbumArtBtn');
+      const st = document.getElementById('albumArtStatusText');
+      const out = document.getElementById('albumArtOutputCard');
+
+      if (!tgt) {
+        showToast('Please specify an audio file or music folder.', true);
+        return;
+      }
+
+      if (btn) {
+        btn.disabled = true;
+        btn.innerText = '⏳ Processing Art...';
+      }
+      if (st) {
+        st.innerText = `Sniffing binary headers and executing ${act.toUpperCase()}...`;
+        st.style.color = 'var(--cyan)';
+      }
+
+      if (window.pywebview && window.pywebview.api && window.pywebview.api.manage_album_artwork) {
+        window.pywebview.api.manage_album_artwork(tgt, act, act === 'extract').then(res => {
+          if (btn) {
+            btn.disabled = false;
+            btn.innerText = '🖼️ Run Art Studio Action';
+          }
+          if (res && res.success) {
+            if (st) {
+              st.innerText = '✓ Album art action completed!';
+              st.style.color = 'var(--emerald)';
+            }
+            let card = `ALBUM ART STUDIO REPORT (${res.action.toUpperCase()})\n`;
+            card += `Target Path  : ${res.target_path}\n`;
+            card += `Scanned Files: ${res.total_files} tracks (${res.files_with_art} with art, ${res.missing_art} missing)\n`;
+            card += `Total Space  : ${res.total_art_mb} MB (Avg: ${res.avg_art_size_kb} KB / track)\n`;
+            card += `Bloat Count  : ${res.bloated_files} tracks with >1.5MB images or uncompressed PNG\n`;
+            if (res.extracted_covers_count > 0) {
+              card += `Extracted    : Created ${res.extracted_covers_count} companion cover.jpg files\n`;
+            }
+            if (res.stripped_files_count > 0) {
+              card += `Stripped     : Reclaimed embedded art space from ${res.stripped_files_count} tracks\n`;
+            }
+            if (out) out.innerText = card;
+          } else {
+            if (st) {
+              st.innerText = '✕ Art action failed: ' + (res ? res.error : 'Unknown');
+              st.style.color = 'var(--rose)';
+            }
+          }
+        }).catch(err => {
+          if (btn) {
+            btn.disabled = false;
+            btn.innerText = '🖼️ Run Art Studio Action';
           }
           if (out) out.innerText = '✕ Error: ' + (err.message || err);
         });

@@ -363,6 +363,30 @@ Examples:
       help="Convert LRC to animated karaoke ASS subtitles: --lrc-to-ass <lrc_file> [output_ass] [--style karaoke|minimal|cinematic] [--color #FFD700] [--srt]",
   )
   parser.add_argument(
+      "--dsd-to-pcm",
+      nargs="+",
+      metavar="PARAM",
+      help="Audiophile DSD to PCM decimator & DoP studio: --dsd-to-pcm <input.dsf> [output.wav] [--rate 88200|176400|352800] [--dop]",
+  )
+  parser.add_argument(
+      "--align-phase",
+      nargs="+",
+      metavar="PARAM",
+      help="Sub-sample fractional delay & phase alignment: --align-phase <audio_file> [output_file] [--max-delay-ms 10.0] [--channel left|right|auto]",
+  )
+  parser.add_argument(
+      "--master-limit",
+      nargs="+",
+      metavar="PARAM",
+      help="Mastering brickwall limiter & ISP true-peak studio: --master-limit <audio_file> [output_file] [--ceiling -1.0] [--threshold -3.0] [--release 120]",
+  )
+  parser.add_argument(
+      "--album-art",
+      nargs="+",
+      metavar="PARAM",
+      help="Album art optimizer, cover normalizer & bloat reducer: --album-art <file_or_dir> [--extract] [--strip]",
+  )
+  parser.add_argument(
       "--version",
       action="version",
       version=f"Sonance v{modern_lyrics_downloader.APP_VERSION}",
@@ -1663,6 +1687,122 @@ Examples:
         export_srt=do_srt,
     )
     print(lrc_to_ass_converter.format_ass_card(res))
+    return
+
+  if args.dsd_to_pcm:
+    import dsd_converter
+    dsd_params = list(args.dsd_to_pcm) + list(unknown)
+    inp = dsd_params[0]
+    out = None
+    rate = 88200
+    dop = False
+    idx = 1
+    while idx < len(dsd_params):
+      arg = dsd_params[idx]
+      if arg in ("--rate", "--sr", "--sample-rate") and idx + 1 < len(dsd_params):
+        rate = int(dsd_params[idx + 1])
+        idx += 2
+      elif arg == "--dop":
+        dop = True
+        idx += 1
+      elif arg in ("--output", "--out") and idx + 1 < len(dsd_params):
+        out = dsd_params[idx + 1]
+        idx += 2
+      elif not arg.startswith("--") and out is None:
+        out = arg
+        idx += 1
+      else:
+        idx += 1
+    print(f"[*] Processing DSD bitstream ({'DoP v1.1' if dop else f'PCM {rate} Hz'}): {inp}...")
+    res = dsd_converter.process_dsd_stream(inp, target_pcm_rate=rate, output_path=out, dop_mode=dop)
+    print(dsd_converter.format_dsd_card(res))
+    return
+
+  if args.align_phase:
+    import subsample_delay
+    ap_params = list(args.align_phase) + list(unknown)
+    inp = ap_params[0]
+    out = None
+    max_ms = 10.0
+    chan = "auto"
+    idx = 1
+    while idx < len(ap_params):
+      arg = ap_params[idx]
+      if arg in ("--max-delay-ms", "--max-ms", "--window") and idx + 1 < len(ap_params):
+        max_ms = float(ap_params[idx + 1])
+        idx += 2
+      elif arg in ("--channel", "--ch") and idx + 1 < len(ap_params):
+        chan = ap_params[idx + 1]
+        idx += 2
+      elif arg in ("--output", "--out") and idx + 1 < len(ap_params):
+        out = ap_params[idx + 1]
+        idx += 2
+      elif not arg.startswith("--") and out is None:
+        out = arg
+        idx += 1
+      else:
+        idx += 1
+    print(f"[*] Measuring sub-sample fractional delay & aligning phase: {inp}...")
+    res = subsample_delay.align_audio_phase(inp, output_path=out, max_delay_ms=max_ms, target_channel=chan)
+    print(subsample_delay.format_delay_card(res))
+    return
+
+  if args.master_limit:
+    import mastering_limiter
+    ml_params = list(args.master_limit) + list(unknown)
+    inp = ml_params[0]
+    out = None
+    ceil = -1.0
+    thresh = -3.0
+    rel = 120.0
+    idx = 1
+    while idx < len(ml_params):
+      arg = ml_params[idx]
+      if arg in ("--ceiling", "--ceil") and idx + 1 < len(ml_params):
+        ceil = float(ml_params[idx + 1])
+        idx += 2
+      elif arg in ("--threshold", "--thresh", "--drive") and idx + 1 < len(ml_params):
+        thresh = float(ml_params[idx + 1])
+        idx += 2
+      elif arg in ("--release", "--rel") and idx + 1 < len(ml_params):
+        rel = float(ml_params[idx + 1])
+        idx += 2
+      elif arg in ("--output", "--out") and idx + 1 < len(ml_params):
+        out = ml_params[idx + 1]
+        idx += 2
+      elif not arg.startswith("--") and out is None:
+        out = arg
+        idx += 1
+      else:
+        idx += 1
+    print(f"[*] Applying mastering brickwall limiter (Ceiling: {ceil} dBFS, Drive: {-thresh:+.1f} dB): {inp}...")
+    res = mastering_limiter.process_mastering_limiter(
+        inp, output_path=out, ceiling_db=ceil, threshold_db=thresh, release_ms=rel
+    )
+    print(mastering_limiter.format_limiter_card(res))
+    return
+
+  if args.album_art:
+    import album_art_studio
+    aa_params = list(args.album_art) + list(unknown)
+    tgt = aa_params[0]
+    act = "report"
+    do_extract = False
+    idx = 1
+    while idx < len(aa_params):
+      arg = aa_params[idx]
+      if arg == "--extract":
+        act = "extract"
+        do_extract = True
+        idx += 1
+      elif arg == "--strip":
+        act = "strip"
+        idx += 1
+      else:
+        idx += 1
+    print(f"[*] Scanning album artwork ({act.upper()} mode): {tgt}...")
+    res = album_art_studio.scan_and_manage_artwork(tgt, action=act, export_companion=do_extract)
+    print(album_art_studio.format_art_card(res))
     return
 
   if args.classic:
