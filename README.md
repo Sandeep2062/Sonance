@@ -91,7 +91,13 @@ Sonance brings together three distinct open-source powerhouses:
 - **Library Doctor & Duplicate Audio Cleaner**: Scans your entire music collection, calculates a 0-100% Library Health Score, detects duplicates (with bitrate and lossless quality comparisons), and cleans redundant files. CLI access available via `python sonance.py --doctor [FOLDER]`.
 - **Fullscreen Party Visualizer Mode**: Smooth high-FPS canvas spectrum visualizer with neon glow bars, animated backdrop, and centered real-time karaoke lyrics.
 
-### 🔄 9. In-App Updates & Releases
+### 📱 9. Wireless Mobile Remote, Smart Playlists & Creative Studio DSP
+- **Wi-Fi Mobile Remote & Cast Controller**: Integrated background HTTP/SSE server (`http://<local-ip>:5050`) allowing full playback control, volume slider, queue management, and **real-time synchronized lyrics right on any smartphone or tablet**. Includes an in-app QR code for instant camera scan connection!
+- **Smart Dynamic Auto-Playlists Engine**: Computes virtual smart playlists live from library metadata: `Pure Lossless` (FLAC/WAV/ALAC), `Karaoke Ready` (.lrc verified), `Recently Added` (last 30 days), `Doctor's Queue`, and `Decades` (80s, 90s, 2000s, 2010s, 2020s). Includes 1-click `.m3u8` playlist export and CLI inspection via `python sonance.py --smart-playlists`.
+- **Speed & Creative DSP Studio**: Dynamic audio playback rate slider (0.5x to 2.0x) and studio presets: **Master 1.0x**, **Nightcore 1.25x**, **Slowed + Reverb 0.85x** (powered by a synthetic stereo Web Audio convolver impulse response), and **Practice 0.75x**.
+- **Desktop Keyboard Hotkeys & Hardware Media Keys**: Control playback anywhere with `Space` (Play/Pause), `Left`/`Right` (Seek $\pm 5$s), `Up`/`Down` (Volume $\pm 5\%$), `M` (Mute), `L` (Lyrics), `V` (Visualizer), `F11` (Fullscreen), and standard OS hardware media keys (`MediaPlayPause`, `MediaTrackNext`, `MediaTrackPrevious`).
+
+### 🔄 10. In-App Updates & Releases
 - Automatic update detection checking against [GitHub Releases](https://github.com/Sandeep2062/Sonance/releases).
 - Every release includes SHA-256 and MD5 checksum manifests (`RELEASE.sha256sum`, `RELEASE.md5sum`).
 
