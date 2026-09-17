@@ -1255,6 +1255,18 @@
       <button class="btn btn-secondary" onclick="openStemsRemixerModal()" style="padding:5px 9px; font-size:11px;" id="stemsRemixerHeaderBtn" title="Multi-Track Stems & Audio Remixer Studio">
         🎛️ Stems Remixer
       </button>
+      <button class="btn btn-secondary" onclick="openTransientModal()" style="padding:5px 9px; font-size:11px;" id="transientHeaderBtn" title="Audiophile Transient Shaper & Drum Punch Designer Studio">
+        💥 Transient
+      </button>
+      <button class="btn btn-secondary" onclick="openBinauralModal()" style="padding:5px 9px; font-size:11px;" id="binauralHeaderBtn" title="Binaural 3D Ambisonic Room & Headphone Virtualizer Studio">
+        🎧 3D Virtualizer
+      </button>
+      <button class="btn btn-secondary" onclick="openGateModal()" style="padding:5px 9px; font-size:11px;" id="gateHeaderBtn" title="Broadcast Audio Noise Gate & Downward Expander Studio">
+        🚪 Noise Gate
+      </button>
+      <button class="btn btn-secondary" onclick="openEchoModal()" style="padding:5px 9px; font-size:11px;" id="echoHeaderBtn" title="Stereo Ping-Pong & Multi-Tap BBD Tape Echo Studio">
+        🎚️ Tape Echo
+      </button>
       <button class="btn btn-secondary" onclick="openLrcStudioModal()" style="padding:5px 9px; font-size:11px;" id="lrcStudioHeaderBtn" title="Interactive LRC Studio & Live Time-Stamper">
         ✍️ LRC Studio
       </button>
@@ -6573,6 +6585,370 @@
     </div>
   </div>
 
+  <!-- Phase 26: Audiophile Transient Shaper & Drum Punch Designer Studio Modal -->
+  <div class="modal-backdrop" id="transientModal" style="display:none;">
+    <div class="modal-card" style="width:720px; max-width:95vw; background:#161926; border:1px solid var(--border); border-radius:12px; box-shadow:0 12px 36px rgba(0,0,0,0.7); overflow:hidden;">
+      <div style="padding:16px 20px; background:#121520; border-bottom:1px solid var(--border); display:flex; justify-content:space-between; align-items:center;">
+        <div class="modal-title" style="font-size:14px; font-weight:700; display:flex; align-items:center; gap:8px;">
+          <span>💥</span>
+          <span>Audiophile Transient Shaper &amp; Drum Punch Designer</span>
+        </div>
+        <button onclick="closeTransientModal()" style="background:none; border:none; color:var(--text-muted); font-size:16px; cursor:pointer;">✕</button>
+      </div>
+
+      <div style="padding:20px; max-height:75vh; overflow-y:auto; display:flex; flex-direction:column; gap:16px;">
+        <div style="font-size:11px; color:var(--text-dim); line-height:1.5;">
+          Independently shapes dynamic Attack (-24 dB to +24 dB) and acoustic Sustain (-24 dB to +24 dB) using dual-ballistics fast/slow envelope followers. Restores drum punch, softens harsh percussive spikes, or tightens room resonance with soft-knee saturation protection.
+        </div>
+
+        <div>
+          <label style="font-size:11px; font-weight:600; color:var(--text-muted); display:block; margin-bottom:6px;">Target Audio File:</label>
+          <div style="display:flex; gap:8px;">
+            <input type="text" id="transientTargetInput" class="search-input" style="width:100%; font-size:11px;" placeholder="Path to input audio file...">
+            <button class="btn btn-secondary" onclick="loadActiveTrackForTransient()" style="font-size:11px; padding:6px 12px; white-space:nowrap;">Active Track</button>
+          </div>
+        </div>
+
+        <div>
+          <label style="font-size:11px; font-weight:600; color:var(--text-muted); display:block; margin-bottom:6px;">Custom Export Destination (Optional):</label>
+          <input type="text" id="transientOutputInput" class="search-input" style="width:100%; font-size:11px;" placeholder="Auto-generated if empty: <original>_transient.wav">
+        </div>
+
+        <div style="display:grid; grid-template-columns:1fr 1fr; gap:14px; background:#121520; padding:14px; border-radius:8px; border:1px solid var(--border);">
+          <div>
+            <div style="display:flex; justify-content:space-between; margin-bottom:4px;">
+              <label style="font-size:11px; font-weight:600; color:var(--text-muted);">Transient Attack Gain:</label>
+              <span id="transientAttackVal" style="font-size:11px; color:var(--cyan); font-weight:600;">0.0 dB</span>
+            </div>
+            <input type="range" id="transientAttackSlider" min="-24.0" max="24.0" step="0.5" value="0.0" style="width:100%;" oninput="document.getElementById('transientAttackVal').innerText = (this.value >= 0 ? '+' : '') + parseFloat(this.value).toFixed(1) + ' dB'">
+          </div>
+
+          <div>
+            <div style="display:flex; justify-content:space-between; margin-bottom:4px;">
+              <label style="font-size:11px; font-weight:600; color:var(--text-muted);">Acoustic Sustain Gain:</label>
+              <span id="transientSustainVal" style="font-size:11px; color:var(--cyan); font-weight:600;">0.0 dB</span>
+            </div>
+            <input type="range" id="transientSustainSlider" min="-24.0" max="24.0" step="0.5" value="0.0" style="width:100%;" oninput="document.getElementById('transientSustainVal').innerText = (this.value >= 0 ? '+' : '') + parseFloat(this.value).toFixed(1) + ' dB'">
+          </div>
+
+          <div>
+            <div style="display:flex; justify-content:space-between; margin-bottom:4px;">
+              <label style="font-size:11px; font-weight:600; color:var(--text-muted);">Attack Window Speed:</label>
+              <span id="transientAttackSpeedVal" style="font-size:11px; color:var(--cyan); font-weight:600;">4.0 ms</span>
+            </div>
+            <input type="range" id="transientAttackSpeedSlider" min="1.0" max="20.0" step="0.5" value="4.0" style="width:100%;" oninput="document.getElementById('transientAttackSpeedVal').innerText = parseFloat(this.value).toFixed(1) + ' ms'">
+          </div>
+
+          <div>
+            <div style="display:flex; justify-content:space-between; margin-bottom:4px;">
+              <label style="font-size:11px; font-weight:600; color:var(--text-muted);">Sustain Decay Speed:</label>
+              <span id="transientSustainSpeedVal" style="font-size:11px; color:var(--cyan); font-weight:600;">80.0 ms</span>
+            </div>
+            <input type="range" id="transientSustainSpeedSlider" min="20.0" max="300.0" step="5.0" value="80.0" style="width:100%;" oninput="document.getElementById('transientSustainSpeedVal').innerText = parseFloat(this.value).toFixed(1) + ' ms'">
+          </div>
+
+          <div style="grid-column:1 / -1; display:flex; align-items:center; justify-content:space-between; padding-top:6px; border-top:1px solid rgba(255,255,255,0.06);">
+            <label style="font-size:11px; font-weight:600; color:var(--text-muted); display:flex; align-items:center; gap:8px; cursor:pointer;">
+              <input type="checkbox" id="transientSoftClipCheck" checked>
+              <span>Enable Soft-Knee Saturation Limiter (Prevents Digital Overs)</span>
+            </label>
+          </div>
+        </div>
+
+        <div style="display:flex; justify-content:space-between; align-items:center; margin-top:4px;">
+          <span id="transientStatusText" style="font-size:11px; color:var(--text-dim);">Ready to shape transients &amp; sustain</span>
+          <button class="btn btn-primary" onclick="runTransientAction()" id="processTransientBtn" style="font-size:12px; padding:7px 18px;">
+            💥 Process Transients
+          </button>
+        </div>
+
+        <div id="transientOutputCard" style="background:#0b0d14; border:1px solid var(--border); border-radius:8px; padding:12px; font-family:monospace; font-size:11px; line-height:1.45; color:var(--cyan); min-height:80px; white-space:pre-wrap; overflow-x:auto;">Select audio file and click Process Transients.</div>
+      </div>
+
+      <div style="padding:10px 16px; background:#121520; border-top:1px solid var(--border); display:flex; justify-content:space-between; align-items:center;">
+        <span style="font-size:10px; color:var(--text-dim);">Dual envelope ballistics with soft-knee tanh saturation limiter</span>
+        <button class="btn btn-secondary" onclick="closeTransientModal()">Close</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Phase 26: Binaural 3D Ambisonic Room & Headphone Virtualizer Modal -->
+  <div class="modal-backdrop" id="binauralModal" style="display:none;">
+    <div class="modal-card" style="width:720px; max-width:95vw; background:#161926; border:1px solid var(--border); border-radius:12px; box-shadow:0 12px 36px rgba(0,0,0,0.7); overflow:hidden;">
+      <div style="padding:16px 20px; background:#121520; border-bottom:1px solid var(--border); display:flex; justify-content:space-between; align-items:center;">
+        <div class="modal-title" style="font-size:14px; font-weight:700; display:flex; align-items:center; gap:8px;">
+          <span>🎧</span>
+          <span>Binaural 3D Room &amp; Headphone Virtualizer</span>
+        </div>
+        <button onclick="closeBinauralModal()" style="background:none; border:none; color:var(--text-muted); font-size:16px; cursor:pointer;">✕</button>
+      </div>
+
+      <div style="padding:20px; max-height:75vh; overflow-y:auto; display:flex; flex-direction:column; gap:16px;">
+        <div style="font-size:11px; color:var(--text-dim); line-height:1.5;">
+          Transforms flat "in-your-head" stereo headphone listening into a natural, out-of-head acoustic monitoring experience. Replicates physical reference studio monitors in a calibrated room using spherical head diffraction (Woodworth ITD), pinna head-shadow damping (ILD), and early room boundaries reflections.
+        </div>
+
+        <div>
+          <label style="font-size:11px; font-weight:600; color:var(--text-muted); display:block; margin-bottom:6px;">Target Audio File:</label>
+          <div style="display:flex; gap:8px;">
+            <input type="text" id="binauralTargetInput" class="search-input" style="width:100%; font-size:11px;" placeholder="Path to input audio file...">
+            <button class="btn btn-secondary" onclick="loadActiveTrackForBinaural()" style="font-size:11px; padding:6px 12px; white-space:nowrap;">Active Track</button>
+          </div>
+        </div>
+
+        <div>
+          <label style="font-size:11px; font-weight:600; color:var(--text-muted); display:block; margin-bottom:6px;">Custom Export Destination (Optional):</label>
+          <input type="text" id="binauralOutputInput" class="search-input" style="width:100%; font-size:11px;" placeholder="Auto-generated if empty: <original>_binaural.wav">
+        </div>
+
+        <div style="display:grid; grid-template-columns:1fr 1fr; gap:14px; background:#121520; padding:14px; border-radius:8px; border:1px solid var(--border);">
+          <div>
+            <label style="font-size:11px; font-weight:600; color:var(--text-muted); display:block; margin-bottom:4px;">Acoustic Room Preset:</label>
+            <select id="binauralPresetSelect" class="search-input" style="width:100%; font-size:11px; padding:4px 8px;">
+              <option value="control_room" selected>Nearfield Studio Monitors (Control Room)</option>
+              <option value="mastering_lab">Midfield Mastering Monitors (Pristine Lab)</option>
+              <option value="live_lounge">Farfield Listening Room (Open Spatial Lounge)</option>
+            </select>
+          </div>
+
+          <div>
+            <div style="display:flex; justify-content:space-between; margin-bottom:4px;">
+              <label style="font-size:11px; font-weight:600; color:var(--text-muted);">Speaker Azimuth Angle:</label>
+              <span id="binauralAngleVal" style="font-size:11px; color:var(--cyan); font-weight:600;">30.0 deg</span>
+            </div>
+            <input type="range" id="binauralAngleSlider" min="20.0" max="60.0" step="1.0" value="30.0" style="width:100%;" oninput="document.getElementById('binauralAngleVal').innerText = parseFloat(this.value).toFixed(1) + ' deg'">
+          </div>
+
+          <div>
+            <div style="display:flex; justify-content:space-between; margin-bottom:4px;">
+              <label style="font-size:11px; font-weight:600; color:var(--text-muted);">Monitor Distance:</label>
+              <span id="binauralDistanceVal" style="font-size:11px; color:var(--cyan); font-weight:600;">1.8 m</span>
+            </div>
+            <input type="range" id="binauralDistanceSlider" min="1.0" max="5.0" step="0.1" value="1.8" style="width:100%;" oninput="document.getElementById('binauralDistanceVal').innerText = parseFloat(this.value).toFixed(1) + ' m'">
+          </div>
+
+          <div>
+            <div style="display:flex; justify-content:space-between; margin-bottom:4px;">
+              <label style="font-size:11px; font-weight:600; color:var(--text-muted);">Room Ambience / Reflections:</label>
+              <span id="binauralAmbienceVal" style="font-size:11px; color:var(--cyan); font-weight:600;">35%</span>
+            </div>
+            <input type="range" id="binauralAmbienceSlider" min="0.0" max="1.0" step="0.05" value="0.35" style="width:100%;" oninput="document.getElementById('binauralAmbienceVal').innerText = Math.round(this.value * 100) + '%'">
+          </div>
+        </div>
+
+        <div style="display:flex; justify-content:space-between; align-items:center; margin-top:4px;">
+          <span id="binauralStatusText" style="font-size:11px; color:var(--text-dim);">Ready to virtualize 3D monitor space</span>
+          <button class="btn btn-primary" onclick="runBinauralAction()" id="processBinauralBtn" style="font-size:12px; padding:7px 18px;">
+            🎧 Virtualize 3D Space
+          </button>
+        </div>
+
+        <div id="binauralOutputCard" style="background:#0b0d14; border:1px solid var(--border); border-radius:8px; padding:12px; font-family:monospace; font-size:11px; line-height:1.45; color:var(--cyan); min-height:80px; white-space:pre-wrap; overflow-x:auto;">Select audio file and click Virtualize 3D Space.</div>
+      </div>
+
+      <div style="padding:10px 16px; background:#121520; border-top:1px solid var(--border); display:flex; justify-content:space-between; align-items:center;">
+        <span style="font-size:10px; color:var(--text-dim);">Woodworth spherical head diffraction &amp; early boundary reflection modeling</span>
+        <button class="btn btn-secondary" onclick="closeBinauralModal()">Close</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Phase 26: Broadcast Audio Noise Gate & Downward Expander Modal -->
+  <div class="modal-backdrop" id="gateModal" style="display:none;">
+    <div class="modal-card" style="width:720px; max-width:95vw; background:#161926; border:1px solid var(--border); border-radius:12px; box-shadow:0 12px 36px rgba(0,0,0,0.7); overflow:hidden;">
+      <div style="padding:16px 20px; background:#121520; border-bottom:1px solid var(--border); display:flex; justify-content:space-between; align-items:center;">
+        <div class="modal-title" style="font-size:14px; font-weight:700; display:flex; align-items:center; gap:8px;">
+          <span>🚪</span>
+          <span>Broadcast Audio Noise Gate &amp; Downward Expander</span>
+        </div>
+        <button onclick="closeGateModal()" style="background:none; border:none; color:var(--text-muted); font-size:16px; cursor:pointer;">✕</button>
+      </div>
+
+      <div style="padding:20px; max-height:75vh; overflow-y:auto; display:flex; flex-direction:column; gap:16px;">
+        <div style="font-size:11px; color:var(--text-dim); line-height:1.5;">
+          Broadcast-grade downward expansion and noise gating with lookahead detection buffer (0-10ms), hysteresis chatter prevention, sidechain filtering, and smooth Attack-Hold-Release envelopes. Eliminates preamp hum, room rumble, headphone bleed, and vinyl surface noise between vocal takes or drum hits.
+        </div>
+
+        <div>
+          <label style="font-size:11px; font-weight:600; color:var(--text-muted); display:block; margin-bottom:6px;">Target Audio File:</label>
+          <div style="display:flex; gap:8px;">
+            <input type="text" id="gateTargetInput" class="search-input" style="width:100%; font-size:11px;" placeholder="Path to input audio file...">
+            <button class="btn btn-secondary" onclick="loadActiveTrackForGate()" style="font-size:11px; padding:6px 12px; white-space:nowrap;">Active Track</button>
+          </div>
+        </div>
+
+        <div>
+          <label style="font-size:11px; font-weight:600; color:var(--text-muted); display:block; margin-bottom:6px;">Custom Export Destination (Optional):</label>
+          <input type="text" id="gateOutputInput" class="search-input" style="width:100%; font-size:11px;" placeholder="Auto-generated if empty: <original>_gated.wav">
+        </div>
+
+        <div style="display:grid; grid-template-columns:1fr 1fr; gap:14px; background:#121520; padding:14px; border-radius:8px; border:1px solid var(--border);">
+          <div>
+            <div style="display:flex; justify-content:space-between; margin-bottom:4px;">
+              <label style="font-size:11px; font-weight:600; color:var(--text-muted);">Gate Open Threshold:</label>
+              <span id="gateThresholdVal" style="font-size:11px; color:var(--cyan); font-weight:600;">-40.0 dBFS</span>
+            </div>
+            <input type="range" id="gateThresholdSlider" min="-80.0" max="-10.0" step="1.0" value="-40.0" style="width:100%;" oninput="document.getElementById('gateThresholdVal').innerText = parseFloat(this.value).toFixed(1) + ' dBFS'">
+          </div>
+
+          <div>
+            <div style="display:flex; justify-content:space-between; margin-bottom:4px;">
+              <label style="font-size:11px; font-weight:600; color:var(--text-muted);">Max Floor Reduction:</label>
+              <span id="gateReductionVal" style="font-size:11px; color:var(--cyan); font-weight:600;">-60.0 dB</span>
+            </div>
+            <input type="range" id="gateReductionSlider" min="-80.0" max="-12.0" step="1.0" value="-60.0" style="width:100%;" oninput="document.getElementById('gateReductionVal').innerText = parseFloat(this.value).toFixed(1) + ' dB'">
+          </div>
+
+          <div>
+            <div style="display:flex; justify-content:space-between; margin-bottom:4px;">
+              <label style="font-size:11px; font-weight:600; color:var(--text-muted);">Expansion Ratio:</label>
+              <span id="gateRatioVal" style="font-size:11px; color:var(--cyan); font-weight:600;">10.0:1</span>
+            </div>
+            <input type="range" id="gateRatioSlider" min="2.0" max="20.0" step="0.5" value="10.0" style="width:100%;" oninput="document.getElementById('gateRatioVal').innerText = parseFloat(this.value).toFixed(1) + ':1'">
+          </div>
+
+          <div>
+            <div style="display:flex; justify-content:space-between; margin-bottom:4px;">
+              <label style="font-size:11px; font-weight:600; color:var(--text-muted);">Lookahead Window:</label>
+              <span id="gateLookaheadVal" style="font-size:11px; color:var(--cyan); font-weight:600;">2.0 ms</span>
+            </div>
+            <input type="range" id="gateLookaheadSlider" min="0.0" max="10.0" step="0.5" value="2.0" style="width:100%;" oninput="document.getElementById('gateLookaheadVal').innerText = parseFloat(this.value).toFixed(1) + ' ms'">
+          </div>
+
+          <div style="grid-column:1 / -1; display:grid; grid-template-columns:1fr 1fr 1fr; gap:10px; padding-top:6px; border-top:1px solid rgba(255,255,255,0.06);">
+            <div>
+              <span style="font-size:10px; color:var(--text-dim);">Attack Time:</span>
+              <input type="number" id="gateAttackInput" class="search-input" style="width:100%; font-size:11px; margin-top:2px;" value="1.5" step="0.1">
+            </div>
+            <div>
+              <span style="font-size:10px; color:var(--text-dim);">Hold Time (ms):</span>
+              <input type="number" id="gateHoldInput" class="search-input" style="width:100%; font-size:11px; margin-top:2px;" value="40.0" step="5">
+            </div>
+            <div>
+              <span style="font-size:10px; color:var(--text-dim);">Release Time (ms):</span>
+              <input type="number" id="gateReleaseInput" class="search-input" style="width:100%; font-size:11px; margin-top:2px;" value="120.0" step="10">
+            </div>
+          </div>
+        </div>
+
+        <div style="display:flex; justify-content:space-between; align-items:center; margin-top:4px;">
+          <span id="gateStatusText" style="font-size:11px; color:var(--text-dim);">Ready to gate background noise</span>
+          <button class="btn btn-primary" onclick="runGateAction()" id="processGateBtn" style="font-size:12px; padding:7px 18px;">
+            🚪 Process Noise Gate
+          </button>
+        </div>
+
+        <div id="gateOutputCard" style="background:#0b0d14; border:1px solid var(--border); border-radius:8px; padding:12px; font-family:monospace; font-size:11px; line-height:1.45; color:var(--cyan); min-height:80px; white-space:pre-wrap; overflow-x:auto;">Select audio file and click Process Noise Gate.</div>
+      </div>
+
+      <div style="padding:10px 16px; background:#121520; border-top:1px solid var(--border); display:flex; justify-content:space-between; align-items:center;">
+        <span style="font-size:10px; color:var(--text-dim);">Lookahead transient preservation with hysteresis anti-chatter gating</span>
+        <button class="btn btn-secondary" onclick="closeGateModal()">Close</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Phase 26: Stereo Ping-Pong & Multi-Tap BBD Tape Echo Modal -->
+  <div class="modal-backdrop" id="echoModal" style="display:none;">
+    <div class="modal-card" style="width:720px; max-width:95vw; background:#161926; border:1px solid var(--border); border-radius:12px; box-shadow:0 12px 36px rgba(0,0,0,0.7); overflow:hidden;">
+      <div style="padding:16px 20px; background:#121520; border-bottom:1px solid var(--border); display:flex; justify-content:space-between; align-items:center;">
+        <div class="modal-title" style="font-size:14px; font-weight:700; display:flex; align-items:center; gap:8px;">
+          <span>🎚️</span>
+          <span>Stereo Ping-Pong &amp; Multi-Tap Tape Echo Studio</span>
+        </div>
+        <button onclick="closeEchoModal()" style="background:none; border:none; color:var(--text-muted); font-size:16px; cursor:pointer;">✕</button>
+      </div>
+
+      <div style="padding:20px; max-height:75vh; overflow-y:auto; display:flex; flex-direction:column; gap:16px;">
+        <div style="font-size:11px; color:var(--text-dim); line-height:1.5;">
+          Emulates vintage magnetic tape loop echoes (Roland Space Echo RE-201 / Echoplex) and analog Bucket Brigade Device (BBD) delay units. Features true stereo ping-pong alternating bounce, high-frequency tape flux damping, motor wow &amp; flutter micro-pitch modulation, and soft feedback saturation.
+        </div>
+
+        <div>
+          <label style="font-size:11px; font-weight:600; color:var(--text-muted); display:block; margin-bottom:6px;">Target Audio File:</label>
+          <div style="display:flex; gap:8px;">
+            <input type="text" id="echoTargetInput" class="search-input" style="width:100%; font-size:11px;" placeholder="Path to input audio file...">
+            <button class="btn btn-secondary" onclick="loadActiveTrackForEcho()" style="font-size:11px; padding:6px 12px; white-space:nowrap;">Active Track</button>
+          </div>
+        </div>
+
+        <div>
+          <label style="font-size:11px; font-weight:600; color:var(--text-muted); display:block; margin-bottom:6px;">Custom Export Destination (Optional):</label>
+          <input type="text" id="echoOutputInput" class="search-input" style="width:100%; font-size:11px;" placeholder="Auto-generated if empty: <original>_echo.wav">
+        </div>
+
+        <div style="display:grid; grid-template-columns:1fr 1fr; gap:14px; background:#121520; padding:14px; border-radius:8px; border:1px solid var(--border);">
+          <div>
+            <div style="display:flex; justify-content:space-between; margin-bottom:4px;">
+              <label style="font-size:11px; font-weight:600; color:var(--text-muted);">Delay Time (ms):</label>
+              <span id="echoDelayVal" style="font-size:11px; color:var(--cyan); font-weight:600;">375.0 ms</span>
+            </div>
+            <input type="range" id="echoDelaySlider" min="10.0" max="1500.0" step="5.0" value="375.0" style="width:100%;" oninput="document.getElementById('echoDelayVal').innerText = parseFloat(this.value).toFixed(1) + ' ms'">
+            <div style="display:flex; gap:4px; margin-top:4px;">
+              <button class="btn btn-secondary" onclick="setEchoPreset(500.0)" style="font-size:9px; padding:2px 6px;">1/4 Note (500ms)</button>
+              <button class="btn btn-secondary" onclick="setEchoPreset(375.0)" style="font-size:9px; padding:2px 6px;">Dotted 8th (375ms)</button>
+              <button class="btn btn-secondary" onclick="setEchoPreset(250.0)" style="font-size:9px; padding:2px 6px;">1/8 Note (250ms)</button>
+              <button class="btn btn-secondary" onclick="setEchoPreset(110.0)" style="font-size:9px; padding:2px 6px;">Slapback (110ms)</button>
+            </div>
+          </div>
+
+          <div>
+            <div style="display:flex; justify-content:space-between; margin-bottom:4px;">
+              <label style="font-size:11px; font-weight:600; color:var(--text-muted);">Feedback Level:</label>
+              <span id="echoFeedbackVal" style="font-size:11px; color:var(--cyan); font-weight:600;">45%</span>
+            </div>
+            <input type="range" id="echoFeedbackSlider" min="0.0" max="100.0" step="1.0" value="45.0" style="width:100%;" oninput="document.getElementById('echoFeedbackVal').innerText = this.value + '%'">
+          </div>
+
+          <div>
+            <div style="display:flex; justify-content:space-between; margin-bottom:4px;">
+              <label style="font-size:11px; font-weight:600; color:var(--text-muted);">High-Frequency Damping:</label>
+              <span id="echoDampingVal" style="font-size:11px; color:var(--cyan); font-weight:600;">3800 Hz</span>
+            </div>
+            <input type="range" id="echoDampingSlider" min="1000.0" max="10000.0" step="100.0" value="3800.0" style="width:100%;" oninput="document.getElementById('echoDampingVal').innerText = this.value + ' Hz'">
+          </div>
+
+          <div>
+            <div style="display:flex; justify-content:space-between; margin-bottom:4px;">
+              <label style="font-size:11px; font-weight:600; color:var(--text-muted);">Tape Flutter Modulation:</label>
+              <span id="echoFlutterVal" style="font-size:11px; color:var(--cyan); font-weight:600;">0.12%</span>
+            </div>
+            <input type="range" id="echoFlutterSlider" min="0.0" max="0.5" step="0.01" value="0.12" style="width:100%;" oninput="document.getElementById('echoFlutterVal').innerText = parseFloat(this.value).toFixed(2) + '%'">
+          </div>
+
+          <div>
+            <div style="display:flex; justify-content:space-between; margin-bottom:4px;">
+              <label style="font-size:11px; font-weight:600; color:var(--text-muted);">Dry / Wet Mix:</label>
+              <span id="echoMixVal" style="font-size:11px; color:var(--cyan); font-weight:600;">35%</span>
+            </div>
+            <input type="range" id="echoMixSlider" min="0.0" max="100.0" step="1.0" value="35.0" style="width:100%;" oninput="document.getElementById('echoMixVal').innerText = this.value + '%'">
+          </div>
+
+          <div style="display:flex; align-items:center; justify-content:flex-start; padding-top:14px;">
+            <label style="font-size:11px; font-weight:600; color:var(--text-muted); display:flex; align-items:center; gap:8px; cursor:pointer;">
+              <input type="checkbox" id="echoPingPongCheck" checked>
+              <span>Stereo Ping-Pong (L &rlarr; R Alternating Bounce)</span>
+            </label>
+          </div>
+        </div>
+
+        <div style="display:flex; justify-content:space-between; align-items:center; margin-top:4px;">
+          <span id="echoStatusText" style="font-size:11px; color:var(--text-dim);">Ready to process stereo tape echo</span>
+          <button class="btn btn-primary" onclick="runEchoAction()" id="processEchoBtn" style="font-size:12px; padding:7px 18px;">
+            🎚️ Apply Tape Echo
+          </button>
+        </div>
+
+        <div id="echoOutputCard" style="background:#0b0d14; border:1px solid var(--border); border-radius:8px; padding:12px; font-family:monospace; font-size:11px; line-height:1.45; color:var(--cyan); min-height:80px; white-space:pre-wrap; overflow-x:auto;">Select audio file and click Apply Tape Echo.</div>
+      </div>
+
+      <div style="padding:10px 16px; background:#121520; border-top:1px solid var(--border); display:flex; justify-content:space-between; align-items:center;">
+        <span style="font-size:10px; color:var(--text-dim);">Analog BBD bucket brigade &amp; capstan tape flux delay emulation</span>
+        <button class="btn btn-secondary" onclick="closeEchoModal()">Close</button>
+      </div>
+    </div>
+  </div>
+
   <!-- Podcast & Long Mix Bookmark Resumption Toast (Phase 10) -->
   <div id="podcastResumeToast" style="display:none; position:fixed; bottom:85px; right:20px; z-index:9999; background:#131722; border:1px solid var(--border); box-shadow:0 8px 24px rgba(0,0,0,0.6); border-radius:10px; padding:10px 14px; align-items:center; gap:10px; backdrop-filter:blur(10px);">
     <span style="font-size:16px;">⏱️</span>
@@ -9577,6 +9953,10 @@
         closeFormantModal();
         closeLoudnessWarModal();
         closeStemsRemixerModal();
+        closeTransientModal();
+        closeBinauralModal();
+        closeGateModal();
+        closeEchoModal();
         dismissPodcastResumeToast();
         const popup = document.getElementById('speedStudioPopup');
         if (popup) popup.style.display = 'none';
@@ -16690,6 +17070,395 @@
           if (btn) {
             btn.disabled = false;
             btn.innerText = '🎛️ Export Stems Mixdown';
+          }
+          if (out) out.innerText = '✕ Error: ' + (err.message || err);
+        });
+      }
+    }
+
+    // ------------------ Phase 26: Audiophile Transient Shaper & Drum Punch Studio ------------------
+    function openTransientModal() {
+      const modal = document.getElementById('transientModal');
+      if (modal) modal.style.display = 'flex';
+      const input = document.getElementById('transientTargetInput');
+      if (input && !input.value && currentTrack && currentTrack.file_path) {
+        input.value = currentTrack.file_path;
+      }
+    }
+
+    function closeTransientModal() {
+      const modal = document.getElementById('transientModal');
+      if (modal) modal.style.display = 'none';
+    }
+
+    function loadActiveTrackForTransient() {
+      const input = document.getElementById('transientTargetInput');
+      if (currentTrack && currentTrack.file_path) {
+        if (input) input.value = currentTrack.file_path;
+        showToast('Loaded active track for Transient Shaper.');
+      } else {
+        showToast('No active audio track playing.', true);
+      }
+    }
+
+    function runTransientAction() {
+      const inp = document.getElementById('transientTargetInput')?.value?.trim();
+      const outPath = document.getElementById('transientOutputInput')?.value?.trim() || null;
+      const attack = parseFloat(document.getElementById('transientAttackSlider')?.value || '0.0');
+      const sustain = parseFloat(document.getElementById('transientSustainSlider')?.value || '0.0');
+      const attSpeed = parseFloat(document.getElementById('transientAttackSpeedSlider')?.value || '4.0');
+      const susSpeed = parseFloat(document.getElementById('transientSustainSpeedSlider')?.value || '80.0');
+      const softClip = document.getElementById('transientSoftClipCheck')?.checked ?? true;
+
+      const btn = document.getElementById('processTransientBtn');
+      const st = document.getElementById('transientStatusText');
+      const out = document.getElementById('transientOutputCard');
+
+      if (!inp) {
+        showToast('Please specify an audio file.', true);
+        return;
+      }
+
+      if (btn) {
+        btn.disabled = true;
+        btn.innerText = '⏳ Shaping Transients...';
+      }
+      if (st) {
+        st.innerText = 'Analyzing dual-ballistics attack onsets and sustain tail...';
+        st.style.color = 'var(--cyan)';
+      }
+
+      if (window.pywebview && window.pywebview.api && window.pywebview.api.shape_audio_transients) {
+        window.pywebview.api.shape_audio_transients(inp, outPath, attack, sustain, attSpeed, susSpeed, softClip).then(res => {
+          if (btn) {
+            btn.disabled = false;
+            btn.innerText = '💥 Process Transients';
+          }
+          if (res && res.status === 'error') {
+            if (st) {
+              st.innerText = '✕ Transient shaping failed: ' + (res.message || 'Unknown error');
+              st.style.color = '#ef4444';
+            }
+            if (out) out.innerText = '✕ Error: ' + (res.message || 'Unknown error');
+            return;
+          }
+          if (res) {
+            if (st) {
+              st.innerText = '✓ Transient shaping complete!';
+              st.style.color = 'var(--emerald)';
+            }
+            let card = `AUDIOPHILE TRANSIENT SHAPER & DRUM PUNCH REPORT\n`;
+            card += `Input File       : ${inp}\n`;
+            card += `Output File      : ${res.output_path}\n`;
+            card += `Attack Gain      : ${(res.attack_db >= 0 ? '+' : '')}${res.attack_db.toFixed(1)} dB (Speed: ${attSpeed.toFixed(1)} ms)\n`;
+            card += `Sustain Gain     : ${(res.sustain_db >= 0 ? '+' : '')}${res.sustain_db.toFixed(1)} dB (Speed: ${susSpeed.toFixed(1)} ms)\n`;
+            card += `In Peak / RMS    : ${res.in_peak_dbfs.toFixed(2)} dBFS / ${res.in_rms_dbfs.toFixed(2)} dBFS\n`;
+            card += `Out Peak / RMS   : ${res.out_peak_dbfs.toFixed(2)} dBFS / ${res.out_rms_dbfs.toFixed(2)} dBFS\n`;
+            card += `Duration         : ${res.duration_sec.toFixed(2)}s @ ${res.sample_rate} Hz\n`;
+            if (out) out.innerText = card;
+            showToast('Transient dynamic shaping applied!');
+          }
+        }).catch(err => {
+          if (btn) {
+            btn.disabled = false;
+            btn.innerText = '💥 Process Transients';
+          }
+          if (out) out.innerText = '✕ Error: ' + (err.message || err);
+        });
+      }
+    }
+
+    // ------------------ Phase 26: Binaural 3D Room & Headphone Virtualizer Studio ------------------
+    function openBinauralModal() {
+      const modal = document.getElementById('binauralModal');
+      if (modal) modal.style.display = 'flex';
+      const input = document.getElementById('binauralTargetInput');
+      if (input && !input.value && currentTrack && currentTrack.file_path) {
+        input.value = currentTrack.file_path;
+      }
+    }
+
+    function closeBinauralModal() {
+      const modal = document.getElementById('binauralModal');
+      if (modal) modal.style.display = 'none';
+    }
+
+    function loadActiveTrackForBinaural() {
+      const input = document.getElementById('binauralTargetInput');
+      if (currentTrack && currentTrack.file_path) {
+        if (input) input.value = currentTrack.file_path;
+        showToast('Loaded active track for 3D Virtualizer.');
+      } else {
+        showToast('No active audio track playing.', true);
+      }
+    }
+
+    function runBinauralAction() {
+      const inp = document.getElementById('binauralTargetInput')?.value?.trim();
+      const outPath = document.getElementById('binauralOutputInput')?.value?.trim() || null;
+      const preset = document.getElementById('binauralPresetSelect')?.value || 'control_room';
+      const angle = parseFloat(document.getElementById('binauralAngleSlider')?.value || '30.0');
+      const dist = parseFloat(document.getElementById('binauralDistanceSlider')?.value || '1.8');
+      const crossfeed = 1.0;
+      const ambience = parseFloat(document.getElementById('binauralAmbienceSlider')?.value || '0.35');
+
+      const btn = document.getElementById('processBinauralBtn');
+      const st = document.getElementById('binauralStatusText');
+      const out = document.getElementById('binauralOutputCard');
+
+      if (!inp) {
+        showToast('Please specify an audio file.', true);
+        return;
+      }
+
+      if (btn) {
+        btn.disabled = true;
+        btn.innerText = '⏳ Simulating Acoustic Room...';
+      }
+      if (st) {
+        st.innerText = 'Computing Woodworth ITD, pinna ILD, and boundary reflections...';
+        st.style.color = 'var(--cyan)';
+      }
+
+      if (window.pywebview && window.pywebview.api && window.pywebview.api.virtualize_binaural_room) {
+        window.pywebview.api.virtualize_binaural_room(inp, outPath, angle, dist, crossfeed, ambience, preset).then(res => {
+          if (btn) {
+            btn.disabled = false;
+            btn.innerText = '🎧 Virtualize 3D Space';
+          }
+          if (res && res.status === 'error') {
+            if (st) {
+              st.innerText = '✕ Binaural virtualization failed: ' + (res.message || 'Unknown error');
+              st.style.color = '#ef4444';
+            }
+            if (out) out.innerText = '✕ Error: ' + (res.message || 'Unknown error');
+            return;
+          }
+          if (res) {
+            if (st) {
+              st.innerText = '✓ Binaural 3D room virtualization complete!';
+              st.style.color = 'var(--emerald)';
+            }
+            let card = `BINAURAL 3D ROOM & HEADPHONE VIRTUALIZER REPORT\n`;
+            card += `Input File       : ${inp}\n`;
+            card += `Output File      : ${res.output_path}\n`;
+            card += `Room Preset      : ${res.preset}\n`;
+            card += `Speaker Azimuth  : ${res.speaker_angle_deg.toFixed(1)} deg\n`;
+            card += `Monitor Distance : ${res.distance_m.toFixed(1)} m\n`;
+            card += `Woodworth ITD    : ${res.itd_ms.toFixed(2)} ms (${res.itd_samples} samples)\n`;
+            card += `Room Ambience    : ${Math.round(res.room_ambience * 100)}%\n`;
+            card += `In Peak / RMS    : ${res.in_peak_dbfs.toFixed(2)} dBFS / ${res.in_rms_dbfs.toFixed(2)} dBFS\n`;
+            card += `Out Peak / RMS   : ${res.out_peak_dbfs.toFixed(2)} dBFS / ${res.out_rms_dbfs.toFixed(2)} dBFS\n`;
+            card += `Duration         : ${res.duration_sec.toFixed(2)}s @ ${res.sample_rate} Hz\n`;
+            if (out) out.innerText = card;
+            showToast('Binaural 3D room virtualized!');
+          }
+        }).catch(err => {
+          if (btn) {
+            btn.disabled = false;
+            btn.innerText = '🎧 Virtualize 3D Space';
+          }
+          if (out) out.innerText = '✕ Error: ' + (err.message || err);
+        });
+      }
+    }
+
+    // ------------------ Phase 26: Broadcast Audio Noise Gate & Downward Expander Studio ------------------
+    function openGateModal() {
+      const modal = document.getElementById('gateModal');
+      if (modal) modal.style.display = 'flex';
+      const input = document.getElementById('gateTargetInput');
+      if (input && !input.value && currentTrack && currentTrack.file_path) {
+        input.value = currentTrack.file_path;
+      }
+    }
+
+    function closeGateModal() {
+      const modal = document.getElementById('gateModal');
+      if (modal) modal.style.display = 'none';
+    }
+
+    function loadActiveTrackForGate() {
+      const input = document.getElementById('gateTargetInput');
+      if (currentTrack && currentTrack.file_path) {
+        if (input) input.value = currentTrack.file_path;
+        showToast('Loaded active track for Noise Gate.');
+      } else {
+        showToast('No active audio track playing.', true);
+      }
+    }
+
+    function runGateAction() {
+      const inp = document.getElementById('gateTargetInput')?.value?.trim();
+      const outPath = document.getElementById('gateOutputInput')?.value?.trim() || null;
+      const thresh = parseFloat(document.getElementById('gateThresholdSlider')?.value || '-40.0');
+      const reduc = parseFloat(document.getElementById('gateReductionSlider')?.value || '-60.0');
+      const ratio = parseFloat(document.getElementById('gateRatioSlider')?.value || '10.0');
+      const look = parseFloat(document.getElementById('gateLookaheadSlider')?.value || '2.0');
+      const att = parseFloat(document.getElementById('gateAttackInput')?.value || '1.5');
+      const hold = parseFloat(document.getElementById('gateHoldInput')?.value || '40.0');
+      const rel = parseFloat(document.getElementById('gateReleaseInput')?.value || '120.0');
+
+      const btn = document.getElementById('processGateBtn');
+      const st = document.getElementById('gateStatusText');
+      const out = document.getElementById('gateOutputCard');
+
+      if (!inp) {
+        showToast('Please specify an audio file.', true);
+        return;
+      }
+
+      if (btn) {
+        btn.disabled = true;
+        btn.innerText = '⏳ Gating Noise Floor...';
+      }
+      if (st) {
+        st.innerText = 'Processing lookahead envelope and downward expansion...';
+        st.style.color = 'var(--cyan)';
+      }
+
+      if (window.pywebview && window.pywebview.api && window.pywebview.api.process_broadcast_noisegate) {
+        window.pywebview.api.process_broadcast_noisegate(inp, outPath, thresh, reduc, ratio, att, hold, rel, look, 3.0).then(res => {
+          if (btn) {
+            btn.disabled = false;
+            btn.innerText = '🚪 Process Noise Gate';
+          }
+          if (res && res.status === 'error') {
+            if (st) {
+              st.innerText = '✕ Noise gate failed: ' + (res.message || 'Unknown error');
+              st.style.color = '#ef4444';
+            }
+            if (out) out.innerText = '✕ Error: ' + (res.message || 'Unknown error');
+            return;
+          }
+          if (res) {
+            if (st) {
+              st.innerText = '✓ Noise gate complete!';
+              st.style.color = 'var(--emerald)';
+            }
+            let card = `BROADCAST AUDIO NOISE GATE & DOWNWARD EXPANDER REPORT\n`;
+            card += `Input File       : ${inp}\n`;
+            card += `Output File      : ${res.output_path}\n`;
+            card += `Open Threshold   : ${res.threshold_db.toFixed(1)} dBFS\n`;
+            card += `Floor Reduction  : ${res.reduction_db.toFixed(1)} dB (Ratio: ${res.ratio.toFixed(1)}:1)\n`;
+            card += `Timing (A/H/R)   : ${res.attack_ms.toFixed(1)} ms / ${res.hold_ms.toFixed(1)} ms / ${res.release_ms.toFixed(1)} ms\n`;
+            card += `Lookahead Delay  : ${res.lookahead_ms.toFixed(1)} ms\n`;
+            card += `Gated Duration   : ${res.attenuation_pct}% of total timeline\n`;
+            card += `In Peak / RMS    : ${res.in_peak_dbfs.toFixed(2)} dBFS / ${res.in_rms_dbfs.toFixed(2)} dBFS\n`;
+            card += `Out Peak / RMS   : ${res.out_peak_dbfs.toFixed(2)} dBFS / ${res.out_rms_dbfs.toFixed(2)} dBFS\n`;
+            card += `Duration         : ${res.duration_sec.toFixed(2)}s @ ${res.sample_rate} Hz\n`;
+            if (out) out.innerText = card;
+            showToast('Noise floor gated successfully!');
+          }
+        }).catch(err => {
+          if (btn) {
+            btn.disabled = false;
+            btn.innerText = '🚪 Process Noise Gate';
+          }
+          if (out) out.innerText = '✕ Error: ' + (err.message || err);
+        });
+      }
+    }
+
+    // ------------------ Phase 26: Stereo Ping-Pong & Multi-Tap BBD Tape Echo Studio ------------------
+    function openEchoModal() {
+      const modal = document.getElementById('echoModal');
+      if (modal) modal.style.display = 'flex';
+      const input = document.getElementById('echoTargetInput');
+      if (input && !input.value && currentTrack && currentTrack.file_path) {
+        input.value = currentTrack.file_path;
+      }
+    }
+
+    function closeEchoModal() {
+      const modal = document.getElementById('echoModal');
+      if (modal) modal.style.display = 'none';
+    }
+
+    function loadActiveTrackForEcho() {
+      const input = document.getElementById('echoTargetInput');
+      if (currentTrack && currentTrack.file_path) {
+        if (input) input.value = currentTrack.file_path;
+        showToast('Loaded active track for Tape Echo.');
+      } else {
+        showToast('No active audio track playing.', true);
+      }
+    }
+
+    function setEchoPreset(ms) {
+      const sl = document.getElementById('echoDelaySlider');
+      const val = document.getElementById('echoDelayVal');
+      if (sl) sl.value = ms;
+      if (val) val.innerText = ms.toFixed(1) + ' ms';
+    }
+
+    function runEchoAction() {
+      const inp = document.getElementById('echoTargetInput')?.value?.trim();
+      const outPath = document.getElementById('echoOutputInput')?.value?.trim() || null;
+      const delay = parseFloat(document.getElementById('echoDelaySlider')?.value || '375.0');
+      const fb = parseFloat(document.getElementById('echoFeedbackSlider')?.value || '45.0');
+      const damp = parseFloat(document.getElementById('echoDampingSlider')?.value || '3800.0');
+      const flutter = parseFloat(document.getElementById('echoFlutterSlider')?.value || '0.12');
+      const drive = parseFloat(document.getElementById('echoDriveSlider')?.value || '1.3');
+      const mix = parseFloat(document.getElementById('echoMixSlider')?.value || '35.0');
+      const pingPong = document.getElementById('echoPingPongCheck')?.checked ?? true;
+
+      const btn = document.getElementById('processEchoBtn');
+      const st = document.getElementById('echoStatusText');
+      const out = document.getElementById('echoOutputCard');
+
+      if (!inp) {
+        showToast('Please specify an audio file.', true);
+        return;
+      }
+
+      if (btn) {
+        btn.disabled = true;
+        btn.innerText = '⏳ Generating Tape Echoes...';
+      }
+      if (st) {
+        st.innerText = 'Processing analog delay line, tape damping, and stereo bounce...';
+        st.style.color = 'var(--cyan)';
+      }
+
+      if (window.pywebview && window.pywebview.api && window.pywebview.api.apply_tape_echo_delay) {
+        window.pywebview.api.apply_tape_echo_delay(inp, outPath, delay, fb, damp, flutter, drive, mix, pingPong).then(res => {
+          if (btn) {
+            btn.disabled = false;
+            btn.innerText = '🎚️ Apply Tape Echo';
+          }
+          if (res && res.status === 'error') {
+            if (st) {
+              st.innerText = '✕ Tape echo failed: ' + (res.message || 'Unknown error');
+              st.style.color = '#ef4444';
+            }
+            if (out) out.innerText = '✕ Error: ' + (res.message || 'Unknown error');
+            return;
+          }
+          if (res) {
+            if (st) {
+              st.innerText = '✓ Stereo tape echo generated successfully!';
+              st.style.color = 'var(--emerald)';
+            }
+            let card = `STEREO PING-PONG & MULTI-TAP TAPE ECHO REPORT\n`;
+            card += `Input File       : ${inp}\n`;
+            card += `Output File      : ${res.output_path}\n`;
+            card += `Delay Time       : ${res.delay_ms.toFixed(1)} ms\n`;
+            card += `Feedback Level   : ${res.feedback_pct.toFixed(1)}%\n`;
+            card += `Echo Mode        : ${res.ping_pong ? 'Stereo Ping-Pong (L <-> R Bounce)' : 'Standard Stereo Dual Delay'}\n`;
+            card += `High-Cut Damping : ${res.damping_hz.toFixed(0)} Hz (Tape Treble Absorption)\n`;
+            card += `Tape Flutter     : ${res.flutter_pct.toFixed(2)}% (Pitch Wow & Movement)\n`;
+            card += `Preamp Drive     : ${res.drive.toFixed(1)}x saturation\n`;
+            card += `Dry / Wet Mix    : ${res.dry_wet_pct.toFixed(1)}%\n`;
+            card += `Master Peak      : ${res.out_peak_dbfs.toFixed(2)} dBFS\n`;
+            card += `Duration         : ${res.duration_sec.toFixed(2)}s @ ${res.sample_rate} Hz\n`;
+            if (out) out.innerText = card;
+            showToast('Stereo tape echo applied!');
+          }
+        }).catch(err => {
+          if (btn) {
+            btn.disabled = false;
+            btn.innerText = '🎚️ Apply Tape Echo';
           }
           if (out) out.innerText = '✕ Error: ' + (err.message || err);
         });

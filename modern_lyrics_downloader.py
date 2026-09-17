@@ -106,6 +106,10 @@ import analog_tape_emulator
 import formant_shifter
 import loudness_war_studio
 import stems_remixer
+import transient_shaper
+import binaural_virtualizer
+import audio_noisegate
+import tape_echo_delay
 
 APP_VERSION = "2.1.0"
 GITHUB_REPO = "Sandeep2062/Sonance"
@@ -1659,6 +1663,104 @@ class LyricsAPI:
             pans=pans,
             mutes=mutes,
             preset=preset,
+        )
+
+    # ------------------ Phase 26: Audiophile Transient Shaper & Drum Punch ------------------
+    def shape_audio_transients(
+        self,
+        input_path: str,
+        output_path: Optional[str] = None,
+        attack_db: float = 0.0,
+        sustain_db: float = 0.0,
+        attack_speed_ms: float = 4.0,
+        sustain_speed_ms: float = 80.0,
+        soft_clip: bool = True,
+    ) -> Dict[str, Any]:
+        """Shapes percussive attack transients and acoustic sustain tail levels."""
+        return transient_shaper.run_transient_shaping(
+            input_path=input_path,
+            output_path=output_path,
+            attack_db=attack_db,
+            sustain_db=sustain_db,
+            attack_speed_ms=attack_speed_ms,
+            sustain_speed_ms=sustain_speed_ms,
+            soft_clip=soft_clip,
+        )
+
+    # ------------------ Phase 26: Binaural 3D Room & Headphone Virtualizer ------------------
+    def virtualize_binaural_room(
+        self,
+        input_path: str,
+        output_path: Optional[str] = None,
+        speaker_angle_deg: float = 30.0,
+        distance_m: float = 1.8,
+        crossfeed_amount: float = 1.0,
+        room_ambience: float = 0.35,
+        preset: str = "control_room",
+    ) -> Dict[str, Any]:
+        """Simulates physical studio monitors in an acoustically treated control room over headphones."""
+        return binaural_virtualizer.run_binaural_virtualization(
+            input_path=input_path,
+            output_path=output_path,
+            speaker_angle_deg=speaker_angle_deg,
+            distance_m=distance_m,
+            crossfeed_amount=crossfeed_amount,
+            room_ambience=room_ambience,
+            preset=preset,
+        )
+
+    # ------------------ Phase 26: Broadcast Noise Gate & Downward Expander ------------------
+    def process_broadcast_noisegate(
+        self,
+        input_path: str,
+        output_path: Optional[str] = None,
+        threshold_db: float = -40.0,
+        reduction_db: float = -60.0,
+        ratio: float = 10.0,
+        attack_ms: float = 1.5,
+        hold_ms: float = 40.0,
+        release_ms: float = 120.0,
+        lookahead_ms: float = 2.0,
+        hysteresis_db: float = 3.0,
+    ) -> Dict[str, Any]:
+        """Applies lookahead noise gating and downward expansion to eliminate hum, hiss, and spill."""
+        return audio_noisegate.run_noise_gate(
+            input_path=input_path,
+            output_path=output_path,
+            threshold_db=threshold_db,
+            reduction_db=reduction_db,
+            ratio=ratio,
+            attack_ms=attack_ms,
+            hold_ms=hold_ms,
+            release_ms=release_ms,
+            lookahead_ms=lookahead_ms,
+            hysteresis_db=hysteresis_db,
+        )
+
+    # ------------------ Phase 26: Stereo Ping-Pong & Multi-Tap Tape Echo ------------------
+    def apply_tape_echo_delay(
+        self,
+        input_path: str,
+        output_path: Optional[str] = None,
+        delay_ms: float = 375.0,
+        feedback_pct: float = 45.0,
+        damping_hz: float = 3800.0,
+        flutter_pct: float = 0.12,
+        drive: float = 1.3,
+        dry_wet_pct: float = 35.0,
+        ping_pong: bool = True,
+    ) -> Dict[str, Any]:
+        """Emulates vintage Roland Space Echo tape delay and analog BBD ping-pong echoes."""
+        return tape_echo_delay.run_tape_echo(
+            input_path=input_path,
+            output_path=output_path,
+            delay_ms=delay_ms,
+            feedback_pct=feedback_pct,
+            damping_hz=damping_hz,
+            flutter_pct=flutter_pct,
+            drive=drive,
+            dry_wet_pct=dry_wet_pct,
+            ping_pong=ping_pong,
         )
 
     def _save_last_folder(self, folder: str):

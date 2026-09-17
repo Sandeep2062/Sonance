@@ -436,6 +436,30 @@ Examples:
       help="Multi-track stems remixer studio: --remix [--vocals <file>] [--drums <file>] [--bass <file>] [--other <file>] [--folder <dir>] [--output <file>] [--preset acapella|karaoke|drum_and_bass|vocal_boost]",
   )
   parser.add_argument(
+      "--transient",
+      nargs="*",
+      metavar="PARAM",
+      help="Audiophile transient shaper & drum punch designer: --transient <audio_file> [output_file] [--attack +4.0] [--sustain -2.0] [--attack-speed 4.0] [--sustain-speed 80.0]",
+  )
+  parser.add_argument(
+      "--binaural",
+      nargs="*",
+      metavar="PARAM",
+      help="Binaural 3D ambisonic room & headphone virtualizer: --binaural <audio_file> [output_file] [--preset control_room|mastering_lab|live_lounge] [--angle 30] [--distance 1.8] [--crossfeed 1.0] [--ambience 0.35]",
+  )
+  parser.add_argument(
+      "--gate",
+      nargs="*",
+      metavar="PARAM",
+      help="Broadcast noise gate & downward expander: --gate <audio_file> [output_file] [--threshold -40] [--reduction -60] [--ratio 10] [--attack 1.5] [--hold 40] [--release 120] [--lookahead 2.0]",
+  )
+  parser.add_argument(
+      "--echo",
+      nargs="*",
+      metavar="PARAM",
+      help="Stereo ping-pong & multi-tap tape echo studio: --echo <audio_file> [output_file] [--delay 375] [--feedback 45] [--damping 3800] [--flutter 0.12] [--drive 1.3] [--mix 35] [--no-ping-pong]",
+  )
+  parser.add_argument(
       "--version",
       action="version",
       version=f"Sonance v{modern_lyrics_downloader.APP_VERSION}",
@@ -2174,6 +2198,256 @@ Examples:
     print(f"[*] Remixing multi-track audio stems...")
     res = stems_remixer.remix_stems(stems, output_path=out, gains_db=gains, preset=preset)
     print(stems_remixer.format_remix_card(res))
+    return
+
+  if args.transient is not None:
+    import transient_shaper
+    ts_params = list(args.transient) + list(unknown)
+    if not ts_params:
+      print("[-] Error: --transient requires an input audio file.")
+      print("    Usage: python sonance.py --transient <audio_file> [output_file] [--attack +4.0] [--sustain -2.0]")
+      return
+    inp = ts_params[0]
+    out = None
+    attack = 0.0
+    sustain = 0.0
+    att_speed = 4.0
+    sus_speed = 80.0
+    soft_clip = True
+
+    idx = 1
+    while idx < len(ts_params):
+      arg = ts_params[idx]
+      if arg == "--attack" and idx + 1 < len(ts_params):
+        attack = float(ts_params[idx + 1])
+        idx += 2
+      elif arg == "--sustain" and idx + 1 < len(ts_params):
+        sustain = float(ts_params[idx + 1])
+        idx += 2
+      elif arg == "--attack-speed" and idx + 1 < len(ts_params):
+        att_speed = float(ts_params[idx + 1])
+        idx += 2
+      elif arg == "--sustain-speed" and idx + 1 < len(ts_params):
+        sus_speed = float(ts_params[idx + 1])
+        idx += 2
+      elif arg == "--no-soft-clip":
+        soft_clip = False
+        idx += 1
+      elif not arg.startswith("-") and out is None:
+        out = arg
+        idx += 1
+      else:
+        idx += 1
+
+    print(f"[*] Processing transient attack and sustain shaping on {inp}...")
+    res = transient_shaper.run_transient_shaping(
+        inp, output_path=out, attack_db=attack, sustain_db=sustain,
+        attack_speed_ms=att_speed, sustain_speed_ms=sus_speed, soft_clip=soft_clip
+    )
+    print("=" * 60)
+    print("  AUDIOPHILE TRANSIENT SHAPER & DRUM PUNCH STUDIO")
+    print("=" * 60)
+    print(f"Input File    : {res['input_path']}")
+    print(f"Output File   : {res['output_path']}")
+    print(f"Attack Gain   : {res['attack_db']:+.1f} dB (speed: {att_speed:.1f}ms)")
+    print(f"Sustain Gain  : {res['sustain_db']:+.1f} dB (speed: {sus_speed:.1f}ms)")
+    print(f"In Peak/RMS   : {res['in_peak_dbfs']:.2f} dBFS / {res['in_rms_dbfs']:.2f} dBFS")
+    print(f"Out Peak/RMS  : {res['out_peak_dbfs']:.2f} dBFS / {res['out_rms_dbfs']:.2f} dBFS")
+    print(f"Duration      : {res['duration_sec']:.2f}s @ {res['sample_rate']} Hz")
+    print("=" * 60)
+    return
+
+  if args.binaural is not None:
+    import binaural_virtualizer
+    bin_params = list(args.binaural) + list(unknown)
+    if not bin_params:
+      print("[-] Error: --binaural requires an input audio file.")
+      print("    Usage: python sonance.py --binaural <audio_file> [output_file] [--preset control_room] [--angle 30] [--distance 1.8]")
+      return
+    inp = bin_params[0]
+    out = None
+    preset = "control_room"
+    angle = 30.0
+    dist = 1.8
+    crossfeed = 1.0
+    ambience = 0.35
+
+    idx = 1
+    while idx < len(bin_params):
+      arg = bin_params[idx]
+      if arg == "--preset" and idx + 1 < len(bin_params):
+        preset = bin_params[idx + 1]
+        idx += 2
+      elif arg == "--angle" and idx + 1 < len(bin_params):
+        angle = float(bin_params[idx + 1])
+        idx += 2
+      elif arg == "--distance" and idx + 1 < len(bin_params):
+        dist = float(bin_params[idx + 1])
+        idx += 2
+      elif arg == "--crossfeed" and idx + 1 < len(bin_params):
+        crossfeed = float(bin_params[idx + 1])
+        idx += 2
+      elif arg == "--ambience" and idx + 1 < len(bin_params):
+        ambience = float(bin_params[idx + 1])
+        idx += 2
+      elif not arg.startswith("-") and out is None:
+        out = arg
+        idx += 1
+      else:
+        idx += 1
+
+    print(f"[*] Simulating binaural 3D studio control room monitor space for {inp}...")
+    res = binaural_virtualizer.run_binaural_virtualization(
+        inp, output_path=out, speaker_angle_deg=angle,
+        distance_m=dist, crossfeed_amount=crossfeed,
+        room_ambience=ambience, preset=preset
+    )
+    print("=" * 60)
+    print("  BINAURAL 3D ROOM & HEADPHONE VIRTUALIZER STUDIO")
+    print("=" * 60)
+    print(f"Input File    : {res['input_path']}")
+    print(f"Output File   : {res['output_path']}")
+    print(f"Room Preset   : {res['preset']}")
+    print(f"Speaker Angle : {res['speaker_angle_deg']:.1f} deg | Distance: {res['distance_m']:.1f} m")
+    print(f"Woodworth ITD : {res['itd_ms']:.2f} ms ({res['itd_samples']} samples)")
+    print(f"In Peak/RMS   : {res['in_peak_dbfs']:.2f} dBFS / {res['in_rms_dbfs']:.2f} dBFS")
+    print(f"Out Peak/RMS  : {res['out_peak_dbfs']:.2f} dBFS / {res['out_rms_dbfs']:.2f} dBFS")
+    print(f"Duration      : {res['duration_sec']:.2f}s @ {res['sample_rate']} Hz")
+    print("=" * 60)
+    return
+
+  if args.gate is not None:
+    import audio_noisegate
+    gate_params = list(args.gate) + list(unknown)
+    if not gate_params:
+      print("[-] Error: --gate requires an input audio file.")
+      print("    Usage: python sonance.py --gate <audio_file> [output_file] [--threshold -40] [--reduction -60] [--ratio 10]")
+      return
+    inp = gate_params[0]
+    out = None
+    thresh = -40.0
+    reduc = -60.0
+    ratio = 10.0
+    att = 1.5
+    hold = 40.0
+    rel = 120.0
+    look = 2.0
+
+    idx = 1
+    while idx < len(gate_params):
+      arg = gate_params[idx]
+      if arg == "--threshold" and idx + 1 < len(gate_params):
+        thresh = float(gate_params[idx + 1])
+        idx += 2
+      elif arg == "--reduction" and idx + 1 < len(gate_params):
+        reduc = float(gate_params[idx + 1])
+        idx += 2
+      elif arg == "--ratio" and idx + 1 < len(gate_params):
+        ratio = float(gate_params[idx + 1])
+        idx += 2
+      elif arg == "--attack" and idx + 1 < len(gate_params):
+        att = float(gate_params[idx + 1])
+        idx += 2
+      elif arg == "--hold" and idx + 1 < len(gate_params):
+        hold = float(gate_params[idx + 1])
+        idx += 2
+      elif arg == "--release" and idx + 1 < len(gate_params):
+        rel = float(gate_params[idx + 1])
+        idx += 2
+      elif arg == "--lookahead" and idx + 1 < len(gate_params):
+        look = float(gate_params[idx + 1])
+        idx += 2
+      elif not arg.startswith("-") and out is None:
+        out = arg
+        idx += 1
+      else:
+        idx += 1
+
+    print(f"[*] Applying lookahead noise gate & downward expander on {inp}...")
+    res = audio_noisegate.run_noise_gate(
+        inp, output_path=out, threshold_db=thresh,
+        reduction_db=reduc, ratio=ratio, attack_ms=att,
+        hold_ms=hold, release_ms=rel, lookahead_ms=look
+    )
+    print("=" * 60)
+    print("  BROADCAST AUDIO NOISE GATE & DOWNWARD EXPANDER STUDIO")
+    print("=" * 60)
+    print(f"Input File    : {res['input_path']}")
+    print(f"Output File   : {res['output_path']}")
+    print(f"Threshold     : {res['threshold_db']:.1f} dBFS (Floor: {res['reduction_db']:.1f} dB)")
+    print(f"Timing (A/H/R): {res['attack_ms']:.1f}ms / {res['hold_ms']:.1f}ms / {res['release_ms']:.1f}ms")
+    print(f"Lookahead     : {res['lookahead_ms']:.1f}ms (Gated Duration: {res['attenuation_pct']}%)")
+    print(f"In Peak/RMS   : {res['in_peak_dbfs']:.2f} dBFS / {res['in_rms_dbfs']:.2f} dBFS")
+    print(f"Out Peak/RMS  : {res['out_peak_dbfs']:.2f} dBFS / {res['out_rms_dbfs']:.2f} dBFS")
+    print(f"Duration      : {res['duration_sec']:.2f}s @ {res['sample_rate']} Hz")
+    print("=" * 60)
+    return
+
+  if args.echo is not None:
+    import tape_echo_delay
+    echo_params = list(args.echo) + list(unknown)
+    if not echo_params:
+      print("[-] Error: --echo requires an input audio file.")
+      print("    Usage: python sonance.py --echo <audio_file> [output_file] [--delay 375] [--feedback 45] [--damping 3800] [--mix 35]")
+      return
+    inp = echo_params[0]
+    out = None
+    delay = 375.0
+    fb = 45.0
+    damp = 3800.0
+    flutter = 0.12
+    drive = 1.3
+    mix = 35.0
+    ping_pong = True
+
+    idx = 1
+    while idx < len(echo_params):
+      arg = echo_params[idx]
+      if arg == "--delay" and idx + 1 < len(echo_params):
+        delay = float(echo_params[idx + 1])
+        idx += 2
+      elif arg == "--feedback" and idx + 1 < len(echo_params):
+        fb = float(echo_params[idx + 1])
+        idx += 2
+      elif arg == "--damping" and idx + 1 < len(echo_params):
+        damp = float(echo_params[idx + 1])
+        idx += 2
+      elif arg == "--flutter" and idx + 1 < len(echo_params):
+        flutter = float(echo_params[idx + 1])
+        idx += 2
+      elif arg == "--drive" and idx + 1 < len(echo_params):
+        drive = float(echo_params[idx + 1])
+        idx += 2
+      elif arg == "--mix" and idx + 1 < len(echo_params):
+        mix = float(echo_params[idx + 1])
+        idx += 2
+      elif arg == "--no-ping-pong":
+        ping_pong = False
+        idx += 1
+      elif not arg.startswith("-") and out is None:
+        out = arg
+        idx += 1
+      else:
+        idx += 1
+
+    print(f"[*] Emulating stereo ping-pong tape echo & analog delay on {inp}...")
+    res = tape_echo_delay.run_tape_echo(
+        inp, output_path=out, delay_ms=delay,
+        feedback_pct=fb, damping_hz=damp, flutter_pct=flutter,
+        drive=drive, dry_wet_pct=mix, ping_pong=ping_pong
+    )
+    print("=" * 60)
+    print("  STEREO PING-PONG & MULTI-TAP TAPE ECHO STUDIO")
+    print("=" * 60)
+    print(f"Input File    : {res['input_path']}")
+    print(f"Output File   : {res['output_path']}")
+    print(f"Delay / Feed  : {res['delay_ms']:.1f}ms | Feedback: {res['feedback_pct']:.1f}%")
+    print(f"Mode / Damp   : {'Stereo Ping-Pong' if res['ping_pong'] else 'Standard Stereo'} | Damping: {res['damping_hz']:.0f} Hz")
+    print(f"Dry/Wet Mix   : {res['dry_wet_pct']:.1f}% (Drive: {res['drive']:.1f}x, Flutter: {res['flutter_pct']:.2f}%)")
+    print(f"In Peak/RMS   : {res['in_peak_dbfs']:.2f} dBFS / {res['in_rms_dbfs']:.2f} dBFS")
+    print(f"Out Peak/RMS  : {res['out_peak_dbfs']:.2f} dBFS / {res['out_rms_dbfs']:.2f} dBFS")
+    print(f"Duration      : {res['duration_sec']:.2f}s @ {res['sample_rate']} Hz")
+    print("=" * 60)
     return
 
   if args.classic:
