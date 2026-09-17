@@ -268,6 +268,29 @@ Examples:
       help="Translate synchronized lyrics to bilingual subtitles: --translate-lyrics <lrc_file> <target_lang> [output_file]",
   )
   parser.add_argument(
+      "--accuraterip",
+      metavar="FILE_OR_DIR",
+      help="Audit CD rip audio against AccurateRip CRCv1, CRCv2 and scan drive offsets: --accuraterip <file_or_dir>",
+  )
+  parser.add_argument(
+      "--heal-playlist",
+      nargs="+",
+      metavar="PARAM",
+      help="Heal broken playlist links & upgrade to lossless: --heal-playlist <playlist> [--library-dir <dir>] [--lossless]",
+  )
+  parser.add_argument(
+      "--spatial-8d",
+      nargs="+",
+      metavar="PARAM",
+      help="Render 360-degree binaural 8D spatial audio master: --spatial-8d <input_file> [output_file] [--orbit <sec>] [--depth <float>]",
+  )
+  parser.add_argument(
+      "--normalize-gain",
+      nargs="+",
+      metavar="PARAM",
+      help="ReplayGain 2.0 & True-Peak loudness normalizer: --normalize-gain <file_or_dir> [--mode tag|hard] [--target-lufs <float>]",
+  )
+  parser.add_argument(
       "--version",
       action="version",
       version=f"Sonance v{modern_lyrics_downloader.APP_VERSION}",
@@ -1093,6 +1116,109 @@ Examples:
           print(f"  {l}")
     else:
       print(f"[-] Translation failed: {res.get('error')}")
+    return
+
+  if args.accuraterip:
+    import accuraterip_verifier
+    tgt = args.accuraterip
+    if os.path.isdir(tgt):
+      res = accuraterip_verifier.verify_album_directory(tgt)
+    else:
+      res = accuraterip_verifier.verify_audio_file(tgt)
+    print(accuraterip_verifier.format_accuraterip_card(res))
+    return
+
+  if args.heal_playlist:
+    import playlist_doctor
+    p_params = list(args.heal_playlist) + list(unknown)
+    pl_path = p_params[0]
+    lib_dir = None
+    out_pl = None
+    up_lossless = "--lossless" in p_params
+    rem_dup = "--no-dedup" not in p_params
+    idx = 1
+    while idx < len(p_params):
+      arg = p_params[idx]
+      if arg == "--library-dir" and idx + 1 < len(p_params):
+        lib_dir = p_params[idx + 1]
+        idx += 2
+      elif arg == "--output" and idx + 1 < len(p_params):
+        out_pl = p_params[idx + 1]
+        idx += 2
+      else:
+        idx += 1
+    print(f"[*] Healing playlist: {pl_path}...")
+    res = playlist_doctor.heal_playlist(
+        pl_path,
+        library_dir=lib_dir,
+        output_path=out_pl,
+        upgrade_lossless=up_lossless,
+        remove_duplicates=rem_dup,
+    )
+    if res.get("success"):
+      print("[+] Playlist Doctor Healed Successfully!")
+      print(f"    • Output Playlist:     {res['output_playlist']}")
+      print(f"    • Restored Links:      {res['healed_tracks']}")
+      print(f"    • Upgraded to FLAC:    {res['upgraded_to_lossless']}")
+      print(f"    • Health Score:        {res['pre_health_score']}% -> {res['post_health_score']}%")
+    else:
+      print(f"[-] Playlist healing failed: {res.get('error')}")
+    return
+
+  if args.spatial_8d:
+    import audio_8d_spatializer
+    s_params = list(args.spatial_8d) + list(unknown)
+    inp = s_params[0]
+    out = None
+    orbit_sec = 12.0
+    depth_val = 0.85
+    idx = 1
+    while idx < len(s_params):
+      arg = s_params[idx]
+      if arg == "--orbit" and idx + 1 < len(s_params):
+        orbit_sec = float(s_params[idx + 1])
+        idx += 2
+      elif arg == "--depth" and idx + 1 < len(s_params):
+        depth_val = float(s_params[idx + 1])
+        idx += 2
+      elif not arg.startswith("--") and out is None:
+        out = arg
+        idx += 1
+      else:
+        idx += 1
+    print(f"[*] Rendering 360-degree Binaural 8D Audio: {inp} (Orbit: {orbit_sec}s, Depth: {int(depth_val*100)}%)...")
+    res = audio_8d_spatializer.render_8d_audio_file(
+        inp, output_path=out, orbit_period_sec=orbit_sec, spatial_depth=depth_val
+    )
+    print(audio_8d_spatializer.format_8d_card(res))
+    return
+
+  if args.normalize_gain:
+    import replaygain_normalizer
+    n_params = list(args.normalize_gain) + list(unknown)
+    tgt = n_params[0]
+    mode = "tag"
+    target_lufs = -18.0
+    idx = 1
+    while idx < len(n_params):
+      arg = n_params[idx]
+      if arg == "--mode" and idx + 1 < len(n_params):
+        mode = n_params[idx + 1].lower()
+        idx += 2
+      elif arg == "--target-lufs" and idx + 1 < len(n_params):
+        target_lufs = float(n_params[idx + 1])
+        idx += 2
+      else:
+        idx += 1
+    print(f"[*] Processing ReplayGain / Loudness Normalizer: {tgt} (Mode: {mode.upper()}, Target: {target_lufs} LUFS)...")
+    if os.path.isdir(tgt):
+      res = replaygain_normalizer.process_folder_replaygain(tgt, mode=mode, target_lufs=target_lufs)
+    else:
+      if mode == "hard":
+        res = replaygain_normalizer.hard_normalize_audio(tgt, target_lufs=target_lufs)
+      else:
+        res = replaygain_normalizer.analyze_audio_gain(tgt, target_lufs=target_lufs)
+    print(replaygain_normalizer.format_replaygain_card(res))
     return
 
   if args.classic:

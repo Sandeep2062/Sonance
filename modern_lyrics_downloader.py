@@ -78,6 +78,10 @@ import audio_inspector
 import audio_restorer
 import library_migrator
 import lyrics_translator
+import accuraterip_verifier
+import playlist_doctor
+import audio_8d_spatializer
+import replaygain_normalizer
 
 APP_VERSION = "2.1.0"
 GITHUB_REPO = "Sandeep2062/Sonance"
@@ -1147,6 +1151,86 @@ class LyricsAPI:
     def get_supported_translation_languages(self) -> Dict[str, str]:
         """Returns supported target language codes and names."""
         return lyrics_translator.get_supported_languages()
+
+    # ------------------ Phase 19: AccurateRip CD Verifier ------------------------
+    def verify_accuraterip(self, file_or_folder: str) -> Dict[str, Any]:
+        """Audits CD rip audio against AccurateRip CRCv1, CRCv2 and scans drive offsets."""
+        if os.path.isdir(file_or_folder):
+            return accuraterip_verifier.verify_album_directory(file_or_folder)
+        return accuraterip_verifier.verify_audio_file(file_or_folder)
+
+    # ------------------ Phase 19: Playlist Doctor & Healer -----------------------
+    def diagnose_playlist(self, playlist_path: str) -> Dict[str, Any]:
+        """Checks playlist health, broken links, duplicates, and lossless ratio."""
+        return playlist_doctor.diagnose_playlist(playlist_path)
+
+    def heal_playlist(
+        self,
+        playlist_path: str,
+        library_dir: Optional[str] = None,
+        output_path: Optional[str] = None,
+        upgrade_lossless: bool = False,
+        relative_paths: bool = False,
+        remove_duplicates: bool = False,
+    ) -> Dict[str, Any]:
+        """Heals broken playlist paths, upgrades to lossless, and writes sanitized M3U8."""
+        return playlist_doctor.heal_playlist(
+            playlist_path,
+            library_dir=library_dir,
+            output_path=output_path,
+            upgrade_lossless=upgrade_lossless,
+            relative_paths=relative_paths,
+            remove_duplicates=remove_duplicates,
+        )
+
+    # ------------------ Phase 19: 8D Spatial Audio Orbit DSP ---------------------
+    def render_8d_audio(
+        self,
+        input_path: str,
+        output_path: Optional[str] = None,
+        orbit_seconds: float = 12.0,
+        spatial_depth: float = 0.85,
+        reverb_mix: float = 0.20,
+    ) -> Dict[str, Any]:
+        """Renders binaural 360-degree rotating 8D spatial audio master."""
+        return audio_8d_spatializer.render_8d_audio_file(
+            input_path,
+            output_path=output_path,
+            orbit_period_sec=orbit_seconds,
+            spatial_depth=spatial_depth,
+            reverb_mix=reverb_mix,
+        )
+
+    # ------------------ Phase 19: ReplayGain 2.0 & Loudness Normalizer -----------
+    def analyze_replaygain(self, file_path: str, target_lufs: float = -18.0) -> Dict[str, Any]:
+        """Analyzes ITU-R BS.1770-4 LUFS and calculates ReplayGain."""
+        return replaygain_normalizer.analyze_audio_gain(file_path, target_lufs=target_lufs)
+
+    def process_replaygain_folder(
+        self,
+        folder_path: str,
+        mode: str = "tag",
+        target_lufs: float = -18.0,
+    ) -> Dict[str, Any]:
+        """Audits folder and applies Album/Track ReplayGain tags or hard-normalizes."""
+        return replaygain_normalizer.process_folder_replaygain(
+            folder_path, mode=mode, target_lufs=target_lufs
+        )
+
+    def hard_normalize_audio(
+        self,
+        input_path: str,
+        output_path: Optional[str] = None,
+        target_lufs: float = -14.0,
+        peak_ceiling_db: float = -0.5,
+    ) -> Dict[str, Any]:
+        """Renders hard-normalized audio with True-Peak brickwall limiter."""
+        return replaygain_normalizer.hard_normalize_audio(
+            input_path,
+            output_path=output_path,
+            target_lufs=target_lufs,
+            peak_ceiling_db=peak_ceiling_db,
+        )
 
     def _save_last_folder(self, folder: str):
         try:

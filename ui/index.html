@@ -1171,6 +1171,18 @@
       <button class="btn btn-secondary" onclick="openLyricsTranslatorModal()" style="padding:5px 9px; font-size:11px;" id="lyricsTranslatorHeaderBtn" title="Dual-Language Synchronized Lyrics Translator">
         🌐 Translate
       </button>
+      <button class="btn btn-secondary" onclick="openAccurateRipModal()" style="padding:5px 9px; font-size:11px;" id="accurateRipHeaderBtn" title="AccurateRip CD Integrity & Drive Offset Verifier">
+        💿 AccurateRip
+      </button>
+      <button class="btn btn-secondary" onclick="openPlaylistDoctorModal()" style="padding:5px 9px; font-size:11px;" id="playlistDoctorHeaderBtn" title="M3U/M3U8 Playlist Doctor & Dead Link Healer">
+        🩹 Playlist Doctor
+      </button>
+      <button class="btn btn-secondary" onclick="openSpatial8dModal()" style="padding:5px 9px; font-size:11px;" id="spatial8dHeaderBtn" title="Binaural 8D Spatial Audio Orbit & Ambisonic Panner DSP">
+        🎧 8D Orbit
+      </button>
+      <button class="btn btn-secondary" onclick="openGainNormalizerModal()" style="padding:5px 9px; font-size:11px;" id="gainNormalizerHeaderBtn" title="ReplayGain 2.0 Mass-Applier & True-Peak Hard Normalizer">
+        🔊 Gain Normalizer
+      </button>
       <button class="btn btn-secondary" onclick="openLrcStudioModal()" style="padding:5px 9px; font-size:11px;" id="lrcStudioHeaderBtn" title="Interactive LRC Studio & Live Time-Stamper">
         ✍️ LRC Studio
       </button>
@@ -3853,7 +3865,7 @@
           <span style="font-size:18px;">✨</span>
           <div>
             <div style="font-weight:700; font-size:14px; color:#fff;">Word-by-Word ELRC Syllable Aligner Studio</div>
-            <div style="font-size:10px; color:var(--text-dim);">Apple Music & Spotify Sing style word-level timestamping (<mm:ss.xx> tags)</div>
+            <div style="font-size:10px; color:var(--text-dim);">Apple Music & Spotify Sing style word-level timestamping (&lt;mm:ss.xx&gt; tags)</div>
           </div>
         </div>
         <button onclick="closeWordAlignerModal()" style="background:none; border:none; color:var(--text-muted); cursor:pointer; font-size:16px;">✕</button>
@@ -4435,6 +4447,221 @@
       <div style="padding:10px 16px; background:#121520; border-top:1px solid var(--border); display:flex; justify-content:space-between; align-items:center;">
         <span style="font-size:10px; color:var(--text-dim);">Maintains millisecond timestamp precision and line cadence</span>
         <button class="btn btn-secondary" onclick="closeLyricsTranslatorModal()">Close</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Phase 19: AccurateRip CD Integrity & Drive Offset Verifier Modal -->
+  <div class="modal-backdrop" id="accurateRipModal" style="display:none;">
+    <div class="modal-box" style="width:680px; max-width:92vw; display:flex; flex-direction:column; max-height:88vh;">
+      <div class="modal-header">
+        <div style="display:flex; align-items:center; gap:8px;">
+          <span style="font-size:18px;">💿</span>
+          <div>
+            <div class="modal-title" style="font-size:14px; font-weight:700;">AccurateRip CD Integrity & Drive Offset Verifier</div>
+            <div style="font-size:10px; color:var(--text-dim);">Global AccurateRip CRCv1, CRCv2, DiscID and drive read offset auditing</div>
+          </div>
+        </div>
+        <button onclick="closeAccurateRipModal()" style="background:none; border:none; color:var(--text-muted); cursor:pointer; font-size:16px;">✕</button>
+      </div>
+
+      <div style="padding:16px; overflow-y:auto; display:flex; flex-direction:column; gap:12px; flex:1;">
+        <div style="display:flex; gap:8px; align-items:flex-end;">
+          <div style="flex:1;">
+            <label style="font-size:11px; color:var(--text-dim); display:block; margin-bottom:4px;">Audio File or CD Album Folder:</label>
+            <input type="text" id="accurateRipTargetInput" class="search-input" style="width:100%; font-size:11px;" placeholder="Path to audio file or CD rip directory...">
+          </div>
+          <button class="btn btn-secondary" onclick="loadActiveTrackForAccurateRip()" style="font-size:11px; padding:6px 12px; white-space:nowrap;">Active Track</button>
+          <button class="btn btn-primary" onclick="runAccurateRipVerifyAction()" id="verifyAccurateRipBtn" style="font-size:11px; padding:6px 16px; white-space:nowrap;">🔍 Verify Rip</button>
+        </div>
+
+        <div id="accurateRipOutputCard" style="background:#0b0d14; border:1px solid var(--border); border-radius:8px; padding:12px; font-family:monospace; font-size:11px; line-height:1.45; color:var(--cyan); min-height:180px; white-space:pre-wrap; overflow-x:auto;">Ready to verify. Select an audio file or CD rip folder and click Verify Rip.</div>
+      </div>
+
+      <div style="padding:10px 16px; background:#121520; border-top:1px solid var(--border); display:flex; justify-content:space-between; align-items:center;">
+        <span style="font-size:10px; color:var(--text-dim);">Detects uncorrected drive offsets (+6, +12, +30, +102, +667)</span>
+        <button class="btn btn-secondary" onclick="closeAccurateRipModal()">Close</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Phase 19: M3U / M3U8 Playlist Doctor & Dead Link Healer Modal -->
+  <div class="modal-backdrop" id="playlistDoctorModal" style="display:none;">
+    <div class="modal-box" style="width:680px; max-width:92vw; display:flex; flex-direction:column; max-height:88vh;">
+      <div class="modal-header">
+        <div style="display:flex; align-items:center; gap:8px;">
+          <span style="font-size:18px;">🩹</span>
+          <div>
+            <div class="modal-title" style="font-size:14px; font-weight:700;">M3U / M3U8 Playlist Doctor & Dead Link Healer</div>
+            <div style="font-size:10px; color:var(--text-dim);">Detect broken links, heal paths via library indexing, and upgrade lossy to lossless</div>
+          </div>
+        </div>
+        <button onclick="closePlaylistDoctorModal()" style="background:none; border:none; color:var(--text-muted); cursor:pointer; font-size:16px;">✕</button>
+      </div>
+
+      <div style="padding:16px; overflow-y:auto; display:flex; flex-direction:column; gap:12px; flex:1;">
+        <div style="display:grid; grid-template-columns:1fr 1fr; gap:10px;">
+          <div>
+            <label style="font-size:11px; color:var(--text-dim); display:block; margin-bottom:4px;">Playlist File (.m3u, .m3u8, .pls):</label>
+            <input type="text" id="playlistDoctorFileInput" class="search-input" style="width:100%; font-size:11px;" placeholder="Path to playlist file...">
+          </div>
+          <div>
+            <label style="font-size:11px; color:var(--text-dim); display:block; margin-bottom:4px;">Music Library Search Folder:</label>
+            <input type="text" id="playlistDoctorLibInput" class="search-input" style="width:100%; font-size:11px;" placeholder="Directory to search for missing songs...">
+          </div>
+        </div>
+
+        <div style="display:flex; gap:16px; align-items:center; background:#141724; padding:8px 12px; border-radius:6px; border:1px solid var(--border);">
+          <label style="display:flex; align-items:center; gap:6px; font-size:11px; cursor:pointer;">
+            <input type="checkbox" id="playlistUpgradeLosslessToggle" checked>
+            <span>✨ Auto-Upgrade MP3s to FLAC/Lossless</span>
+          </label>
+          <label style="display:flex; align-items:center; gap:6px; font-size:11px; cursor:pointer;">
+            <input type="checkbox" id="playlistRemoveDupToggle" checked>
+            <span>🧹 Remove Duplicate Tracks</span>
+          </label>
+        </div>
+
+        <div style="display:flex; gap:8px;">
+          <button class="btn btn-secondary" onclick="runPlaylistDiagnoseAction()" id="diagnosePlaylistBtn" style="font-size:11px; padding:6px 14px;">🩺 Diagnose Health</button>
+          <button class="btn btn-primary" onclick="runPlaylistHealAction()" id="healPlaylistBtn" style="font-size:11px; padding:6px 16px;">🩹 Heal & Repair Playlist</button>
+        </div>
+
+        <div id="playlistDoctorOutputCard" style="background:#0b0d14; border:1px solid var(--border); border-radius:8px; padding:12px; font-family:monospace; font-size:11px; line-height:1.45; color:var(--cyan); min-height:180px; white-space:pre-wrap; overflow-x:auto;">Select a playlist file to diagnose health and heal broken paths.</div>
+      </div>
+
+      <div style="padding:10px 16px; background:#121520; border-top:1px solid var(--border); display:flex; justify-content:space-between; align-items:center;">
+        <span style="font-size:10px; color:var(--text-dim);">Outputs sanitized UTF-8 #EXTM3U playlist</span>
+        <button class="btn btn-secondary" onclick="closePlaylistDoctorModal()">Close</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Phase 19: Binaural 8D Spatial Audio Orbit Modal -->
+  <div class="modal-backdrop" id="spatial8dModal" style="display:none;">
+    <div class="modal-box" style="width:640px; max-width:92vw; display:flex; flex-direction:column; max-height:88vh;">
+      <div class="modal-header">
+        <div style="display:flex; align-items:center; gap:8px;">
+          <span style="font-size:18px;">🎧</span>
+          <div>
+            <div class="modal-title" style="font-size:14px; font-weight:700;">Binaural 8D Spatial Audio Orbit & Ambisonic DSP</div>
+            <div style="font-size:10px; color:var(--text-dim);">360-degree rotating headphone sound field with ITD delay, ILD head shadow & Haas reverb</div>
+          </div>
+        </div>
+        <button onclick="closeSpatial8dModal()" style="background:none; border:none; color:var(--text-muted); cursor:pointer; font-size:16px;">✕</button>
+      </div>
+
+      <div style="padding:16px; overflow-y:auto; display:flex; flex-direction:column; gap:12px; flex:1;">
+        <div style="display:flex; gap:8px; align-items:flex-end;">
+          <div style="flex:1;">
+            <label style="font-size:11px; color:var(--text-dim); display:block; margin-bottom:4px;">Input Audio File:</label>
+            <input type="text" id="spatial8dFileInput" class="search-input" style="width:100%; font-size:11px;" placeholder="Path to audio file to convert to 8D...">
+          </div>
+          <button class="btn btn-secondary" onclick="loadActiveTrackForSpatial8d()" style="font-size:11px; padding:6px 12px; white-space:nowrap;">Active Track</button>
+        </div>
+
+        <div style="display:grid; grid-template-columns:1fr 1fr 1fr; gap:10px; background:#141724; padding:10px; border-radius:6px; border:1px solid var(--border);">
+          <div>
+            <label style="font-size:10px; color:var(--text-dim); display:block; margin-bottom:4px;">Orbit Period: <b id="spatial8dOrbitVal" style="color:var(--cyan);">12s</b></label>
+            <input type="range" id="spatial8dOrbitSlider" min="4" max="24" step="1" value="12" style="width:100%;" oninput="document.getElementById('spatial8dOrbitVal').innerText=this.value+'s'">
+          </div>
+          <div>
+            <label style="font-size:10px; color:var(--text-dim); display:block; margin-bottom:4px;">Spatial Depth: <b id="spatial8dDepthVal" style="color:var(--cyan);">85%</b></label>
+            <input type="range" id="spatial8dDepthSlider" min="50" max="100" step="5" value="85" style="width:100%;" oninput="document.getElementById('spatial8dDepthVal').innerText=this.value+'%'">
+          </div>
+          <div>
+            <label style="font-size:10px; color:var(--text-dim); display:block; margin-bottom:4px;">Haas Room Reverb: <b id="spatial8dReverbVal" style="color:var(--cyan);">20%</b></label>
+            <input type="range" id="spatial8dReverbSlider" min="0" max="40" step="5" value="20" style="width:100%;" oninput="document.getElementById('spatial8dReverbVal').innerText=this.value+'%'">
+          </div>
+        </div>
+
+        <div style="display:flex; justify-content:space-between; align-items:center; background:#181c2d; padding:8px 12px; border-radius:6px; border:1px solid var(--border);">
+          <div>
+            <div style="font-size:11px; font-weight:700; color:#fff;">Live 8D Orbit Playback Mode</div>
+            <div style="font-size:10px; color:var(--text-dim);">Rotates sound field 360 deg in real-time during live music playback</div>
+          </div>
+          <button class="btn btn-secondary" onclick="toggleLive8dPlayback()" id="live8dToggleBtn" style="font-size:11px; padding:4px 12px;">OFF</button>
+        </div>
+
+        <div style="display:flex; justify-content:space-between; align-items:center;">
+          <span id="spatial8dStatusText" style="font-size:11px; color:var(--text-dim);">Ready to render 8D spatial audio master.</span>
+          <button class="btn btn-primary" onclick="runRender8dAction()" id="render8dBtn" style="font-size:11px; padding:6px 18px;">
+            🎧 Render 8D Master
+          </button>
+        </div>
+
+        <div id="spatial8dOutputCard" style="background:#0b0d14; border:1px solid var(--border); border-radius:8px; padding:12px; font-family:monospace; font-size:11px; line-height:1.45; color:var(--cyan); min-height:120px; white-space:pre-wrap; overflow-x:auto;">Click Render 8D Master to generate an offline 8D audio track.</div>
+      </div>
+
+      <div style="padding:10px 16px; background:#121520; border-top:1px solid var(--border); display:flex; justify-content:space-between; align-items:center;">
+        <span style="font-size:10px; color:var(--text-dim);">Recommended for stereo headphones and IEMs</span>
+        <button class="btn btn-secondary" onclick="closeSpatial8dModal()">Close</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Phase 19: ReplayGain 2.0 & True-Peak Normalizer Modal -->
+  <div class="modal-backdrop" id="gainNormalizerModal" style="display:none;">
+    <div class="modal-box" style="width:680px; max-width:92vw; display:flex; flex-direction:column; max-height:88vh;">
+      <div class="modal-header">
+        <div style="display:flex; align-items:center; gap:8px;">
+          <span style="font-size:18px;">🔊</span>
+          <div>
+            <div class="modal-title" style="font-size:14px; font-weight:700;">ReplayGain 2.0 Mass-Applier & True-Peak Hard Normalizer</div>
+            <div style="font-size:10px; color:var(--text-dim);">ITU-R BS.1770 LUFS loudness measurement, non-destructive tagging & brickwall limited normalization</div>
+          </div>
+        </div>
+        <button onclick="closeGainNormalizerModal()" style="background:none; border:none; color:var(--text-muted); cursor:pointer; font-size:16px;">✕</button>
+      </div>
+
+      <div style="padding:16px; overflow-y:auto; display:flex; flex-direction:column; gap:12px; flex:1;">
+        <div style="display:flex; gap:8px; align-items:flex-end;">
+          <div style="flex:1;">
+            <label style="font-size:11px; color:var(--text-dim); display:block; margin-bottom:4px;">Target Track or Music Directory:</label>
+            <input type="text" id="gainNormalizerTargetInput" class="search-input" style="width:100%; font-size:11px;" placeholder="Path to audio file or album directory...">
+          </div>
+          <button class="btn btn-secondary" onclick="loadActiveTrackForGainNormalizer()" style="font-size:11px; padding:6px 12px; white-space:nowrap;">Active Track</button>
+          <button class="btn btn-secondary" onclick="loadActiveFolderForGainNormalizer()" style="font-size:11px; padding:6px 12px; white-space:nowrap;">Active Folder</button>
+        </div>
+
+        <div style="display:grid; grid-template-columns:1fr 1fr; gap:10px; background:#141724; padding:10px; border-radius:6px; border:1px solid var(--border);">
+          <div>
+            <label style="font-size:11px; color:var(--text-dim); display:block; margin-bottom:4px;">Target Loudness Standard:</label>
+            <select id="gainTargetLufsSelect" class="search-input" style="width:100%; font-size:11px;">
+              <option value="-18.0">-18.0 LUFS (Audiophile / ReplayGain Reference)</option>
+              <option value="-16.0">-16.0 LUFS (Apple Music / Sound Check)</option>
+              <option value="-14.0" selected>-14.0 LUFS (Spotify / YouTube / Streaming)</option>
+              <option value="-23.0">-23.0 LUFS (EBU R128 Broadcast Standard)</option>
+            </select>
+          </div>
+          <div>
+            <label style="font-size:11px; color:var(--text-dim); display:block; margin-bottom:4px;">Processing Mode:</label>
+            <div style="display:flex; gap:12px; margin-top:6px;">
+              <label style="display:flex; align-items:center; gap:5px; font-size:11px; cursor:pointer;">
+                <input type="radio" name="gainNormalizerMode" value="tag" checked>
+                <span>🏷️ ReplayGain Tags</span>
+              </label>
+              <label style="display:flex; align-items:center; gap:5px; font-size:11px; cursor:pointer;">
+                <input type="radio" name="gainNormalizerMode" value="hard">
+                <span>⚡ Hard Peak-Limited</span>
+              </label>
+            </div>
+          </div>
+        </div>
+
+        <div style="display:flex; justify-content:space-between; align-items:center;">
+          <span id="gainNormalizerStatusText" style="font-size:11px; color:var(--text-dim);">Ready to audit loudness and apply normalization.</span>
+          <button class="btn btn-primary" onclick="runGainNormalizerAction()" id="processGainBtn" style="font-size:11px; padding:6px 18px;">
+            🔊 Process Audio Loudness
+          </button>
+        </div>
+
+        <div id="gainNormalizerOutputCard" style="background:#0b0d14; border:1px solid var(--border); border-radius:8px; padding:12px; font-family:monospace; font-size:11px; line-height:1.45; color:var(--cyan); min-height:180px; white-space:pre-wrap; overflow-x:auto;">Select target file or directory and click Process Audio Loudness.</div>
+      </div>
+
+      <div style="padding:10px 16px; background:#121520; border-top:1px solid var(--border); display:flex; justify-content:space-between; align-items:center;">
+        <span style="font-size:10px; color:var(--text-dim);">Includes -0.5 dBFS True-Peak lookahead brickwall limiter</span>
+        <button class="btn btn-secondary" onclick="closeGainNormalizerModal()">Close</button>
       </div>
     </div>
   </div>
@@ -7415,6 +7642,10 @@
         closeAudioRestorerModal();
         closeLibraryMigratorModal();
         closeLyricsTranslatorModal();
+        closeAccurateRipModal();
+        closePlaylistDoctorModal();
+        closeSpatial8dModal();
+        closeGainNormalizerModal();
         dismissPodcastResumeToast();
         const popup = document.getElementById('speedStudioPopup');
         if (popup) popup.style.display = 'none';
@@ -11581,6 +11812,437 @@
           alert(`✓ Bilingual Translated LRC Saved!\n\nFile: ${outPath}`);
         }).catch(err => {
           alert('✕ Error saving companion LRC: ' + (err.message || err));
+        });
+      }
+    }
+
+    // =========================================================================
+    // Phase 19: AccurateRip Verifier, Playlist Doctor, 8D Spatial Audio, ReplayGain
+    // =========================================================================
+
+    // --- 1. AccurateRip CD Integrity & Offset Verifier ---
+    function openAccurateRipModal() {
+      const modal = document.getElementById('accurateRipModal');
+      if (!modal) return;
+      loadActiveTrackForAccurateRip();
+      modal.style.display = 'flex';
+    }
+
+    function closeAccurateRipModal() {
+      const modal = document.getElementById('accurateRipModal');
+      if (modal) modal.style.display = 'none';
+    }
+
+    function loadActiveTrackForAccurateRip() {
+      const track = (playingTrackIndex !== null) ? libraryTracks.find(t => t.index === playingTrackIndex)
+                  : (selectedTrackIndex !== null) ? libraryTracks.find(t => t.index === selectedTrackIndex) : null;
+      const inp = document.getElementById('accurateRipTargetInput');
+      if (inp && track && track.path) {
+        inp.value = track.path;
+      }
+    }
+
+    function runAccurateRipVerifyAction() {
+      const target = (document.getElementById('accurateRipTargetInput').value || '').trim();
+      if (!target) {
+        alert('Please enter or select an audio file or CD directory.');
+        return;
+      }
+
+      const btn = document.getElementById('verifyAccurateRipBtn');
+      const out = document.getElementById('accurateRipOutputCard');
+      if (btn) {
+        btn.disabled = true;
+        btn.innerText = '⏳ Verifying...';
+      }
+      if (out) out.innerText = 'Analyzing audio PCM, calculating AccurateRip CRCv1/v2 & scanning drive offsets...';
+
+      if (window.pywebview && window.pywebview.api && window.pywebview.api.verify_accuraterip) {
+        window.pywebview.api.verify_accuraterip(target).then(res => {
+          if (btn) {
+            btn.disabled = false;
+            btn.innerText = '🔍 Verify Rip';
+          }
+          if (res && res.success) {
+            let card = '';
+            if (res.tracks) {
+              card = `ACCURATERIP CD AUDIT REPORT\nFolder: ${res.folder}\nTotal Tracks: ${res.track_count}\nDiscID: ${res.disc_id}\n\n`;
+              card += `Trk | File Name                    | AR v1    | AR v2    | Duration\n`;
+              card += `----+------------------------------+----------+----------+---------\n`;
+              res.tracks.forEach(t => {
+                const fname = (t.file.length > 28 ? t.file.substring(0, 25) + '...' : t.file).padEnd(28);
+                const dur = `${Math.floor(t.duration/60)}:${Math.floor(t.duration%60).toString().padStart(2, '0')}`;
+                card += `${t.track_no.toString().padStart(3)} | ${fname} | ${t.ar_v1} | ${t.ar_v2} | ${dur.padStart(7)}\n`;
+              });
+              if (res.disc_url) {
+                card += `\nDatabase URL: ${res.disc_url}\n`;
+              }
+            } else {
+              card = `ACCURATERIP TRACK VERIFICATION\nFile: ${res.file}\nDuration: ${res.duration_sec}s | Samples Checked: ${res.samples_checked}\n\n`;
+              card += `AccurateRip CRCv1 : ${res.accuraterip_v1}\n`;
+              card += `AccurateRip CRCv2 : ${res.accuraterip_v2}\n`;
+              card += `Audio PCM CRC32   : ${res.pcm_crc32}\n`;
+              card += `Audio PCM MD5     : ${res.pcm_md5}\n\n`;
+              if (res.offset_scan && res.offset_scan.length > 0) {
+                card += `COMMON DRIVE READ OFFSET SCAN:\nOffset | CRCv1    | CRCv2\n-------+----------+----------\n`;
+                res.offset_scan.forEach(o => {
+                  const offStr = (o.offset >= 0 ? '+' : '') + o.offset;
+                  card += `${offStr.padStart(6)} | ${o.crc_v1} | ${o.crc_v2}\n`;
+                });
+              }
+            }
+            if (out) out.innerText = card;
+          } else {
+            if (out) out.innerText = '✕ Verification failed: ' + (res ? res.error : 'Unknown error');
+          }
+        }).catch(err => {
+          if (btn) {
+            btn.disabled = false;
+            btn.innerText = '🔍 Verify Rip';
+          }
+          if (out) out.innerText = '✕ Error: ' + (err.message || err);
+        });
+      }
+    }
+
+    // --- 2. Playlist Doctor & Dead Link Healer ---
+    function openPlaylistDoctorModal() {
+      const modal = document.getElementById('playlistDoctorModal');
+      if (!modal) return;
+      const curFolder = document.getElementById('currentFolderText').innerText;
+      const libIn = document.getElementById('playlistDoctorLibInput');
+      if (libIn && curFolder && curFolder !== 'No folder selected') {
+        libIn.value = curFolder;
+      }
+      modal.style.display = 'flex';
+    }
+
+    function closePlaylistDoctorModal() {
+      const modal = document.getElementById('playlistDoctorModal');
+      if (modal) modal.style.display = 'none';
+    }
+
+    function runPlaylistDiagnoseAction() {
+      const plPath = (document.getElementById('playlistDoctorFileInput').value || '').trim();
+      if (!plPath) {
+        alert('Please enter a playlist path (.m3u, .m3u8, .pls).');
+        return;
+      }
+
+      const out = document.getElementById('playlistDoctorOutputCard');
+      if (out) out.innerText = 'Diagnosing playlist health, dead links, and lossless ratios...';
+
+      if (window.pywebview && window.pywebview.api && window.pywebview.api.diagnose_playlist) {
+        window.pywebview.api.diagnose_playlist(plPath).then(res => {
+          if (res && res.success) {
+            let card = `PLAYLIST HEALTH DIAGNOSTIC REPORT\nPlaylist: ${res.playlist}\n`;
+            card += `Health Score   : ${res.health_score}% ${res.health_score === 100 ? '(PERFECT)' : '(NEEDS HEALING)'}\n`;
+            card += `Total Tracks   : ${res.total_tracks}\n`;
+            card += `Valid Tracks   : ${res.valid_tracks}\n`;
+            card += `Broken Links   : ${res.broken_tracks}\n`;
+            card += `Duplicates     : ${res.duplicates}\n`;
+            card += `Lossless Ratio : ${res.lossless_tracks} tracks (${res.lossless_percent}%)\n\n`;
+
+            if (res.broken_tracks > 0) {
+              card += `TOP BROKEN PATHS:\n`;
+              let count = 0;
+              res.items.forEach(item => {
+                if (!item.exists && count < 6) {
+                  count++;
+                  card += `  #${item.index}: ${item.path}\n`;
+                }
+              });
+              if (res.broken_tracks > count) {
+                card += `  ... and ${res.broken_tracks - count} more broken entries.\n`;
+              }
+            }
+            if (out) out.innerText = card;
+          } else {
+            if (out) out.innerText = '✕ Diagnosis failed: ' + (res ? res.error : 'Unknown');
+          }
+        }).catch(err => {
+          if (out) out.innerText = '✕ Error: ' + (err.message || err);
+        });
+      }
+    }
+
+    function runPlaylistHealAction() {
+      const plPath = (document.getElementById('playlistDoctorFileInput').value || '').trim();
+      const libDir = (document.getElementById('playlistDoctorLibInput').value || '').trim() || null;
+      const upLossless = document.getElementById('playlistUpgradeLosslessToggle').checked;
+      const remDup = document.getElementById('playlistRemoveDupToggle').checked;
+
+      if (!plPath) {
+        alert('Please enter a playlist path to heal.');
+        return;
+      }
+
+      const btn = document.getElementById('healPlaylistBtn');
+      const out = document.getElementById('playlistDoctorOutputCard');
+      if (btn) {
+        btn.disabled = true;
+        btn.innerText = '⏳ Healing...';
+      }
+      if (out) out.innerText = 'Scanning library, matching missing paths, and upgrading lossless tracks...';
+
+      if (window.pywebview && window.pywebview.api && window.pywebview.api.heal_playlist) {
+        window.pywebview.api.heal_playlist(plPath, libDir, null, upLossless, false, remDup).then(res => {
+          if (btn) {
+            btn.disabled = false;
+            btn.innerText = '🩹 Heal & Repair Playlist';
+          }
+          if (res && res.success) {
+            let card = `✓ PLAYLIST HEALING COMPLETE!\n`;
+            card += `Output File         : ${res.output_playlist}\n`;
+            card += `Pre Health Score    : ${res.pre_health_score}% -> Post: ${res.post_health_score}%\n`;
+            card += `Healed Broken Links : ${res.healed_tracks}\n`;
+            card += `Upgraded to Lossless: ${res.upgraded_to_lossless}\n`;
+            card += `Total Active Tracks : ${res.total_tracks}\n`;
+            if (out) out.innerText = card;
+          } else {
+            if (out) out.innerText = '✕ Healing failed: ' + (res ? res.error : 'Unknown');
+          }
+        }).catch(err => {
+          if (btn) {
+            btn.disabled = false;
+            btn.innerText = '🩹 Heal & Repair Playlist';
+          }
+          if (out) out.innerText = '✕ Error: ' + (err.message || err);
+        });
+      }
+    }
+
+    // --- 3. Binaural 8D Spatial Audio Orbit DSP ---
+    let live8dEnabled = false;
+    let live8dRafId = null;
+    let live8dStartTime = null;
+
+    function openSpatial8dModal() {
+      const modal = document.getElementById('spatial8dModal');
+      if (!modal) return;
+      loadActiveTrackForSpatial8d();
+      modal.style.display = 'flex';
+    }
+
+    function closeSpatial8dModal() {
+      const modal = document.getElementById('spatial8dModal');
+      if (modal) modal.style.display = 'none';
+    }
+
+    function loadActiveTrackForSpatial8d() {
+      const track = (playingTrackIndex !== null) ? libraryTracks.find(t => t.index === playingTrackIndex)
+                  : (selectedTrackIndex !== null) ? libraryTracks.find(t => t.index === selectedTrackIndex) : null;
+      const inp = document.getElementById('spatial8dFileInput');
+      if (inp && track && track.path) {
+        inp.value = track.path;
+      }
+    }
+
+    function toggleLive8dPlayback() {
+      setupWebAudio();
+      live8dEnabled = !live8dEnabled;
+      const btn = document.getElementById('live8dToggleBtn');
+      if (btn) {
+        btn.innerText = live8dEnabled ? 'ON (360°)' : 'OFF';
+        btn.style.background = live8dEnabled ? 'var(--cyan)' : '';
+        btn.style.color = live8dEnabled ? '#000' : '';
+      }
+
+      if (live8dEnabled) {
+        live8dStartTime = performance.now();
+        animateLive8d();
+      } else {
+        if (live8dRafId) cancelAnimationFrame(live8dRafId);
+        if (typeof stereoPanner !== 'undefined' && stereoPanner && stereoPanner.pan && audioCtx) {
+          stereoPanner.pan.setValueAtTime(0.0, audioCtx.currentTime);
+        }
+      }
+    }
+
+    function animateLive8d() {
+      if (!live8dEnabled) return;
+      const orbitSec = parseFloat(document.getElementById('spatial8dOrbitSlider').value || '12');
+      const depth = parseFloat(document.getElementById('spatial8dDepthSlider').value || '85') / 100.0;
+      const elapsed = (performance.now() - live8dStartTime) / 1000.0;
+      const theta = (2.0 * Math.PI * (elapsed / orbitSec)) % (2.0 * Math.PI);
+      const panVal = Math.sin(theta) * depth;
+
+      if (typeof stereoPanner !== 'undefined' && stereoPanner && stereoPanner.pan && audioCtx) {
+        stereoPanner.pan.setValueAtTime(Math.max(-1.0, Math.min(1.0, panVal)), audioCtx.currentTime);
+      }
+
+      live8dRafId = requestAnimationFrame(animateLive8d);
+    }
+
+    function runRender8dAction() {
+      const file = (document.getElementById('spatial8dFileInput').value || '').trim();
+      if (!file) {
+        alert('Please enter or select an audio file to render in 8D.');
+        return;
+      }
+
+      const orbit = parseFloat(document.getElementById('spatial8dOrbitSlider').value || '12');
+      const depth = parseFloat(document.getElementById('spatial8dDepthSlider').value || '85') / 100.0;
+      const rev = parseFloat(document.getElementById('spatial8dReverbSlider').value || '20') / 100.0;
+
+      const btn = document.getElementById('render8dBtn');
+      const out = document.getElementById('spatial8dOutputCard');
+      const st = document.getElementById('spatial8dStatusText');
+
+      if (btn) {
+        btn.disabled = true;
+        btn.innerText = '⏳ Rendering 8D...';
+      }
+      if (st) {
+        st.innerText = 'Synthesizing binaural ITD microsecond delays, head shadow & Haas reflections...';
+        st.style.color = 'var(--cyan)';
+      }
+
+      if (window.pywebview && window.pywebview.api && window.pywebview.api.render_8d_audio) {
+        window.pywebview.api.render_8d_audio(file, null, orbit, depth, rev).then(res => {
+          if (btn) {
+            btn.disabled = false;
+            btn.innerText = '🎧 Render 8D Master';
+          }
+          if (res && res.success) {
+            if (st) {
+              st.innerText = '✓ 8D Audio Master Rendered Successfully!';
+              st.style.color = 'var(--emerald)';
+            }
+            let card = `BINAURAL 8D SPATIAL MASTER RENDERED\n\n`;
+            card += `Input File   : ${res.input_file}\n`;
+            card += `Output File  : ${res.output_file}\n`;
+            card += `Duration     : ${res.duration_sec}s\n`;
+            card += `Orbit Period : ${res.orbit_period_sec}s per 360 deg rotation\n`;
+            card += `Spatial Depth: ${Math.round(res.spatial_depth * 100)}%\n`;
+            card += `Haas Reverb  : ${Math.round(res.reverb_mix * 100)}%\n`;
+            if (out) out.innerText = card;
+          } else {
+            if (st) {
+              st.innerText = '✕ 8D rendering failed: ' + (res ? res.error : 'Unknown');
+              st.style.color = 'var(--rose)';
+            }
+          }
+        }).catch(err => {
+          if (btn) {
+            btn.disabled = false;
+            btn.innerText = '🎧 Render 8D Master';
+          }
+          if (out) out.innerText = '✕ Error: ' + (err.message || err);
+        });
+      }
+    }
+
+    // --- 4. ReplayGain 2.0 & True-Peak Loudness Normalizer ---
+    function openGainNormalizerModal() {
+      const modal = document.getElementById('gainNormalizerModal');
+      if (!modal) return;
+      loadActiveTrackForGainNormalizer();
+      modal.style.display = 'flex';
+    }
+
+    function closeGainNormalizerModal() {
+      const modal = document.getElementById('gainNormalizerModal');
+      if (modal) modal.style.display = 'none';
+    }
+
+    function loadActiveTrackForGainNormalizer() {
+      const track = (playingTrackIndex !== null) ? libraryTracks.find(t => t.index === playingTrackIndex)
+                  : (selectedTrackIndex !== null) ? libraryTracks.find(t => t.index === selectedTrackIndex) : null;
+      const inp = document.getElementById('gainNormalizerTargetInput');
+      if (inp && track && track.path) {
+        inp.value = track.path;
+      }
+    }
+
+    function loadActiveFolderForGainNormalizer() {
+      const folder = document.getElementById('currentFolderText').innerText;
+      const inp = document.getElementById('gainNormalizerTargetInput');
+      if (inp && folder && folder !== 'No folder selected') {
+        inp.value = folder;
+      }
+    }
+
+    function runGainNormalizerAction() {
+      const target = (document.getElementById('gainNormalizerTargetInput').value || '').trim();
+      if (!target) {
+        alert('Please enter or select a target track or folder.');
+        return;
+      }
+
+      const lufs = parseFloat(document.getElementById('gainTargetLufsSelect').value || '-18.0');
+      const modeEl = document.querySelector('input[name="gainNormalizerMode"]:checked');
+      const mode = modeEl ? modeEl.value : 'tag';
+
+      const btn = document.getElementById('processGainBtn');
+      const out = document.getElementById('gainNormalizerOutputCard');
+      const st = document.getElementById('gainNormalizerStatusText');
+
+      if (btn) {
+        btn.disabled = true;
+        btn.innerText = '⏳ Processing...';
+      }
+      if (st) {
+        st.innerText = 'Auditing ITU-R BS.1770-4 loudness and applying normalization...';
+        st.style.color = 'var(--cyan)';
+      }
+
+      const isFolder = !target.toLowerCase().match(/\.(wav|flac|mp3|m4a|ogg|opus)$/);
+
+      if (window.pywebview && window.pywebview.api) {
+        const promise = isFolder
+          ? window.pywebview.api.process_replaygain_folder(target, mode, lufs)
+          : (mode === 'hard'
+              ? window.pywebview.api.hard_normalize_audio(target, null, lufs, -0.5)
+              : window.pywebview.api.analyze_replaygain(target, lufs));
+
+        promise.then(res => {
+          if (btn) {
+            btn.disabled = false;
+            btn.innerText = '🔊 Process Audio Loudness';
+          }
+          if (res && res.success) {
+            if (st) {
+              st.innerText = '✓ Loudness processing completed successfully!';
+              st.style.color = 'var(--emerald)';
+            }
+            let card = '';
+            if (res.tracks) {
+              card = `REPLAYGAIN 2.0 BATCH PROCESSING\nFolder: ${res.folder}\nMode: ${res.mode.toUpperCase()} | Target: ${res.target_lufs} LUFS\n`;
+              card += `Album Loudness: ${res.album_lufs} LUFS | Album Gain: ${res.album_gain_db} dB\n`;
+              card += `Processed: ${res.processed_count} / ${res.total_tracks} tracks\n\n`;
+              card += `File                           | Measured  | Track Gain | Peak dBFS\n`;
+              card += `-------------------------------+-----------+------------+----------\n`;
+              res.tracks.forEach(t => {
+                const fname = (t.file.length > 30 ? t.file.substring(0, 27) + '...' : t.file).padEnd(30);
+                card += `${fname} | ${t.measured_lufs.toString().padStart(6)} LUFS | ${t.track_gain_db > 0 ? '+' : ''}${t.track_gain_db.toFixed(2)} dB | ${t.peak_dbfs.toFixed(2)} dBFS\n`;
+              });
+            } else if (res.pre_lufs !== undefined) {
+              card = `TRUE-PEAK HARD NORMALIZATION\nInput : ${res.input_file}\nOutput: ${res.output_file}\n\n`;
+              card += `Gain Applied    : ${res.gain_applied_db > 0 ? '+' : ''}${res.gain_applied_db} dB\n`;
+              card += `Pre Loudness    : ${res.pre_lufs} LUFS  ->  Post: ${res.post_lufs} LUFS\n`;
+              card += `Pre True-Peak   : ${res.pre_peak_dbfs} dBFS ->  Post: ${res.post_peak_dbfs} dBFS\n`;
+              card += `Limiter Engaged : ${res.limiter_engaged}\n`;
+            } else {
+              card = `REPLAYGAIN 2.0 TRACK AUDIT\nFile: ${res.file}\n\n`;
+              card += `Measured Loudness : ${res.measured_lufs} LUFS\n`;
+              card += `Target Loudness   : ${res.target_lufs} LUFS\n`;
+              card += `ReplayGain Value  : ${res.track_gain_db > 0 ? '+' : ''}${res.track_gain_db} dB\n`;
+              card += `Peak Level        : ${res.peak_dbfs} dBFS\n`;
+            }
+            if (out) out.innerText = card;
+          } else {
+            if (st) {
+              st.innerText = '✕ Processing failed: ' + (res ? res.error : 'Unknown');
+              st.style.color = 'var(--rose)';
+            }
+          }
+        }).catch(err => {
+          if (btn) {
+            btn.disabled = false;
+            btn.innerText = '🔊 Process Audio Loudness';
+          }
+          if (out) out.innerText = '✕ Error: ' + (err.message || err);
         });
       }
     }
