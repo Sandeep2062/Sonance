@@ -537,6 +537,24 @@ Examples:
       help="The Grand Workstation Zenith & Master Orchestration Suite: --zenith <audio_file_or_dir> [output] [--profile audiophile_pure_master|club_edm_banger|acoustic_intimate|broadcast_radio_sheen|vinyl_cutting_prep] [--batch]",
   )
   parser.add_argument(
+      "--audio-devices",
+      "--devices",
+      action="store_true",
+      help="List all physical audio output devices, host APIs (WASAPI, DirectSound, CoreAudio, ALSA), and registered ASIO drivers.",
+  )
+  parser.add_argument(
+      "--test-exclusive",
+      nargs="*",
+      metavar="PARAM",
+      help="Test Exclusive Mode DAC hardware lock: --test-exclusive [device_id] [--sr 48000|96000|192000]",
+  )
+  parser.add_argument(
+      "--play-exclusive",
+      nargs="*",
+      metavar="PARAM",
+      help="Bit-perfect Exclusive audio playback: --play-exclusive <audio_file> [--device <id>] [--mode wasapi_exclusive|asio|shared]",
+  )
+  parser.add_argument(
       "--version",
       action="version",
       version=f"Sonance v{modern_lyrics_downloader.APP_VERSION}",
@@ -3291,7 +3309,118 @@ Examples:
     print("=" * 70)
     return
 
+  if args.audio_devices:
+    import exclusive_audio_engine
+    print("=" * 70)
+    print("  SONANCE AUDIOPHILE WORKSTATION v3.6.0")
+    print("  Hardware Audio Output Endpoints & Driver Discovery")
+    print("=" * 70)
+    engine = exclusive_audio_engine.get_engine()
+    res = engine.query_devices()
+    if not res.get("available"):
+      print(f"[-] Error querying devices: {res.get('error')}")
+      return
 
+    print("[*] Host Audio APIs:")
+    for api in res.get("host_apis", []):
+      print(f"    - ID {api['id']}: {api['name']} ({api['devices_count']} endpoints)")
+
+    print("\n[*] Physical Audio Output Devices / DACs:")
+    for dev in res.get("devices", []):
+      default_tag = " [DEFAULT]" if dev.get("is_default") else ""
+      wasapi_tag = " [WASAPI]" if dev.get("is_wasapi") else ""
+      print(f"    - ID {dev['id']:2d}: {dev['name']}{default_tag}{wasapi_tag}")
+      print(f"            Host API: {dev['host_api']} | Max Out Ch: {dev['max_channels']} | Default SR: {dev['default_sample_rate']} Hz")
+
+    asio_drivers = res.get("asio_drivers", [])
+    print(f"\n[*] Registered ASIO Drivers ({len(asio_drivers)} found):")
+    if asio_drivers:
+      for asio in asio_drivers:
+        print(f"    - Name: {asio['name']}")
+        print(f"      Desc: {asio['description']}")
+        print(f"      CLSID: {asio['clsid']}")
+    else:
+      print("    (No third-party ASIO drivers registered. Native WASAPI Exclusive is fully available!)")
+    print("=" * 70)
+    return
+
+  if args.test_exclusive is not None:
+    import exclusive_audio_engine
+    params = list(args.test_exclusive) + list(unknown)
+    dev_id = None
+    sr = 48000
+    idx = 0
+    while idx < len(params):
+      p = params[idx]
+      if p in ["--sr", "--rate"] and idx + 1 < len(params):
+        try:
+          sr = int(params[idx + 1])
+        except ValueError:
+          pass
+        idx += 2
+      elif not p.startswith("--") and dev_id is None:
+        try:
+          dev_id = int(p)
+        except ValueError:
+          pass
+        idx += 1
+      else:
+        idx += 1
+
+    print("=" * 70)
+    print("  SONANCE AUDIOPHILE WORKSTATION v3.6.0")
+    print("  Exclusive Mode DAC Hardware Lock Test")
+    print("=" * 70)
+    engine = exclusive_audio_engine.get_engine()
+    res = engine.play_test_tone(device_id=dev_id, sample_rate=sr, duration=0.6)
+    if res.get("success"):
+      print(f"[+] SUCCESS: {res['message']}")
+      print(f"[+] Sample Rate Tested : {res['sample_rate']} Hz (440 Hz Bit-Perfect Chime)")
+      print(f"[+] Test Duration      : {res['duration']}s")
+    else:
+      print(f"[-] ERROR: {res.get('error')}")
+    print("=" * 70)
+    return
+
+  if args.play_exclusive is not None:
+    import exclusive_audio_engine
+    params = list(args.play_exclusive) + list(unknown)
+    if not params:
+      print("[-] Error: --play-exclusive requires an input audio file.")
+      print("    Usage: python sonance.py --play-exclusive <audio_file> [--device <id>] [--mode wasapi_exclusive|asio|shared]")
+      return
+    file_path = params[0]
+    dev_id = None
+    mode = "wasapi_exclusive"
+    idx = 1
+    while idx < len(params):
+      p = params[idx]
+      if p in ["--device", "--dev"] and idx + 1 < len(params):
+        try:
+          dev_id = int(params[idx + 1])
+        except ValueError:
+          pass
+        idx += 2
+      elif p in ["--mode"] and idx + 1 < len(params):
+        mode = params[idx + 1]
+        idx += 2
+      else:
+        idx += 1
+
+    print("=" * 70)
+    print("  SONANCE AUDIOPHILE WORKSTATION v3.6.0")
+    print("  Bit-Perfect Exclusive Audio Playback")
+    print("=" * 70)
+    engine = exclusive_audio_engine.get_engine()
+    engine.set_config(mode=mode, device_id=dev_id, bit_perfect_lock=True)
+    res = engine.play(file_path)
+    if not res.get("success"):
+      print(f"[-] Error: {res.get('error')}")
+      return
+    print(f"[*] Playing: {res['file']}")
+    print(f"[*] Mode   : {mode.upper()}")
+    print("[*] Streaming bit-perfect PCM directly to hardware DAC...")
+    return
 
   if args.classic:
     print("[*] Launching Sonance (Classic Tkinter UI)...")

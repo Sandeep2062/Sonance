@@ -1297,6 +1297,9 @@
       <button class="btn btn-secondary" onclick="openZenithModal()" style="padding:5px 9px; font-size:11px; background:linear-gradient(135deg, rgba(245,158,11,0.2), rgba(0,242,254,0.2)); border:1px solid var(--gold);" id="zenithHeaderBtn" title="The Grand Workstation Zenith & Master Orchestration Suite (7-Stage Mastering Pipeline)">
         👑 Zenith Suite
       </button>
+      <button class="btn btn-secondary" onclick="openExclusiveAudioModal()" style="padding:5px 9px; font-size:11px; background:linear-gradient(135deg, rgba(16,185,129,0.2), rgba(0,242,254,0.2)); border:1px solid var(--emerald);" id="exclusiveAudioHeaderBtn" title="Audiophile Exclusive Audio Output & Hardware DAC Mode (WASAPI Exclusive / ASIO / Bit-Perfect)">
+        ⚡ Exclusive DAC
+      </button>
       <button class="btn btn-secondary" onclick="openLrcStudioModal()" style="padding:5px 9px; font-size:11px;" id="lrcStudioHeaderBtn" title="Interactive LRC Studio & Live Time-Stamper">
         ✍️ LRC Studio
       </button>
@@ -8298,6 +8301,112 @@
     </div>
   </div>
 
+  <!-- Audiophile Exclusive Audio & Hardware DAC Modal -->
+  <div class="modal-backdrop" id="exclusiveAudioModal" style="display:none;">
+    <div class="modal-card" style="width:780px; max-width:96vw; background:#161926; border:1px solid var(--emerald); border-radius:12px; box-shadow:0 16px 48px rgba(0,0,0,0.8), 0 0 24px rgba(16,185,129,0.2); overflow:hidden;">
+      <div style="padding:16px 20px; background:linear-gradient(135deg, #121520, #13241e); border-bottom:1px solid var(--emerald); display:flex; justify-content:space-between; align-items:center;">
+        <div class="modal-title" style="font-size:14px; font-weight:700; display:flex; align-items:center; gap:8px; color:#fff;">
+          <span style="font-size:18px;">⚡</span>
+          <span style="background:linear-gradient(135deg, #fff, var(--emerald)); -webkit-background-clip:text; -webkit-text-fill-color:transparent;">Audiophile Exclusive Audio Output &amp; Hardware DAC Studio</span>
+        </div>
+        <button onclick="closeExclusiveAudioModal()" style="background:none; border:none; color:var(--text-muted); font-size:16px; cursor:pointer;">✕</button>
+      </div>
+
+      <div style="padding:20px; max-height:75vh; overflow-y:auto; display:flex; flex-direction:column; gap:16px;">
+        <div style="font-size:11px; color:var(--text-dim); line-height:1.5;">
+          Direct hardware streaming bypassing the Windows Audio Engine (<code>AudioDG.exe</code>) and OS mixers. Delivers 100% bit-perfect audio directly to external USB DACs, internal sound cards, and audio interfaces with automatic hardware clock matching (44.1 kHz to 192 kHz) without OS software resampling or dithering.
+        </div>
+
+        <!-- Output Driver Mode Selector -->
+        <div>
+          <label style="font-size:11px; font-weight:600; color:var(--text-muted); display:block; margin-bottom:6px;">Audio Output Engine &amp; Driver Mode:</label>
+          <div style="display:flex; flex-wrap:wrap; gap:8px;">
+            <button class="btn btn-secondary" onclick="setExclusiveMode('wasapi_exclusive')" id="exclMode_wasapi" style="font-size:11px; padding:6px 12px; border-color:var(--emerald); color:#fff;">⚡ WASAPI Exclusive (Bit-Perfect)</button>
+            <button class="btn btn-secondary" onclick="setExclusiveMode('asio')" id="exclMode_asio" style="font-size:11px; padding:6px 12px;">🎛️ ASIO (Direct Manufacturer Driver)</button>
+            <button class="btn btn-secondary" onclick="setExclusiveMode('shared')" id="exclMode_shared" style="font-size:11px; padding:6px 12px;">🌐 Standard Shared (OS Mixer)</button>
+          </div>
+        </div>
+
+        <!-- Physical Hardware Device Dropdown -->
+        <div>
+          <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:6px;">
+            <label style="font-size:11px; font-weight:600; color:var(--text-muted);">Target Physical Audio Output Device / DAC:</label>
+            <button class="btn btn-secondary" onclick="loadExclusiveDevicesList()" style="font-size:10px; padding:2px 8px;">🔄 Refresh Endpoints</button>
+          </div>
+          <select id="exclusiveDeviceSelect" onchange="onExclusiveDeviceChanged()" class="search-input" style="width:100%; font-size:11px;">
+            <option value="default">Scanning hardware audio devices...</option>
+          </select>
+        </div>
+
+        <!-- Buffer Latency & Bit-Perfect Options -->
+        <div style="display:grid; grid-template-columns:1fr 1fr; gap:12px;">
+          <div>
+            <label style="font-size:11px; font-weight:600; color:var(--text-muted); display:block; margin-bottom:4px;">Hardware Buffer Latency (Frames):</label>
+            <select id="exclusiveBufferSizeSelect" onchange="saveExclusiveSettings()" class="search-input" style="width:100%; font-size:11px;">
+              <option value="64">64 Samples (Ultra-low latency ~1.3 ms)</option>
+              <option value="128">128 Samples (Low latency ~2.7 ms)</option>
+              <option value="256" selected>256 Samples (Optimal Audiophile ~5.3 ms)</option>
+              <option value="512">512 Samples (Safe Studio ~10.7 ms)</option>
+              <option value="1024">1024 Samples (Relaxed Buffer ~21.3 ms)</option>
+            </select>
+          </div>
+
+          <div style="display:flex; flex-direction:column; justify-content:center;">
+            <label style="display:flex; align-items:center; gap:8px; font-size:11px; color:#fff; cursor:pointer; margin-top:14px;">
+              <input type="checkbox" id="exclusiveBitPerfectLock" checked onchange="saveExclusiveSettings()" style="accent-color:var(--emerald); cursor:pointer;">
+              <span>🔒 Bit-Perfect Volume Lock (100% Bit-Exact, No Digital Dither)</span>
+            </label>
+          </div>
+        </div>
+
+        <!-- Live Hardware Telemetry Card -->
+        <div style="background:#0e111a; border:1px solid var(--border); border-radius:8px; padding:14px; display:flex; flex-direction:column; gap:8px;">
+          <div style="font-size:11px; font-weight:700; color:var(--emerald); border-bottom:1px solid var(--border); padding-bottom:6px; display:flex; justify-content:space-between; align-items:center;">
+            <span>⚡ HARDWARE DAC TELEMETRY &amp; CLOCK LOCK</span>
+            <span id="exclusiveLockBadge" style="font-size:10px; background:rgba(16,185,129,0.15); border:1px solid var(--emerald); color:var(--emerald); padding:1px 6px; border-radius:4px; font-family:monospace; font-weight:700;">READY</span>
+          </div>
+
+          <div style="display:grid; grid-template-columns: repeat(auto-fit, minmax(140px, 1fr)); gap:8px; font-size:10px; font-family:monospace;">
+            <div style="background:#141722; padding:6px 8px; border-radius:4px;">
+              <div style="color:var(--text-dim);">OUTPUT DRIVER</div>
+              <div id="exclTelDriver" style="color:var(--cyan); font-weight:700; margin-top:2px;">WASAPI Exclusive</div>
+            </div>
+            <div style="background:#141722; padding:6px 8px; border-radius:4px;">
+              <div style="color:var(--text-dim);">DAC CLOCK RATE</div>
+              <div id="exclTelRate" style="color:#fff; font-weight:700; margin-top:2px;">Auto-Match Track</div>
+            </div>
+            <div style="background:#141722; padding:6px 8px; border-radius:4px;">
+              <div style="color:var(--text-dim);">BIT DEPTH</div>
+              <div id="exclTelDepth" style="color:var(--emerald); font-weight:700; margin-top:2px;">Bit-Perfect Direct</div>
+            </div>
+            <div style="background:#141722; padding:6px 8px; border-radius:4px;">
+              <div style="color:var(--text-dim);">EST. LATENCY</div>
+              <div id="exclTelLatency" style="color:var(--amber); font-weight:700; margin-top:2px;">~5.33 ms</div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Hardware Verification Test Chime -->
+        <div style="display:flex; justify-content:space-between; align-items:center; background:#121520; border:1px solid var(--border); border-radius:8px; padding:10px 14px;">
+          <div>
+            <div style="font-size:11px; font-weight:700; color:#fff;">Verify Exclusive DAC Hardware Lock</div>
+            <div style="font-size:10px; color:var(--text-dim);">Plays a 440 Hz test chime in Exclusive mode to confirm direct communication.</div>
+          </div>
+          <button class="btn btn-secondary" onclick="runExclusiveTestTone()" id="exclusiveTestToneBtn" style="font-size:11px; padding:6px 14px; border-color:var(--emerald); color:var(--emerald);">
+            🔔 Test DAC Lock
+          </button>
+        </div>
+
+        <div id="exclusiveTestToneResult" style="display:none; font-family:monospace; font-size:10px; padding:8px 12px; border-radius:6px; background:#0b0d14; border:1px solid var(--border);"></div>
+      </div>
+
+      <div style="padding:10px 16px; background:#121520; border-top:1px solid var(--border); display:flex; justify-content:space-between; align-items:center;">
+        <span style="font-size:10px; color:var(--text-dim);">MusicBee-Grade Bit-Perfect Streaming • WASAPI Exclusive / ASIO Direct</span>
+        <button class="btn btn-secondary" onclick="closeExclusiveAudioModal()">Save &amp; Close</button>
+      </div>
+    </div>
+  </div>
+
   <!-- Podcast & Long Mix Bookmark Resumption Toast (Phase 10) -->
   <div id="podcastResumeToast" style="display:none; position:fixed; bottom:85px; right:20px; z-index:9999; background:#131722; border:1px solid var(--border); box-shadow:0 8px 24px rgba(0,0,0,0.6); border-radius:10px; padding:10px 14px; align-items:center; gap:10px; backdrop-filter:blur(10px);">
     <span style="font-size:16px;">⏱️</span>
@@ -11316,6 +11425,7 @@
         closeResonanceModal();
         closeVintageCompModal();
         closeZenithModal();
+        closeExclusiveAudioModal();
         dismissPodcastResumeToast();
         const popup = document.getElementById('speedStudioPopup');
         if (popup) popup.style.display = 'none';
@@ -20114,9 +20224,178 @@
       }
     }
 
+    // =========================================================================
+    // Audiophile Exclusive Audio & Hardware DAC Output (WASAPI Exclusive & ASIO)
+    // =========================================================================
+    let exclusiveAudioConfig = {
+      mode: 'wasapi_exclusive',
+      device_id: null,
+      buffer_size: 256,
+      bit_perfect_lock: true,
+      volume: 1.0
+    };
+    let exclusiveDevicesCache = [];
+
+    function openExclusiveAudioModal() {
+      const modal = document.getElementById('exclusiveAudioModal');
+      if (modal) modal.style.display = 'flex';
+      loadExclusiveDevicesList();
+    }
+
+    function closeExclusiveAudioModal() {
+      const modal = document.getElementById('exclusiveAudioModal');
+      if (modal) modal.style.display = 'none';
+    }
+
+    function setExclusiveMode(mode) {
+      exclusiveAudioConfig.mode = mode;
+      ['wasapi_exclusive', 'asio', 'shared'].forEach(m => {
+        const btnId = m === 'wasapi_exclusive' ? 'exclMode_wasapi' : (m === 'asio' ? 'exclMode_asio' : 'exclMode_shared');
+        const b = document.getElementById(btnId);
+        if (b) {
+          b.style.borderColor = (m === mode) ? 'var(--emerald)' : 'var(--border)';
+          b.style.color = (m === mode) ? '#fff' : 'var(--text-muted)';
+        }
+      });
+      const driverLabel = document.getElementById('exclTelDriver');
+      if (driverLabel) {
+        driverLabel.innerText = mode === 'wasapi_exclusive' ? 'WASAPI Exclusive' : (mode === 'asio' ? 'ASIO Direct' : 'Shared Mixer');
+      }
+      saveExclusiveSettings();
+    }
+
+    function loadExclusiveDevicesList() {
+      if (window.pywebview && window.pywebview.api && window.pywebview.api.get_audio_output_devices) {
+        window.pywebview.api.get_audio_output_devices().then(res => {
+          if (res && res.devices) {
+            exclusiveDevicesCache = res.devices;
+            const select = document.getElementById('exclusiveDeviceSelect');
+            if (select) {
+              select.innerHTML = '';
+              res.devices.forEach(dev => {
+                const opt = document.createElement('option');
+                opt.value = dev.id;
+                opt.innerText = `${dev.name} [${dev.host_api}] (${dev.default_sample_rate} Hz, ${dev.max_channels}ch)`;
+                if (dev.id === exclusiveAudioConfig.device_id || (exclusiveAudioConfig.device_id === null && dev.is_default)) {
+                  opt.selected = true;
+                }
+                select.appendChild(opt);
+              });
+            }
+            if (res.current_config) {
+              exclusiveAudioConfig = Object.assign({}, exclusiveAudioConfig, res.current_config);
+              const bufSelect = document.getElementById('exclusiveBufferSizeSelect');
+              if (bufSelect) bufSelect.value = String(exclusiveAudioConfig.buffer_size || 256);
+              const lockCheck = document.getElementById('exclusiveBitPerfectLock');
+              if (lockCheck) lockCheck.checked = (exclusiveAudioConfig.bit_perfect_lock !== false);
+              setExclusiveMode(exclusiveAudioConfig.mode || 'wasapi_exclusive');
+            }
+          }
+        }).catch(err => {
+          console.warn('Error querying audio output devices:', err);
+        });
+      }
+    }
+
+    function onExclusiveDeviceChanged() {
+      const select = document.getElementById('exclusiveDeviceSelect');
+      if (select) {
+        exclusiveAudioConfig.device_id = parseInt(select.value, 10);
+        saveExclusiveSettings();
+      }
+    }
+
+    function saveExclusiveSettings() {
+      const select = document.getElementById('exclusiveDeviceSelect');
+      const devId = select ? parseInt(select.value, 10) : exclusiveAudioConfig.device_id;
+      const bufSelect = document.getElementById('exclusiveBufferSizeSelect');
+      const bufSize = bufSelect ? parseInt(bufSelect.value, 10) : 256;
+      const lockCheck = document.getElementById('exclusiveBitPerfectLock');
+      const bitLock = lockCheck ? lockCheck.checked : true;
+
+      exclusiveAudioConfig.device_id = isNaN(devId) ? null : devId;
+      exclusiveAudioConfig.buffer_size = bufSize;
+      exclusiveAudioConfig.bit_perfect_lock = bitLock;
+
+      // Update telemetry card
+      const latEl = document.getElementById('exclTelLatency');
+      if (latEl) latEl.innerText = `~${((bufSize / 48000) * 1000).toFixed(2)} ms`;
+      const lockBadge = document.getElementById('exclusiveLockBadge');
+      if (lockBadge) {
+        lockBadge.innerText = exclusiveAudioConfig.mode === 'wasapi_exclusive' ? 'WASAPI LOCKED' : (exclusiveAudioConfig.mode === 'asio' ? 'ASIO READY' : 'SHARED');
+      }
+
+      // Update Player Bar telemetry badge
+      const dacTel = document.getElementById('playerDacTelemetry');
+      if (dacTel) {
+        if (exclusiveAudioConfig.mode === 'wasapi_exclusive') {
+          dacTel.innerText = '⚡ WASAPI Exclusive (Bit-Perfect)';
+          dacTel.style.color = 'var(--emerald)';
+          dacTel.style.borderColor = 'rgba(16,185,129,0.4)';
+          dacTel.style.background = 'rgba(16,185,129,0.12)';
+        } else if (exclusiveAudioConfig.mode === 'asio') {
+          dacTel.innerText = '🎛️ ASIO Direct Hardware';
+          dacTel.style.color = 'var(--amber)';
+          dacTel.style.borderColor = 'rgba(245,158,11,0.4)';
+          dacTel.style.background = 'rgba(245,158,11,0.12)';
+        } else {
+          dacTel.innerText = 'Direct PCM (Shared)';
+          dacTel.style.color = 'var(--cyan)';
+          dacTel.style.borderColor = 'rgba(6,182,212,0.25)';
+          dacTel.style.background = 'rgba(6,182,212,0.1)';
+        }
+      }
+
+      if (window.pywebview && window.pywebview.api && window.pywebview.api.set_exclusive_audio_config) {
+        window.pywebview.api.set_exclusive_audio_config(
+          exclusiveAudioConfig.mode,
+          exclusiveAudioConfig.device_id,
+          exclusiveAudioConfig.buffer_size,
+          exclusiveAudioConfig.bit_perfect_lock,
+          exclusiveAudioConfig.volume
+        );
+      }
+    }
+
+    function runExclusiveTestTone() {
+      const btn = document.getElementById('exclusiveTestToneBtn');
+      const resDiv = document.getElementById('exclusiveTestToneResult');
+      if (btn) btn.disabled = true;
+      if (resDiv) {
+        resDiv.style.display = 'block';
+        resDiv.style.color = 'var(--text-dim)';
+        resDiv.innerText = 'Transmitting 440 Hz test chime in Exclusive Mode directly to hardware...';
+      }
+
+      if (window.pywebview && window.pywebview.api && window.pywebview.api.test_exclusive_device) {
+        window.pywebview.api.test_exclusive_device(exclusiveAudioConfig.device_id, 48000).then(res => {
+          if (btn) btn.disabled = false;
+          if (resDiv) {
+            if (res.success) {
+              resDiv.style.color = 'var(--emerald)';
+              resDiv.innerText = `✓ ${res.message}`;
+            } else {
+              resDiv.style.color = 'var(--rose)';
+              resDiv.innerText = `✕ Exclusive lock error: ${res.error}`;
+            }
+          }
+        }).catch(err => {
+          if (btn) btn.disabled = false;
+          if (resDiv) {
+            resDiv.style.color = 'var(--rose)';
+            resDiv.innerText = `✕ Error: ${err.message || err}`;
+          }
+        });
+      } else {
+        if (btn) btn.disabled = false;
+        if (resDiv) resDiv.innerText = 'PyWebView API not connected';
+      }
+    }
+
     // Auto-init Phase 11, 12 & 13 features on DOM ready
     window.addEventListener('DOMContentLoaded', () => {
       initAmbientCanvas();
+      setTimeout(loadExclusiveDevicesList, 1500);
     });
   </script>
 </body>

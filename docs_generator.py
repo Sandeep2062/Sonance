@@ -12,7 +12,7 @@ import webbrowser
 from pathlib import Path
 from typing import Dict, Any, Optional
 
-APP_VERSION = "3.5.0"
+APP_VERSION = "3.6.0"
 WORKSTATION_NAME = "Sonance Audiophile Workstation"
 ROOT_DIR = Path(__file__).parent.resolve()
 DEFAULT_MANUAL_PATH = ROOT_DIR / "ui" / "manual.html"
@@ -367,6 +367,23 @@ PHASES_DATA = [
         "desc": "The crowning zenith of the 35-Phase Sonance Audiophile Workstation. Orchestrates an end-to-end 7-stage serial mastering pipeline: 1. Spectral De-Resonator, 2. Subharmonic Bass & Missing Fundamental, 3. British Class-A Console & Baxandall EQ, 4. Vintage Optical/Variable-Mu Dynamics, 5. Mid/Side Spatial Panorama, 6. Studer A800 Analog Tape Saturation, and 7. True-Peak Lookahead Brickwall Limiter with automated batch album processing and cryptographic verification.",
         "dsp_math": "Master serial pipeline transfer function: Y(z) = H_{\\text{Limiter}}(z) \\circ H_{\\text{Tape}}(z) \\circ H_{\\text{M/S}}(z) \\circ H_{\\text{Vintage}}(z) \\circ H_{\\text{Console}}(z) \\circ H_{\\text{Bass}}(z) \\circ H_{\\text{DeRes}}(z) [X(z)]",
         "features": ["7-stage unbroken serial mastering pipeline executing across world-class physical DSP engines", "5 mastering macro profiles (Audiophile Pure Master, Club/EDM Banger, Acoustic Intimate, Broadcast Sheen, Vinyl Lathe)", "Individual stage bypass and parameter overrides for custom mastering chains", "Automated batch album processing ensuring cohesive track-to-track loudness and tone", "Full audio telemetry: peak dBFS, RMS loudness, dynamic crest factor, and SHA-256 integrity manifest", "24-bit linear PCM WAV master export with true-peak inter-sample protection"]
+    },
+    {
+        "phase": 36,
+        "title": "Audiophile Exclusive Mode & Hardware DAC Output Studio",
+        "category": "Exclusive Audio Output & Hardware Clocking",
+        "modules": ["exclusive_audio_engine.py"],
+        "cli": "python sonance.py --audio-devices | --test-exclusive [device_id] --sr 96000 | --play-exclusive track.flac",
+        "desc": "Direct hardware audio streaming bypassing the Windows Audio Engine (AudioDG.exe) and OS software mixers. Features WASAPI Exclusive mode and ASIO driver discovery/routing on Windows, AAudio Exclusive mode (AAUDIO_SHARING_MODE_EXCLUSIVE) and bit-perfect USB Audio DAC direct access on Android, CoreAudio Hog Mode on macOS, and ALSA direct hardware DMA (hw:X,Y) on Linux. Locks the DAC hardware clock directly to the audio track sample rate (44.1 kHz to 192 kHz) for bit-perfect output with zero resampling and sub-5ms buffer latency.",
+        "dsp_math": "Direct Bit-Perfect Hardware Stream: Y[n] = X[n], \\quad f_s^{\\text{DAC}} = f_s^{\\text{file}}, \\quad \\text{Latency} = \\frac{\\text{Buffer Size}}{f_s} \\cdot 1000\\text{ ms}",
+        "features": [
+            "Bit-perfect playback bypassing OS mixers and forced 48 kHz resampling",
+            "Automatic DAC hardware clock rate matching from 44.1 kHz up to 192 kHz / 384 kHz",
+            "Windows WASAPI Exclusive mode via IAudioClient with MMCSS Pro Audio scheduling",
+            "Windows Registry ASIO driver scanner discovering all manufacturer hardware drivers",
+            "Android AAudio Exclusive MMAP stream and userspace USB Audio Class (UAC) DAC direct driver",
+            "Real-time bit-perfect telemetry badge, buffer latency tuner, and 440 Hz DAC lock test chime"
+        ]
     }
 ]
 
@@ -459,6 +476,11 @@ MATH_FORMULAS = [
         "name": "Master Serial Pipeline Discrete Transfer Composition",
         "formula": "Y(z) = \\prod_{k=N}^1 \\mathcal{T}_k \\left[ X(z) \\right] = \\left( \\mathcal{T}_{\\text{Limiter}} \\circ \\mathcal{T}_{\\text{Tape}} \\circ \\mathcal{T}_{\\text{M/S}} \\circ \\mathcal{T}_{\\text{Dyn}} \\circ \\mathcal{T}_{\\text{Console}} \\circ \\mathcal{T}_{\\text{Bass}} \\circ \\mathcal{T}_{\\text{DeRes}} \\right) X(z)",
         "explanation": "Composes N non-linear, time-variant discrete mastering stages in strict causal sequence. Each stage processes the conditioned output of the previous stage, ensuring surgical artifact removal precedes dynamic expansion, saturation, and final true-peak brickwall limiting."
+    },
+    {
+        "name": "Bit-Perfect Exclusive Hardware DMA & Sample Clock Direct Coupling",
+        "formula": "Y[n] = X[n], \\quad \\Delta t_{\\text{buffer}} = \\frac{N_{\\text{frames}}}{f_s} \\cdot 1000\\text{ ms}, \\quad f_{\\text{DAC}} = f_{\\text{source}}",
+        "explanation": "Bypasses the OS audio mixer kernel (AudioDG.exe on Windows, AudioFlinger on Android) via WASAPI Exclusive, ASIO, or AAudio MMAP. Guarantees an identity transfer function where output discrete PCM samples Y[n] match input file samples X[n] without digital filtering, sample rate interpolation, or dither quantization noise."
     }
 ]
 
@@ -1186,7 +1208,7 @@ def build_manual_html() -> str:
                 <div class="meta-tags">
                     <span class="meta-tag">⚡ Version {APP_VERSION}</span>
                     <span class="meta-tag">🎼 {total_phases} Master Phases</span>
-                    <span class="meta-tag">🎛️ 52 DSP Engines &amp; Core Modules</span>
+                    <span class="meta-tag">🎛️ 53 DSP Engines &amp; Core Modules</span>
                     <span class="meta-tag">🌐 100% Offline Single-File Architecture</span>
                 </div>
             </div>

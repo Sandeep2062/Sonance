@@ -617,7 +617,7 @@
         </div>
         <div class="search-box">
             <span class="search-icon">🔍</span>
-            <input type="text" id="manualSearchInput" placeholder="Search 35 phases, DSP algorithms, CLI commands..." onkeyup="filterManualContent()">
+            <input type="text" id="manualSearchInput" placeholder="Search 36 phases, DSP algorithms, CLI commands..." onkeyup="filterManualContent()">
         </div>
         <div class="header-actions">
             <a href="#shortcuts-section" class="btn-link">⌨️ Shortcuts</a>
@@ -629,7 +629,7 @@
 
     <div class="app-container">
         <aside id="sidebarNav">
-            <div class="sidebar-section-title">Master Roadmap (Phases 1-35)</div>
+            <div class="sidebar-section-title">Master Roadmap (Phases 1-36)</div>
             <a href="#phase-1" class="toc-item" onclick="setActiveLink(this)">
             <span class="toc-num">01</span>
             <span class="toc-name">Core Multi-Threaded Engine, Synchronized Lyrics & Metadata Tagging</span>
@@ -735,6 +735,9 @@
         </a><a href="#phase-35" class="toc-item" onclick="setActiveLink(this)">
             <span class="toc-num">35</span>
             <span class="toc-name">The Grand Workstation Zenith & Master Orchestration Suite</span>
+        </a><a href="#phase-36" class="toc-item" onclick="setActiveLink(this)">
+            <span class="toc-num">36</span>
+            <span class="toc-name">Audiophile Exclusive Mode & Hardware DAC Output Studio</span>
         </a>
             
             <div class="sidebar-section-title" style="margin-top:16px;">Reference &amp; Theory</div>
@@ -751,15 +754,15 @@
                     bit-exact CD extraction, stem separation, and over 25 professional mastering and DSP engineering studios.
                 </p>
                 <div class="meta-tags">
-                    <span class="meta-tag">⚡ Version 3.5.0</span>
-                    <span class="meta-tag">🎼 35 Master Phases</span>
-                    <span class="meta-tag">🎛️ 52 DSP Engines &amp; Core Modules</span>
+                    <span class="meta-tag">⚡ Version 3.6.0</span>
+                    <span class="meta-tag">🎼 36 Master Phases</span>
+                    <span class="meta-tag">🎛️ 53 DSP Engines &amp; Core Modules</span>
                     <span class="meta-tag">🌐 100% Offline Single-File Architecture</span>
                 </div>
             </div>
 
             <div class="section-header" id="catalog-section">
-                <h2>Master Phase Catalog (1 - 35)</h2>
+                <h2>Master Phase Catalog (1 - 36)</h2>
                 <span style="font-size:12px; color:var(--text-muted);">Click any phase to jump</span>
             </div>
 
@@ -1849,6 +1852,37 @@
             </div>
         </article>
         
+        <article class="phase-card" id="phase-36">
+            <div class="phase-card-header">
+                <div class="phase-badge-row">
+                    <span class="phase-pill">PHASE 36</span>
+                    <span class="phase-cat">Exclusive Audio Output & Hardware Clocking</span>
+                </div>
+                <h2 class="phase-title">Audiophile Exclusive Mode & Hardware DAC Output Studio</h2>
+                <div class="module-bar"><span class="badge-module">exclusive_audio_engine.py</span></div>
+            </div>
+            
+            <p class="phase-desc">Direct hardware audio streaming bypassing the Windows Audio Engine (AudioDG.exe) and OS software mixers. Features WASAPI Exclusive mode and ASIO driver discovery/routing on Windows, AAudio Exclusive mode (AAUDIO_SHARING_MODE_EXCLUSIVE) and bit-perfect USB Audio DAC direct access on Android, CoreAudio Hog Mode on macOS, and ALSA direct hardware DMA (hw:X,Y) on Linux. Locks the DAC hardware clock directly to the audio track sample rate (44.1 kHz to 192 kHz) for bit-perfect output with zero resampling and sub-5ms buffer latency.</p>
+            
+            <div class="code-box">
+                <div class="code-label">CLI INVOCATION</div>
+                <div class="code-line">
+                    <code>python sonance.py --audio-devices | --test-exclusive [device_id] --sr 96000 | --play-exclusive track.flac</code>
+                    <button class="copy-btn" onclick="copyCode(this, 'python sonance.py --audio-devices | --test-exclusive [device_id] --sr 96000 | --play-exclusive track.flac')">Copy</button>
+                </div>
+            </div>
+            
+            <div class="math-box">
+                <div class="math-label">MATHEMATICAL / DSP FOUNDATION</div>
+                <div class="math-equation">Direct Bit-Perfect Hardware Stream: Y[n] = X[n], \quad f_s^{\text{DAC}} = f_s^{\text{file}}, \quad \text{Latency} = \frac{\text{Buffer Size}}{f_s} \cdot 1000\text{ ms}</div>
+            </div>
+            
+            <div class="features-box">
+                <div class="features-label">KEY CAPABILITIES</div>
+                <ul class="features-list"><li>Bit-perfect playback bypassing OS mixers and forced 48 kHz resampling</li><li>Automatic DAC hardware clock rate matching from 44.1 kHz up to 192 kHz / 384 kHz</li><li>Windows WASAPI Exclusive mode via IAudioClient with MMCSS Pro Audio scheduling</li><li>Windows Registry ASIO driver scanner discovering all manufacturer hardware drivers</li><li>Android AAudio Exclusive MMAP stream and userspace USB Audio Class (UAC) DAC direct driver</li><li>Real-time bit-perfect telemetry badge, buffer latency tuner, and 440 Hz DAC lock test chime</li></ul>
+            </div>
+        </article>
+        
 
             <div class="section-header" id="shortcuts-section">
                 <h2>Master Keyboard Shortcuts</h2>
@@ -2009,6 +2043,12 @@
             <h3 class="formula-title">Master Serial Pipeline Discrete Transfer Composition</h3>
             <div class="formula-math">Y(z) = \prod_{k=N}^1 \mathcal{T}_k \left[ X(z) \right] = \left( \mathcal{T}_{\text{Limiter}} \circ \mathcal{T}_{\text{Tape}} \circ \mathcal{T}_{\text{M/S}} \circ \mathcal{T}_{\text{Dyn}} \circ \mathcal{T}_{\text{Console}} \circ \mathcal{T}_{\text{Bass}} \circ \mathcal{T}_{\text{DeRes}} \right) X(z)</div>
             <p class="formula-desc">Composes N non-linear, time-variant discrete mastering stages in strict causal sequence. Each stage processes the conditioned output of the previous stage, ensuring surgical artifact removal precedes dynamic expansion, saturation, and final true-peak brickwall limiting.</p>
+        </div>
+        
+        <div class="formula-card">
+            <h3 class="formula-title">Bit-Perfect Exclusive Hardware DMA & Sample Clock Direct Coupling</h3>
+            <div class="formula-math">Y[n] = X[n], \quad \Delta t_{\text{buffer}} = \frac{N_{\text{frames}}}{f_s} \cdot 1000\text{ ms}, \quad f_{\text{DAC}} = f_{\text{source}}</div>
+            <p class="formula-desc">Bypasses the OS audio mixer kernel (AudioDG.exe on Windows, AudioFlinger on Android) via WASAPI Exclusive, ASIO, or AAudio MMAP. Guarantees an identity transfer function where output discrete PCM samples Y[n] match input file samples X[n] without digital filtering, sample rate interpolation, or dither quantization noise.</p>
         </div>
         
             </div>

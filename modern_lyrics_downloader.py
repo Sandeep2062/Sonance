@@ -120,8 +120,9 @@ import subharmonic_bass
 import resonance_suppressor
 import vintage_compressor
 import zenith_orchestrator
+import exclusive_audio_engine
 
-APP_VERSION = "3.5.0"
+APP_VERSION = "3.6.0"
 GITHUB_REPO = "Sandeep2062/Sonance"
 APP_DIR = Path(__file__).parent.resolve()
 UI_PATH = APP_DIR / "ui" / "index.html"
@@ -2022,6 +2023,71 @@ class LyricsAPI:
             profile=profile,
             stage_overrides=stage_overrides,
         )
+
+    # ------------------ Exclusive Audio Mode & Hardware DAC Output ------------------
+    def get_audio_output_devices(self) -> Dict[str, Any]:
+        """Returns all system audio output devices, host APIs, and registered ASIO drivers."""
+        return exclusive_audio_engine.get_engine().query_devices()
+
+    def get_exclusive_audio_config(self) -> Dict[str, Any]:
+        """Returns current exclusive audio engine settings."""
+        return exclusive_audio_engine.get_engine().get_config()
+
+    def set_exclusive_audio_config(
+        self,
+        mode: Optional[str] = None,
+        device_id: Optional[int] = None,
+        buffer_size: Optional[int] = None,
+        bit_perfect_lock: Optional[bool] = None,
+        volume: Optional[float] = None,
+    ) -> Dict[str, Any]:
+        """Updates exclusive audio output configuration."""
+        return exclusive_audio_engine.get_engine().set_config(
+            mode=mode,
+            device_id=device_id,
+            buffer_size=buffer_size,
+            bit_perfect_lock=bit_perfect_lock,
+            volume=volume,
+        )
+
+    def test_exclusive_device(
+        self,
+        device_id: Optional[int] = None,
+        sample_rate: int = 48000,
+    ) -> Dict[str, Any]:
+        """Plays a brief 440 Hz test chime in Exclusive mode to verify DAC hardware lock."""
+        return exclusive_audio_engine.get_engine().play_test_tone(
+            device_id=device_id,
+            sample_rate=sample_rate,
+        )
+
+    def exclusive_play(self, file_path: str, start_time: float = 0.0) -> Dict[str, Any]:
+        """Initiates bit-perfect hardware playback bypassing the OS mixer."""
+        return exclusive_audio_engine.get_engine().play(file_path, start_time=start_time)
+
+    def exclusive_pause(self) -> Dict[str, Any]:
+        """Pauses exclusive hardware playback."""
+        exclusive_audio_engine.get_engine().pause()
+        return {"status": "paused"}
+
+    def exclusive_resume(self) -> Dict[str, Any]:
+        """Resumes exclusive hardware playback."""
+        exclusive_audio_engine.get_engine().resume()
+        return {"status": "resumed"}
+
+    def exclusive_seek(self, position_sec: float) -> Dict[str, Any]:
+        """Seeks within exclusive hardware playback stream."""
+        exclusive_audio_engine.get_engine().seek(position_sec)
+        return {"status": "seeked", "position": position_sec}
+
+    def exclusive_stop(self) -> Dict[str, Any]:
+        """Stops exclusive hardware playback and releases device lock."""
+        exclusive_audio_engine.get_engine().stop()
+        return {"status": "stopped"}
+
+    def get_exclusive_status(self) -> Dict[str, Any]:
+        """Returns real-time telemetry of the active bit-perfect audio stream."""
+        return exclusive_audio_engine.get_engine().get_status()
 
     def _save_last_folder(self, folder: str):
         try:
