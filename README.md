@@ -325,6 +325,16 @@ python update_version.py 3.7.0
 
 ---
 
+## 📈 Star History
+
+<div align="center">
+
+[![Star History Chart](https://api.star-history.com/svg?repos=Sandeep2062/Sonance&type=Date)](https://star-history.com/#Sandeep2062/Sonance&Date)
+
+</div>
+
+---
+
 ## 📄 License
 
 This project is licensed under the **GNU General Public License v3.0 with Commons Clause**:

@@ -83,3 +83,10 @@ $RECYCLE.BIN/
 
 # Runtime cache
 cache/
+
+# Android Signing & Keystores (DO NOT COMMIT)
+*.jks
+*.keystore
+*.p12
+key.properties
+upload-keystore.base64.txt
