@@ -6,8 +6,9 @@
 
 [![GitHub Release](https://img.shields.io/github/v/release/Sandeep2062/Sonance?style=for-the-badge&color=10b981&label=Release)](https://github.com/Sandeep2062/Sonance/releases)
 [![License: GPL v3 with Commons Clause](https://img.shields.io/badge/License-GPLv3%20%2B%20Commons-blue?style=for-the-badge)](LICENSE)
-[![Platform: Windows | macOS | Linux](https://img.shields.io/badge/Platform-Windows%20%7C%20macOS%20%7C%20Linux-9333ea?style=for-the-badge)]()
+[![Platform: Windows | macOS | Linux | Android](https://img.shields.io/badge/Platform-Windows%20%7C%20macOS%20%7C%20Linux%20%7C%20Android-9333ea?style=for-the-badge)]()
 [![Python: 3.10+](https://img.shields.io/badge/Python-3.10%2B-0284c7?style=for-the-badge&logo=python)]()
+[![Flutter: 3.x](https://img.shields.io/badge/Flutter-3.x-02569B?style=for-the-badge&logo=flutter)]()
 
 ---
 
@@ -43,283 +44,315 @@ Sonance is engineered from the ground up as a unified audiophile ecosystem:
 
 ---
 
-## ✨ Features
+## 🖥️ Supported Platforms & System Requirements
 
-### 🎧 1. Multi-Source Streaming & Global Search
-- **Unified Online Search**: Instantly query tracks and albums across Deezer, Spotify catalog, and YouTube.
-- **Built-in Audio Player**: Seamless playback with instant seeking via HTTP byte-range audio streaming.
-- **Real-Time Karaoke Sync**: Synchronized lyrics highlight word-for-word and line-for-line as the track plays.
-- **Zero Account Requirement**: You can stream and search right out of the box without logging in.
+Sonance runs natively across desktop and mobile platforms with dedicated bit-perfect audio output pipelines for each operating system:
 
-### ⬇️ 2. Lossless & Hi-Res Batch Downloader
-- **Deezer Integration**: Provide your Deezer ARL to unlock direct FLAC (1411 kbps) and 320 kbps MP3 downloading.
-- **Qobuz Hi-Res Master**: Connect using your Qobuz ID & token to download genuine 24-bit studio master audio files.
-- **Spotify Library & Playlist Sync**: Link your Spotify developer credentials (`Client ID` & `Client Secret`) to import personal playlists and saved albums.
-- **Batch Download Queue**: Multi-threaded queue manager showing live download speed, progress percentage, and task status.
-- **Complete Tagging Engine**: Automatically embeds high-resolution album artwork, artist, title, album, year, and track numbers into MP3 (ID3v2.4), FLAC, and M4A containers.
+| Platform | Minimum OS Version | Recommended | Audio Architecture | Package Types Available |
+|:---|:---|:---|:---|:---|
+| **Windows** | Windows 10 (64-bit) | Windows 11 (64-bit) | WASAPI Exclusive Mode, ASIO Direct, Shared AudioDG | Portable Setup `.exe`, `.nupkg` |
+| **macOS** | macOS 11.0 (Big Sur) | macOS 13+ (Ventura, Sonoma, Sequoia) | CoreAudio Hog Mode, System Default | Universal `.dmg` (Apple Silicon & Intel) |
+| **Linux** | Ubuntu 20.04 / Debian 11 | Ubuntu 22.04+ / Arch / Fedora | ALSA Direct Hardware DMA (`hw:X,Y`), PipeWire, PulseAudio | Portable `.AppImage`, `.deb`, `.tar.xz` |
+| **Android** | Android 5.0 (Lollipop, API 21) | **Android 8.0+ / 10+** | AAudio Exclusive Mode (`EXCLUSIVE`), Direct USB DAC Passthrough | Universal `.apk` (`Sonance-android-all-arch.apk`) |
 
-### 📝 3. Simultaneous Synced Lyrics Auto-Download
-- **The Signature Feature**: When any track is downloaded, Sonance **simultaneously** queries top lyrics databases (LRCLIB, Musixmatch, Megalobiz, NetEase, and Genius).
-- **Anti-Mismatch Verification**: Compares lyrics timestamps with audio duration to prevent downloading mismatched lyrics.
-- **Dual Storage**: Saves the timestamped `.lrc` file right alongside the audio file AND embeds the synchronized lyrics into the audio file tags.
-- **Local Library Explorer**: Full-height artist & album tree browser, missing lyrics detector, and 1-click batch missing lyrics downloader.
-
-### 📻 4. Social Scrobbling & Artist Insights (Last.fm & ListenBrainz)
-- **Live Scrobbling**: Real-time "Now Playing" updates and automatic scrobble submissions after 50% or 4 minutes.
-- **Artist Insights Modal**: View rich biographies, genre tags, listener statistics, and similar track recommendations.
-- **Open-Source Compatibility**: Support for both Last.fm and decentralized ListenBrainz profiles.
-
-### 🎚️ 5. 10-Band Studio Equalizer (DSP) & Discord RPC
-- **Hardware DSP**: 10-Band BiquadFilterNodes (32 Hz to 16 kHz) with 8 studio presets (`Bass Boost`, `Rock`, `Pop`, `Jazz`, `Electronic`, `Classical`, `Vocal Booster`, `Flat`).
-- **Discord Rich Presence**: Live playback profile card with track title, artist, album art, remaining time bar, and profile buttons.
-
-### 🏷️ 6. Studio Visual Metadata & Cover Art Editor
-- **Full Tag Editor (ID3v2.4 / Vorbis / MP4 / OGG)**: Visual metadata editing per-song directly from your local library.
-- **Embedded Cover Art Manager**: Extract embedded album art as high-res preview, replace artwork from disk, or strip unwanted covers.
-- **1-Click MusicBrainz & Deezer Auto-Fill**: Automatically fills missing album title, release year, genre, and high-resolution cover art directly from online open-music databases.
-
-### 🎵 7. High-Fidelity Playback Engine & Live Sync Tuner
-- **Live Lyrics Timing Offset Synchronizer**: Instant `[-0.5s]`, `[-0.1s]`, `[+0.1s]`, `[+0.5s]` live adjustment bar during playback, with 1-click permanent `.lrc` file saving.
-- **DJ Crossfade & Gapless Transition**: 0 to 12 second smooth volume crossfade between consecutive tracks, plus intelligent zero-gap transition.
-- **Sleep Timer**: 15m, 30m, 45m, 60m, Custom, or "End of Current Track" presets with a gentle 30-second volume fade-out.
-- **Smart Stream & Offline Cache**: Pre-caches streamed tracks locally with deterministic SHA-256 hashing for instant offline replay and zero buffering.
-
-### 🎛️ 8. Workstation Master: Mini-Player, Auto-DJ, Library Doctor & Visualizer
-- **Floating Mini-Player & Desktop Lyrics Overlay**: Compact 380×240 glassmorphic widget pinned always-on-top, featuring glowing synchronized lyrics line, animated cover art, and playback controls.
-- **Auto-DJ & Infinite Radio Mode**: Automatically discovers acoustically similar tracks from Last.fm and Deezer when your playlist ends, keeping playback going endlessly.
-- **Studio Volume Normalizer & ReplayGain DSP**: Real-time Web Audio `DynamicsCompressorNode` smoothing out harsh volume jumps across streaming platforms and local files.
-- **Library Doctor & Duplicate Audio Cleaner**: Scans your entire music collection, calculates a 0-100% Library Health Score, detects duplicates (with bitrate and lossless quality comparisons), and cleans redundant files. CLI access available via `python sonance.py --doctor [FOLDER]`.
-- **Fullscreen Party Visualizer Mode**: Smooth high-FPS canvas spectrum visualizer with neon glow bars, animated backdrop, and centered real-time karaoke lyrics.
-
-### 📱 9. Wireless Mobile Remote, Smart Playlists & Creative Studio DSP
-- **Wi-Fi Mobile Remote & Cast Controller**: Integrated background HTTP/SSE server (`http://<local-ip>:5050`) allowing full playback control, volume slider, queue management, and **real-time synchronized lyrics right on any smartphone or tablet**. Includes an in-app QR code for instant camera scan connection!
-- **Smart Dynamic Auto-Playlists Engine**: Computes virtual smart playlists live from library metadata: `Pure Lossless` (FLAC/WAV/ALAC), `Karaoke Ready` (.lrc verified), `Recently Added` (last 30 days), `Doctor's Queue`, and `Decades` (80s, 90s, 2000s, 2010s, 2020s). Includes 1-click `.m3u8` playlist export and CLI inspection via `python sonance.py --smart-playlists`.
-- **Speed & Creative DSP Studio**: Dynamic audio playback rate slider (0.5x to 2.0x) and studio presets: **Master 1.0x**, **Nightcore 1.25x**, **Slowed + Reverb 0.85x** (powered by a synthetic stereo Web Audio convolver impulse response), and **Practice 0.75x**.
-- **Desktop Keyboard Hotkeys & Hardware Media Keys**: Control playback anywhere with `Space` (Play/Pause), `Left`/`Right` (Seek $\pm 5$s), `Up`/`Down` (Volume $\pm 5\%$), `M` (Mute), `L` (Lyrics), `V` (Visualizer), `F11` (Fullscreen), and standard OS hardware media keys (`MediaPlayPause`, `MediaTrackNext`, `MediaTrackPrevious`).
-
-### 🎤 10. Karaoke Sing DSP, Multilingual Lyrics Studio, Audio Transcoder & Wrapped Stats
-- **Karaoke Vocal Reducer DSP (`🎤 Sing`)**: Real-time Web Audio Out-of-Phase Stereo (OOPS) center-channel vocal cancellation suppressing lead vocals on-the-fly while keeping stereo backing tracks and instruments vibrant.
-- **Multilingual Lyrics Translation & Romanization Studio**: Instant Japanese Romaji (Hiragana/Katakana conversion) and Korean Latin Revised Romanization, with dual-line phonetic rendering in both the Fullscreen Karaoke Stage and Floating Mini-Player.
-- **Lossless & Hi-Res Batch Audio Transcoder**: High-performance batch conversion engine between FLAC, WAV, MP3 (320k/256k/192k/128k), M4A, and OGG while preserving full ID3v2.4/Vorbis tags, embedded high-resolution album cover art, and companion `.lrc` lyrics files. Also accessible via CLI: `python sonance.py --transcode <source> [out_dir] [format] [bitrate]`.
-- **Listening Stats Studio & "Sonance Wrapped"**: 100% private, local playback tracker computing total play counts, listening hours, active streaks, top artists, top songs, and audio quality distribution (% Lossless vs 320k vs streaming). Export summaries with 1 click or view in terminal via `python sonance.py --stats`.
-- **Interactive Waveform Timeline**: Dynamic audio energy waveform scrubber canvas rendered live across the player progress bar.
-
-### 💎 11. Visual LRC Studio, Acoustic Audio Fingerprinting, 3D Spatial DSP & Discographies
-- **Visual Interactive LRC Studio & Live Time-Stamper**: Create and sync `.lrc` lyrics from scratch! Paste raw lyrics, listen along, and tap `Space` or `[Enter]` on each beat to stamp line-by-line timestamps in real-time with millisecond precision adjusters (`+0.1s`/`-0.1s`), and save directly to companion `.lrc` and embedded metadata.
-- **Acoustic Audio Identification & Auto-Tagger (`audio_fingerprint.py`)**: Automatically recognizes unknown or untagged tracks (`Track01.mp3`, `recording.wav`) using acoustic fingerprint signatures and duration matching across online databases (iTunes, Deezer, MusicBrainz) to auto-populate Title, Artist, Album, Year, Genre, Track Number, and high-res cover art. Available via the desktop Tag Editor or CLI: `python sonance.py --identify <audio_file>`.
-- **Headphone Binaural Crossfeed & 3D Spatial Stereo DSP**: Bauer/Chu crossfeed algorithm in Web Audio blending microsecond-delayed, low-pass crosstalk between channels to eliminate headphone acoustic fatigue, plus a real-time 3D Spatial Stereo Width slider (0% Mono to 200% Ultra-Wide 3D).
-- **Artist Discography & Full-Album Downloader (`discography_scraper.py`)**: Explore complete artist discographies, inspect studio albums, EPs, and full tracklists, and batch-download entire albums with synchronized lyrics with 1 click. Also available via CLI: `python sonance.py --discography "Artist Name"`.
-- **Podcast & Audiobook Smart Resuming**: Automatically saves and restores exact playback positions for long audio tracks (>15 minutes), displaying a 1-click "Resume from MM:SS" toast notification.
-
-### 💿 12. CUE Sheet Lossless Splitter, Audio Cutter Studio, DAC Selector & Ambient Visuals
-- **CUE Sheet Album Lossless Splitter & Virtual Track Engine (`cue_splitter.py`)**: Parse Red Book CD `.cue` index sheets, browse and play virtual tracks on-the-fly without copying files, or perform sample-accurate lossless physical track splitting with full metadata tagging and cover preservation. CLI: `python sonance.py --cue-split <cue_file> [out_dir] [format] [bitrate]`.
-- **Visual Waveform Audio Cutter & Ringtone Studio (`audio_cutter.py`)**: Millisecond-accurate visual audio trimmer with draggable range bounds, customizable fade-in/fade-out curves (0.5s - 3.0s), loop preview, and export to iPhone ringtones (`.m4r`), MP3 (320 kbps), WAV, and M4A. CLI: `python sonance.py --trim <audio_file> <start_sec> <end_sec> [format] [out_file]`.
-- **Hardware Audio Output Device Selector (DAC & Sink Selector)**: Direct hardware routing to external USB DACs, Bluetooth headphones, and studio monitors via the HTML5 Audio Sink API (`audio.setSinkId()`).
-- **Ambient Fluid Album Art Mesh Canvas Backdrop**: Real-time breathing animated canvas mesh gradient extracting dominant color stops from the current playing album cover art.
-- **Podcast & Audiobook Silence Skipper DSP**: Real-time silence detection automatically skipping or accelerating pauses > 1.2s in podcasts, audiobooks, and recorded lectures.
-
-### 🔊 13. ReplayGain 2.0, Syllable Karaoke, Audio Dedup, CD Ripper & Spectrogram Waterfall
-- **ReplayGain 2.0 & EBU R128 Loudness Scanner (`loudness_scanner.py`)**: ITU-R BS.1770 integrated loudness (LUFS), Loudness Range (LU), and True Peak (dBFS) measurement with standard ReplayGain tag embedding across MP3 (ID3v2 TXXX), FLAC (Vorbis Comments), and M4A. Configurable target loudness (-14 LUFS Streaming, -18 LUFS Audiophile, -23 LUFS EBU R128 Broadcast). CLI: `python sonance.py --scan-loudness <audio_file_or_dir> [-14.0] [--apply]`.
-- **Synchronized Word-by-Word Syllable Karaoke Studio (`word_karaoke.py`)**: Advanced Enhanced LRC parser and word/syllable timing synthesizer rendering real-time Apple Music / Spotify Sing style glowing text sweep karaoke fills with zero CPU overhead.
-- **Lossless Audio Duplicate Cleaner & Integrity Verifier (`audio_dedup.py`)**: Cross-format acoustic and metadata duplicate detection, fidelity scoring (Lossless 24/96 FLAC > 320k MP3 > 128k AAC), duplicate grouping, and safe redundant audio archiving. CLI: `python sonance.py --dedup <music_folder> [archive_dir]`.
-- **Audio CD Ripper & DiscID AccurateRip Studio (`cd_ripper.py`)**: Physical optical CD drive detection, MusicBrainz DiscID querying, and bit-perfect extraction to FLAC, WAV, MP3, or M4A with metadata auto-tagging and companion synced `.lrc` download. CLI: `python sonance.py --rip-cd [drive_letter] [out_dir] [format]`.
-- **Real-Time 2D Spectrogram Waterfall Visualizer**: Live scrolling FFT frequency-over-time thermal heatmap canvas (0 Hz to 24 kHz) integrated into the Spek technical specs modal.
-
-### ☁️ 14. Subsonic Personal Cloud Streaming, Room EQ Convolution DSP & Universal Playlist Converter
-- **Subsonic / Navidrome / Jellyfin Personal Cloud Streaming (`cloud_streamer.py`)**: Connect Sonance directly to self-hosted personal music servers with Subsonic API token authentication. Browse remote artist directories, stream losslessly over HTTP with auto-matched synchronized `.lrc` lyrics, and query remote cloud libraries. CLI: `python sonance.py --cloud-stream <server_url> <username> [password]`.
-- **Acoustic Convolution IR Room Correction & Tube Preamp DSP (`room_eq.py`)**: Web Audio `ConvolverNode` engine loading real-world and synthesized acoustic Impulse Response (IR) profiles: *Abbey Studio Room* (early studio reflections), *Warm Vintage Tube Preamp* (even-order analog harmonic saturation), *Acoustic Concert Hall* (spatial diffusion), and *Audiophile Vinyl Curve* (stylus resonance). Supports custom `.wav` IR file loading with adjustable Wet/Dry mix.
-- **Psychoacoustic Sub-Bass Harmonic Synthesizer DSP**: MaxxBass-style virtual fundamental generator creating upper harmonics from sub-bass frequencies (<80 Hz) so deep bass notes are vividly heard on laptop speakers, small monitors, and earphones without cone distortion.
-- **Universal Multi-Format Playlist Converter (`playlist_converter.py`)**: Bidirectional playlist converter supporting `.m3u`, `.m3u8`, `.pls`, `.wpl` (Windows Media), `.xspf` (VLC/XML), and Spotify public playlist URL importing into local manifests or download queues. CLI: `python sonance.py --convert-playlist <input_file_or_url> [output_format] [output_file]`.
-- **Bit-Perfect DAC Stream Telemetry**: Live bottom bar telemetry displaying DAC resolution: `24-bit / 96.0 kHz Hi-Res Direct`, `16-bit / 44.1 kHz Lossless`, or `Cloud Stream Direct`.
-
-### 🎚️ 15. Stem Separator Studio, Lossless Authenticity Auditor & DJ Camelot Mixing
-- **AI & Spectral Audio Stem Separator Studio (`vocal_separator.py`)**: Split any track into isolated, pristine stems: 2-Stem (**Vocals / Acapella** + **Instrumental / Backing**) or 4-Stem (**Vocals**, **Instrumental Backing**, **Bassline**, and **Drums & Percussion**). Features high-efficiency center-channel phase cancellation, formant bandpass filtering, pure-Python/NumPy fallback, and FFmpeg pipeline exporting to FLAC, WAV, or MP3. CLI: `python sonance.py --split-stems <audio_file> [out_dir] [2stems|4stems] [format]`.
-- **Lossless Audio Authenticity Auditor & Brickwall Cutoff Inspector (`audio_auditor.py`)**: Detects "Fake Lossless" files (low-bitrate 128 kbps or 192 kbps lossy MP3s upscaled and re-encoded into FLAC or WAV containers) using FFT brickwall frequency analysis. Scans for telltale 16.0 kHz cutoffs (128k MP3), 19.5 kHz roll-offs (320k MP3), and ultrasonic bandwidth (> 20 kHz genuine CD / > 24 kHz Hi-Res Studio Master) with an authenticity confidence score (0-100%). CLI: `python sonance.py --audit <file_or_dir>`.
-- **DJ Camelot Harmonic Key & BPM Beatmatcher Engine (`dj_mixer.py`)**: High-precision tempo tracking (BPM) via spectral onset autocorrelation and musical key detection using 12-semitone chromagram pitch-class profiling with Krumhansl-Schmuckler tonal correlation. Maps keys directly to standard Camelot Wheel codes (e.g. `8A / Am`, `8B / C`) and displays live harmonic mixing compatibility recommendations for seamless DJ transitions ($\pm 1$ step energy boost/drop, relative Major/Minor mood shift). CLI: `python sonance.py --analyze-key <audio_file>`.
-- **Synchronized Guitar Chord Studio & Tab Companion (`chord_studio.py`)**: Displays real-time synchronized guitar chord progressions (`[Am]`, `[C]`, `[G]`, `[F]`) right above or alongside karaoke lyric lines in the Karaoke Stage. Includes interactive fretboard diagrams (6-string EADGBE fingerings) for 40+ popular chord voicings.
-- **Live DJ Telemetry Badge**: Real-time tempo and key badge in the bottom player bar (`⚡ 128 BPM · 8A (Am)`) with 1-click access to harmonic transition pairings.
-
-### 🎛️ 16. Audiophile Resampler, Pitch Transposer, Library Auto-Organizer & Monolithic Album Packer
-- **Audiophile Polyphase Sinc Resampler & TPDF Dither Studio (`audio_resampler.py`)**: High-fidelity sample rate conversion up to 192 kHz / 384 kHz utilizing bandlimited Kaiser-windowed sinc interpolation with triangular probability density function (TPDF) random dither and high-pass noise shaping ($e[n] - 0.75 e[n-1]$). Quantization noise is pushed into ultrasonic registers (>18 kHz) ensuring pristine bit-depth reductions (e.g. 24-bit to 16-bit) without harmonic distortion or limit cycles. CLI: `python sonance.py --resample <audio_file> <sample_rate> [bit_depth] [output_file]`.
-- **Karaoke Vocal Pitch Transposer & Key Shifter (`pitch_shifter.py`)**: Real-time semitone pitch transposition ($\pm 6$ semitones) without tempo changes using an STFT phase vocoder and FFmpeg `rubberband`/`atempo` pipeline. Ideal for vocalists practicing songs outside their native vocal range or matching karaoke tracks to singing pitch. CLI: `python sonance.py --pitch-shift <audio_file> <semitones> [output_file]`.
-- **Audiophile Library Auto-Organizer & File Renamer (`library_organizer.py`)**: Rule-based library reorganization matching tracks by ID3/Vorbis tags into structured directories (`%artist%/[%year%] %album%/%track% - %title%`). Migrates companion `.lrc` synced lyrics and cover artwork, sanitizes Windows reserved characters (`<>:"/\|?*`), and features a dry-run preview before committing moves or copies. CLI: `python sonance.py --organize <folder> [--pattern "<pattern>"] [--execute] [--copy]`.
-- **Lossless Monolithic Album Packer & CUE Archiver (`album_packer.py`)**: Merges loose album tracks into a single continuous, gapless FLAC or WAV image accompanied by an exact Red Book audio CD compliant CUE sheet (`mm:ss:ff` 75 fps sector index timing). Supports lossless unpacking of monolithic album images back into pristine tagged tracks. CLI: `python sonance.py --pack-album <folder> [output_flac]` and `python sonance.py --unpack-album <monolithic_flac> [output_dir]`.
-
-### 📊 17. TT Dynamic Range Meter, DAP Synchronizer, A-B Phrase Looper & Word-by-Word Syllable Aligner
-- **TT Dynamic Range (DR) Meter & Loudness War Crest Factor Analyzer (`dr_meter.py`)**: Official Pleasurize Music Foundation DR algorithm implementation ($DR4$ to $DR18+$). Analyzes True Peak (dBFS) and top-20% loudest 3-second block RMS levels to evaluate dynamic contrast and Crest Factor across stereo channels for tracks and entire albums. Generates detailed ASCII report summaries (`dr_report.txt`) and color-coded Loudness War diagnostic grades. CLI: `python sonance.py --dr-meter <file_or_dir>`.
-- **Portable DAP, Walkman & USB Flash Storage Synchronizer (`device_sync.py`)**: Synchronizes music collections, smart playlists, and favorites to Sony Walkman, FiiO, Astell&Kern, and USB storage drives with auto-detected drive letters and volume labels. Features on-the-fly transcoding (Direct Lossless Copy, MP3 320k, MP3 256k, AAC 256k), FAT32/exFAT path sanitization, companion `.lrc` lyrics migration, and relative-path `.m3u8` playlist generation. CLI: `python sonance.py --sync-device <target_path> <source_dir> [--mode copy|mp3_320] [--playlist <name>]`.
-- **Musician A-B Phrase Looper & Metronome Practice Studio (`ab_looper.py`)**: Millisecond-accurate A-B phrase looping for instrumentalists, vocalists, and ear-training. Features seamless micro-cosine crossfades preventing digital boundary clicks, synthesized metronome count-in click tracks (4 beats at adjustable BPM), loop repetition concatenation (1x to 16x), and loop sample audio export. CLI: `python sonance.py --loop <audio_file> <start_sec> <end_sec> [repeats] [--count-in] [output_file]`.
-- **Enhanced Word-by-Word ELRC Syllable Aligner (`word_aligner.py`)**: Generates Apple Music and Spotify Sing style Enhanced LRC files (`<mm:ss.xx> word <mm:ss.xx> word`) by pairing acoustic spectral flux onset transient detection with phonetic syllable length weighting. Supports interactive spacebar tap-to-align in the desktop workstation and companion `.elrc` export. CLI: `python sonance.py --align-words <lrc_file> [audio_file] [output_elrc]`.
-
-### 🎧 18. Phase 17: Headphone AutoEq, FLAC MD5 Verifier, DJ Auto-Mixer & Lyrics Aggregator
-- **Headphone AutoEq & Harman Target Calibration Studio (`headphone_autoeq.py`)**: Calibrates headphone and IEM frequency response to the Harman 2020 Target curve. Includes 17+ audiophile profiles (Sennheiser HD 600/650/800 S, Sony WH-1000XM4/XM5, Apple AirPods Max/Pro 2, Beyerdynamic DT 770/990 Pro, Audio-Technica ATH-M50x, Moondrop Blessing 2/Aria/Chu, Hifiman Sundara/Edition XS) with negative preamp headroom compensation. Supports importing custom EqualizerAPO / Peace GraphicEQ & parametric `.txt` configs and 1-click application to the 10-band hardware equalizer. CLI: `python sonance.py --autoeq <model_key|--list>`.
-- **Lossless FLAC Stream MD5 Integrity Auditor & Bit-Rot Scanner (`flac_verifier.py`)**: Native extraction of the 128-bit unencoded audio MD5 signature from the 34-byte FLAC `STREAMINFO` metadata block. Decodes raw uncompressed PCM samples to compute an exact MD5 checksum, catching silent bit rot, truncated downloads, hard drive sector degradation, and corrupted audio streams with individual and folder-wide library audit reports. CLI: `python sonance.py --verify-flac <flac_file_or_dir>`.
-- **DJ Harmonic Auto-Mix & Phrase-Synced Crossfade Engine (`dj_automix.py`)**: Club-style continuous DJ set generator combining Camelot key harmonic matching with BPM phrase onset alignment. Features club bass-swap filter sweeps (outgoing track high-pass sweep paired with incoming low-pass opening) to eliminate low-end kick frequency clashes, customizable 8s–20s blend durations, and gapless master WAV export. CLI: `python sonance.py --automix <track1> <track2> ... [--trans <seconds>] [--output <file>]`.
-- **Multi-Source Synced Lyrics Aggregator & Fusion Studio (`lyrics_aggregator.py`)**: Multi-provider lyrics engine aggregating LRCLIB, Deezer, and Megalobiz with intelligent timestamp scoring, fallback cascading, automatic Asian phonetic romanization (Romaji, Hangul, Pinyin), and a 1-click batch downloader that scans music libraries and automatically saves missing companion `.lrc` files. CLI: `python sonance.py --fetch-lyrics <artist> <title> [--romanize] [--output <file>]` and `python sonance.py --batch-lyrics <folder> [--overwrite]`.
-
-### 🔬 19. Phase 18: Audio Bitstream Inspector, Vinyl/Tape Audio Restorer, Library Migrator & Lyrics Translator
-- **Hi-Res Audio Stream Inspector & Bitstream Forensics (`audio_inspector.py`)**: Deep container and bitstream forensics across FLAC, WAV, MP3, AAC/M4A, OGG, Opus. Extracts exact uncompressed PCM metrics, compression ratios, LAME/FLAC/Apple encoder signatures, padding waste analysis, and formatted ASCII inspection cards. CLI: `python sonance.py --inspect-stream <audio_file> [--json]`.
-- **Analog Audio Restoration & Vinyl De-Clicker / De-Hisser Studio (`audio_restorer.py`)**: Restoration DSP for vinyl record rips and analog cassette tapes. Features cubic spline impulsive de-clicking/de-popping, 50 Hz / 60 Hz AC mains ground hum notch filters, 18 Hz turntable motor rumble subsonic filtering, and high-frequency tape hiss spectral gating. CLI: `python sonance.py --restore-audio <input_file> <output_file> [--declick] [--dehum 50|60] [--derumble] [--dehiss]`.
-- **Cross-Platform Library & Playlist Migrator (`library_migrator.py`)**: 1-click library and playlist importer migrating from iTunes / Apple Music XML (`iTunes Music Library.xml`), MusicBee library exports, Winamp, and Foobar2000 with intelligent fuzzy path reconciliation across drive letters and folders, star rating preservation, and `.m3u8` playlist export. CLI: `python sonance.py --migrate-library <library_xml> [--target-dir <dir>] [--output-playlist <file>]`.
-- **Dual-Language Synchronized Lyrics Translator (`lyrics_translator.py`)**: Multi-lingual lyrics translator preserving millisecond timestamps to produce bilingual synchronized LRC files (`[mm:ss.xx] Original line \n [mm:ss.xx] (Translated line)`) across 50+ languages with 1-click companion `.lrc` export. CLI: `python sonance.py --translate-lyrics <lrc_file> [--lang <code>] [--translated-only] [--output <file>]`.
-
-### 💿 20. Phase 19: AccurateRip CD Verifier, Playlist Doctor, 8D Spatial Audio Orbit & ReplayGain Normalizer
-- **AccurateRip CD Integrity & Sample Offset Verifier (`accuraterip_verifier.py`)**: Computes official AccurateRip CRCv1, CRCv2, and DiscID signatures across CD audio PCM samples. Scans common CD drive read offsets (-1000 to +1000 samples, including +6, +12, +30, +102, +667) to identify uncorrected drive offsets and verify bit-perfect community accuracy. CLI: `python sonance.py --accuraterip <file_or_dir>`.
-- **M3U / M3U8 Playlist Doctor & Dead Link Healer (`playlist_doctor.py`)**: Full health diagnosis for `.m3u`, `.m3u8`, and `.pls` playlists. Recursively indexes local music collections to heal broken paths across drive letters or reorganized directories, cleans duplicate tracks, and automatically upgrades lossy `.mp3` entries to `.flac` lossless files. CLI: `python sonance.py --heal-playlist <playlist> [--library-dir <dir>] [--output <file>] [--lossless]`.
-- **Binaural 8D Spatial Audio Orbit & Ambisonic Panner DSP (`audio_8d_spatializer.py`)**: Synthesizes immersive 360-degree rotating binaural audio for headphones utilizing Interaural Time Difference (ITD microsecond fractional delays), Interaural Level Difference (ILD head-shadow filtering), and Haas room reflections with real-time Web Audio orbit playback and offline master rendering. CLI: `python sonance.py --spatial-8d <input_file> [output_file] [--orbit <sec>] [--depth <float>]`.
-- **ReplayGain 2.0 Mass-Applier & True-Peak Hard Normalizer (`replaygain_normalizer.py`)**: Measures ITU-R BS.1770-4 / EBU R128 integrated loudness (LUFS) and True Peak (dBFS). Features non-destructive Track/Album Gain tag writing across FLAC, MP3 (TXXX), M4A, and OGG, as well as hard peak-limited volume normalization with a lookahead True-Peak brickwall limiter (-0.5 dBFS ceiling). CLI: `python sonance.py --normalize-gain <file_or_dir> [--mode tag|hard] [--target-lufs <float>]`.
-
-### 🎚️ 21. Phase 20: Parametric Master EQ, Stereo Phase Meter, DAC Tester & Lyrics Drift Corrector
-- **Audiophile Parametric 5-Band Master EQ Studio (`parametric_eq.py`)**: Robert Bristow-Johnson (RBJ) Audio EQ biquad filter equations with continuous frequency (20 Hz - 20 kHz), gain (±18 dB), Q factor (0.1 - 10.0), Low/High shelves, composite complex frequency response calculation ($H(f)$ in dB), live interactive SVG curve rendering, and audio filtering export to WAV/FLAC/MP3. CLI: `python sonance.py --parametric-eq <input_file> [output_file]`.
-- **Audio Phase Correlation & Stereo Goniometer Studio (`phase_correlation.py`)**: Computes Pearson stereo phase correlation coefficient ($[-1.0, +1.0]$), stereo width (Side/Mid energy ratio), L/R balance tilt (dB), mono collapse loss, downsampled Lissajous vector scope oscilloscope coordinates, and 1-click inverted-phase / elliptical mono bass correction. CLI: `python sonance.py --phase-meter <audio_file> [--correct]`.
-- **Audiophile DAC Bit-Perfect Test Tone & Jitter Generator (`dac_tester.py`)**: Synthesizes reference laboratory test signals for DAC linearity, jitter, and room calibration: Logarithmic Sine Sweeps (20 Hz - 20 kHz, -0.1 dBFS), SMPTE IMD (60 Hz + 7 kHz, 4:1), CCIF IMD (19 kHz + 20 kHz, 1:1), Julian Dunn J-Test (AES clock jitter provocation), Voss-McCartney Pink Noise (-3 dB/octave), and Dithered Digital Black Floor (-140 dBFS). Supports 16/24-bit PCM up to 192 kHz. CLI: `python sonance.py --test-tone <sweep|imd_smpte|imd_ccif|jtest|pink_noise|digital_black> [output] [--rate 96000] [--bits 24] [--dur 10]`.
-- **Smart Lyrics Sync Offset Drift Corrector & Two-Point Re-Timer (`lyrics_retimer.py`)**: Eliminates cumulative timing drift across synced `.lrc` files via two-point linear slope calibration ($t_{\text{new}} = \alpha \cdot t_{\text{old}} + \beta$), tempo stretch factor compensation (e.g. PAL 25fps vs Film 23.976fps), uniform lead-in shifts, and companion `.lrc` export. CLI: `python sonance.py --retime-lyrics <lrc_file> <t1_old> <t1_new> <t2_old> <t2_new> [output_lrc]`.
-
-### 📊 22. Phase 21: Hi-Res Spectrogram Analyzer, Dynamic Audio De-Clipper, Silence Track Splitter & Lyrics Video Maker
-- **Hi-Res Audio Spectrogram & Bandwidth Cutoff Analyzer (`spectrum_analyzer.py`)**: Computes high-resolution STFT power spectral density (20 Hz - 96 kHz), spectral centroid (audio brightness), 85% & 95% energy rolloff, Wiener entropy (spectral flatness), and detects authentic Hi-Res vs. upsampled audio or lossy MP3 brickwall cutoffs (16 kHz, 18 kHz, 20 kHz). CLI: `python sonance.py --spectrum <audio_file> [--max-sec 60]`.
-- **Multiband Dynamic Range Expander & Audio De-Clipper Studio (`audio_declipper.py`)**: Reconstructs harsh flat-topped digital clipping artifacts caused by the "Loudness War" using cubic Hermite spline interpolation, automatic lookahead headroom pre-attenuation (-1.0 dB to -8.0 dB), and multiband transient dynamic expansion (0.0 dB to +6.0 dB) to restore punch and snare bite. CLI: `python sonance.py --declip <audio_file> [output_file] [--expansion 2.0] [--headroom 4.0]`.
-- **Smart Silence Audio Track Splitter & Auto-CUE Generator (`track_splitter.py`)**: Splits continuous vinyl record side digitizations, live concert recordings, and DJ sets into individual tagged tracks based on adaptive silence thresholding (-50 dBFS to -30 dBFS) and zero-crossing snapping to prevent clicks, with automatic Red Book `.cue` sheet export. CLI: `python sonance.py --auto-split <audio_file> [output_dir] [--threshold -42.0] [--min-silence 1.5]`.
-- **Synchronized LRC Karaoke Video & Theater Generator (`lyrics_video_maker.py`)**: Transforms any audio track and synchronized `.lrc` into an animated karaoke presentation with glowing typography transitions and smooth vertical line scrolling, supporting both standalone HTML5 Karaoke Theater and MP4 video generation. CLI: `python sonance.py --lyrics-video <audio_file> [lrc_file] [output_video] [--resolution 1080p|720p]`.
-
-### 🚀 23. Phase 22: High-Tap Sinc Upsampler, CUE Sheet Doctor, Room IR Synthesizer & ASS Karaoke Subtitles
-- **Audiophile High-Tap Sinc Audio Upsampler & Apodizing Studio (`audio_upsampler.py`)**: Bandlimited Whittaker-Shannon polyphase sinc interpolation supporting up to 192 kHz / 384 kHz ultra Hi-Res, with selectable Linear Phase (zero phase distortion, symmetrical delay) and Minimum Phase (apodizing, zero pre-ringing, natural acoustic transient decay), Kaiser windowing (>120 dB stopband rejection), and 24-bit PCM WAV master export. CLI: `python sonance.py --upsample <audio_file> [output_file] [--rate 192000] [--filter linear|minimum]`.
-- **Smart CUE Sheet Doctor, File Re-Aligner & Red Book Validator (`cue_fixer.py`)**: Audits and auto-heals broken `.cue` sheets, fixes missing or mismatched `FILE` references (e.g. `.wav` referenced when `.flac` is on disk), converts legacy encodings (Shift-JIS, CP1252, GBK) to UTF-8, fixes illegal sector frames ($f \ge 75$), verifies track index chronology, and computes per-track durations. CLI: `python sonance.py --fix-cue <cue_file> [target_audio] [--output <repaired_cue>]`.
-- **Room Acoustic Impulse Response (IR) Generator & Reverb Synthesizer (`room_ir_synthesizer.py`)**: 3D image-source ray-tracing room acoustics simulator that synthesizes calibrated stereo impulse response (WAV) files from room dimensions ($L \times W \times H$), surface absorption ($\alpha$), and target RT60 reverberation times ($0.2\text{s} - 5.0\text{s}$) with frequency-dependent air damping and binaural ITD/ILD ear spacing. Fully compatible with Sonance's convolution engine. CLI: `python sonance.py --synthesize-ir [output_wav] [--preset studio|room|concert_hall|cathedral] [--rt60 1.5] [--sr 48000]`.
-- **Word-by-Word LRC to Karaoke Subtitle Styler & ASS Converter (`lrc_to_ass_converter.py`)**: Converts plain and syllable-timed synchronized `.lrc` / `.elrc` files into broadcast-quality Advanced SubStation Alpha (`.ass`) and `.srt` subtitle files with progressive syllable sweep animation (`{\k<duration>}`), custom typography, glowing drop shadows, and color wipes for VLC, MPV, Aegisub, and video muxing. CLI: `python sonance.py --lrc-to-ass <lrc_file> [output_ass] [--style karaoke|minimal|cinematic] [--color #FFD700] [--srt]`.
-
-### 📻 24. Phase 23: DSD to PCM Decimator, Sub-Sample Phase Aligner, Mastering Limiter & Album Art Studio
-- **Audiophile DSD to PCM Decimator & DoP Stream Studio (`dsd_converter.py`)**: Direct Stream Digital 1-bit Delta-Sigma bitstream decoder (DSD64 / 2.8224 MHz, DSD128 / 5.6448 MHz) for `.dsf` and `.dff` files. Features multi-stage Kaiser FIR decimation filtering to eliminate ultrasonic quantization noise above 30 kHz, or packages directly into DSD-over-PCM (DoP v1.1) with 0x05/0xFA sync markers for bit-perfect USB DAC playback. CLI: `python sonance.py --dsd-to-pcm <input.dsf> [output.wav] [--rate 88200|176400|352800] [--dop]`.
-- **Sub-Sample Fractional Delay & Stereo Phase Alignment Studio (`subsample_delay.py`)**: Eliminates acoustic comb filtering, hollow midrange, and smeared transients from physical microphone distance offsets. Detects inter-channel delay down to sub-samples via cross-correlation with parabolic peak interpolation, and shifts channels using a windowed sinc fractional delay filter with microsecond / sub-millimeter precision. CLI: `python sonance.py --align-phase <audio_file> [output_file] [--max-delay-ms 10.0] [--channel left|right|auto]`.
-- **Mastering Brickwall Limiter & True-Peak (ISP) Studio (`mastering_limiter.py`)**: Broadcast-grade mastering limiter with 4x oversampled Inter-Sample Peak (ISP) detection. Features a lookahead delay buffer (4ms) ensuring absolute 0.000000 clipping prevention, program-dependent dual-stage release recovery, and streaming compliance for Spotify, Apple Music (-1.0 dBFS), and CD Red Book (-0.1 dBFS). CLI: `python sonance.py --master-limit <audio_file> [output_file] [--ceiling -1.0] [--threshold -3.0] [--release 120]`.
-- **Album Art Optimizer, Cover Normalizer & Bloat Reducer (`album_art_studio.py`)**: Audits and manages embedded album artwork across audio libraries (FLAC, MP3, M4A, OGG, WAV). Pure-Python binary header parser for PNG, JPEG, and WebP dimensions without external dependencies. Pinpoints oversized embedded images that bloat tags, extracts external companion `cover.jpg` for DAPs & MusicBee, and non-destructively strips bloated embedded art. CLI: `python sonance.py --album-art <file_or_dir> [--extract] [--strip]`.
-
-### 🗣️ 25. Phase 24: Dynamic De-Esser, Mid-Side Studio, Audio Watermark & Cue Markers
-- **Multiband Dynamic De-Esser & Vocal Sibilance Tamer Studio (`audio_deesser.py`)**: Split-band dynamic attenuator targeting harsh vocal frequency zones ($4.0\text{ kHz} - 9.0\text{ kHz}$) caused by sibilant consonants ('s', 'sh', 't', 'ch') and aggressive streaming audio codecs. Features an ultra-fast $1\text{ms}$ RMS sidechain peak follower, adaptive $30-80\text{ms}$ recovery, customizable attenuation threshold ($-36\text{ dBFS}$ to $-6\text{ dBFS}$), maximum gain reduction depth, and "Listen Sibilance" audition mode for pinpoint frequency calibration. CLI: `python sonance.py --deess <audio_file> [output_file] [--freq 6500] [--threshold -18] [--reduction -9] [--listen]`.
-- **M/S (Mid-Side) Spatial Width & Elliptical Bass Monomaker Studio (`midside_processor.py`)**: Orthogonal Mid/Side matrix transformer ($M = [L+R]/\sqrt{2}$, $S = [L-R]/\sqrt{2}$) for mastering and spatial enhancement. Features continuously variable stereo width scaling ($0\%$ mono to $200\%$ hyper-wide panorama), 2nd-order Butterworth elliptical bass monomaker filter ($60 - 300\text{ Hz}$) eliminating low-end phase cancellation on subwoofers and vinyl cuts, and high-frequency Side air excitation ($>10\text{ kHz}$) for panoramic acoustic ambience. CLI: `python sonance.py --midside <audio_file> [output_file] [--width 125] [--monomaker 120] [--mid 0] [--side 0] [--air 1.5]`.
-- **Lossless Audio Watermark & Forensic Fingerprint Studio (`audio_watermark.py`)**: Inaudible psychoacoustic high-frequency FSK watermark embedder and forensic detector operating in the near-Nyquist ultrasonic spectrum ($18 - 20\text{ kHz}$) at sub-audible amplitudes ($-50\text{ dBFS}$ to $-75\text{ dBFS}$). Encodes arbitrary text payloads (ISRC tokens, copyright metadata, cryptographic ownership IDs) with CRC-16 integrity validation and dual-layer RIFF container forensic tagging (`wmrk` chunk) without loss of acoustic fidelity. CLI: `python sonance.py --watermark <audio_file> [--embed <text>] [--detect] [--output <out_file>] [--strength -65]`.
-- **Broadcast Audio Cue Marker & Podcast Chapter Studio (`cue_markers.py`)**: Reads, embeds, and exports broadcast-grade cue points and timeline chapter markers across WAV (`cue ` and `LIST adtl` / `labl` chunks) and FLAC (Vorbis `CHAPTERxxx` tags). Imports YouTube, SoundCloud, and podcast timestamp descriptions directly into sample-accurate audio markers, and generates standard Red Book / EBU `.cue` sheet files ($75\text{ frames/sec}$) with lossless container rewriting. CLI: `python sonance.py --markers <audio_file> [--import-timestamps <text_or_file>] [--export-cue <cue_file>] [--output <out_file>]`.
-
-### 📼 26. Phase 25: Analog Tape Saturation, Formant Shifter, Loudness War & Stems Remixer
-- **Analog Tape Saturation & Tube Warmth Studio (`analog_tape_emulator.py`)**: Models physical tape head flux and tube preamps using a continuous soft-knee hyperbolic tangent curve $y = \tanh(x \cdot \text{drive})/\tanh(\text{drive})$, asymmetrical 2nd-harmonic tube saturation, low-frequency tape head-bump resonance filter ($50\text{--}100\text{ Hz}$), high-frequency tape flux compression, multi-speed head simulation ($30\text{ ips}$ Ultra-Fi, $15\text{ ips}$ Classic, $7.5\text{ ips}$ Vintage Lo-Fi), and optional tape hiss ($-75\text{ to }-95\text{ dBFS}$) with 24-bit PCM WAV master export. CLI: `python sonance.py --tape <audio_file> [--drive 2.5] [--speed 15.0] [--warmth 2.0] [--bias 0.5] [--tape-hiss] [--hiss-level -82.0] [--output <out_file>]`.
-- **Multi-Rate Pitch Shifter & Formant-Preserving Vocal Resizer (`formant_shifter.py`)**: Transposes vocal and musical pitch ($\pm 12\text{ semitones}$) while strictly preserving natural vocal tract formants (eliminating the chipmunk or giant effect) using an STFT phase vocoder combined with cepstral liftering spectral envelope preservation. Features independent vocal tract scaling ($0.75\times$ to $1.35\times$) for gender and timbre modification. CLI: `python sonance.py --formant <audio_file> [--pitch 2.0] [--formant-scale 1.15] [--no-formant-lock] [--output <out_file>]`.
-- **Mastering Loudness War & True Dynamic Spread Analyzer Studio (`loudness_war_studio.py`)**: Comprehensive ITU-R BS.1770-4 / EBU R128 compliance suite computing dual-stage gated Integrated LUFS, 3-second Short-term LUFS, 400ms Momentary LUFS, Loudness Range (LRA in LU), sample peak, RMS, Crest Factor (dB), Dynamic Health rating (0–100%), and streaming gain penalties for Spotify, Apple Music, YouTube, and Tidal. CLI: `python sonance.py --loudness-war <audio_file> [--target -14.0]`.
-- **Multi-Track Stems & Audio Remixer Studio (`stems_remixer.py`)**: Professional multi-track mixing and rebalancing console for 4 stems (Vocals, Drums, Bass, Other). Implements constant-power sinusoidal stereo panning ($-100\%$ L to $+100\%$ R), independent volume faders ($-30\text{ dB}$ to $+12\text{ dB}$), one-click production presets (Custom, Acapella, Karaoke, Drum & Bass, Vocal Boost), and 24-bit PCM WAV master summing. CLI: `python sonance.py --remix [--vocals <path>] [--drums <path>] [--bass <path>] [--other <path>] [--vocals-gain 0.0] [--preset acapella] [--output <out_file>]`.
-
-### 💥 27. Phase 26: Transient Shaper, 3D Binaural Virtualizer, Noise Gate & Tape Echo Delay
-- **Audiophile Transient Shaper & Drum Punch Designer Studio (`transient_shaper.py`)**: Dual-ballistics envelope detector (fast vs. slow envelope followers) to independently reshape transient Attack ($-24\text{ dB}$ to $+24\text{ dB}$) and acoustic Sustain ($-24\text{ dB}$ to $+24\text{ dB}$) with customizable reaction speeds ($1\text{--}300\text{ ms}$) and soft-knee hyperbolic tangent saturation limiting to prevent digital overs. CLI: `python sonance.py --transient <audio_file> [output_file] [--attack +4.0] [--sustain -2.0] [--attack-speed 4.0] [--sustain-speed 80.0]`.
-- **Binaural 3D Ambisonic Room & Headphone Virtualizer Studio (`binaural_virtualizer.py`)**: Simulates physical studio reference monitors in an acoustically treated control room over headphones. Models spherical head diffraction (Woodworth Interaural Time Difference ITD: $\text{ITD}=\frac{r}{c}(\theta+\sin\theta)$), pinna head-shadow damping (Interaural Level Difference ILD), early room boundary reflections (floor, ceiling, side walls), and configurable speaker angles ($20^\circ\text{--}60^\circ$) and distance ($1.0\text{--}5.0\text{ m}$). CLI: `python sonance.py --binaural <audio_file> [output_file] [--preset control_room|mastering_lab|live_lounge] [--angle 30] [--distance 1.8] [--crossfeed 1.0] [--ambience 0.35]`.
-- **Broadcast Audio Noise Gate & Downward Expander Studio (`audio_noisegate.py`)**: Downward expander / noise gate featuring lookahead delay buffer ($0\text{--}10\text{ ms}$) to preserve transient attacks without clicks, hysteresis anti-chatter gating, sidechain bandpass filtering, and smooth Attack-Hold-Release envelopes to silence preamp hum, room rumble, headphone bleed, and vinyl surface noise. CLI: `python sonance.py --gate <audio_file> [output_file] [--threshold -40] [--reduction -60] [--ratio 10] [--attack 1.5] [--hold 40] [--release 120] [--lookahead 2.0]`.
-- **Stereo Ping-Pong & Multi-Tap BBD Tape Echo Studio (`tape_echo_delay.py`)**: Vintage magnetic tape loop echo (Roland Space Echo RE-201 / Echoplex) and analog Bucket Brigade Device (BBD) delay emulator. Features alternating stereo ping-pong bounce ($L \to R \to L \to R$), high-cut damping filter ($1000\text{--}10000\text{ Hz}$), capstan wow & flutter micro-pitch modulation, and soft feedback loop saturation. CLI: `python sonance.py --echo <audio_file> [output_file] [--delay 375] [--feedback 45] [--damping 3800] [--flutter 0.12] [--drive 1.3] [--mix 35] [--no-ping-pong]`.
-
-### 📦 28. Phase 27: Universal Workstation Release Packaging & Complete Handbook
-- **Universal Workstation Release Packaging & Manifest Auditor Studio (`release_packager.py`)**: Comprehensive release management and integrity audit suite. Verifies syntax (`py_compile`) and importability of all 53 DSP engines and core modules spanning all phases ($100\%$ integrity pass rate), generates cryptographic SHA-256 and MD5 checksum manifests (`RELEASE.sha256sum`, `RELEASE.md5sum`), outputs structured JSON metadata (`RELEASE.manifest.json`), and packages clean standalone distribution bundles (`dist/sonance-workstation-v2.8.0.zip`) omitting caches, virtual environments, and temporary artifacts. CLI: `python sonance.py --package-release [--zip] [--verify-only] [--out-dir <dir>]`.
-- **Offline Audiophile Guide & Workstation Manual Generator (`docs_generator.py`)**: Single-file interactive HTML handbook (`ui/manual.html`) compiling complete documentation for all phases, quick CLI cheat sheets, mathematical formulas (EBU R128 LUFS, Biquad Direct-Form II, Sinc interpolation, Woodworth ITD, Pearson correlation, Tape saturation), global keyboard shortcuts, and cryptographic verification workflows. 100% offline with zero external CDNs. CLI: `python sonance.py --generate-manual [output_path] [--open]`.
-
-### 🔌 29. Phase 28: VST3 & CLAP Audio Plugin Host & Multi-Slot Rack Studio
-- **VST3 & CLAP Audio Plugin Host & Multi-Slot Rack Studio (`plugin_host.py`)**: Comprehensive audio effect plugin hosting environment. Discovers installed 3rd-party `.vst3` and `.clap` plugin bundles on Windows (`%COMMONPROGRAMFILES%\VST3`, `%LOCALAPPDATA%\Programs\Common\VST3`, `%COMMONPROGRAMFILES%\CLAP`), macOS, and Linux, and embeds 5 built-in 64-bit virtual studio audio engines: Pultec EQP-1A Passive EQ, Teletronix LA-2A Optical Leveling Amplifier, Triode Valve Saturator & Exciter, Haas Stereophonic Expander, and Lexicon 480L Algorithmic Plate Reverb. Features serial multi-slot rack routing with per-slot dry/wet mix ($0\text{--}100\%$), bypass switching, gain staging, factory presets (Mastering Bus Polish, Vocal Magic & Reverb, Vintage Analog Space), and master true-peak safety limiting ($-0.2\text{ dBFS}$) with 24-bit PCM WAV export. CLI: `python sonance.py --vst-scan` / `python sonance.py --vst-rack <audio_file> [output_file] [--preset mastering_bus|vocal_magic|analog_space]`.
-
-### 🌌 30. Phase 29: Dolby Atmos 7.1.4 Bed Spatializer & Multichannel Audio Renderer
-- **Dolby Atmos 7.1.4 Bed Spatializer & Multichannel Audio Renderer Studio (`spatial_multichannel.py`)**: Deconstructs stereo masters into an immersive 12-channel 7.1.4 spatial audio bed comprising 7 ear-level bed channels (Left $-30^\circ$, Right $+30^\circ$, Center $0^\circ$, LFE Subwoofer, Left Side Surround $-90^\circ$, Right Side Surround $+90^\circ$, Left Rear Surround $-140^\circ$, Right Rear Surround $+140^\circ$) and 4 overhead height channels (Top Front Left $-45^\circ/45^\circ$, Top Front Right $+45^\circ/45^\circ$, Top Rear Left $-135^\circ/45^\circ$, Top Rear Right $+135^\circ/45^\circ$). Features a 4th-order Linkwitz-Riley LFE subwoofer crossover filter ($60\text{--}160\text{ Hz}$), ceiling height micro-reflection ambience generator ($>800\text{ Hz}$), and dual rendering pathways: **3D Binaural Headphone Virtualizer** using spherical Woodworth Interaural Time Difference ($\Delta t = \frac{r}{c}(\sin\theta + 0.5\theta)$) and pinna shadowing for full immersive Atmos reproduction over standard stereo headphones, or **Discrete Multichannel WAV** export for true 12-channel (7.1.4), 8-channel (7.1), or 6-channel (5.1) 24-bit PCM speaker systems. CLI: `python sonance.py --atmos <audio_file> [output_file] [--mode binaural|discrete] [--format 7.1.4|7.1|5.1] [--height 0.35] [--lfe 0.20] [--lfe-cutoff 120] [--spread 0.40]`.
-
-### 🎛️ 31. Phase 30: British Class-A Console Channel Strip & SSL G-Master Bus Compressor Studio
-- **British Class-A Console Channel Strip & SSL G-Master Bus Compressor Studio (`console_channel_strip.py`)**: Definitive studio console mastering path physical modeling. Features an iconic Solid State Logic (SSL 4000 G-Master Bus Compressor) with Quad-VCA peak/RMS log-domain detection, selectable ratios ($1.5:1$, $2:1$, $4:1$, $10:1$), attack times ($0.1\text{--}30\text{ ms}$), program-dependent dual-constant Auto-Release ($0.1\text{s}$ transient recovery $+ 1.2\text{s}$ body memory), sidechain high-pass filter ($60\text{--}185\text{ Hz}$), and parallel New York-style compression ($0\text{--}100\%$). Paired with a British Class-A Neve 1073 preamp with Marinair output transformer harmonic saturation $y = \frac{\tanh(\text{drive}\cdot x + \text{bias})-\tanh(\text{bias})}{\tanh(\text{drive})} + 0.04\cdot\text{warmth}\cdot x^3$, $18\text{ dB/oct}$ 3rd-order highpass filter, low shelf overshoot ($35\text{--}220\text{ Hz}$), proportional-Q mid inductor peaking ($360\text{ Hz}\text{ to }7.2\text{ kHz}$), and smooth $12\text{ kHz}$ Baxandall air sheen. Includes analog console summing crosstalk ($-65\text{ dB}$), thermal noise floor, and master true-peak safety limiting ($-0.2\text{ dBFS}$) with 24-bit linear PCM WAV export. CLI: `python sonance.py --console <audio_file> [output_file] [--preset master_bus_glue|analog_warmth|drum_bus_punch|vocal_channel|radio_broadcast] [--threshold -14.0] [--ratio 2.0] [--hpf 90]`.
-
-### 🌐 32. Phase 31: Higher-Order Ambisonics & 360-Degree VR Spherical Spatializer Studio
-- **Higher-Order Ambisonics & 360-Degree VR Spherical Spatializer Studio (`ambisonic_hoa.py`)**: Full 3D spherical harmonic spatializer supporting 1st Order ($N=1$, 4 channels: $W, Y, Z, X$), 2nd Order ($N=2$, 9 channels: $W, Y, Z, X, V, T, R, S, U$), and 3rd Order ($N=3$, 16 channels: ACN 0--15) Ambisonics decomposition. Encodes incoming audio into industry-standard ACN (Ambisonic Channel Number) sorting and SN3D (Schmidt Semi-Normalized) AmbiX format with dynamic 3D spatial trajectories (Spherical Orbit Helix with continuous elevation spiraling, Horizontal 360° equator orbit, Pendulum arc, Overhead halo orbit, and Fixed spherical anchor coordinates). Features inverse-distance amplitude decay ($1/d$) with frequency-dependent atmospheric air absorption damping. Offers dual rendering pathways: **3D Binaural Headphone Virtualizer** decoding the HOA sound field via a 14-point spherical virtual loudspeaker array convolved with Woodworth ITD interaural delays ($\Delta t = \frac{r}{c}(\sin\theta + 0.5\theta)$), pinna ILD head-shadow filtering, and high-frequency elevation notches ($7.5\text{ kHz}$) for hyper-realistic 3D headphone staging; or **Discrete AmbiX Multichannel WAV** export for 4-channel, 9-channel, or 16-channel 24-bit linear PCM audio ready for VR headsets (Meta Quest, Apple Vision Pro), YouTube 360, and DAW spatial panning tools. CLI: `python sonance.py --hoa <audio_file> [output_file] [--order 1|2|3] [--mode binaural|bformat] [--trajectory orbit_helix|orbit_horizontal|orbit_pendulum|fixed] [--azimuth 0] [--elevation 0] [--period 12]`.
-
-### 🔊 33. Phase 32: Psychoacoustic Subharmonic Bass Synthesizer & Missing Fundamental Studio
-- **Psychoacoustic Subharmonic Bass Synthesizer & Missing Fundamental Studio (`subharmonic_bass.py`)**: Subterranean low-end synthesizer and psychoacoustic exciter. Emulates the iconic dbx 120XP subharmonic octave divider across dual isolated bands ($24\text{--}36\text{ Hz}$ for deep rumble/808 body, and $36\text{--}56\text{ Hz}$ for fundamental kick drum chest thump) using zero-crossing frequency-halving and musical envelope tracking. Paired with MaxxBass psychoacoustic missing fundamental overtone synthesis generating 2nd ($2f_0$), 3rd ($3f_0$), and 4th ($4f_0$) Chebyshev harmonics ($T_2(x) = 2x^2 - 1, T_3(x) = 4x^3 - 3x, T_4(x) = 8x^4 - 8x^2 + 1$) to exploit the human auditory cortex "missing fundamental" perception, allowing deep bass to thump clearly on mobile phones, laptop speakers, and earbuds without driver overload. Includes warm asymmetrical analog tube saturation ($y = \frac{\tanh(\text{drive}\cdot x)}{1 + 0.15 x^2}$), 4th-order Butterworth subsonic rumble high-pass filter ($20\text{--}35\text{ Hz}$), elliptical low-end monomaker ($80\text{--}150\text{ Hz}$) for punchy mono-compatible club systems, and True-Peak safety limiting ($-0.2\text{ dBFS}$) with 24-bit linear PCM WAV master export. CLI: `python sonance.py --bass <audio_file> [output_file] [--preset club_sub_boom|punchy_kick_thump|earbuds_maxxbass|audiophile_warm_bass|sub_rumble_cleanup] [--sub-24-36 0.85] [--sub-36-56 0.50] [--maxxbass 0.35] [--drive 1.25] [--subsonic-hpf 25] [--monomaker 120] [--mix 0.9]`.
-
-### 🎯 34. Phase 33: Dynamic Spectral Resonance Suppressor & Surgical De-Resonator Studio
-- **Dynamic Spectral Resonance Suppressor & Surgical De-Resonator Studio (`resonance_suppressor.py`)**: Advanced dynamic spectral resonance tracking and surgical frequency de-resonator inspired by Oeksound Soothe2 and Soundtheory Gullfoss physical models. Performs high-resolution 2048-point Hann-windowed Short-Time Fourier Transform (STFT) spectral decomposition across 40 critical Bark frequency bands to dynamically track musical spectral envelopes and pinpoint abrasive acoustic resonances, harsh vocal sibilance, piercing room mode ringing, hollow vocal boxiness, and ear-fatiguing cymbal bite. Dynamically attenuates offending peaks according to prominence: $\Delta G(f) = -\text{depth} \cdot \max(0, P_{\text{prominence}}(f) - \text{threshold})^{1 + 0.25Q}$ with musical ballistic smoothing ($5\text{ ms}$ attack and $50\text{ ms}$ release) for artifact-free transparency. Features a **Delta "Listen Mode"** difference monitor isolating strictly what is being suppressed, adjustable focus bounding filters (Low-Cut $40\text{--}5500\text{ Hz}$, High-Cut $1.8\text{--}20\text{ kHz}$), surgical sharpness $Q$ selectivity ($0.5\text{--}5.0$), parallel dry/wet mixing, output makeup gain, and True-Peak safety limiting ($-0.2\text{ dBFS}$) with 24-bit linear PCM WAV master export. CLI: `python sonance.py --soothe <audio_file> [output_file] [--preset tame_harshness|vocal_de_boxer|muddy_low_mid|cymbal_silencer|extreme_surgical] [--depth 0.55] [--threshold 3.5] [--sharpness 2.5] [--low-cut 1200] [--high-cut 9000] [--listen]`.
-
-### 📻 35. Phase 34: Vintage Optical & Variable-Mu Master Compressor Studio
-- **Vintage Optical & Variable-Mu Master Compressor Studio (`vintage_compressor.py`)**: Physical modeling of dual legendary vintage dynamics processors for master bus and track glue. Features the iconic **Teletronix LA-2A** T4 electro-optical cell emulation with dual-stage memory release ($60\text{ ms}$ initial decay followed by a $0.5\text{s}$ to $4.5\text{s}$ multi-second memory tail scaling dynamically with input gain reduction history) and R37 high-frequency sidechain emphasis trimming; paired with the **Fairchild 670** remote-cutoff variable-mu dual-triode 6386 tube compressor with 6 stepped hardware time-constant positions (including dual-time automatic release recovery), continuous variable-mu compression without a fixed threshold or sharp knee ($\mu(V_g) = \frac{\mu_0}{1 + k \cdot |V_g|^{1.2}}$), sidechain high-pass filter ($60\text{--}185\text{ Hz}$), 12AX7/6386 tube harmonic saturation and transformer warmth, stereo link vs dual-mono detection, parallel dry/wet blend, and True-Peak safety limiting ($-0.2\text{ dBFS}$) with 24-bit linear PCM WAV master export. CLI: `python sonance.py --la2a <audio_file> [output_file] [--mode la2a|fairchild] [--preset la2a_smooth_vocal|la2a_acoustic_warmth|fairchild_master_bus|fairchild_drum_crush|vintage_warm_glue] [--reduction 50] [--hpf 90] [--hf-emphasis] [--tc 1-6] [--drive 1.25] [--makeup 2.0] [--mix 1.0]`.
-
-### 👑 36. Phase 35: The Grand Workstation Zenith & Master Orchestration Suite
-- **The Grand Workstation Zenith & Master Orchestration Suite (`zenith_orchestrator.py`)**: The crowning milestone and finale of the 35-Phase Sonance Audiophile Workstation. Orchestrates an unbroken, multi-stage serial mastering pipeline chaining 7 world-class physical DSP engines in sequence: 1. Dynamic Spectral De-Resonator (`resonance_suppressor.py`), 2. Psychoacoustic Subharmonic Bass & Missing Fundamental Synthesizer (`subharmonic_bass.py`), 3. British Class-A Console Channel Strip & EQ (`console_channel_strip.py`), 4. Vintage Optical/Variable-Mu Dynamics Glue (`vintage_compressor.py`), 5. Mid/Side Spatial Width & Elliptical Monomaker (`midside_processor.py`), 6. Master Studer A800 Analog Tape Saturation (`analog_tape_emulator.py`), and 7. Lookahead True-Peak Brickwall Limiter (`mastering_limiter.py`). Features 5 master macro profiles (`audiophile_pure_master`, `club_edm_banger`, `acoustic_intimate`, `broadcast_radio_sheen`, `vinyl_cutting_prep`), individual stage bypass and parameter overrides, automated batch album processing, complete pre/post audio telemetry (Peak, RMS, dynamic crest factor compression), and SHA-256 cryptographic verification manifests. CLI: `python sonance.py --zenith <audio_file_or_dir> [output] [--profile audiophile_pure_master|club_edm_banger|acoustic_intimate|broadcast_radio_sheen|vinyl_cutting_prep] [--batch]`.
-
-### ⚡ 37. Phase 36: Audiophile Exclusive Mode & Hardware DAC Output Studio
-- **Audiophile Exclusive Mode & Hardware DAC Output Studio (`exclusive_audio_engine.py`)**: Direct hardware audio streaming engine bypassing the Windows Audio Engine (`AudioDG.exe`) and OS mixers. Features **WASAPI Exclusive Mode** and **ASIO Driver Discovery & Routing** on Windows, **AAudio Exclusive Mode** (`AAUDIO_SHARING_MODE_EXCLUSIVE`) and **Direct Bit-Perfect USB Audio DAC Access** on Android, **CoreAudio Hog Mode** on macOS, and **ALSA Direct Hardware DMA** (`hw:X,Y`) on Linux. Directly couples and locks DAC hardware clocks to audio files' native sample rates ($44.1\text{ kHz}$ to $192\text{ kHz}$ and beyond) for 100% bit-perfect audio delivery with zero OS software resampling, zero dithering, and sub-$5\text{ ms}$ buffer latency. Includes background playback with MMCSS ("Pro Audio") scheduling, bit-perfect volume lock, hardware buffer latency tuning ($64\text{--}1024\text{ frames}$), live bit-perfect telemetry badge, and 1-click $440\text{ Hz}$ DAC hardware lock chime test. CLI: `python sonance.py --devices` / `python sonance.py --test-exclusive [device_id] [--sr 96000]` / `python sonance.py --play-exclusive <audio_file> [--device <id>] [--mode wasapi_exclusive|asio|shared]`.
-
-### 🔄 38. In-App Updates & Releases
-- Automatic update detection checking against [GitHub Releases](https://github.com/Sandeep2062/Sonance/releases).
-- Every release includes SHA-256 and MD5 checksum manifests (`RELEASE.sha256sum`, `RELEASE.md5sum`).
+> [!NOTE]
+> **Android Bit-Perfect Notice**: Android 8.0+ (API 26) or higher is recommended for low-latency AAudio streams. For bit-perfect integer clock output bypassing the Android system resampler (AudioFlinger), Android 10+ with an external USB OTG DAC is supported.
 
 ---
 
-## 🚀 Quick Start & Installation
+## ✨ Features at a Glance
 
-### Requirements
-- **Windows 10 / 11** or **Linux**
-- **Python 3.10+** (standard install from [python.org](https://python.org))
+Sonance unifies playback, streaming, lossless downloading, metadata tagging, and studio audio engineering into a clean, intuitive interface:
 
-### 1. Clone the Repository
-```bash
-git clone https://github.com/Sandeep2062/Sonance.git
-cd Sonance
-```
+### 1. 🎵 Streaming, Global Search & Smart Fallback
+- **Unified Multi-Source Search**: Search millions of tracks and albums instantly across Deezer, Spotify catalogs, and YouTube in a single search bar.
+- **Zero Account Required**: Search and stream full-length songs immediately without needing to create an account or sign in.
+- **Instant Seeking & Offline Cache**: High-speed HTTP byte-range audio streaming with automatic SHA-256 local caching for instant offline playback.
+- **Auto-DJ & Radio Mode**: Automatically continues playback with acoustically similar tracks when your current queue finishes.
 
-### 2. Install Dependencies
-```bash
-pip install -r requirements.txt
-# or manually:
-pip install pywebview tinytag requests beautifulsoup4 syncedlyrics yt-dlp mutagen
-```
+### 2. ⬇️ Lossless & Hi-Res Batch Downloader
+- **Studio-Grade Audio Downloads**:
+  - **Deezer**: Direct CD-quality 16-bit / 44.1 kHz FLAC (1411 kbps) and 320 kbps MP3.
+  - **Qobuz**: Authentic 24-bit Studio Master Hi-Res FLAC (up to 192 kHz).
+  - **YouTube & YouTube Music**: High-bitrate audio stream extraction with automated parallel batch queues.
+- **Simultaneous Synced Lyrics Auto-Download**: Whenever a song is downloaded, Sonance simultaneously searches LRCLIB, Musixmatch, Megalobiz, NetEase, and Genius to save a companion `.lrc` file and embed timestamped lyrics directly into the audio tags.
+- **Anti-Mismatch Verification**: Automatically checks downloaded lyric timestamps against audio duration to prevent out-of-sync lyrics.
 
-### 3. Launch Sonance
-```bash
-# Launch modern desktop workstation (Default launcher)
-python sonance.py
+### 3. 🔍 Smart Alternative Lossless Matcher (Song Upgrader)
+- Have a favorite song or playlist on YouTube or Spotify that you want in true lossless quality?
+- **Automatic High-Fidelity Matching**: Simply paste or search any YouTube video, YouTube Music link, or Spotify track/playlist. Sonance extracts the track metadata (Artist, Title, Album) and automatically queries Deezer and Qobuz for the **highest quality lossless FLAC or 320 kbps alternative**.
+- Never settle for compressed 128 kbps audio when a 16-bit or 24-bit studio master exists!
 
-# Or launch classic tkinter GUI
-python sonance.py --classic
-```
+### 4. 🍪 YouTube Cookie Integration (YouTube Premium High-Quality Audio)
+- **1-Click Cookie Extraction**: Import cookies directly from your installed desktop browser (Chrome, Edge, Firefox, Brave, Opera) or drop your `youtube_cookies.txt` into the `cookies/` folder.
+- **YouTube Premium Quality**: If you have a YouTube Premium account, importing your cookies unlocks access to high-bitrate 256 kbps AAC and pristine Opus streams instead of the free-tier standard 128 kbps audio.
+- **Reliable & Unrestricted**: Eliminates YouTube bot challenges, avoids IP rate limits, and unlocks age-restricted and member-only audio tracks.
+
+### 5. 🎤 Real-Time Synced Lyrics & Syllable Karaoke
+- **Word-by-Word Syllable Sweep**: Real-time Apple Music and Spotify Sing style glowing syllable-by-syllable karaoke sweeps (`.elrc`).
+- **Floating Desktop Mini-Player**: Always-on-top glassmorphic widget displaying synchronized lyrics, album art, and controls while you work or game.
+- **Live Timing Drift Tuner**: Instant `[-0.5s]`, `[-0.1s]`, `[+0.1s]`, `[+0.5s]` offset buttons to adjust timing on-the-fly and save permanently to disk.
+- **Multilingual Romanization & Translation**: Live phonetic Romaji (Japanese), Latin Romanization (Korean), and Pinyin (Chinese) rendering, plus bilingual translation across 50+ languages.
+- **Interactive Visual LRC Studio**: Create `.lrc` files from scratch with spacebar tap-to-sync timing precision.
+
+### 6. 🏷️ Visual Metadata & Tag Editor
+- **Full Container Tagging**: Inspect and edit tags across MP3 (ID3v2.4), FLAC (Vorbis Comments), M4A/AAC (MP4 atoms), and OGG.
+- **Cover Art Studio**: View, extract, replace, or strip high-resolution embedded album artwork.
+- **1-Click MusicBrainz & Deezer Auto-Tagger**: Automatically populates missing titles, artist names, albums, release years, and cover artwork with one click.
+- **Acoustic Audio Fingerprinting (`audio_fingerprint.py`)**: Recognizes untagged or mystery audio files (e.g., `Track01.mp3`) by their acoustic audio waveform.
+
+### 7. 📚 Library Management, Auto-Organizer & "Library Doctor"
+- **Library Doctor**: Scans your entire music library, calculates a 0–100% Library Health Score, detects duplicate audio files with bitrate/lossless quality comparisons, and cleans redundant tracks safely.
+- **Rule-Based Auto-Organizer**: Automatically cleans and organizes disorganized music folders into clean directory structures:
+  `%artist%/[%year%] %album%/%track% - %title%`
+- **Portable DAP & Walkman Sync (`device_sync.py`)**: Synchronizes music, playlists, and `.lrc` lyrics to Sony Walkman, FiiO, Astell&Kern, and USB drives with on-the-fly transcoding and FAT32 path sanitization.
+
+### 8. 🔄 Universal Playlist Converter & Doctor
+- **Bidirectional Format Conversion**: Convert playlists seamlessly between `.m3u`, `.m3u8`, `.pls`, `.wpl` (Windows Media Player), and `.xspf` (VLC).
+- **Playlist Doctor (`playlist_doctor.py`)**: Automatically repairs broken file paths when music is moved across drives, eliminates dead links, and upgrades existing lossy `.mp3` entries to `.flac`.
+- **Spotify Playlist Importer**: Paste public Spotify playlist URLs to import tracklists directly into local download queues or playlists.
+
+### 9. 🎧 Bit-Perfect Hardware DAC & Exclusive Modes
+- **Bypass the Operating System Mixer**: Stream directly to external USB DACs, soundcards, and audiophile equipment with pure integer clock isolation.
+  - **Windows**: WASAPI Exclusive Mode & ASIO Direct Driver Routing.
+  - **macOS**: CoreAudio Hog Mode.
+  - **Linux**: ALSA Direct Hardware DMA (`hw:X,Y`).
+  - **Android**: AAudio Exclusive Mode (`AAUDIO_SHARING_MODE_EXCLUSIVE`) and direct USB DAC passthrough.
+- **Zero Resampling & Zero Jitter**: Matches DAC sample rates dynamically ($44.1\text{ kHz}$ to $192\text{ kHz}+$) for bit-perfect output with sub-$5\text{ ms}$ buffer latency.
+
+### 10. 🎚️ Studio Mastering Suite (36 Audio DSP Engines)
+- **10-Band Studio Equalizer & Headphone AutoEq**: Hardware DSP with studio presets and Harman Target headphone calibration for 17+ audiophile headphones.
+- **Spatial Audio & 7.1.4 Dolby Atmos**: Deconstructs stereo masters into immersive 12-channel 7.1.4 spatial audio beds and 360° Ambisonics (HOA 3rd Order).
+- **AI Stem Separator**: Isolates Vocals, Instrumental Backing, Bass, and Drums from any song.
+- **Audio Restoration**: Vinyl de-clicker, mains de-hummer, tape hiss suppressor, and audio de-clipper.
+- **Mastering Dynamics**: British Class-A Console channel strip, SSL G-Master bus compressor, Teletronix LA-2A optical leveling, Fairchild 670 tube compressor, and lookahead True-Peak brickwall limiter.
+- **The Grand Zenith Orchestrator (`zenith_orchestrator.py`)**: Chains 7 physical mastering DSP engines into a continuous one-click studio mastering pipeline.
+
+### 11. 📱 Wireless Mobile Remote & Casting
+- **Local Wi-Fi Remote Server**: Built-in background server (`http://<your-local-ip>:5050`) with an in-app QR code for quick camera scan connection.
+- Control playback, volume, and track queues, and view **real-time synchronized lyrics on any smartphone or tablet** in your home network!
 
 ---
 
 ## ⚙️ Authentication & Accounts (Optional)
 
-You can use Sonance completely free without any accounts. To unlock lossless and Hi-Res downloads, head to **Settings**:
+You can use Sonance completely free without creating any accounts. If you want to unlock lossless FLAC downloads, studio master audio, or private library syncing, configure the following optional settings in **Settings**:
 
-| Service | Setting | What It Unlocks |
-|---------|---------|-----------------|
-| **Deezer** | `Deezer ARL` | Direct 16-bit / 44.1kHz FLAC Lossless & 320 kbps MP3 |
-| **Qobuz** | `User ID`, `Token`, `App ID/Secret` | True 24-bit Studio Master Hi-Res FLAC |
-| **Spotify** | `Client ID`, `Client Secret` | Private playlist import & library syncing |
-| **YouTube** | *None required* | Free high-bitrate audio streaming & downloading fallback |
+| Service | Credentials | What It Unlocks |
+|:---|:---|:---|
+| **Deezer** | `Deezer ARL` | Direct 16-bit / 44.1 kHz FLAC Lossless (1411 kbps) & 320 kbps MP3 |
+| **Qobuz** | `User ID`, `Token`, `App ID/Secret` | True 24-bit Studio Master Hi-Res FLAC (up to 192 kHz) |
+| **YouTube & YouTube Music** | Browser cookies or `youtube_cookies.txt` | **YouTube Premium HQ audio (256 kbps AAC/Opus)**, bypasses bot checks & rate limits |
+| **Spotify** | `Client ID`, `Client Secret` or `sp_dc` cookie | Import personal playlists, saved library albums, and tracks |
+| **SoundCloud** | `OAuth Token` | High-bitrate track streaming & extraction |
+| **Last.fm / ListenBrainz** | Username & API Session | Live background scrobbling & rich artist insights |
+
+### How to Add YouTube Cookies (for YouTube Premium HQ Audio)
+1. **Option 1 (1-Click in Sonance)**: Open Sonance, go to **Settings > Accounts > YouTube**, and click **Import from Browser** (supports Chrome, Edge, Firefox, Brave, and Opera).
+2. **Option 2 (Manual File)**:
+   - Export cookies using any standard browser extension (e.g. *Get cookies.txt LOCALLY*) while logged into YouTube.
+   - Save the file as `youtube_cookies.txt` inside the `cookies/` folder of the Sonance directory:
+     ```
+     Sonance/
+     └── cookies/
+         └── youtube_cookies.txt
+     ```
+3. Once active, Sonance will automatically use your credentials to fetch highest-bitrate premium streams and avoid verification checks!
+
+---
+
+## 🚀 Quick Start & Installation
+
+### Option 1: Download Pre-Built Binaries
+Ready-to-use release builds are published on [GitHub Releases](https://github.com/Sandeep2062/Sonance/releases):
+- **Windows**: `Sonance-windows-x86_64-setup.exe`
+- **Android**: `Sonance-android-all-arch.apk`
+- **macOS**: `Sonance-macos-universal.dmg`
+- **Linux**: `Sonance-linux-x86_64.AppImage` or `.deb` / `.tar.xz`
+
+### Option 2: Run From Source (Python Desktop Workstation)
+```bash
+# 1. Clone the repository
+git clone https://github.com/Sandeep2062/Sonance.git
+cd Sonance
+
+# 2. Install Python dependencies
+pip install -r requirements.txt
+
+# 3. Launch the modern desktop workstation
+python sonance.py
+
+# Or launch the lightweight classic interface
+python sonance.py --classic
+```
+
+### Option 3: Run From Source (Flutter App)
+```bash
+# Ensure Flutter SDK is installed (https://flutter.dev)
+flutter pub get
+
+# Run on your preferred target
+flutter run -d windows    # Windows Desktop
+flutter run -d android    # Connected Android device / emulator
+flutter run -d macos      # macOS Desktop
+flutter run -d linux      # Linux Desktop
+```
+
+---
+
+## 🛠️ Contributor & Developer Guide
+
+We welcome contributions of all kinds — whether you want to fix a bug, add a new DSP engine, improve the UI, or expand lyrics providers! Here is how to get started:
+
+### 1. Prerequisites
+- **Git** installed on your system.
+- **Python 3.10+** (standard installation from [python.org](https://python.org)).
+- **Flutter SDK 3.x** (optional, required if working on the Flutter mobile/desktop app).
+- **FFmpeg** installed and accessible in your system `PATH` (recommended for audio transcoding and stem separation).
+
+### 2. Fork and Clone
+```bash
+# Fork the repository on GitHub, then clone your fork:
+git clone https://github.com/<your-username>/Sonance.git
+cd Sonance
+
+# Add the upstream repository:
+git remote add upstream https://github.com/Sandeep2062/Sonance.git
+```
+
+### 3. Create a Feature Branch
+Always create a new branch from `main` before making changes:
+```bash
+git checkout -b feature/your-feature-name
+# Or for a bug fix:
+git checkout -b fix/audio-sync-issue
+```
+
+### 4. Setup Your Development Environment
+#### For Python Workstation:
+```bash
+# Create a virtual environment (recommended)
+python -m venv venv
+
+# Activate the virtual environment:
+# On Windows (PowerShell):
+.\venv\Scripts\Activate.ps1
+# On Linux/macOS:
+source venv/bin/activate
+
+# Install required packages
+pip install -r requirements.txt
+```
+
+#### For Flutter App:
+```bash
+flutter pub get
+flutter doctor
+```
+
+### 5. Running the App During Development
+```bash
+# Run the Python desktop app:
+python sonance.py
+
+# Run the Flutter app with hot reload:
+flutter run
+```
+
+### 6. Building Standalone Binaries
+- **Windows Executable (PyInstaller)**:
+  ```bash
+  pyinstaller --noconsole --onefile --name "Sonance-windows-x86_64-setup" --add-data "ui;ui" modern_lyrics_downloader.py
+  ```
+- **Android APK (Flutter)**:
+  ```bash
+  flutter build apk --release
+  ```
+- **Desktop (Flutter)**:
+  ```bash
+  flutter build windows
+  flutter build macos
+  flutter build linux
+  ```
+
+### 7. Running Tests & Code Quality Audits
+Before committing, verify that your changes pass all syntax checks and module integrity audits:
+
+```bash
+# Run the built-in integrity auditor across all 53 core modules and DSP engines:
+python release_packager.py --audit-only
+# Or via the workstation launcher:
+python sonance.py --package-release --verify-only
+
+# Verify Python syntax across all scripts:
+python -m py_compile *.py
+
+# Run Flutter tests (if working on Flutter code):
+flutter test
+flutter analyze
+```
+
+### 8. Commit Guidelines
+We follow standard conventional commit messages to keep our Git history readable and clean:
+
+| Prefix | Description | Example |
+|:---|:---|:---|
+| `feat:` | New features or enhancements | `feat: add Deezer lossless stream fallback` |
+| `fix:` | Bug fixes | `fix: resolve lyrics timing drift on high-FPS visualizer` |
+| `dsp:` | Audio engine, filters, or mastering plugins | `dsp: optimize biquad filter calculation in parametric EQ` |
+| `ui:` | User interface and styling changes | `ui: improve floating mini-player contrast in dark mode` |
+| `docs:` | Documentation improvements | `docs: add detailed contributor guide to README` |
+| `refactor:` | Code restructuring without changing behavior | `refactor: simplify cookie extraction logic` |
+| `test:` | Adding or updating tests | `test: add verification test for FLAC MD5 checker` |
+
+### 9. Submitting a Pull Request (PR)
+1. Push your changes to your fork:
+   ```bash
+   git push origin feature/your-feature-name
+   ```
+2. Go to [https://github.com/Sandeep2062/Sonance](https://github.com/Sandeep2062/Sonance) and click **Compare & pull request**.
+3. Provide a clear summary of your changes, what problem they solve, and screenshots if you modified UI components.
+4. Submit the PR — we review and merge contributions promptly!
 
 ---
 
 ## 📦 Multi-Platform Release Assets
 
-Pre-built binaries are published under [Releases](https://github.com/Sandeep2062/Sonance/releases):
+Pre-built releases include cryptographic checksums to verify package authenticity:
 
-| Asset | Platform | Description |
-|---|---|---|
-| `Sonance-windows-x86_64-setup.exe` | Windows | Standalone portable executable |
-| `RELEASE.sha256sum` | All | SHA-256 integrity verification hash |
-| `RELEASE.md5sum` | All | MD5 verification hash |
+| Asset Name | Target Platform | Description |
+|:---|:---|:---|
+| `Sonance-windows-x86_64-setup.exe` | Windows 10/11 | Standalone portable executable |
+| `Sonance-android-all-arch.apk` | Android 5.0+ | Universal APK with direct USB DAC audio support |
+| `Sonance-macos-universal.dmg` | macOS 11+ | Universal DMG for Apple Silicon & Intel Macs |
+| `Sonance-linux-x86_64.AppImage` / `.deb` | Linux | Portable AppImage and Debian package |
+| `RELEASE.sha256sum` | All | SHA-256 integrity verification hash list |
+| `RELEASE.md5sum` | All | MD5 verification hash list |
 
-To verify download integrity on Windows PowerShell:
-```powershell
-Get-FileHash -Algorithm SHA256 .\Sonance-windows-x86_64-setup.exe
-```
+### Verifying Download Integrity
+- **Windows (PowerShell)**:
+  ```powershell
+  Get-FileHash -Algorithm SHA256 .\Sonance-windows-x86_64-setup.exe
+  ```
+- **Linux & macOS**:
+  ```bash
+  sha256sum -c RELEASE.sha256sum
+  ```
 
 ---
 
 ## 🏷️ Version Bumper & Release Automation
 
-To update the version across all 17 components of Sonance (Flutter, Python, HTML/JS, CMake, Info.plist, and release manifests):
+To update the version consistently across all components (Flutter, Python, HTML/JS, CMake, and release manifests):
 
 ```bash
-# Bash / Linux / macOS / Git Bash (interactive prompt or argument)
-./bump_version.sh 3.7.0
-
-# Windows PowerShell (interactive prompt or argument)
+# Windows PowerShell:
 .\bump_version.ps1 3.7.0
 
-# Direct Python engine
+# Linux / macOS / Git Bash:
+./bump_version.sh 3.7.0
+
+# Direct Python engine:
 python update_version.py 3.7.0
 ```
 
