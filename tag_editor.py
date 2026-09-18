@@ -1,10 +1,10 @@
 """
-tag_editor.py - Sonance Professional Audio Metadata & Mp3tag-Grade Tag Editor
+tag_editor.py - Sonance Professional Audio Metadata & Tag Editor
 
 Part of the Sonance project (https://github.com/Sandeep2062/Sonance)
 Copyright (C) 2024-2026 Sandeep Khadka — GPLv3 with Commons Clause
 
-Full Mp3tag & MusicBee capability:
+Full professional audio metadata & tagging capability:
 - Read & write tags across MP3 (ID3v2.4), FLAC (Vorbis Comment), M4A/MP4, and OGG
 - High-resolution Album Cover Art extraction, embedding, and replacement
 - MusicBrainz & Last.fm auto-tag lookup

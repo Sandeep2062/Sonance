@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """
-Sonance - MusicBee-Grade Library Auto-Organizer & File Renamer
-==============================================================
+Sonance - Audiophile Library Auto-Organizer & File Renamer
+==========================================================
 Intelligently restructures and organizes local music collections based on
 audio metadata tags and custom directory naming patterns.
 
@@ -244,7 +244,7 @@ def execute_library_organization(
 
 if __name__ == "__main__":
     import sys
-    print("Sonance MusicBee-Grade Library Auto-Organizer")
+    print("Sonance Audiophile Library Auto-Organizer")
     if len(sys.argv) < 2:
         print("Usage: python library_organizer.py <library_folder> [pattern] [--dry-run]")
         sys.exit(1)

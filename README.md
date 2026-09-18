@@ -12,53 +12,53 @@
 ---
 
 <p align="center">
-  <b>Sonance</b> merges the best features of <b>Spotube</b>, <b>FluentDL</b>, and <b>Synced Lyrics Downloader</b> into one cohesive, privacy-first desktop music application.
+  <b>Sonance</b> is an all-in-one flagship audiophile music workstation, studio mastering suite, and lossless streaming engine.
   <br>
-  No subscriptions required. No ads. No telemetry. 100% focused on pure audio fidelity and seamless lyrics.
+  No subscriptions required. No ads. No telemetry. 100% focused on pure audio fidelity, bit-perfect hardware output, and seamless real-time lyrics.
 </p>
 
 </div>
 
 ---
 
-## 🌟 Key Pillars & Merged Capabilities
+## 🌟 Core Architecture & Pillars
 
-Sonance brings together three distinct open-source powerhouses:
+Sonance is engineered from the ground up as a unified audiophile ecosystem:
 
 ```
                       ┌──────────────────────────────────────┐
-                      │             SONANCE v2.1             │
+                      │             SONANCE v3.6             │
                       └──────────────────┬───────────────────┘
                                          │
          ┌───────────────────────────────┼───────────────────────────────┐
          │                               │                               │
          ▼                               ▼                               ▼
-  [ From Spotube ]                [ From FluentDL ]             [ From Synced Lyrics ]
-  • Spotify Catalog & Metadata    • Deezer ARL (FLAC/320k)      • Direct LRCLIB & Genius
-  • High-Bitrate Streaming        • Qobuz 24-bit Hi-Res Master  • Anti-Mismatch Duration Check
-  • In-App Live Karaoke Player    • Spotify Developer OAuth     • Simultaneous .lrc Auto-Download
-  • In-App Auto-Update Checker    • Batch Download Queue        • Spek-style Audio Quality Specs
-  • Cross-Platform Releases       • ID3v2.4 & Vorbis Tagging    • Local Music Library Scanner
+  [ Audiophile Decoders & DSP ]   [ Hardware DAC & Bit-Perfect ] [ Real-Time Lyrics & Library ]
+  • 32-bit Float Audio Engine     • WASAPI Exclusive & ASIO Direct • Multi-Provider LRC Sync
+  • 36 Studio Mastering Plugins   • Android USB Direct DAC Pass  • Line & Syllable-by-Syllable
+  • Dolby Atmos 7.1.4 Spatializer • Lossless FLAC / Qobuz 24-bit • Auto ID3v2/Vorbis Metadata
+  • HOA 3rd Order & Binaural 3D   • Pure Integer Clock Isolation • Offline Caching & Auto-DJ
+  • Sinc Interpolation Resampling • Jitter & Mismatch Immunity   • AccurateRip & Library Sync
 ```
 
 ---
 
 ## ✨ Features
 
-### 🎧 1. Multi-Source Streaming & Search (Spotube)
+### 🎧 1. Multi-Source Streaming & Global Search
 - **Unified Online Search**: Instantly query tracks and albums across Deezer, Spotify catalog, and YouTube.
 - **Built-in Audio Player**: Seamless playback with instant seeking via HTTP byte-range audio streaming.
 - **Real-Time Karaoke Sync**: Synchronized lyrics highlight word-for-word and line-for-line as the track plays.
 - **Zero Account Requirement**: You can stream and search right out of the box without logging in.
 
-### ⬇️ 2. Lossless & Hi-Res Batch Downloader (FluentDL)
+### ⬇️ 2. Lossless & Hi-Res Batch Downloader
 - **Deezer Integration**: Provide your Deezer ARL to unlock direct FLAC (1411 kbps) and 320 kbps MP3 downloading.
 - **Qobuz Hi-Res Master**: Connect using your Qobuz ID & token to download genuine 24-bit studio master audio files.
 - **Spotify Library & Playlist Sync**: Link your Spotify developer credentials (`Client ID` & `Client Secret`) to import personal playlists and saved albums.
 - **Batch Download Queue**: Multi-threaded queue manager showing live download speed, progress percentage, and task status.
 - **Complete Tagging Engine**: Automatically embeds high-resolution album artwork, artist, title, album, year, and track numbers into MP3 (ID3v2.4), FLAC, and M4A containers.
 
-### 📝 3. Simultaneous Synced Lyrics Auto-Download (Synced Lyrics)
+### 📝 3. Simultaneous Synced Lyrics Auto-Download
 - **The Signature Feature**: When any track is downloaded, Sonance **simultaneously** queries top lyrics databases (LRCLIB, Musixmatch, Megalobiz, NetEase, and Genius).
 - **Anti-Mismatch Verification**: Compares lyrics timestamps with audio duration to prevent downloading mismatched lyrics.
 - **Dual Storage**: Saves the timestamped `.lrc` file right alongside the audio file AND embeds the synchronized lyrics into the audio file tags.
@@ -73,12 +73,12 @@ Sonance brings together three distinct open-source powerhouses:
 - **Hardware DSP**: 10-Band BiquadFilterNodes (32 Hz to 16 kHz) with 8 studio presets (`Bass Boost`, `Rock`, `Pop`, `Jazz`, `Electronic`, `Classical`, `Vocal Booster`, `Flat`).
 - **Discord Rich Presence**: Live playback profile card with track title, artist, album art, remaining time bar, and profile buttons.
 
-### 🏷️ 6. Mp3tag Studio Visual Metadata & Cover Art Editor
+### 🏷️ 6. Studio Visual Metadata & Cover Art Editor
 - **Full Tag Editor (ID3v2.4 / Vorbis / MP4 / OGG)**: Visual metadata editing per-song directly from your local library.
 - **Embedded Cover Art Manager**: Extract embedded album art as high-res preview, replace artwork from disk, or strip unwanted covers.
 - **1-Click MusicBrainz & Deezer Auto-Fill**: Automatically fills missing album title, release year, genre, and high-resolution cover art directly from online open-music databases.
 
-### 🎵 7. MusicBee-Grade Playback Engine & Live Sync Tuner
+### 🎵 7. High-Fidelity Playback Engine & Live Sync Tuner
 - **Live Lyrics Timing Offset Synchronizer**: Instant `[-0.5s]`, `[-0.1s]`, `[+0.1s]`, `[+0.5s]` live adjustment bar during playback, with 1-click permanent `.lrc` file saving.
 - **DJ Crossfade & Gapless Transition**: 0 to 12 second smooth volume crossfade between consecutive tracks, plus intelligent zero-gap transition.
 - **Sleep Timer**: 15m, 30m, 45m, 60m, Custom, or "End of Current Track" presets with a gentle 30-second volume fade-out.
@@ -142,7 +142,7 @@ Sonance brings together three distinct open-source powerhouses:
 ### 🎛️ 16. Audiophile Resampler, Pitch Transposer, Library Auto-Organizer & Monolithic Album Packer
 - **Audiophile Polyphase Sinc Resampler & TPDF Dither Studio (`audio_resampler.py`)**: High-fidelity sample rate conversion up to 192 kHz / 384 kHz utilizing bandlimited Kaiser-windowed sinc interpolation with triangular probability density function (TPDF) random dither and high-pass noise shaping ($e[n] - 0.75 e[n-1]$). Quantization noise is pushed into ultrasonic registers (>18 kHz) ensuring pristine bit-depth reductions (e.g. 24-bit to 16-bit) without harmonic distortion or limit cycles. CLI: `python sonance.py --resample <audio_file> <sample_rate> [bit_depth] [output_file]`.
 - **Karaoke Vocal Pitch Transposer & Key Shifter (`pitch_shifter.py`)**: Real-time semitone pitch transposition ($\pm 6$ semitones) without tempo changes using an STFT phase vocoder and FFmpeg `rubberband`/`atempo` pipeline. Ideal for vocalists practicing songs outside their native vocal range or matching karaoke tracks to singing pitch. CLI: `python sonance.py --pitch-shift <audio_file> <semitones> [output_file]`.
-- **MusicBee-Style Library Auto-Organizer & File Renamer (`library_organizer.py`)**: Rule-based library reorganization matching tracks by ID3/Vorbis tags into structured directories (`%artist%/[%year%] %album%/%track% - %title%`). Migrates companion `.lrc` synced lyrics and cover artwork, sanitizes Windows reserved characters (`<>:"/\|?*`), and features a dry-run preview before committing moves or copies. CLI: `python sonance.py --organize <folder> [--pattern "<pattern>"] [--execute] [--copy]`.
+- **Audiophile Library Auto-Organizer & File Renamer (`library_organizer.py`)**: Rule-based library reorganization matching tracks by ID3/Vorbis tags into structured directories (`%artist%/[%year%] %album%/%track% - %title%`). Migrates companion `.lrc` synced lyrics and cover artwork, sanitizes Windows reserved characters (`<>:"/\|?*`), and features a dry-run preview before committing moves or copies. CLI: `python sonance.py --organize <folder> [--pattern "<pattern>"] [--execute] [--copy]`.
 - **Lossless Monolithic Album Packer & CUE Archiver (`album_packer.py`)**: Merges loose album tracks into a single continuous, gapless FLAC or WAV image accompanied by an exact Red Book audio CD compliant CUE sheet (`mm:ss:ff` 75 fps sector index timing). Supports lossless unpacking of monolithic album images back into pristine tagged tracks. CLI: `python sonance.py --pack-album <folder> [output_flac]` and `python sonance.py --unpack-album <monolithic_flac> [output_dir]`.
 
 ### 📊 17. TT Dynamic Range Meter, DAP Synchronizer, A-B Phrase Looper & Word-by-Word Syllable Aligner

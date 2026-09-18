@@ -1099,7 +1099,7 @@
       transition: width 0.2s ease;
     }
 
-    /* FluentDL-Style Settings Cards */
+    /* Settings Cards */
     .settings-view-container {
       flex: 1;
       padding: 24px 32px;
@@ -1678,7 +1678,7 @@
     </aside>
     </div> <!-- /view-local -->
 
-    <!-- View 2: Multi-Source Search & Stream (Spotube + FluentDL) -->
+    <!-- View 2: Multi-Source Search & Stream -->
     <div class="app-view" id="view-search">
       <div class="search-view-container">
         <div style="display:flex; justify-content:space-between; align-items:center;">
@@ -1727,7 +1727,7 @@
       </div>
     </div> <!-- /view-search -->
 
-    <!-- View 3: Batch Download Queue (FluentDL) -->
+    <!-- View 3: Batch Download Queue -->
     <div class="app-view" id="view-queue">
       <div class="queue-view-container">
         <div style="display:flex; justify-content:space-between; align-items:center;">
@@ -1760,7 +1760,7 @@
       </div>
     </div> <!-- /view-queue -->
 
-    <!-- View 4: Authentication & Settings (FluentDL Layout) -->
+    <!-- View 4: Authentication & Settings -->
     <div class="app-view" id="view-settings">
       <div class="settings-view-container">
         <div>
@@ -2005,7 +2005,7 @@
                 <span>🎚️</span>
                 <span>DJ Crossfade & Gapless Playback</span>
               </div>
-              <div class="settings-card-sub">Crossfade between consecutive tracks and eliminate silence gaps like MusicBee and pro DJ players.</div>
+              <div class="settings-card-sub">Crossfade between consecutive tracks and eliminate silence gaps seamlessly.</div>
             </div>
           </div>
           <div style="display:flex; flex-direction:column; gap:12px; margin-top:10px;">
@@ -2112,11 +2112,11 @@
 
     <div class="player-center">
       <div class="player-controls">
-        <button class="control-btn" onclick="playPreviousTrack()" title="Previous Track (MusicBee)">⏮</button>
+        <button class="control-btn" onclick="playPreviousTrack()" title="Previous Track">⏮</button>
         <button class="control-btn" onclick="seekRelative(-10)" title="Rewind 10s">⏪</button>
         <button class="control-btn play-circle" id="playPauseBtn" onclick="togglePlayPause()">▶</button>
         <button class="control-btn" onclick="seekRelative(10)" title="Forward 10s">⏩</button>
-        <button class="control-btn" onclick="playNextTrack()" title="Next Track (MusicBee)">⏭</button>
+        <button class="control-btn" onclick="playNextTrack()" title="Next Track">⏭</button>
       </div>
 
       <div class="scrubber-row">
@@ -2366,14 +2366,14 @@
     </div>
   </div>
 
-  <!-- Mp3tag Studio Visual Tag & Album Art Editor Modal -->
+  <!-- Studio Visual Tag & Album Art Editor Modal -->
   <div class="modal-backdrop" id="tagEditorModal" style="display:none;">
     <div class="modal-box" style="width:740px; max-width:92vw;">
       <div class="modal-header">
         <div style="display:flex; align-items:center; gap:8px;">
           <span style="font-size:15px;">🏷️</span>
           <div>
-            <div style="font-weight:700; font-size:13px;">Mp3tag Studio — Audio Metadata & Cover Art Editor</div>
+            <div style="font-weight:700; font-size:13px;">Studio Tag Editor — Audio Metadata & Cover Art Editor</div>
             <div id="tagEditFilePath" style="font-size:10px; color:var(--text-dim); max-width:550px; overflow:hidden; text-overflow:ellipsis; white-space:nowrap;"></div>
           </div>
         </div>
@@ -3701,7 +3701,7 @@
         <div style="display:flex; align-items:center; gap:8px;">
           <span style="font-size:18px;">🗂️</span>
           <div>
-            <div style="font-weight:700; font-size:14px; color:#fff;">MusicBee-Grade Library Auto-Organizer</div>
+            <div style="font-weight:700; font-size:14px; color:#fff;">Audiophile Library Auto-Organizer</div>
             <div style="font-size:10px; color:var(--text-dim);">Restructure and rename messy music folders using tags (%artist%, %album%, %track%, %title%)</div>
           </div>
         </div>
@@ -8567,7 +8567,7 @@
       </div>
 
       <div style="padding:10px 16px; background:var(--modal-header-bg); border-top:1px solid var(--border); display:flex; justify-content:space-between; align-items:center;">
-        <span style="font-size:10px; color:var(--text-dim);">MusicBee-Grade Bit-Perfect Streaming • WASAPI Exclusive / ASIO Direct</span>
+        <span style="font-size:10px; color:var(--text-dim);">Bit-Perfect Hardware Streaming • WASAPI Exclusive / ASIO Direct</span>
         <button class="btn btn-secondary" onclick="closeExclusiveAudioModal()">Save &amp; Close</button>
       </div>
     </div>
@@ -8904,7 +8904,7 @@
               <button class="btn btn-secondary" style="padding:3px 7px; font-size:11px; ${t.is_favorite ? 'color:#ec4899;' : 'color:var(--text-muted);'}" title="Toggle Favorite" onclick="event.stopPropagation(); toggleTrackFavorite(${t.index})">
                 ${t.is_favorite ? '♥' : '♡'}
               </button>
-              <button class="btn btn-secondary" style="padding:3px 7px; font-size:10px;" title="Edit Audio Metadata & Album Art (Mp3tag)" onclick="event.stopPropagation(); openTagEditor(${t.index})">
+              <button class="btn btn-secondary" style="padding:3px 7px; font-size:10px;" title="Edit Audio Metadata & Album Art" onclick="event.stopPropagation(); openTagEditor(${t.index})">
                 🏷️ Edit
               </button>
               <button class="btn btn-secondary" style="padding:3px 7px; font-size:10px;" onclick="event.stopPropagation(); downloadSingleTrack(${t.index})">
@@ -10621,7 +10621,7 @@
     }
 
     // =========================================================================
-    // Phase 6: Mp3tag Studio Visual Metadata & Cover Art Editor
+    // Phase 6: Studio Visual Metadata & Cover Art Editor
     // =========================================================================
     let tagEditorCurrentTrack = null;
     let tagEditorCoverDataUri = null;

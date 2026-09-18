@@ -8,7 +8,7 @@ Audits, extracts, and manages album art across audio libraries:
 - Inspects embedded artwork in FLAC, MP3, M4A, OGG, and WAV containers
 - Pure-Python binary header parser for PNG, JPEG, and WebP dimensions without Pillow
 - Pinpoints bloated embedded art (e.g. 10MB uncompressed PNGs embedded in every track)
-- Extracts companion 'cover.jpg' / 'folder.jpg' for portable DAPs, car audio & MusicBee
+- Extracts companion 'cover.jpg' / 'folder.jpg' for portable DAPs, car audio & external media players
 - Non-destructive embedded art removal to reclaim disk space
 """
 

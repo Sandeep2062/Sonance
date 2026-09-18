@@ -69,7 +69,7 @@ class _SettingsViewState extends ConsumerState<SettingsView> {
                 ),
                 const SizedBox(height: 24),
 
-                // Deezer Card (FluentDL style)
+                // Deezer Card
                 _buildCard(
                   title: 'Deezer',
                   subtitle: 'Sign into Deezer using your Deezer ARL cookie for direct FLAC & 320 kbps MP3.',
@@ -107,7 +107,7 @@ class _SettingsViewState extends ConsumerState<SettingsView> {
 
                 const SizedBox(height: 20),
 
-                // Qobuz Card (FluentDL style)
+                // Qobuz Card
                 _buildCard(
                   title: 'Qobuz',
                   subtitle: 'Sign in using an ID and token for True 24-bit Studio Master Hi-Res FLAC.',

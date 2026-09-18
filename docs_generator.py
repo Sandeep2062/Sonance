@@ -24,9 +24,9 @@ PHASES_DATA = [
         "category": "Core Architecture",
         "modules": ["downloader_engine.py", "lyrics_engine.py", "tag_editor.py"],
         "cli": "python sonance.py --lyrics \"Track Title\" --artist \"Artist Name\"",
-        "desc": "Foundational multi-threaded downloading engine combining Spotube, FluentDL, and Syncedlyrics with intelligent ID3v2/Vorbis/MP4 metadata tagging.",
+        "desc": "Foundational multi-threaded downloading engine with high-speed stream extraction and intelligent ID3v2/Vorbis/MP4 metadata tagging.",
         "dsp_math": "Multi-provider scoring weight: S = 0.5 * Similarity(title) + 0.3 * Similarity(artist) + 0.2 * SyncPrecision",
-        "features": ["Multi-threaded download pipeline", "Synced lyrics downloader (.lrc)", "Automated ID3v2/Vorbis/MP4 cover art & tags", "Multi-provider fallback (NetEase, LRCLIB, Megalobiz, Musixmatch)"]
+        "features": ["Multi-threaded download pipeline", "Synced lyrics engine (.lrc)", "Automated ID3v2/Vorbis/MP4 cover art & tags", "Multi-provider fallback (NetEase, LRCLIB, Megalobiz, Musixmatch)"]
     },
     {
         "phase": 2,

@@ -650,7 +650,7 @@ class LyricsAPI:
         """Retrieves similar recommended tracks."""
         return scrobbler.lastfm_client.get_similar_tracks(artist, track)
 
-    # ------------------ Tag Editor & Cover Art (Mp3tag Grade) ------------------
+    # ------------------ Tag Editor & Cover Art (Studio Tag Editor) ------------------
     def read_track_tags(self, file_path: str) -> Dict[str, Any]:
         """Reads ID3/Vorbis/MP4 tags and cover art data URI."""
         return tag_editor.read_tags(file_path)

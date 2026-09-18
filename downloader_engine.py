@@ -4,9 +4,9 @@ downloader_engine.py - Sonance Unified Multi-Source Downloader & Tagging Engine
 Part of the Sonance project (https://github.com/Sandeep2062/Sonance)
 Copyright (C) 2024-2026 Sandeep Khadka — GPLv3 with Commons Clause
 
-Merges core capabilities from:
-- FluentDL: Deezer ARL, Qobuz Hi-Res FLAC, Spotify playlist/metadata, batch download queue
-- Spotube: YouTube/Piped/SoundCloud audio fallback, high-bitrate stream extraction
+Unified capabilities:
+- Lossless & Hi-Res: Deezer ARL, Qobuz Hi-Res FLAC, Spotify playlist/metadata, batch download queue
+- Audio Streaming: High-bitrate audio stream extraction and multi-source fallback
 - Synced Lyrics: Simultaneous timestamped .lrc downloading & tagging with anti-mismatch verification
 """
 
@@ -306,7 +306,7 @@ def search_music_catalog(query: str, source: str = "all", limit: int = 20) -> Li
     return results
 
 
-# ------------------ Simultaneous Music + Synced Lyrics Downloader ------------------
+# ------------------ Simultaneous Music + Synced Lyrics Engine ------------------
 
 def download_track_with_lyrics(
     track_info: Dict[str, Any],

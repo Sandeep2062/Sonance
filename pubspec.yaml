@@ -10,7 +10,7 @@ dependencies:
   flutter:
     sdk: flutter
 
-  # State Management (Spotube architecture)
+  # State Management
   flutter_riverpod: ^2.5.1
 
   # Audio Playback & Background Media
@@ -18,7 +18,7 @@ dependencies:
   audio_service: ^0.18.15
   audio_session: ^0.1.19
 
-  # Music Streaming & Audio Extraction (Spotube fallback)
+  # Music Streaming & Audio Extraction
   youtube_explode_dart: ^2.2.0
 
   # Networking & Parallel Downloads
