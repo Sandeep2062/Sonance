@@ -61,9 +61,9 @@ class _LyricsViewState extends ConsumerState<LyricsView> {
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
-            const CircularProgressIndicator(color: SonanceTheme.emerald),
+            CircularProgressIndicator(color: Theme.of(context).colorScheme.primary),
             const SizedBox(height: 16),
-            Text('Fetching verified synced lyrics for "${player.currentTrack!.title}"...', style: const TextStyle(color: Colors.grey)),
+            Text('Fetching verified synced lyrics for "${player.currentTrack!.title}"...', style: TextStyle(color: Theme.of(context).colorScheme.onSurface.withOpacity(0.6))),
           ],
         ),
       );
@@ -75,7 +75,7 @@ class _LyricsViewState extends ConsumerState<LyricsView> {
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Text(player.currentTrack!.title, style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
-            Text('${player.currentTrack!.artist} · ${lyrics.provider ?? "LRCLIB"}', style: const TextStyle(fontSize: 11, color: Colors.grey)),
+            Text('${player.currentTrack!.artist} · ${lyrics.provider ?? "LRCLIB"}', style: TextStyle(fontSize: 11, color: Theme.of(context).colorScheme.onSurface.withOpacity(0.6))),
           ],
         ),
         backgroundColor: Colors.transparent,
@@ -95,7 +95,7 @@ class _LyricsViewState extends ConsumerState<LyricsView> {
               style: TextStyle(
                 fontSize: isActive ? 24 : 18,
                 fontWeight: isActive ? FontWeight.w800 : FontWeight.normal,
-                color: isActive ? SonanceTheme.emerald : Colors.white38,
+                color: isActive ? Theme.of(context).colorScheme.primary : Theme.of(context).colorScheme.onSurface.withOpacity(0.35),
                 height: 1.4,
               ),
               child: Text(

@@ -74,21 +74,32 @@ class QueueView extends ConsumerWidget {
                                   children: [
                                     Container(
                                       padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
-                                      decoration: BoxDecoration(color: Colors.white10, borderRadius: BorderRadius.circular(6)),
+                                      decoration: BoxDecoration(
+                                        color: Theme.of(context).colorScheme.outlineVariant.withOpacity(0.2),
+                                        borderRadius: BorderRadius.circular(6),
+                                      ),
                                       child: Text(task.format.toUpperCase(), style: const TextStyle(fontSize: 10, fontWeight: FontWeight.bold)),
                                     ),
                                     const SizedBox(width: 8),
                                     if (task.lyricsStatus == 'synced')
                                       Container(
                                         padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
-                                        decoration: BoxDecoration(color: SonanceTheme.emerald.withOpacity(0.2), borderRadius: BorderRadius.circular(6)),
-                                        child: const Text('✅ Synced .lrc', style: TextStyle(color: SonanceTheme.emerald, fontSize: 10, fontWeight: FontWeight.bold)),
+                                        decoration: BoxDecoration(
+                                          color: Theme.of(context).colorScheme.primary.withOpacity(0.12),
+                                          borderRadius: BorderRadius.circular(6),
+                                          border: Border.all(color: Theme.of(context).colorScheme.primary.withOpacity(0.3)),
+                                        ),
+                                        child: Text('Synced LRC', style: TextStyle(color: Theme.of(context).colorScheme.primary, fontSize: 10, fontWeight: FontWeight.bold)),
                                       )
                                     else if (isDone)
                                       Container(
                                         padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
-                                        decoration: BoxDecoration(color: Colors.red.withOpacity(0.2), borderRadius: BorderRadius.circular(6)),
-                                        child: const Text('❌ No LRC', style: TextStyle(color: Colors.redAccent, fontSize: 10, fontWeight: FontWeight.bold)),
+                                        decoration: BoxDecoration(
+                                          color: Theme.of(context).colorScheme.error.withOpacity(0.12),
+                                          borderRadius: BorderRadius.circular(6),
+                                          border: Border.all(color: Theme.of(context).colorScheme.error.withOpacity(0.3)),
+                                        ),
+                                        child: Text('No LRC', style: TextStyle(color: Theme.of(context).colorScheme.error, fontSize: 10, fontWeight: FontWeight.bold)),
                                       ),
                                   ],
                                 ),
@@ -98,15 +109,15 @@ class QueueView extends ConsumerWidget {
                             Row(
                               mainAxisAlignment: MainAxisAlignment.spaceBetween,
                               children: [
-                                Text(task.message, style: TextStyle(fontSize: 11, color: isDone ? SonanceTheme.emerald : (isFailed ? Colors.redAccent : Colors.amber))),
+                                Text(task.message, style: TextStyle(fontSize: 11, color: isDone ? Theme.of(context).colorScheme.primary : (isFailed ? Theme.of(context).colorScheme.error : Colors.amber))),
                                 Text('${task.percent.toStringAsFixed(0)}%', style: const TextStyle(fontSize: 11, fontWeight: FontWeight.bold)),
                               ],
                             ),
                             const SizedBox(height: 6),
                             LinearProgressIndicator(
                               value: task.percent / 100.0,
-                              backgroundColor: Colors.white10,
-                              color: isDone ? SonanceTheme.emerald : (isFailed ? Colors.redAccent : SonanceTheme.emerald),
+                              backgroundColor: Theme.of(context).colorScheme.outlineVariant.withOpacity(0.2),
+                              color: isDone ? Theme.of(context).colorScheme.primary : (isFailed ? Theme.of(context).colorScheme.error : Theme.of(context).colorScheme.primary),
                               borderRadius: BorderRadius.circular(4),
                             ),
                           ],

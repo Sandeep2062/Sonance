@@ -89,14 +89,17 @@ class _SettingsViewState extends ConsumerState<SettingsView> {
                     Align(
                       alignment: Alignment.centerRight,
                       child: ElevatedButton(
-                        style: ElevatedButton.styleFrom(backgroundColor: SonanceTheme.emerald),
+                        style: ElevatedButton.styleFrom(
+                          backgroundColor: Theme.of(context).colorScheme.primary,
+                          foregroundColor: Colors.white,
+                        ),
                         onPressed: () {
                           ref.read(authProvider.notifier).updateDeezer(_deezerArlCtrl.text);
                           ScaffoldMessenger.of(context).showSnackBar(
                             const SnackBar(content: Text('Deezer ARL saved!')),
                           );
                         },
-                        child: const Text('Save Changes', style: TextStyle(color: Colors.black, fontWeight: FontWeight.bold)),
+                        child: const Text('Save Changes', style: TextStyle(fontWeight: FontWeight.bold)),
                       ),
                     ),
                   ],
@@ -152,7 +155,10 @@ class _SettingsViewState extends ConsumerState<SettingsView> {
                     Align(
                       alignment: Alignment.centerRight,
                       child: ElevatedButton(
-                        style: ElevatedButton.styleFrom(backgroundColor: SonanceTheme.emerald),
+                        style: ElevatedButton.styleFrom(
+                          backgroundColor: Theme.of(context).colorScheme.primary,
+                          foregroundColor: Colors.white,
+                        ),
                         onPressed: () {
                           ref.read(authProvider.notifier).updateQobuz(
                                 id: _qobuzIdCtrl.text,
@@ -164,7 +170,7 @@ class _SettingsViewState extends ConsumerState<SettingsView> {
                             const SnackBar(content: Text('Qobuz credentials saved!')),
                           );
                         },
-                        child: const Text('Save Changes', style: TextStyle(color: Colors.black, fontWeight: FontWeight.bold)),
+                        child: const Text('Save Changes', style: TextStyle(fontWeight: FontWeight.bold)),
                       ),
                     ),
                   ],
@@ -203,7 +209,10 @@ class _SettingsViewState extends ConsumerState<SettingsView> {
                     Align(
                       alignment: Alignment.centerRight,
                       child: ElevatedButton(
-                        style: ElevatedButton.styleFrom(backgroundColor: SonanceTheme.emerald),
+                        style: ElevatedButton.styleFrom(
+                          backgroundColor: Theme.of(context).colorScheme.primary,
+                          foregroundColor: Colors.white,
+                        ),
                         onPressed: () {
                           ref.read(authProvider.notifier).updateSpotify(
                                 clientId: _spotifyClientCtrl.text,
@@ -213,7 +222,7 @@ class _SettingsViewState extends ConsumerState<SettingsView> {
                             const SnackBar(content: Text('Spotify credentials saved!')),
                           );
                         },
-                        child: const Text('Save Changes', style: TextStyle(color: Colors.black, fontWeight: FontWeight.bold)),
+                        child: const Text('Save Changes', style: TextStyle(fontWeight: FontWeight.bold)),
                       ),
                     ),
                   ],
@@ -260,7 +269,10 @@ class _SettingsViewState extends ConsumerState<SettingsView> {
                                   actions: [
                                     TextButton(onPressed: () => Navigator.pop(ctx), child: const Text('Later')),
                                     ElevatedButton(
-                                      style: ElevatedButton.styleFrom(backgroundColor: SonanceTheme.emerald),
+                                      style: ElevatedButton.styleFrom(
+                                        backgroundColor: Theme.of(context).colorScheme.primary,
+                                        foregroundColor: Colors.white,
+                                      ),
                                       onPressed: () {
                                         Navigator.pop(ctx);
                                         if (info.downloadUrl != null) {
@@ -273,7 +285,7 @@ class _SettingsViewState extends ConsumerState<SettingsView> {
                                           );
                                         }
                                       },
-                                      child: const Text('Update Now', style: TextStyle(color: Colors.black)),
+                                      child: const Text('Update Now', style: TextStyle(fontWeight: FontWeight.bold)),
                                     ),
                                   ],
                                 ),
@@ -304,46 +316,51 @@ class _SettingsViewState extends ConsumerState<SettingsView> {
     required bool isLoggedIn,
     required List<Widget> children,
   }) {
-    return Card(
-      child: Padding(
-        padding: const EdgeInsets.all(18),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+    return Builder(
+      builder: (context) {
+        final theme = Theme.of(context);
+        return Card(
+          child: Padding(
+            padding: const EdgeInsets.all(18),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
-                    Text(title, style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
-                    const SizedBox(height: 2),
-                    Text(subtitle, style: const TextStyle(fontSize: 11, color: Colors.grey)),
+                    Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(title, style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
+                        const SizedBox(height: 2),
+                        Text(subtitle, style: TextStyle(fontSize: 11, color: theme.colorScheme.onSurface.withOpacity(0.6))),
+                      ],
+                    ),
+                    Container(
+                      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+                      decoration: BoxDecoration(
+                        color: isLoggedIn ? theme.colorScheme.primary.withOpacity(0.12) : theme.colorScheme.outlineVariant.withOpacity(0.2),
+                        borderRadius: BorderRadius.circular(6),
+                        border: Border.all(color: isLoggedIn ? theme.colorScheme.primary.withOpacity(0.4) : theme.colorScheme.outlineVariant),
+                      ),
+                      child: Text(
+                        status,
+                        style: TextStyle(
+                          fontSize: 11,
+                          fontWeight: FontWeight.w600,
+                          color: isLoggedIn ? theme.colorScheme.primary : theme.colorScheme.onSurface.withOpacity(0.6),
+                        ),
+                      ),
+                    ),
                   ],
                 ),
-                Container(
-                  padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
-                  decoration: BoxDecoration(
-                    color: isLoggedIn ? SonanceTheme.emerald.withOpacity(0.15) : Colors.white10,
-                    borderRadius: BorderRadius.circular(12),
-                    border: Border.all(color: isLoggedIn ? SonanceTheme.emerald : Colors.white24),
-                  ),
-                  child: Text(
-                    status,
-                    style: TextStyle(
-                      fontSize: 11,
-                      fontWeight: FontWeight.bold,
-                      color: isLoggedIn ? SonanceTheme.emerald : Colors.grey,
-                    ),
-                  ),
-                ),
+                const Divider(height: 24),
+                ...children,
               ],
             ),
-            const Divider(height: 24),
-            ...children,
-          ],
-        ),
-      ),
+          ),
+        );
+      },
     );
   }
 }

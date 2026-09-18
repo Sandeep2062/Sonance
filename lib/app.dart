@@ -10,7 +10,9 @@ class SonanceApp extends StatelessWidget {
     return MaterialApp(
       title: 'Sonance',
       debugShowCheckedModeBanner: false,
-      theme: SonanceTheme.darkTheme,
+      theme: SonanceTheme.lightTheme,
+      darkTheme: SonanceTheme.darkTheme,
+      themeMode: ThemeMode.system,
       home: const HomeScreen(),
     );
   }

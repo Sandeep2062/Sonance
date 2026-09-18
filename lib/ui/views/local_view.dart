@@ -87,8 +87,12 @@ class _LocalViewState extends ConsumerState<LocalView> {
                   ],
                 ),
                 ElevatedButton.icon(
-                  style: ElevatedButton.styleFrom(backgroundColor: SonanceTheme.surfaceColor),
-                  icon: const Icon(Icons.folder_open, color: SonanceTheme.emerald),
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: Theme.of(context).colorScheme.surface,
+                    foregroundColor: Theme.of(context).colorScheme.onSurface,
+                    side: BorderSide(color: Theme.of(context).colorScheme.outline),
+                  ),
+                  icon: Icon(Icons.folder_open, color: Theme.of(context).colorScheme.primary),
                   label: const Text('Select Music Folder'),
                   onPressed: _pickFolder,
                 ),
@@ -97,16 +101,16 @@ class _LocalViewState extends ConsumerState<LocalView> {
             const SizedBox(height: 16),
 
             if (_isScanning)
-              const Expanded(child: Center(child: CircularProgressIndicator(color: SonanceTheme.emerald)))
+              Expanded(child: Center(child: CircularProgressIndicator(color: Theme.of(context).colorScheme.primary)))
             else if (_localTracks.isEmpty)
               Expanded(
                 child: Center(
                   child: Column(
                     mainAxisSize: MainAxisSize.min,
                     children: [
-                      const Icon(Icons.folder_copy_outlined, size: 64, color: Colors.grey),
+                      Icon(Icons.folder_copy_outlined, size: 64, color: Theme.of(context).colorScheme.onSurface.withOpacity(0.4)),
                       const SizedBox(height: 12),
-                      const Text('Click "Select Music Folder" to browse your local audio library.', style: TextStyle(color: Colors.grey)),
+                      Text('Click "Select Music Folder" to browse your local audio library.', style: TextStyle(color: Theme.of(context).colorScheme.onSurface.withOpacity(0.6))),
                     ],
                   ),
                 ),
@@ -125,32 +129,38 @@ class _LocalViewState extends ConsumerState<LocalView> {
                         leading: Container(
                           width: 44,
                           height: 44,
-                          decoration: BoxDecoration(color: Colors.black45, borderRadius: BorderRadius.circular(8)),
-                          child: const Icon(Icons.music_note, color: SonanceTheme.emerald),
+                          decoration: BoxDecoration(
+                            color: Theme.of(context).colorScheme.outlineVariant.withOpacity(0.2),
+                            borderRadius: BorderRadius.circular(8),
+                          ),
+                          child: Icon(Icons.music_note, color: Theme.of(context).colorScheme.primary),
                         ),
                         title: Text(track.title, style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 13)),
-                        subtitle: Text(track.artist, style: const TextStyle(color: Colors.grey, fontSize: 11)),
+                        subtitle: Text(track.artist, style: TextStyle(color: Theme.of(context).colorScheme.onSurface.withOpacity(0.6), fontSize: 11)),
                         trailing: Row(
                           mainAxisSize: MainAxisSize.min,
                           children: [
                             Container(
                               padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
                               decoration: BoxDecoration(
-                                color: hasLrc ? SonanceTheme.emerald.withOpacity(0.15) : Colors.white10,
+                                color: hasLrc ? Theme.of(context).colorScheme.primary.withOpacity(0.12) : Theme.of(context).colorScheme.outlineVariant.withOpacity(0.2),
                                 borderRadius: BorderRadius.circular(6),
+                                border: Border.all(
+                                  color: hasLrc ? Theme.of(context).colorScheme.primary.withOpacity(0.3) : Theme.of(context).colorScheme.outlineVariant,
+                                ),
                               ),
                               child: Text(
-                                hasLrc ? '✅ Synced' : '❌ No LRC',
+                                hasLrc ? 'Synced LRC' : 'No LRC',
                                 style: TextStyle(
                                   fontSize: 10,
-                                  fontWeight: FontWeight.bold,
-                                  color: hasLrc ? SonanceTheme.emerald : Colors.grey,
+                                  fontWeight: FontWeight.w600,
+                                  color: hasLrc ? Theme.of(context).colorScheme.primary : Theme.of(context).colorScheme.onSurface.withOpacity(0.6),
                                 ),
                               ),
                             ),
                             const SizedBox(width: 8),
                             IconButton(
-                              icon: const Icon(Icons.play_circle_fill, color: SonanceTheme.emerald),
+                              icon: Icon(Icons.play_circle_fill, color: Theme.of(context).colorScheme.primary),
                               onPressed: () => ref.read(playerProvider.notifier).playTrack(track),
                             ),
                           ],

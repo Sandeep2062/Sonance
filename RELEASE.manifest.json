@@ -2,7 +2,7 @@
   "project": "Sonance Audiophile Workstation",
   "version": "3.6.0",
   "phase": "Phase 27 (Grand Finale Release)",
-  "timestamp": "2026-09-18 02:54:34 UTC",
+  "timestamp": "2026-09-18 03:18:48 UTC",
   "audit": {
     "total_modules_audited": 53,
     "passed_count": 53,
@@ -11,8 +11,8 @@
   },
   "summary": {
     "total_files": 135,
-    "total_bytes": 2965702,
-    "total_bytes_formatted": "2.83 MB",
+    "total_bytes": 3003471,
+    "total_bytes_formatted": "2.86 MB",
     "categories": {
       "asset": 26,
       "docs": 3,
@@ -40,22 +40,22 @@
     {
       "path": "RELEASE.manifest.json",
       "size": 32670,
-      "sha256": "161f611f1a3afb5bef9ebe3111918a82f395d5105e553bd88a3c53d2a22f677c",
-      "md5": "645cb1f9076003bffe4ae98a3b692c87",
+      "sha256": "332acca6daa52458a40eb8537b3cd9a9cd9f91f78d5890190bd6ecbf96fa684d",
+      "md5": "1d994022db1fc8e713e7f2b8d9f741dd",
       "category": "config"
     },
     {
       "path": "RELEASE.md5sum",
       "size": 7736,
-      "sha256": "7d3f70bdcea61baabdee189505df0e31e9338b3a3eacc95aac353e34ef66cdb0",
-      "md5": "6f9b3b8f674c7622371293b901fbb96b",
+      "sha256": "b2a82f7264aadb6f3270f487e30c9ac4fdf135c255b39d88fd8515bf3c2cae7e",
+      "md5": "d8dbf448680e458d99276ca747b60a95",
       "category": "asset"
     },
     {
       "path": "RELEASE.sha256sum",
       "size": 12056,
-      "sha256": "0efe136ceffbd18125915e13ec6826a6bf71631c6650b27b51990211ae543ddf",
-      "md5": "881f4dec4f7c442897377d12b7ca6b6c",
+      "sha256": "649aca7da0ece982ce2c96c6fdcb107c5d7d04722f90d1cb21ea664003cc2180",
+      "md5": "4972598ee63ad188d29f37c6b787d3f7",
       "category": "asset"
     },
     {
@@ -753,9 +753,9 @@
     },
     {
       "path": "lib/app.dart",
-      "size": 406,
-      "sha256": "a56c962c0c6df3c9c9dadbd9e19e9b4e6462c0c245b7484e2fd0b72e2c74cbbd",
-      "md5": "19d9797570d50db29948e3490d4f9d3c",
+      "size": 483,
+      "sha256": "b0ce113b12b68fcc0f7144cc3ad583f355fb27b8cdb445b96a598bbfcec26fbf",
+      "md5": "086ac4c4fd0e382f74cadf1c97a77825",
       "category": "asset"
     },
     {
@@ -844,9 +844,9 @@
     },
     {
       "path": "lib/core/theme/app_theme.dart",
-      "size": 1230,
-      "sha256": "e0e365ed457f163ec2a52dbef69b6b8040e49fe27c8b072b0485b225eb1ab445",
-      "md5": "413d519112ccb69ff760fb8bba6dd335",
+      "size": 3916,
+      "sha256": "5f43acacbf3d4bd9b3fb63b8e22c45f5cd4c2ae34f6f585ea4884488b0964cad",
+      "md5": "ec57d5572f441907e8d04a8a43785efa",
       "category": "asset"
     },
     {
@@ -893,44 +893,44 @@
     },
     {
       "path": "lib/ui/home_screen.dart",
-      "size": 5237,
-      "sha256": "60713497db6bc21dc146ac40c541a5a22d081461281c26287dbbb3d892e3ed91",
-      "md5": "c6feced66762bd72cb1d9cce8a8be4de",
+      "size": 5586,
+      "sha256": "61ed841e2b5fdd45409e268fc824a331ad624317933ae36b9a07455082d83855",
+      "md5": "51e1e2e65299ad3ac304fa96c79b25a5",
       "category": "ui"
     },
     {
       "path": "lib/ui/views/local_view.dart",
-      "size": 6753,
-      "sha256": "5d967a9a5ec997f1e8c9a678d8e64804a559e55bfaccecfdae4f59f4b1216f67",
-      "md5": "ba381111226995a7309163076d59c55f",
+      "size": 7623,
+      "sha256": "5cf18c8cc8f6794df6ba47e6d90c2ef7a92e34bd374bac6ea37272f42c4f79b1",
+      "md5": "f8cc810d783730f5cae1beafe888034d",
       "category": "ui"
     },
     {
       "path": "lib/ui/views/lyrics_view.dart",
-      "size": 3512,
-      "sha256": "c198318a3a999bddb6950009634e0834ecd6bc34bb4bba1629f47b242983c347",
-      "md5": "46842525a01b7645aefcbe4897ff0084",
+      "size": 3661,
+      "sha256": "b9f689f9b532b5435630855d2689de0b22c7947092b52145404b6a654c84606a",
+      "md5": "1e93c24837ff8cdb23f3df87161f29d4",
       "category": "ui"
     },
     {
       "path": "lib/ui/views/queue_view.dart",
-      "size": 6400,
-      "sha256": "8013767fa7d6040ef758e5073ebc385a1d6b550f2596ead0397283c2463aafbd",
-      "md5": "84969bf7185c49d6267887d8e1e5a74a",
+      "size": 7265,
+      "sha256": "37fff8cc25b3edd78cadfb3b7c4c676eb9bf22fb6446fdf165660f1866cc9650",
+      "md5": "2e2e322044c8a77ed5fc9a53e4a11233",
       "category": "ui"
     },
     {
       "path": "lib/ui/views/search_view.dart",
-      "size": 9835,
-      "sha256": "d50bd24ef93624e626502febeb8674089dcb12e5326641c806d0d39a89fde985",
-      "md5": "83e4cb11c899d9fee48875c0d159d548",
+      "size": 10229,
+      "sha256": "3f670f5d3eb9d0c56042f37d8f47bd5185a480593c1983d0547ea1debd435490",
+      "md5": "82f923c986da0dbbbb897660c68e8d5a",
       "category": "ui"
     },
     {
       "path": "lib/ui/views/settings_view.dart",
-      "size": 15630,
-      "sha256": "3537246a596b17800c77218f11e44138a8d74612255600553bc7254ed8978052",
-      "md5": "f9cf61965048228485e01f9b9ea23ea3",
+      "size": 16537,
+      "sha256": "e1d47bc962ccc04365bba1de90d41806ad271cc5ff678759ff7887b5b859be8c",
+      "md5": "9640f246ac5dd20845b3992c82aea89b",
       "category": "ui"
     },
     {
@@ -949,9 +949,9 @@
     },
     {
       "path": "ui/index.html",
-      "size": 1084879,
-      "sha256": "b8a0182e1192d0a1c19205841304b2fbe4660bfe7e5c6772f039a4aeb49e59c7",
-      "md5": "ead8745bb41391785d6dc8c8b94ed3e0",
+      "size": 1116351,
+      "sha256": "013ca6b7a4183110a49e465ee00ce634826c191f2066728a53ceb804bd18577c",
+      "md5": "3ce1863c13d90e82cd8466f4a3b1dbdd",
       "category": "ui"
     },
     {

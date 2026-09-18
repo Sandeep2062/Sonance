@@ -49,7 +49,10 @@ class _SearchViewState extends ConsumerState<SearchView> {
         actions: [
           TextButton(onPressed: () => Navigator.pop(ctx), child: const Text('Cancel')),
           ElevatedButton(
-            style: ElevatedButton.styleFrom(backgroundColor: SonanceTheme.emerald),
+            style: ElevatedButton.styleFrom(
+              backgroundColor: Theme.of(context).colorScheme.primary,
+              foregroundColor: Colors.white,
+            ),
             onPressed: () async {
               final url = urlCtrl.text.trim();
               Navigator.pop(ctx);
@@ -75,7 +78,7 @@ class _SearchViewState extends ConsumerState<SearchView> {
                 );
               }
             },
-            child: const Text('Import & Download All', style: TextStyle(color: Colors.black, fontWeight: FontWeight.bold)),
+            child: const Text('Import & Download All', style: TextStyle(fontWeight: FontWeight.bold)),
           ),
         ],
       ),
@@ -100,9 +103,9 @@ class _SearchViewState extends ConsumerState<SearchView> {
                     decoration: InputDecoration(
                       hintText: 'Search songs, artists, albums (Deezer, YouTube)...',
                       prefixIcon: const Icon(Icons.search),
-                      border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
+                      border: OutlineInputBorder(borderRadius: BorderRadius.circular(10)),
                       filled: true,
-                      fillColor: SonanceTheme.surfaceColor,
+                      fillColor: Theme.of(context).colorScheme.surface,
                     ),
                     onSubmitted: (q) => ref.read(searchProvider.notifier).search(q),
                   ),
@@ -110,12 +113,13 @@ class _SearchViewState extends ConsumerState<SearchView> {
                 const SizedBox(width: 12),
                 ElevatedButton(
                   style: ElevatedButton.styleFrom(
-                    backgroundColor: SonanceTheme.emerald,
+                    backgroundColor: Theme.of(context).colorScheme.primary,
+                    foregroundColor: Colors.white,
                     padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 18),
-                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
                   ),
                   onPressed: () => ref.read(searchProvider.notifier).search(_searchCtrl.text),
-                  child: const Text('Search', style: TextStyle(color: Colors.black, fontWeight: FontWeight.bold)),
+                  child: const Text('Search', style: TextStyle(fontWeight: FontWeight.bold)),
                 ),
               ],
             ),
@@ -123,8 +127,8 @@ class _SearchViewState extends ConsumerState<SearchView> {
             Row(
               children: [
                 TextButton.icon(
-                  icon: const Icon(Icons.link, size: 16, color: SonanceTheme.emerald),
-                  label: const Text('Paste Spotify Playlist / Album Link', style: TextStyle(color: SonanceTheme.emerald, fontSize: 12)),
+                  icon: Icon(Icons.link, size: 16, color: Theme.of(context).colorScheme.primary),
+                  label: Text('Paste Spotify Playlist / Album Link', style: TextStyle(color: Theme.of(context).colorScheme.primary, fontSize: 12)),
                   onPressed: _showSpotifyImportDialog,
                 ),
               ],
@@ -132,7 +136,7 @@ class _SearchViewState extends ConsumerState<SearchView> {
             const SizedBox(height: 8),
 
             if (search.isLoading)
-              const Expanded(child: Center(child: CircularProgressIndicator(color: SonanceTheme.emerald)))
+              Expanded(child: Center(child: CircularProgressIndicator(color: Theme.of(context).colorScheme.primary)))
             else if (search.results.isEmpty)
               const Expanded(
                 child: Center(
@@ -180,8 +184,11 @@ class _SearchViewState extends ConsumerState<SearchView> {
                                   const SizedBox(height: 4),
                                   Container(
                                     padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
-                                    decoration: BoxDecoration(color: Colors.white10, borderRadius: BorderRadius.circular(4)),
-                                    child: Text(track.source, style: const TextStyle(fontSize: 9, fontWeight: FontWeight.bold)),
+                                    decoration: BoxDecoration(
+                                      color: Theme.of(context).colorScheme.outlineVariant.withOpacity(0.2),
+                                      borderRadius: BorderRadius.circular(4),
+                                    ),
+                                    child: Text(track.source, style: TextStyle(fontSize: 9, fontWeight: FontWeight.bold, color: Theme.of(context).colorScheme.onSurface.withOpacity(0.7))),
                                   ),
                                 ],
                               ),
@@ -190,7 +197,7 @@ class _SearchViewState extends ConsumerState<SearchView> {
                               mainAxisAlignment: MainAxisAlignment.center,
                               children: [
                                 IconButton(
-                                  icon: const Icon(Icons.play_arrow, color: SonanceTheme.emerald),
+                                  icon: Icon(Icons.play_arrow, color: Theme.of(context).colorScheme.primary),
                                   onPressed: () => ref.read(playerProvider.notifier).playTrack(track),
                                   tooltip: 'Play Stream',
                                 ),

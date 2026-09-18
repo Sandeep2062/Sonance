@@ -40,13 +40,15 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
             leading: Padding(
               padding: const EdgeInsets.symmetric(vertical: 16),
               child: Container(
-                width: 42,
-                height: 42,
+                width: 40,
+                height: 40,
                 decoration: BoxDecoration(
-                  gradient: const LinearGradient(colors: [SonanceTheme.emerald, Color(0xFF0D9488)]),
-                  borderRadius: BorderRadius.circular(10),
+                  color: Theme.of(context).colorScheme.primary,
+                  borderRadius: BorderRadius.circular(8),
                 ),
-                child: const Center(child: Text('🎵', style: TextStyle(fontSize: 20))),
+                child: const Center(
+                  child: Icon(Icons.graphic_eq_rounded, color: Colors.white, size: 22),
+                ),
               ),
             ),
             labelType: NavigationRailLabelType.all,
@@ -58,7 +60,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
               NavigationRailDestination(icon: Icon(Icons.settings_outlined), selectedIcon: Icon(Icons.settings), label: Text('Settings')),
             ],
           ),
-          const VerticalDivider(thickness: 1, width: 1, color: SonanceTheme.borderColor),
+          VerticalDivider(thickness: 1, width: 1, color: Theme.of(context).dividerTheme.color ?? Theme.of(context).dividerColor),
 
           // Main View
           Expanded(
@@ -70,9 +72,9 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                 if (player.currentTrack != null)
                   Container(
                     height: 72,
-                    decoration: const BoxDecoration(
-                      color: SonanceTheme.surfaceColor,
-                      border: Border(top: BorderSide(color: SonanceTheme.borderColor)),
+                    decoration: BoxDecoration(
+                      color: Theme.of(context).colorScheme.surface,
+                      border: Border(top: BorderSide(color: Theme.of(context).dividerTheme.color ?? Theme.of(context).dividerColor)),
                     ),
                     padding: const EdgeInsets.symmetric(horizontal: 20),
                     child: Row(
@@ -80,8 +82,8 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                         ClipRRect(
                           borderRadius: BorderRadius.circular(6),
                           child: player.currentTrack!.coverUrl != null
-                              ? Image.network(player.currentTrack!.coverUrl!, width: 48, height: 48, fit: BoxFit.cover, errorBuilder: (_, __, ___) => Container(width: 48, height: 48, color: Colors.black))
-                              : Container(width: 48, height: 48, color: Colors.black, child: const Icon(Icons.music_note)),
+                              ? Image.network(player.currentTrack!.coverUrl!, width: 48, height: 48, fit: BoxFit.cover, errorBuilder: (_, __, ___) => Container(width: 48, height: 48, color: Theme.of(context).colorScheme.outlineVariant))
+                              : Container(width: 48, height: 48, color: Theme.of(context).colorScheme.outlineVariant, child: Icon(Icons.music_note, color: Theme.of(context).colorScheme.onSurface.withOpacity(0.5))),
                         ),
                         const SizedBox(width: 14),
                         Expanded(
@@ -89,18 +91,18 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                             mainAxisAlignment: MainAxisAlignment.center,
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
-                              Text(player.currentTrack!.title, maxLines: 1, overflow: TextOverflow.ellipsis, style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 13)),
-                              Text(player.currentTrack!.artist, maxLines: 1, overflow: TextOverflow.ellipsis, style: const TextStyle(color: Colors.grey, fontSize: 11)),
+                              Text(player.currentTrack!.title, maxLines: 1, overflow: TextOverflow.ellipsis, style: TextStyle(fontWeight: FontWeight.w600, fontSize: 13, color: Theme.of(context).colorScheme.onSurface)),
+                              Text(player.currentTrack!.artist, maxLines: 1, overflow: TextOverflow.ellipsis, style: TextStyle(color: Theme.of(context).colorScheme.onSurface.withOpacity(0.6), fontSize: 11)),
                             ],
                           ),
                         ),
                         IconButton(
-                          icon: Icon(player.isPlaying ? Icons.pause_circle_filled : Icons.play_circle_fill, size: 38, color: SonanceTheme.emerald),
+                          icon: Icon(player.isPlaying ? Icons.pause_circle_filled : Icons.play_circle_fill, size: 38, color: Theme.of(context).colorScheme.primary),
                           onPressed: () => ref.read(playerProvider.notifier).togglePlayPause(),
                         ),
                         const SizedBox(width: 12),
                         IconButton(
-                          icon: const Icon(Icons.lyrics, color: SonanceTheme.emerald),
+                          icon: Icon(Icons.lyrics_outlined, color: Theme.of(context).colorScheme.primary),
                           onPressed: () => setState(() => _selectedIndex = 3),
                           tooltip: 'Open Live Karaoke Lyrics',
                         ),
