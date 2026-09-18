@@ -1285,6 +1285,9 @@
       <button class="btn btn-secondary" onclick="openHoaModal()" style="padding:5px 9px; font-size:11px;" id="hoaHeaderBtn" title="Higher-Order Ambisonics & 360-Degree VR Spherical Spatializer Studio">
         🌐 360° Ambisonics
       </button>
+      <button class="btn btn-secondary" onclick="openBassModal()" style="padding:5px 9px; font-size:11px;" id="bassHeaderBtn" title="Psychoacoustic Subharmonic Bass Synthesizer & Missing Fundamental Studio">
+        🔊 Subharmonic Bass
+      </button>
       <button class="btn btn-secondary" onclick="openLrcStudioModal()" style="padding:5px 9px; font-size:11px;" id="lrcStudioHeaderBtn" title="Interactive LRC Studio & Live Time-Stamper">
         ✍️ LRC Studio
       </button>
@@ -7664,6 +7667,167 @@
     </div>
   </div>
 
+  <!-- Phase 32: Psychoacoustic Subharmonic Bass Synthesizer & Missing Fundamental Modal -->
+  <div class="modal-backdrop" id="bassModal" style="display:none;">
+    <div class="modal-card" style="width:880px; max-width:96vw; background:#161926; border:1px solid var(--border); border-radius:12px; box-shadow:0 12px 36px rgba(0,0,0,0.7); overflow:hidden;">
+      <div style="padding:16px 20px; background:#121520; border-bottom:1px solid var(--border); display:flex; justify-content:space-between; align-items:center;">
+        <div class="modal-title" style="font-size:14px; font-weight:700; display:flex; align-items:center; gap:8px;">
+          <span>🔊</span>
+          <span>Psychoacoustic Subharmonic Bass &amp; Missing Fundamental Studio</span>
+        </div>
+        <button onclick="closeBassModal()" style="background:none; border:none; color:var(--text-muted); font-size:16px; cursor:pointer;">✕</button>
+      </div>
+
+      <div style="padding:20px; max-height:75vh; overflow-y:auto; display:flex; flex-direction:column; gap:16px;">
+        <div style="font-size:11px; color:var(--text-dim); line-height:1.5;">
+          Subterranean low-end synthesizer and psychoacoustic exciter. Emulates dbx 120XP subharmonic octave division (24-36 Hz and 36-56 Hz bands) paired with MaxxBass Chebyshev harmonic overtones (2nd, 3rd, 4th harmonics) to exploit the brain's "missing fundamental" auditory cortex perception on mobile speakers and headphones, with 4th-order subsonic rumble cleanup and elliptical bass monomaker.
+        </div>
+
+        <div>
+          <label style="font-size:11px; font-weight:600; color:var(--text-muted); display:block; margin-bottom:6px;">Target Audio File:</label>
+          <div style="display:flex; gap:8px;">
+            <input type="text" id="bassTargetInput" class="search-input" style="width:100%; font-size:11px;" placeholder="Path to input audio file...">
+            <button class="btn btn-secondary" onclick="loadActiveTrackForBass()" style="font-size:11px; padding:6px 12px; white-space:nowrap;">Active Track</button>
+          </div>
+        </div>
+
+        <div>
+          <label style="font-size:11px; font-weight:600; color:var(--text-muted); display:block; margin-bottom:6px;">Custom Export Destination (Optional):</label>
+          <input type="text" id="bassOutputInput" class="search-input" style="width:100%; font-size:11px;" placeholder="Auto-generated if empty: <original>_subharmonic_bass.wav">
+        </div>
+
+        <!-- Factory Presets Selector -->
+        <div>
+          <label style="font-size:11px; font-weight:600; color:var(--text-muted); display:block; margin-bottom:6px;">Subharmonic Bass Presets:</label>
+          <div style="display:flex; flex-wrap:wrap; gap:8px;">
+            <button class="btn btn-secondary" onclick="applyBassPreset('club_sub_boom')" style="font-size:11px; padding:5px 10px;">💥 Club Sub Boom</button>
+            <button class="btn btn-secondary" onclick="applyBassPreset('punchy_kick_thump')" style="font-size:11px; padding:5px 10px;">🥁 Punchy Kick Thump</button>
+            <button class="btn btn-secondary" onclick="applyBassPreset('earbuds_maxxbass')" style="font-size:11px; padding:5px 10px;">🎧 Earbuds &amp; Mobile MaxxBass</button>
+            <button class="btn btn-secondary" onclick="applyBassPreset('audiophile_warm_bass')" style="font-size:11px; padding:5px 10px;">🎻 Audiophile Warm Bass</button>
+            <button class="btn btn-secondary" onclick="applyBassPreset('sub_rumble_cleanup')" style="font-size:11px; padding:5px 10px;">🧹 Subsonic Clean-Up</button>
+          </div>
+        </div>
+
+        <!-- Dual Column: Subharmonic Synthesizer & MaxxBass Psychoacoustic Overtones -->
+        <div style="display:grid; grid-template-columns: 1fr 1fr; gap:16px;">
+          <!-- Left: Subharmonic Octave Divider -->
+          <div style="background:#121520; border:1px solid var(--border); border-radius:10px; padding:14px; display:flex; flex-direction:column; gap:12px;">
+            <div style="font-size:12px; font-weight:700; color:var(--cyan); border-bottom:1px solid var(--border); padding-bottom:6px;">
+              ⚡ SUBHARMONIC SYNTHESIZER (dbx 120XP)
+            </div>
+
+            <div>
+              <div style="display:flex; justify-content:space-between; margin-bottom:4px;">
+                <label style="font-size:11px; font-weight:600; color:var(--text-muted);">Sub Band 1 (24 - 36 Hz):</label>
+                <span id="subBand1Val" style="font-size:11px; color:var(--cyan); font-weight:600;">0.85x</span>
+              </div>
+              <input type="range" id="subBand1Slider" min="0.0" max="1.5" step="0.05" value="0.85" style="width:100%;" oninput="document.getElementById('subBand1Val').innerText = parseFloat(this.value).toFixed(2) + 'x'">
+              <div style="font-size:10px; color:var(--text-dim); margin-top:2px;">Subterranean infrasonic rumble &amp; 808 sub-body.</div>
+            </div>
+
+            <div>
+              <div style="display:flex; justify-content:space-between; margin-bottom:4px;">
+                <label style="font-size:11px; font-weight:600; color:var(--text-muted);">Sub Band 2 (36 - 56 Hz):</label>
+                <span id="subBand2Val" style="font-size:11px; color:var(--cyan); font-weight:600;">0.50x</span>
+              </div>
+              <input type="range" id="subBand2Slider" min="0.0" max="1.5" step="0.05" value="0.50" style="width:100%;" oninput="document.getElementById('subBand2Val').innerText = parseFloat(this.value).toFixed(2) + 'x'">
+              <div style="font-size:10px; color:var(--text-dim); margin-top:2px;">Kick drum chest punch &amp; bass guitar fundamental.</div>
+            </div>
+
+            <div>
+              <div style="display:flex; justify-content:space-between; margin-bottom:4px;">
+                <label style="font-size:11px; font-weight:600; color:var(--text-muted);">Analog Tube Drive:</label>
+                <span id="bassDriveVal" style="font-size:11px; color:var(--gold); font-weight:600;">1.25x</span>
+              </div>
+              <input type="range" id="bassDriveSlider" min="1.0" max="2.5" step="0.05" value="1.25" style="width:100%;" oninput="document.getElementById('bassDriveVal').innerText = parseFloat(this.value).toFixed(2) + 'x'">
+              <div style="font-size:10px; color:var(--text-dim); margin-top:2px;">Warm asymmetrical soft-clipping for harmonic glue.</div>
+            </div>
+          </div>
+
+          <!-- Right: MaxxBass & Low-End Shaping -->
+          <div style="background:#121520; border:1px solid var(--border); border-radius:10px; padding:14px; display:flex; flex-direction:column; gap:12px;">
+            <div style="font-size:12px; font-weight:700; color:var(--gold); border-bottom:1px solid var(--border); padding-bottom:6px;">
+              🧠 MAXXBASS &amp; LOW-END SHAPING
+            </div>
+
+            <div>
+              <div style="display:flex; justify-content:space-between; margin-bottom:4px;">
+                <label style="font-size:11px; font-weight:600; color:var(--text-muted);">Missing Fundamental Intensity:</label>
+                <span id="maxxbassIntVal" style="font-size:11px; color:var(--gold); font-weight:600;">0.35x</span>
+              </div>
+              <input type="range" id="maxxbassIntSlider" min="0.0" max="1.5" step="0.05" value="0.35" style="width:100%;" oninput="document.getElementById('maxxbassIntVal').innerText = parseFloat(this.value).toFixed(2) + 'x'">
+              <div style="font-size:10px; color:var(--text-dim); margin-top:2px;">Chebyshev 2nd/3rd/4th harmonics perceived on mobile/earbuds.</div>
+            </div>
+
+            <div style="display:grid; grid-template-columns: 1fr 1fr; gap:8px;">
+              <div>
+                <label style="font-size:10px; font-weight:600; color:var(--text-muted); display:block; margin-bottom:4px;">MaxxBass HPF Cutoff:</label>
+                <select id="maxxbassCutoffSelect" class="search-input" style="width:100%; font-size:11px;">
+                  <option value="45">45 Hz</option>
+                  <option value="55" selected>55 Hz</option>
+                  <option value="65">65 Hz</option>
+                  <option value="75">75 Hz</option>
+                  <option value="85">85 Hz</option>
+                </select>
+              </div>
+              <div>
+                <label style="font-size:10px; font-weight:600; color:var(--text-muted); display:block; margin-bottom:4px;">Subsonic Rumble Filter:</label>
+                <select id="bassSubsonicSelect" class="search-input" style="width:100%; font-size:11px;">
+                  <option value="0">Bypass</option>
+                  <option value="20">20 Hz (Sub-audio)</option>
+                  <option value="22" selected>22 Hz (Standard)</option>
+                  <option value="28">28 Hz (Tight)</option>
+                  <option value="35">35 Hz (Vinyl Safe)</option>
+                </select>
+              </div>
+            </div>
+
+            <div>
+              <label style="font-size:10px; font-weight:600; color:var(--text-muted); display:block; margin-bottom:4px;">Elliptical Monomaker Cutoff:</label>
+              <select id="bassMonomakerSelect" class="search-input" style="width:100%; font-size:11px;">
+                <option value="0">Bypass (Keep Stereo Bass)</option>
+                <option value="80">80 Hz (Acoustic / Vinyl)</option>
+                <option value="100">100 Hz (Pop / Rock)</option>
+                <option value="120" selected>120 Hz (Club / EDM Punch)</option>
+                <option value="150">150 Hz (Heavy Focus)</option>
+              </select>
+              <div style="font-size:10px; color:var(--text-dim); margin-top:2px;">Sums sub-bass to center mono, preserving stereo imaging above.</div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Master Mixing & Levels -->
+        <div style="background:#0e111a; border:1px solid var(--border); border-radius:8px; padding:12px; display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:12px;">
+          <div style="display:flex; align-items:center; gap:8px;">
+            <label style="font-size:11px; font-weight:600; color:var(--text-muted);">Dry / Wet Mix:</label>
+            <input type="range" id="bassDryWetSlider" min="0" max="100" step="5" value="90" style="width:110px;" oninput="document.getElementById('bassDryWetVal').innerText = this.value + '%'">
+            <span id="bassDryWetVal" style="font-size:11px; color:var(--cyan); font-weight:600; min-width:36px;">90%</span>
+          </div>
+          <div style="display:flex; align-items:center; gap:8px;">
+            <label style="font-size:11px; font-weight:600; color:var(--text-muted);">Master Makeup Gain:</label>
+            <input type="range" id="bassGainSlider" min="-6" max="6" step="0.5" value="0.0" style="width:110px;" oninput="document.getElementById('bassGainVal').innerText = (this.value >= 0 ? '+' : '') + this.value + ' dB'">
+            <span id="bassGainVal" style="font-size:11px; color:var(--emerald); font-weight:600; min-width:48px;">0.0 dB</span>
+          </div>
+          <div style="font-size:10px; color:var(--text-dim);">Built-in True-Peak Brickwall Limiter (-0.2 dBFS safety ceiling)</div>
+        </div>
+
+        <div style="display:flex; justify-content:space-between; align-items:center; margin-top:4px;">
+          <span id="bassStatusText" style="font-size:11px; color:var(--text-dim);">Ready to synthesize subharmonics and missing fundamental</span>
+          <button class="btn btn-primary" onclick="runBassAction()" id="processBassBtn" style="font-size:12px; padding:7px 20px;">
+            🔊 Render Subharmonic Bass
+          </button>
+        </div>
+
+        <div id="bassOutputCard" style="background:#0b0d14; border:1px solid var(--border); border-radius:8px; padding:12px; font-family:monospace; font-size:11px; line-height:1.45; color:var(--cyan); min-height:80px; white-space:pre-wrap; overflow-x:auto;">Select audio file and click Render Subharmonic Bass.</div>
+      </div>
+
+      <div style="padding:10px 16px; background:#121520; border-top:1px solid var(--border); display:flex; justify-content:space-between; align-items:center;">
+        <span style="font-size:10px; color:var(--text-dim);">dbx 120XP Subharmonic Modeling / MaxxBass Auditory Cortex Psychoacoustics</span>
+        <button class="btn btn-secondary" onclick="closeBassModal()">Close</button>
+      </div>
+    </div>
+  </div>
+
   <!-- Podcast & Long Mix Bookmark Resumption Toast (Phase 10) -->
   <div id="podcastResumeToast" style="display:none; position:fixed; bottom:85px; right:20px; z-index:9999; background:#131722; border:1px solid var(--border); box-shadow:0 8px 24px rgba(0,0,0,0.6); border-radius:10px; padding:10px 14px; align-items:center; gap:10px; backdrop-filter:blur(10px);">
     <span style="font-size:16px;">⏱️</span>
@@ -10678,6 +10842,7 @@
         closeAtmosModal();
         closeConsoleModal();
         closeHoaModal();
+        closeBassModal();
         dismissPodcastResumeToast();
         const popup = document.getElementById('speedStudioPopup');
         if (popup) popup.style.display = 'none';
@@ -18913,6 +19078,137 @@
           }
           if (st) {
             st.innerText = 'Error rendering Ambisonics';
+            st.style.color = 'var(--rose)';
+          }
+          if (outCard) outCard.innerText = '✕ Error: ' + (err.message || err);
+        });
+      }
+    }
+
+    // ------------------ Phase 32: Psychoacoustic Subharmonic Bass Synthesizer ------------------
+    function openBassModal() {
+      const modal = document.getElementById('bassModal');
+      if (modal) modal.style.display = 'flex';
+    }
+
+    function closeBassModal() {
+      const modal = document.getElementById('bassModal');
+      if (modal) modal.style.display = 'none';
+    }
+
+    function loadActiveTrackForBass() {
+      if (state.currentTrack && state.currentTrack.path) {
+        const inp = document.getElementById('bassTargetInput');
+        if (inp) inp.value = state.currentTrack.path;
+      } else {
+        showToast('No active track loaded in player');
+      }
+    }
+
+    const BASS_PRESETS_DATA = {
+      club_sub_boom: { sub1: 0.85, sub2: 0.50, mb: 0.35, mb_cut: '55', drive: 1.25, hpf: '22', mono: '120', mix: 90 },
+      punchy_kick_thump: { sub1: 0.30, sub2: 0.80, mb: 0.45, mb_cut: '65', drive: 1.35, hpf: '28', mono: '100', mix: 85 },
+      earbuds_maxxbass: { sub1: 0.15, sub2: 0.35, mb: 0.95, mb_cut: '75', drive: 1.15, hpf: '35', mono: '90', mix: 90 },
+      audiophile_warm_bass: { sub1: 0.35, sub2: 0.40, mb: 0.25, mb_cut: '50', drive: 1.40, hpf: '20', mono: '80', mix: 75 },
+      sub_rumble_cleanup: { sub1: 0.0, sub2: 0.0, mb: 0.0, mb_cut: '60', drive: 1.0, hpf: '30', mono: '110', mix: 100 }
+    };
+
+    function applyBassPreset(pKey) {
+      const p = BASS_PRESETS_DATA[pKey];
+      if (!p) return;
+
+      const s1 = document.getElementById('subBand1Slider');
+      if (s1) { s1.value = p.sub1; document.getElementById('subBand1Val').innerText = p.sub1.toFixed(2) + 'x'; }
+
+      const s2 = document.getElementById('subBand2Slider');
+      if (s2) { s2.value = p.sub2; document.getElementById('subBand2Val').innerText = p.sub2.toFixed(2) + 'x'; }
+
+      const mb = document.getElementById('maxxbassIntSlider');
+      if (mb) { mb.value = p.mb; document.getElementById('maxxbassIntVal').innerText = p.mb.toFixed(2) + 'x'; }
+
+      const mbCut = document.getElementById('maxxbassCutoffSelect');
+      if (mbCut) mbCut.value = p.mb_cut;
+
+      const drv = document.getElementById('bassDriveSlider');
+      if (drv) { drv.value = p.drive; document.getElementById('bassDriveVal').innerText = p.drive.toFixed(2) + 'x'; }
+
+      const hpf = document.getElementById('bassSubsonicSelect');
+      if (hpf) hpf.value = p.hpf;
+
+      const mono = document.getElementById('bassMonomakerSelect');
+      if (mono) mono.value = p.mono;
+
+      const dw = document.getElementById('bassDryWetSlider');
+      if (dw) { dw.value = p.mix; document.getElementById('bassDryWetVal').innerText = p.mix + '%'; }
+
+      showToast('Loaded Subharmonic Bass preset: ' + pKey);
+    }
+
+    function runBassAction() {
+      const inp = (document.getElementById('bassTargetInput').value || '').trim();
+      const out = (document.getElementById('bassOutputInput').value || '').trim() || null;
+      const sub1 = parseFloat(document.getElementById('subBand1Slider').value);
+      const sub2 = parseFloat(document.getElementById('subBand2Slider').value);
+      const mb = parseFloat(document.getElementById('maxxbassIntSlider').value);
+      const mbCut = parseFloat(document.getElementById('maxxbassCutoffSelect').value);
+      const drv = parseFloat(document.getElementById('bassDriveSlider').value);
+      const hpf = parseFloat(document.getElementById('bassSubsonicSelect').value);
+      const mono = parseFloat(document.getElementById('bassMonomakerSelect').value);
+      const mix = parseFloat(document.getElementById('bassDryWetSlider').value) / 100.0;
+      const gain = parseFloat(document.getElementById('bassGainSlider').value);
+
+      const btn = document.getElementById('processBassBtn');
+      const st = document.getElementById('bassStatusText');
+      const outCard = document.getElementById('bassOutputCard');
+
+      if (!inp) {
+        showToast('Please select input audio file');
+        return;
+      }
+
+      if (btn) {
+        btn.disabled = true;
+        btn.innerText = '🔊 Synthesizing Bass...';
+      }
+      if (st) {
+        st.innerText = 'Synthesizing subharmonics & Chebyshev psychoacoustic harmonics...';
+        st.style.color = 'var(--cyan)';
+      }
+      if (outCard) outCard.innerText = 'Calculating zero-crossing octave dividers and auditory cortex harmonics...';
+
+      if (window.pywebview && window.pywebview.api && window.pywebview.api.render_subharmonic_bass) {
+        window.pywebview.api.render_subharmonic_bass(
+          inp, out, 'custom', sub1, sub2, mb, mbCut, drv, hpf, mono, mix, gain
+        ).then(res => {
+          if (btn) {
+            btn.disabled = false;
+            btn.innerText = '🔊 Render Subharmonic Bass';
+          }
+          if (res) {
+            if (st) {
+              st.innerText = '✓ Subharmonic bass master rendered successfully!';
+              st.style.color = 'var(--emerald)';
+            }
+            const s = res.settings;
+            let card = `PSYCHOACOUSTIC SUBHARMONIC BASS MASTER REPORT\n`;
+            card += `Input Source     : ${res.input_path}\n`;
+            card += `Output Master    : ${res.output_path}\n`;
+            card += `Master Format    : 24-bit Linear PCM WAV @ ${res.sample_rate} Hz (${res.duration_sec}s)\n`;
+            card += `Peak / RMS Level : ${res.out_peak_dbfs} dBFS / ${res.out_rms_dbfs} dBFS (Gain: ${res.sub_energy_gain_db > 0 ? '+' : ''}${res.sub_energy_gain_db.toFixed(2)} dB)\n`;
+            card += `Subharmonic 24-36: Level ${s.sub_24_36_gain.toFixed(2)}x (Energy: ${res.sub_1_rms_dbfs} dBFS)\n`;
+            card += `Subharmonic 36-56: Level ${s.sub_36_56_gain.toFixed(2)}x (Energy: ${res.sub_2_rms_dbfs} dBFS)\n`;
+            card += `MaxxBass Missing : Intensity ${s.maxxbass_intensity.toFixed(2)}x @ Cutoff ${s.maxxbass_cutoff_hz.toFixed(0)} Hz (Energy: ${res.maxxbass_rms_dbfs} dBFS)\n`;
+            card += `Subsonic / Mono  : HPF ${s.subsonic_hpf_hz.toFixed(0)} Hz | Monomaker ${s.monomaker_hz.toFixed(0)} Hz | Tube Drive ${s.tube_drive.toFixed(2)}x\n`;
+            if (outCard) outCard.innerText = card;
+            showToast('Subharmonic bass rendered successfully!');
+          }
+        }).catch(err => {
+          if (btn) {
+            btn.disabled = false;
+            btn.innerText = '🔊 Render Subharmonic Bass';
+          }
+          if (st) {
+            st.innerText = 'Error processing subharmonic bass';
             st.style.color = 'var(--rose)';
           }
           if (outCard) outCard.innerText = '✕ Error: ' + (err.message || err);

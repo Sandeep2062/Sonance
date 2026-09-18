@@ -116,8 +116,9 @@ import plugin_host
 import spatial_multichannel
 import console_channel_strip
 import ambisonic_hoa
+import subharmonic_bass
 
-APP_VERSION = "3.1.0"
+APP_VERSION = "3.2.0"
 GITHUB_REPO = "Sandeep2062/Sonance"
 APP_DIR = Path(__file__).parent.resolve()
 UI_PATH = APP_DIR / "ui" / "index.html"
@@ -1891,6 +1892,42 @@ class LyricsAPI:
             base_azimuth_deg=base_azimuth_deg,
             base_elevation_deg=base_elevation_deg,
             orbit_period_sec=orbit_period_sec,
+        )
+
+    # ------------------ Phase 32: Psychoacoustic Subharmonic Bass Synthesizer ------------------
+    def get_subharmonic_presets(self) -> Dict[str, Any]:
+        """Returns the dictionary of factory presets for Subharmonic Bass Studio."""
+        return subharmonic_bass.FACTORY_PRESETS
+
+    def render_subharmonic_bass(
+        self,
+        input_path: str,
+        output_path: Optional[str] = None,
+        preset: str = "club_sub_boom",
+        sub_24_36_gain: Optional[float] = None,
+        sub_36_56_gain: Optional[float] = None,
+        maxxbass_intensity: Optional[float] = None,
+        maxxbass_cutoff_hz: Optional[float] = None,
+        tube_drive: Optional[float] = None,
+        subsonic_hpf_hz: Optional[float] = None,
+        monomaker_hz: Optional[float] = None,
+        dry_wet: Optional[float] = None,
+        output_gain_db: float = 0.0,
+    ) -> Dict[str, Any]:
+        """Synthesizes subharmonics and psychoacoustic missing fundamental overtones for deep low-end."""
+        return subharmonic_bass.render_subharmonic_bass(
+            input_path=input_path,
+            output_path=output_path,
+            preset=preset,
+            sub_24_36_gain=sub_24_36_gain,
+            sub_36_56_gain=sub_36_56_gain,
+            maxxbass_intensity=maxxbass_intensity,
+            maxxbass_cutoff_hz=maxxbass_cutoff_hz,
+            tube_drive=tube_drive,
+            subsonic_hpf_hz=subsonic_hpf_hz,
+            monomaker_hz=monomaker_hz,
+            dry_wet=dry_wet,
+            output_gain_db=output_gain_db,
         )
 
     def _save_last_folder(self, folder: str):

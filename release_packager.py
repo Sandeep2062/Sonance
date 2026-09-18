@@ -17,7 +17,7 @@ import importlib
 from pathlib import Path
 from typing import Dict, Any, List, Optional, Tuple
 
-APP_VERSION = "3.1.0"
+APP_VERSION = "3.2.0"
 WORKSTATION_NAME = "Sonance Audiophile Workstation"
 ROOT_DIR = Path(__file__).parent.resolve()
 
@@ -92,6 +92,9 @@ CORE_PHASE_MODULES = [
 
     # Phase 31: Higher-Order Ambisonics & 360-Degree VR Spatializer Studio
     ("ambisonic_hoa", "Phase 31: Higher-Order Ambisonics & 360-Degree VR Spatializer Studio"),
+
+    # Phase 32: Psychoacoustic Subharmonic Bass Synthesizer & Missing Fundamental Studio
+    ("subharmonic_bass", "Phase 32: Psychoacoustic Subharmonic Bass Synthesizer & Missing Fundamental Studio"),
 ]
 
 # File classification patterns

@@ -12,7 +12,7 @@ import webbrowser
 from pathlib import Path
 from typing import Dict, Any, Optional
 
-APP_VERSION = "3.1.0"
+APP_VERSION = "3.2.0"
 WORKSTATION_NAME = "Sonance Audiophile Workstation"
 ROOT_DIR = Path(__file__).parent.resolve()
 DEFAULT_MANUAL_PATH = ROOT_DIR / "ui" / "manual.html"
@@ -327,6 +327,16 @@ PHASES_DATA = [
         "desc": "Encodes stereo audio into real spherical harmonics up to 3rd order (16 channels ACN / SN3D AmbiX) with dynamic 3D spatial trajectories (helix, horizontal orbit, pendulum, overhead halo), air absorption damping, and dual rendering into 3D binaural headphones (Woodworth ITD + pinna notch) or discrete 4/9/16-channel 24-bit PCM AmbiX WAV.",
         "dsp_math": "Spherical harmonics: Y_l^m(theta, phi) = N_l^m * P_l^{|m|}(sin phi) * trig_m(theta); AmbiX ACN index: n = l^2 + l + m; Inverse-distance damping: A(d) = 1/max(1, d) * exp(-alpha * f * d)",
         "features": ["1st, 2nd, and 3rd order Ambisonic B-Format encoding (4, 9, 16 channels)", "Industry-standard ACN channel ordering and SN3D normalization (AmbiX)", "5 dynamic 3D motion trajectories (Orbit Helix, Horizontal 360, Pendulum Arc, Overhead, Fixed)", "3D Binaural Headphone Virtualizer via 14-point spherical loudspeaker array with Woodworth ITD delay & pinna notch", "Discrete multichannel 24-bit linear PCM WAV export ready for VR (Quest, Vision Pro) & YouTube 360"]
+    },
+    {
+        "phase": 32,
+        "title": "Psychoacoustic Subharmonic Bass Synthesizer & Missing Fundamental Studio",
+        "category": "Bass Processing & Psychoacoustics",
+        "modules": ["subharmonic_bass.py"],
+        "cli": "python sonance.py --bass master.wav [output.wav] --preset club_sub_boom | --sub-24-36 0.85 --sub-36-56 0.50 --maxxbass 0.35",
+        "desc": "Subterranean bass synthesis and psychoacoustic low-end excitation. Emulates the hardware dbx 120XP subharmonic octave divider (24-36 Hz and 36-56 Hz bands) to generate sub-bass one octave down, paired with MaxxBass Chebyshev harmonic overtone synthesis (2nd, 3rd, 4th harmonics) exploiting the auditory cortex missing fundamental effect for massive bass on mobile speakers and headphones. Includes 4th-order subsonic rumble cleanup (20-35 Hz), elliptical bass monomaker (80-150 Hz), analog tube saturation, and True-Peak safety limiting (-0.2 dBFS).",
+        "dsp_math": "Subharmonic octave division: f_{sub} = f_0 / 2 via zero-crossing flip-flop tracking; Chebyshev missing fundamental overtones: T_2(x) = 2x^2 - 1, T_3(x) = 4x^3 - 3x, T_4(x) = 8x^4 - 8x^2 + 1; Low-cut subsonic Butterworth: H_{HP4}(s) = s^4 / B_4(s)",
+        "features": ["Dual-band subharmonic octave divider (24-36 Hz subterranean & 36-56 Hz kick punch)", "MaxxBass psychoacoustic missing fundamental exciter for small speaker & headphone translation", "Asymmetrical analog tube saturation & transformer warmth", "4th-order Butterworth subsonic rumble high-pass filter (20-35 Hz)", "Elliptical low-end monomaker (80-150 Hz) for club sound system punch and vinyl compliance", "True-Peak brickwall safety limiter (-0.2 dBFS) with 24-bit PCM WAV export"]
     }
 ]
 
@@ -389,6 +399,16 @@ MATH_FORMULAS = [
         "name": "Higher-Order Ambisonics Spherical Harmonics (ACN / SN3D)",
         "formula": "B_l^m(t) = S(t) \\cdot Y_l^m(\\theta, \\phi) = S(t) \\cdot N_l^{|m|} P_l^{|m|}(\\sin\\phi) \\begin{cases} \\cos(m\\theta) & m \\ge 0 \\\\ \\sin(|m|\\theta) & m < 0 \\end{cases}",
         "explanation": "Decomposes directional sound fields on the surface of a sphere into orthogonal spherical harmonic basis functions of degree l and order m, indexed by Ambisonic Channel Number (ACN n = l^2 + l + m) under Schmidt Semi-Normalized (SN3D) convention."
+    },
+    {
+        "name": "dbx 120XP Subharmonic Octave Division",
+        "formula": "y_{\\text{sub}}(t) = A_{\\text{env}}(t) \\cdot \\sin\\left(\\frac{\\omega_0}{2} t + \\phi_0\\right) \\cdot \\text{sgn}\\left(z(t)\\right)",
+        "explanation": "Extracts the fundamental bass envelope in the 48-112 Hz band, divides cycle frequency by 2 via zero-crossing transition detection, and synthesizes pure sub-octave energy locked to musical dynamics."
+    },
+    {
+        "name": "MaxxBass Psychoacoustic Missing Fundamental (Chebyshev Polynomials)",
+        "formula": "H_{\\text{synth}}(x) = c_2 T_2(x) + c_3 T_3(x) + c_4 T_4(x) = c_2(2x^2 - 1) + c_3(4x^3 - 3x) + c_4(8x^4 - 8x^2 + 1)",
+        "explanation": "Generates 2nd, 3rd, and 4th order harmonic overtones of low-frequency fundamentals. The auditory cortex perceives the missing fundamental frequency even on mobile transducers incapable of reproducing physical sub-bass."
     }
 ]
 
@@ -1116,7 +1136,7 @@ def build_manual_html() -> str:
                 <div class="meta-tags">
                     <span class="meta-tag">⚡ Version {APP_VERSION}</span>
                     <span class="meta-tag">🎼 {total_phases} Master Phases</span>
-                    <span class="meta-tag">🎛️ 48 DSP Engines &amp; Core Modules</span>
+                    <span class="meta-tag">🎛️ 49 DSP Engines &amp; Core Modules</span>
                     <span class="meta-tag">🌐 100% Offline Single-File Architecture</span>
                 </div>
             </div>

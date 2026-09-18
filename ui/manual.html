@@ -617,7 +617,7 @@
         </div>
         <div class="search-box">
             <span class="search-icon">🔍</span>
-            <input type="text" id="manualSearchInput" placeholder="Search 31 phases, DSP algorithms, CLI commands..." onkeyup="filterManualContent()">
+            <input type="text" id="manualSearchInput" placeholder="Search 32 phases, DSP algorithms, CLI commands..." onkeyup="filterManualContent()">
         </div>
         <div class="header-actions">
             <a href="#shortcuts-section" class="btn-link">⌨️ Shortcuts</a>
@@ -629,7 +629,7 @@
 
     <div class="app-container">
         <aside id="sidebarNav">
-            <div class="sidebar-section-title">Master Roadmap (Phases 1-31)</div>
+            <div class="sidebar-section-title">Master Roadmap (Phases 1-32)</div>
             <a href="#phase-1" class="toc-item" onclick="setActiveLink(this)">
             <span class="toc-num">01</span>
             <span class="toc-name">Core Multi-Threaded Engine, Synchronized Lyrics & Metadata Tagging</span>
@@ -723,6 +723,9 @@
         </a><a href="#phase-31" class="toc-item" onclick="setActiveLink(this)">
             <span class="toc-num">31</span>
             <span class="toc-name">Higher-Order Ambisonics (HOA 1st/2nd/3rd Order) & 360-Degree VR Spatializer Studio</span>
+        </a><a href="#phase-32" class="toc-item" onclick="setActiveLink(this)">
+            <span class="toc-num">32</span>
+            <span class="toc-name">Psychoacoustic Subharmonic Bass Synthesizer & Missing Fundamental Studio</span>
         </a>
             
             <div class="sidebar-section-title" style="margin-top:16px;">Reference &amp; Theory</div>
@@ -739,15 +742,15 @@
                     bit-exact CD extraction, stem separation, and over 25 professional mastering and DSP engineering studios.
                 </p>
                 <div class="meta-tags">
-                    <span class="meta-tag">⚡ Version 3.1.0</span>
-                    <span class="meta-tag">🎼 31 Master Phases</span>
-                    <span class="meta-tag">🎛️ 48 DSP Engines &amp; Core Modules</span>
+                    <span class="meta-tag">⚡ Version 3.2.0</span>
+                    <span class="meta-tag">🎼 32 Master Phases</span>
+                    <span class="meta-tag">🎛️ 49 DSP Engines &amp; Core Modules</span>
                     <span class="meta-tag">🌐 100% Offline Single-File Architecture</span>
                 </div>
             </div>
 
             <div class="section-header" id="catalog-section">
-                <h2>Master Phase Catalog (1 - 31)</h2>
+                <h2>Master Phase Catalog (1 - 32)</h2>
                 <span style="font-size:12px; color:var(--text-muted);">Click any phase to jump</span>
             </div>
 
@@ -1713,6 +1716,37 @@
             </div>
         </article>
         
+        <article class="phase-card" id="phase-32">
+            <div class="phase-card-header">
+                <div class="phase-badge-row">
+                    <span class="phase-pill">PHASE 32</span>
+                    <span class="phase-cat">Bass Processing & Psychoacoustics</span>
+                </div>
+                <h2 class="phase-title">Psychoacoustic Subharmonic Bass Synthesizer & Missing Fundamental Studio</h2>
+                <div class="module-bar"><span class="badge-module">subharmonic_bass.py</span></div>
+            </div>
+            
+            <p class="phase-desc">Subterranean bass synthesis and psychoacoustic low-end excitation. Emulates the hardware dbx 120XP subharmonic octave divider (24-36 Hz and 36-56 Hz bands) to generate sub-bass one octave down, paired with MaxxBass Chebyshev harmonic overtone synthesis (2nd, 3rd, 4th harmonics) exploiting the auditory cortex missing fundamental effect for massive bass on mobile speakers and headphones. Includes 4th-order subsonic rumble cleanup (20-35 Hz), elliptical bass monomaker (80-150 Hz), analog tube saturation, and True-Peak safety limiting (-0.2 dBFS).</p>
+            
+            <div class="code-box">
+                <div class="code-label">CLI INVOCATION</div>
+                <div class="code-line">
+                    <code>python sonance.py --bass master.wav [output.wav] --preset club_sub_boom | --sub-24-36 0.85 --sub-36-56 0.50 --maxxbass 0.35</code>
+                    <button class="copy-btn" onclick="copyCode(this, 'python sonance.py --bass master.wav [output.wav] --preset club_sub_boom | --sub-24-36 0.85 --sub-36-56 0.50 --maxxbass 0.35')">Copy</button>
+                </div>
+            </div>
+            
+            <div class="math-box">
+                <div class="math-label">MATHEMATICAL / DSP FOUNDATION</div>
+                <div class="math-equation">Subharmonic octave division: f_{sub} = f_0 / 2 via zero-crossing flip-flop tracking; Chebyshev missing fundamental overtones: T_2(x) = 2x^2 - 1, T_3(x) = 4x^3 - 3x, T_4(x) = 8x^4 - 8x^2 + 1; Low-cut subsonic Butterworth: H_{HP4}(s) = s^4 / B_4(s)</div>
+            </div>
+            
+            <div class="features-box">
+                <div class="features-label">KEY CAPABILITIES</div>
+                <ul class="features-list"><li>Dual-band subharmonic octave divider (24-36 Hz subterranean & 36-56 Hz kick punch)</li><li>MaxxBass psychoacoustic missing fundamental exciter for small speaker & headphone translation</li><li>Asymmetrical analog tube saturation & transformer warmth</li><li>4th-order Butterworth subsonic rumble high-pass filter (20-35 Hz)</li><li>Elliptical low-end monomaker (80-150 Hz) for club sound system punch and vinyl compliance</li><li>True-Peak brickwall safety limiter (-0.2 dBFS) with 24-bit PCM WAV export</li></ul>
+            </div>
+        </article>
+        
 
             <div class="section-header" id="shortcuts-section">
                 <h2>Master Keyboard Shortcuts</h2>
@@ -1837,6 +1871,18 @@
             <h3 class="formula-title">Higher-Order Ambisonics Spherical Harmonics (ACN / SN3D)</h3>
             <div class="formula-math">B_l^m(t) = S(t) \cdot Y_l^m(\theta, \phi) = S(t) \cdot N_l^{|m|} P_l^{|m|}(\sin\phi) \begin{cases} \cos(m\theta) & m \ge 0 \\ \sin(|m|\theta) & m < 0 \end{cases}</div>
             <p class="formula-desc">Decomposes directional sound fields on the surface of a sphere into orthogonal spherical harmonic basis functions of degree l and order m, indexed by Ambisonic Channel Number (ACN n = l^2 + l + m) under Schmidt Semi-Normalized (SN3D) convention.</p>
+        </div>
+        
+        <div class="formula-card">
+            <h3 class="formula-title">dbx 120XP Subharmonic Octave Division</h3>
+            <div class="formula-math">y_{\text{sub}}(t) = A_{\text{env}}(t) \cdot \sin\left(\frac{\omega_0}{2} t + \phi_0\right) \cdot \text{sgn}\left(z(t)\right)</div>
+            <p class="formula-desc">Extracts the fundamental bass envelope in the 48-112 Hz band, divides cycle frequency by 2 via zero-crossing transition detection, and synthesizes pure sub-octave energy locked to musical dynamics.</p>
+        </div>
+        
+        <div class="formula-card">
+            <h3 class="formula-title">MaxxBass Psychoacoustic Missing Fundamental (Chebyshev Polynomials)</h3>
+            <div class="formula-math">H_{\text{synth}}(x) = c_2 T_2(x) + c_3 T_3(x) + c_4 T_4(x) = c_2(2x^2 - 1) + c_3(4x^3 - 3x) + c_4(8x^4 - 8x^2 + 1)</div>
+            <p class="formula-desc">Generates 2nd, 3rd, and 4th order harmonic overtones of low-frequency fundamentals. The auditory cortex perceives the missing fundamental frequency even on mobile transducers incapable of reproducing physical sub-bass.</p>
         </div>
         
             </div>

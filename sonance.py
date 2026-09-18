@@ -506,6 +506,13 @@ Examples:
       help="Higher-Order Ambisonics & 360-Degree VR Spatializer: --hoa <audio_file> [output_file] [--order 1|2|3] [--mode binaural|bformat] [--trajectory orbit_helix|orbit_horizontal|orbit_pendulum|fixed] [--azimuth 0] [--elevation 0] [--period 12]",
   )
   parser.add_argument(
+      "--bass",
+      "--subharmonic",
+      nargs="*",
+      metavar="PARAM",
+      help="Psychoacoustic subharmonic bass synthesizer & missing fundamental studio: --bass <audio_file> [output_file] [--preset club_sub_boom|punchy_kick_thump|earbuds_maxxbass|audiophile_warm_bass|sub_rumble_cleanup] [--sub-24-36 0.85] [--sub-36-56 0.5] [--maxxbass 0.35] [--drive 1.25] [--subsonic-hpf 25] [--monomaker 120] [--mix 0.9]",
+  )
+  parser.add_argument(
       "--version",
       action="version",
       version=f"Sonance v{modern_lyrics_downloader.APP_VERSION}",
@@ -2929,6 +2936,99 @@ Examples:
     print(f"[+] Audio Format     : 24-bit Linear PCM WAV @ {res['sample_rate']} Hz ({res['duration_sec']}s)")
     print(f"[+] Channels Exported: {res['channels']} ({res['mode_label']})")
     print(f"[+] Peak / RMS Level : {res['peak_dbfs']} dBFS / {res['rms_dbfs']} dBFS")
+    print("=" * 70)
+    return
+
+  if args.bass is not None:
+    import subharmonic_bass
+    params = list(args.bass) + list(unknown)
+    if not params:
+      print("[-] Error: --bass requires an input audio file.")
+      print("    Usage: python sonance.py --bass <audio_file> [output_file] [--preset <name>] [--sub-24-36 <val>] [--sub-36-56 <val>] [--maxxbass <val>]")
+      return
+
+    inp = params[0]
+    out = None
+    preset = "club_sub_boom"
+    sub_1 = None
+    sub_2 = None
+    maxxbass = None
+    mb_cutoff = None
+    drive = None
+    hpf = None
+    monomaker = None
+    mix = None
+    gain = 0.0
+
+    idx = 1
+    while idx < len(params):
+      item = params[idx]
+      if item == "--preset" and idx + 1 < len(params):
+        preset = params[idx + 1]
+        idx += 2
+      elif item in ("--sub-24-36", "--sub1") and idx + 1 < len(params):
+        sub_1 = float(params[idx + 1])
+        idx += 2
+      elif item in ("--sub-36-56", "--sub2") and idx + 1 < len(params):
+        sub_2 = float(params[idx + 1])
+        idx += 2
+      elif item in ("--maxxbass", "--harmonics") and idx + 1 < len(params):
+        maxxbass = float(params[idx + 1])
+        idx += 2
+      elif item == "--maxxbass-cutoff" and idx + 1 < len(params):
+        mb_cutoff = float(params[idx + 1])
+        idx += 2
+      elif item == "--drive" and idx + 1 < len(params):
+        drive = float(params[idx + 1])
+        idx += 2
+      elif item in ("--subsonic-hpf", "--hpf") and idx + 1 < len(params):
+        hpf = float(params[idx + 1])
+        idx += 2
+      elif item in ("--monomaker", "--mono") and idx + 1 < len(params):
+        monomaker = float(params[idx + 1])
+        idx += 2
+      elif item in ("--mix", "--dry-wet") and idx + 1 < len(params):
+        mix = float(params[idx + 1])
+        idx += 2
+      elif item in ("--gain", "--makeup") and idx + 1 < len(params):
+        gain = float(params[idx + 1])
+        idx += 2
+      elif not item.startswith("-") and out is None:
+        out = item
+        idx += 1
+      else:
+        idx += 1
+
+    print("=" * 70)
+    print("  SONANCE AUDIOPHILE WORKSTATION v3.2.0")
+    print("  Phase 32: Psychoacoustic Subharmonic Bass & Missing Fundamental Studio")
+    print("=" * 70)
+    print(f"[*] Input Source     : {inp}")
+    print(f"[*] Preset Selected  : {preset.upper()}")
+
+    res = subharmonic_bass.render_subharmonic_bass(
+        input_path=inp,
+        output_path=out,
+        preset=preset,
+        sub_24_36_gain=sub_1,
+        sub_36_56_gain=sub_2,
+        maxxbass_intensity=maxxbass,
+        maxxbass_cutoff_hz=mb_cutoff,
+        tube_drive=drive,
+        subsonic_hpf_hz=hpf,
+        monomaker_hz=monomaker,
+        dry_wet=mix,
+        output_gain_db=gain,
+    )
+
+    s = res["settings"]
+    print(f"[+] Output Master    : {res['output_path']}")
+    print(f"[+] Audio Format     : 24-bit Linear PCM WAV @ {res['sample_rate']} Hz ({res['duration_sec']}s)")
+    print(f"[+] In Peak / RMS    : {res['in_peak_dbfs']} dBFS / {res['in_rms_dbfs']} dBFS")
+    print(f"[+] Out Peak / RMS   : {res['out_peak_dbfs']} dBFS / {res['out_rms_dbfs']} dBFS (Sub Energy: {res['sub_energy_gain_db']:+0.2f} dB)")
+    print(f"[+] Subharmonics     : 24-36Hz: {s['sub_24_36_gain']:.2f} ({res['sub_1_rms_dbfs']} dBFS) | 36-56Hz: {s['sub_36_56_gain']:.2f} ({res['sub_2_rms_dbfs']} dBFS)")
+    print(f"[+] MaxxBass Missing : Intensity: {s['maxxbass_intensity']:.2f} | HPF Cutoff: {s['maxxbass_cutoff_hz']:.0f} Hz ({res['maxxbass_rms_dbfs']} dBFS)")
+    print(f"[+] Low-End Shaping  : Subsonic HPF: {s['subsonic_hpf_hz']:.0f} Hz | Monomaker: {s['monomaker_hz']:.0f} Hz | Tube Drive: {s['tube_drive']:.2f}x")
     print("=" * 70)
     return
 
