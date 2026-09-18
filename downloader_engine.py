@@ -36,13 +36,14 @@ except ImportError:
     HAS_MUTAGEN = False
 
 import lyrics_engine
+import sonance_paths
 
 # ------------------ Defaults & Settings ------------------
 
-CONFIG_PATH = Path(__file__).parent.resolve() / "lyrics_gui_config.json"
-AUTH_CONFIG_PATH = Path(__file__).parent.resolve() / "user_secrets.json"
+CONFIG_PATH = sonance_paths.get_config_path()
+AUTH_CONFIG_PATH = sonance_paths.get_secrets_path()
 
-DEFAULT_DOWNLOAD_DIR = str(Path.home() / "Music" / "Sonance")
+DEFAULT_DOWNLOAD_DIR = str(sonance_paths.get_default_download_dir())
 
 HEADERS = {
     "User-Agent": "Sonance/1.0 (https://github.com/Sandeep2062/Sonance)",
@@ -387,7 +388,7 @@ def download_track_with_lyrics(
         # Universal fallback: search YouTube high quality audio via yt-dlp
         try:
             query = f"{artist} - {title} audio"
-            yt_cookie_path = str(Path(__file__).parent.resolve() / "cookies" / "youtube_cookies.txt")
+            yt_cookie_path = str(sonance_paths.get_cookies_dir() / "youtube_cookies.txt")
             ydl_opts = {
                 "format": "bestaudio/best",
                 "outtmpl": str(dest_folder / f"{base_name}.%(ext)s"),

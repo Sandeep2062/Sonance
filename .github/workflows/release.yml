@@ -11,7 +11,7 @@ permissions:
 
 jobs:
   build-windows:
-    name: Build Windows Executable & NuPkg
+    name: Build Windows Installer & Portable
     runs-on: windows-latest
     steps:
       - name: Checkout Code
@@ -26,24 +26,27 @@ jobs:
       - name: Install Dependencies
         run: |
           python -m pip install --upgrade pip
-          pip install pywebview tinytag requests beautifulsoup4 syncedlyrics yt-dlp mutagen pyinstaller
+          pip install -r requirements.txt pyinstaller
 
-      - name: Build Windows Binary with PyInstaller
+      - name: Build Windows Application with PyInstaller
         run: |
-          pyinstaller --noconsole --onefile --name "Sonance-windows-x86_64-setup" --add-data "ui;ui" modern_lyrics_downloader.py
+          pyinstaller --noconsole --onedir --name "Sonance" --icon "assets/icon.ico" --add-data "ui;ui" --add-data "assets;assets" modern_lyrics_downloader.py
 
-      - name: Create NuPkg Package
+      - name: Compile Inno Setup Native Installer
         run: |
-          mkdir -p dist/nupkg
-          Compress-Archive -Path dist/Sonance-windows-x86_64-setup.exe -DestinationPath dist/Sonance-windows-x86_64.nupkg
+          & "C:\Program Files (x86)\Inno Setup 6\ISCC.exe" windows/installer.iss
+
+      - name: Create Portable Zip Package
+        run: |
+          Compress-Archive -Path dist/Sonance/* -DestinationPath dist/Sonance-Windows-x86_64-portable.zip
 
       - name: Upload Windows Artifacts
         uses: actions/upload-artifact@v4
         with:
           name: windows-binaries
           path: |
-            dist/Sonance-windows-x86_64-setup.exe
-            dist/Sonance-windows-x86_64.nupkg
+            dist/Sonance-Windows-x86_64-Installer.exe
+            dist/Sonance-Windows-x86_64-portable.zip
 
   build-android:
     name: Build Android APK
@@ -52,8 +55,8 @@ jobs:
       - name: Checkout Code
         uses: actions/checkout@v4
 
-      - name: Set up Java
-        uses: actions/setup-java@v4
+      - name: Set up Java 17
+        uses: actions/setup-java@v5
         with:
           distribution: 'temurin'
           java-version: '17'
@@ -64,8 +67,11 @@ jobs:
           channel: 'stable'
           cache: true
 
-      - name: Install Dependencies
-        run: flutter pub get || true
+      - name: Make Gradle Wrapper Executable
+        run: chmod +x android/gradlew
+
+      - name: Install Flutter Dependencies
+        run: flutter pub get
 
       - name: Configure Android Signing Keystore
         if: ${{ env.ANDROID_KEYSTORE_BASE64 != '' }}
@@ -80,17 +86,14 @@ jobs:
         env:
           ANDROID_KEYSTORE_BASE64: ${{ secrets.ANDROID_KEYSTORE_BASE64 }}
 
-      - name: Build Android Universal APK
+      - name: Build Android Universal Release APK
         run: |
           mkdir -p artifacts
-          flutter build apk --release || true
+          flutter build apk --release
           if [ -f build/app/outputs/flutter-apk/app-release.apk ]; then
             cp build/app/outputs/flutter-apk/app-release.apk artifacts/Sonance-android-all-arch.apk
           elif [ -f build/app/outputs/apk/release/app-release.apk ]; then
             cp build/app/outputs/apk/release/app-release.apk artifacts/Sonance-android-all-arch.apk
-          fi
-          if [ ! -f artifacts/Sonance-android-all-arch.apk ]; then
-            echo "Sonance Android Package" > artifacts/Sonance-android-all-arch.apk
           fi
 
       - name: Upload Android Artifact
@@ -100,29 +103,62 @@ jobs:
           path: artifacts/Sonance-android-all-arch.apk
 
   build-linux:
-    name: Build Linux Packages (deb, AppImage, tar.xz)
+    name: Build Linux Packages (deb, tar.xz)
     runs-on: ubuntu-latest
     steps:
       - name: Checkout Code
         uses: actions/checkout@v4
 
-      - name: Package Linux Tarball, Deb & AppImage
-        run: |
-          mkdir -p dist/sonance-linux
-          cp -r ui *.py dist/sonance-linux/ 2>/dev/null || true
-          tar -cJf Sonance-linux-x86_64.tar.xz -C dist sonance-linux
+      - name: Set up Python 3.11
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+          cache: 'pip'
 
-          # Generate portable AppImage & Deb placeholders if tools not present
-          mkdir -p linux-artifacts
-          cp Sonance-linux-x86_64.tar.xz linux-artifacts/
-          cp Sonance-linux-x86_64.tar.xz linux-artifacts/Sonance-linux-x86_64.deb
-          cp Sonance-linux-x86_64.tar.xz linux-artifacts/Sonance-linux-x86_64.AppImage
+      - name: Install System Dependencies & PyInstaller
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y libwebkit2gtk-4.1-dev
+          python -m pip install --upgrade pip
+          pip install -r requirements.txt pyinstaller
+
+      - name: Build Linux Binary with PyInstaller
+        run: |
+          pyinstaller --noconsole --onedir --name "sonance" --add-data "ui:ui" --add-data "assets:assets" modern_lyrics_downloader.py
+
+      - name: Package Debian Installer (.deb) & Tarball
+        run: |
+          mkdir -p deb_pkg/opt/sonance
+          mkdir -p deb_pkg/usr/bin
+          mkdir -p deb_pkg/usr/share/applications
+          mkdir -p deb_pkg/usr/share/icons/hicolor/256x256/apps
+          mkdir -p deb_pkg/DEBIAN
+
+          cp -r dist/sonance/* deb_pkg/opt/sonance/
+          ln -s /opt/sonance/sonance deb_pkg/usr/bin/sonance
+          cp assets/logo.png deb_pkg/usr/share/icons/hicolor/256x256/apps/sonance.png || true
+          cp linux/sonance.desktop deb_pkg/usr/share/applications/
+
+          cat <<EOF > deb_pkg/DEBIAN/control
+          Package: sonance
+          Version: 3.6.1
+          Section: sound
+          Priority: optional
+          Architecture: amd64
+          Maintainer: Sandeep Khadka
+          Description: Audiophile music suite and lossless streaming engine.
+          EOF
+
+          dpkg-deb --build deb_pkg dist/Sonance-linux-x86_64.deb
+          tar -cJf dist/Sonance-linux-x86_64.tar.xz -C dist sonance
 
       - name: Upload Linux Artifacts
         uses: actions/upload-artifact@v4
         with:
           name: linux-binaries
-          path: linux-artifacts/*
+          path: |
+            dist/Sonance-linux-x86_64.deb
+            dist/Sonance-linux-x86_64.tar.xz
 
   build-macos:
     name: Build macOS Universal DMG
@@ -131,17 +167,33 @@ jobs:
       - name: Checkout Code
         uses: actions/checkout@v4
 
-      - name: Package macOS DMG
+      - name: Set up Python 3.11
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+          cache: 'pip'
+
+      - name: Install Dependencies
         run: |
-          mkdir -p dist/Sonance.app/Contents/MacOS
-          cp -r ui *.py dist/Sonance.app/Contents/ 2>/dev/null || true
-          hdiutil create -volname "Sonance" -srcfolder dist/Sonance.app -ov -format UDZO Sonance-macos-universal.dmg || touch Sonance-macos-universal.dmg
+          python -m pip install --upgrade pip
+          pip install -r requirements.txt pyinstaller
+
+      - name: Build macOS Application Bundle with PyInstaller
+        run: |
+          pyinstaller --noconsole --windowed --name "Sonance" --icon "assets/icon.png" --add-data "ui:ui" --add-data "assets:assets" modern_lyrics_downloader.py
+
+      - name: Package macOS DMG Installer
+        run: |
+          mkdir -p dmg_root
+          cp -R dist/Sonance.app dmg_root/
+          ln -s /Applications dmg_root/Applications
+          hdiutil create -volname "Sonance" -srcfolder dmg_root -ov -format UDZO dist/Sonance-macos-universal.dmg
 
       - name: Upload macOS Artifact
         uses: actions/upload-artifact@v4
         with:
           name: macos-binary
-          path: Sonance-macos-universal.dmg
+          path: dist/Sonance-macos-universal.dmg
 
   release:
     name: Generate Checksums & Publish Release

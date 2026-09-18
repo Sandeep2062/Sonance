@@ -1,8 +1,8 @@
 {
   "project": "Sonance Audiophile Workstation",
-  "version": "3.6.0",
+  "version": "3.6.1",
   "phase": "Phase 27 (Grand Finale Release)",
-  "timestamp": "2026-09-18 03:41:10 UTC",
+  "timestamp": "2026-09-18 04:54:39 UTC",
   "audit": {
     "total_modules_audited": 53,
     "passed_count": 53,
@@ -10,16 +10,16 @@
     "integrity_percent": "100.0%"
   },
   "summary": {
-    "total_files": 138,
-    "total_bytes": 2996916,
-    "total_bytes_formatted": "2.86 MB",
+    "total_files": 166,
+    "total_bytes": 4354657,
+    "total_bytes_formatted": "4.15 MB",
     "categories": {
-      "asset": 28,
-      "docs": 3,
+      "asset": 49,
+      "docs": 4,
       "config": 3,
-      "core": 70,
+      "core": 72,
       "dsp": 24,
-      "ui": 10
+      "ui": 14
     }
   },
   "files": [
@@ -32,30 +32,30 @@
     },
     {
       "path": "README.md",
-      "size": 62453,
-      "sha256": "25a7655622464aaad8e4c9d4a4918f1f4c3b6c9e79813794e432f4cb09f2462e",
-      "md5": "44ada5fc7f8a4e649b10b5ebc7442cce",
+      "size": 19985,
+      "sha256": "43d9a513bc9b2a5878e479409298bbbb0b342d89bb30a3469fe0d7f752b2da07",
+      "md5": "0845a1e2da6aa50010019df9bc883200",
       "category": "docs"
     },
     {
       "path": "RELEASE.manifest.json",
-      "size": 33371,
-      "sha256": "8acb6f0510324a4f700522304ac2fd63600b2fdfd1408925668f855cc4b3c3ab",
-      "md5": "dbb8eaed7dfed332a3cba1a9c039d4fb",
+      "size": 40307,
+      "sha256": "db8e31228508967e477865d33192b0793d2079450291f28ef825c32510c38d5c",
+      "md5": "aaa79f6268440a94063deaa90506c8d6",
       "category": "config"
     },
     {
       "path": "RELEASE.md5sum",
-      "size": 7892,
-      "sha256": "2cffb281c99b429d70f990f43527369947a3b02c578596d61a30b250a79014fe",
-      "md5": "82f1716ca95d7557cb12b65f6ccef9de",
+      "size": 9775,
+      "sha256": "1bfca755d2de0c6dee5e16e66b2d15285aff3df9e2cddc6557e4bd8c9a402777",
+      "md5": "3dbc49766a605c122328439c1459887e",
       "category": "asset"
     },
     {
       "path": "RELEASE.sha256sum",
-      "size": 12308,
-      "sha256": "f8609a0bbf143f91a3bac2d468b9d4ddc67b54cff51e749ab339d43217d4ee56",
-      "md5": "0c7fdd25c65dfaee0d8fa108620da744",
+      "size": 15087,
+      "sha256": "8019d425082f72310cfa17f5dc0228c6ded24d4f5a8f5b4cf9b27f6e7ece380a",
+      "md5": "74e4f668289cabece97d6f9fdbbcc6c7",
       "category": "asset"
     },
     {
@@ -228,16 +228,16 @@
     },
     {
       "path": "cache_manager.py",
-      "size": 2375,
-      "sha256": "13772f6f4f1dea256dbfe1bca3c20cad668be89a62cfe841d7ebeca2d2c3a110",
-      "md5": "de6b617fefb8d12127561254d3283ef2",
+      "size": 2329,
+      "sha256": "eccb50e583c908d9fd4051ca28f6bec0eb112f42180d73e790d3736f3d5772f8",
+      "md5": "1cdfa85d825280b2eeb16152b754d08a",
       "category": "core"
     },
     {
       "path": "cd_ripper.py",
       "size": 8203,
-      "sha256": "c07d177a262448af24530ea4c6a22cef58c4dce29cc7db96616433edf456cddc",
-      "md5": "28a6d672b09de0b302e8abc5fc412191",
+      "sha256": "34b3d349e372519e031da4bbe61a94a3532f02b06499506fc7d7e849146b4741",
+      "md5": "08c66caae30c6762a2bfb521911fff4b",
       "category": "core"
     },
     {
@@ -263,9 +263,9 @@
     },
     {
       "path": "cookie_manager.py",
-      "size": 9204,
-      "sha256": "f5b20e88dc8b2fc0191697938fa7c41a24be0ce8381d48a83f3830506160eda4",
-      "md5": "5ce88098b9aadb1d1c40e4dcb3ebf980",
+      "size": 9192,
+      "sha256": "f6a987d96f90e1a016039707fe0695cd3ea1e27a82419ff70f67020547b568da",
+      "md5": "26b427e92df0c98673ece53ed34f1561",
       "category": "core"
     },
     {
@@ -334,15 +334,15 @@
     {
       "path": "docs_generator.py",
       "size": 71502,
-      "sha256": "41062f9cc941b8d2e62ebd43cd01142bbe297b0c39be86b9bf4b12aca9989d7a",
-      "md5": "90059d3219b7774a96f42edb150a0647",
+      "sha256": "b94be016457963b8d237986fe80acceb31dc97707bf8be408d6ce8fa5fb2eb63",
+      "md5": "f729c0909f9da274c053accb4c80ef04",
       "category": "core"
     },
     {
       "path": "downloader_engine.py",
-      "size": 20437,
-      "sha256": "2e8a3f21887bd3b06a30b3e117af026734fe1aa458c86956d80c2788e0bef85d",
-      "md5": "500aeb7b47fc415b11df80f7758462c2",
+      "size": 20405,
+      "sha256": "bef51bd241785dc240aca08b437accd594f405fb8e75c784b1cdfa0b8ae6f4b3",
+      "md5": "9f8558b0a06ae0432e18e1182c32b243",
       "category": "core"
     },
     {
@@ -378,6 +378,13 @@
       "size": 12692,
       "sha256": "81c7ca472df298727b3db2ccb2334e6bca8477f3e220960107ff307ed039140a",
       "md5": "4bce5e8f0b67bab7a836df55f40fbf47",
+      "category": "core"
+    },
+    {
+      "path": "generate_icons.py",
+      "size": 2531,
+      "sha256": "4058e2d764e8735caf5dd69f2e3aae5b73f54c209727de9b4a2ea5136bb01112",
+      "md5": "433894d14b22933171ce3b29ef226c7e",
       "category": "core"
     },
     {
@@ -515,9 +522,9 @@
     },
     {
       "path": "modern_lyrics_downloader.py",
-      "size": 91551,
-      "sha256": "a8cb4c6330d1d7c4f290970643409a71ca2e720b590ef425ec7cf8d49c54dcd4",
-      "md5": "8a37893d0d107bce21ae9134bd5c91c0",
+      "size": 96688,
+      "sha256": "2500ef72c0332f88c25cda07821649408bf0a3908770009f46ce2d94ceaae1b2",
+      "md5": "9f84587a1c6a12cb7166cedb3be700a4",
       "category": "core"
     },
     {
@@ -558,8 +565,8 @@
     {
       "path": "playlist_manager.py",
       "size": 3264,
-      "sha256": "4627bc3e9719285e39e9871faaa6692c5fada036d7bf47ca4469c96880c57b4f",
-      "md5": "c4da8655ef2e5cf66efed9bd6a6c1c35",
+      "sha256": "7da8c66045d7c05c810eb0cfb09b2cceb05c3be24c175b203ecf126ff40fa995",
+      "md5": "c305308117bcb7d66d576f6a6394effb",
       "category": "core"
     },
     {
@@ -572,15 +579,15 @@
     {
       "path": "pubspec.yaml",
       "size": 1090,
-      "sha256": "7b1141fb4d956c3b358175a080b292bf935a374fc02d2e0ee2dca8cf7f4b1927",
-      "md5": "cde46141ce5dfa095efeb9a2106a8e14",
+      "sha256": "bbc853719d47e8188513741c452adaf33f0192f724f182be55b2592a38c7bb84",
+      "md5": "367e4c0b552c4355cc237218a4ee99d5",
       "category": "config"
     },
     {
       "path": "release_packager.py",
       "size": 18352,
-      "sha256": "421b163a140009abc9df702734d1976764d5d891efc9e026f9d33a2cc4c47ca4",
-      "md5": "4c4f9710f661d74d39e16bb5577d6aff",
+      "sha256": "8562bb2fda44096b1b68370eb1e953e0740bc4d35b966823e9321d8ed227b3a6",
+      "md5": "8c603ed071197ecf0c65f0ca6b1e163a",
       "category": "core"
     },
     {
@@ -627,9 +634,9 @@
     },
     {
       "path": "scrobbler.py",
-      "size": 12569,
-      "sha256": "8c1e4d67a4b7b41d4cc4666fa1bbc3b7fea07b32959b960fde42764168a62232",
-      "md5": "74ed10eb583d626c7b65cb4eeb62e651",
+      "size": 12574,
+      "sha256": "17c7b540574e82cbe57df97ba5ade6911e53d05f2c7dcb560462522062c1f751",
+      "md5": "8efa92e3c5d55f4b66e654114a5e2401",
       "category": "core"
     },
     {
@@ -642,8 +649,15 @@
     {
       "path": "sonance.py",
       "size": 129459,
-      "sha256": "5ac799727798f0a88608a796312aa76fe9151be48d000280a4b966df58f294f2",
-      "md5": "e43fbd6edd96a39ad0cb451e90faa2f3",
+      "sha256": "2cee2d849d81e38fd6af67ecffc714ff5f69fddf530f2c773f63888a85775cb0",
+      "md5": "ada1a108964625e13d63ef3ec887618f",
+      "category": "core"
+    },
+    {
+      "path": "sonance_paths.py",
+      "size": 4136,
+      "sha256": "a2c69f3c51313a6927ce7fca6afdfac962d67b31a13d023c047fc7e5a9abf729",
+      "md5": "784716712344a05563369fc40f917ba0",
       "category": "core"
     },
     {
@@ -684,8 +698,8 @@
     {
       "path": "tag_editor.py",
       "size": 13803,
-      "sha256": "a034a395c9e1b85456e99f16762756ad6a39aaaaaa3559742b462b779d13955c",
-      "md5": "c868b9dd0597bfbd0ac87652e3632b57",
+      "sha256": "2ac1b0e027f6affe2f02c8cf7b19ae2cfe5366e9e36c596f3c61a6e4bd2c48e7",
+      "md5": "bc162349d4afdaed671298aa38c7801b",
       "category": "core"
     },
     {
@@ -715,6 +729,20 @@
       "sha256": "b1ac8abb2625b889b7c69eccb5123876c85ef0e6fe271ea5db2b4849d3f3ed0e",
       "md5": "acab54287cf9421991774ccaa2e1c661",
       "category": "core"
+    },
+    {
+      "path": "upload-keystore.base64.txt",
+      "size": 3632,
+      "sha256": "ab727b457c80acf20b8113a6f901b426e5b5da89a1f64d5d5e0eddf0eb5902d4",
+      "md5": "19aa5393f323810ff4a5d12df4f881ac",
+      "category": "docs"
+    },
+    {
+      "path": "upload-keystore.jks",
+      "size": 2722,
+      "sha256": "e4a29e58179d917afbb90f89ab428c0736a8043c47863a8647d419017027312b",
+      "md5": "522401fea1bcf7d69b41c6be26e3ecad",
+      "category": "asset"
     },
     {
       "path": "vintage_compressor.py",
@@ -752,6 +780,48 @@
       "category": "core"
     },
     {
+      "path": "android/build.gradle",
+      "size": 599,
+      "sha256": "64c679cf95a67b7200f8f1e5d71a1886dd944eda9b7758cfb1bc0eed27eff279",
+      "md5": "f620938e5e0466b7495402ed9cc06ad4",
+      "category": "ui"
+    },
+    {
+      "path": "android/gradle.properties",
+      "size": 82,
+      "sha256": "ae6ee5fb70f4617087443acef930588128c2e23729c596c7cbc42a4f5f182603",
+      "md5": "bcb11d2935171253d5a2551b1292d27f",
+      "category": "asset"
+    },
+    {
+      "path": "android/gradlew",
+      "size": 2089,
+      "sha256": "fd3c7103b1e50966d3a19ecda3276fb3bb0241140e30214bfa27fde923896467",
+      "md5": "10ee28745f82f65d49f7b9eab22ea398",
+      "category": "asset"
+    },
+    {
+      "path": "android/gradlew.bat",
+      "size": 2673,
+      "sha256": "7fa3a0d601e25ec37c4460d965f94bf61d5f6b666972993159805373f04b46be",
+      "md5": "290a19847827fc42d4acc0de8677dd9e",
+      "category": "asset"
+    },
+    {
+      "path": "android/settings.gradle",
+      "size": 431,
+      "sha256": "0030d7d4bf3f53a2194d7f391cdcdbb9ee82ca16b9ef82baa12e7659ad26e2f2",
+      "md5": "68f0fee2afeb0e05dfae21805045ccd2",
+      "category": "asset"
+    },
+    {
+      "path": "android/app/build.gradle",
+      "size": 2315,
+      "sha256": "544dce17477df4b98ffff9d0493efcaea65a9a2d1833c83eb288756afa80985e",
+      "md5": "64e17da419b68c3eaab92a7eac7af32e",
+      "category": "ui"
+    },
+    {
       "path": "android/app/src/main/AndroidManifest.xml",
       "size": 1804,
       "sha256": "e49286c2ac13c26284cd67b5cb84de9b98bd61a8cafadb790d116ace1b291f33",
@@ -763,6 +833,104 @@
       "size": 5579,
       "sha256": "0dd129d2d951584161cb577e6ace23a6a1c26ab02ad1694b577a023226d36018",
       "md5": "08359915b920fe834585858ad285eb07",
+      "category": "asset"
+    },
+    {
+      "path": "android/app/src/main/res/drawable/launch_background.xml",
+      "size": 178,
+      "sha256": "32fd394240a788b16aebb6f7bf5bd5d2b3f33fed5880690b2cf4f38bfa7b5fa1",
+      "md5": "4d9e7579af474174d461e1d6955722df",
+      "category": "asset"
+    },
+    {
+      "path": "android/app/src/main/res/drawable-v21/launch_background.xml",
+      "size": 178,
+      "sha256": "32fd394240a788b16aebb6f7bf5bd5d2b3f33fed5880690b2cf4f38bfa7b5fa1",
+      "md5": "4d9e7579af474174d461e1d6955722df",
+      "category": "asset"
+    },
+    {
+      "path": "android/app/src/main/res/mipmap-hdpi/ic_launcher.png",
+      "size": 6767,
+      "sha256": "1f5121a84c9b0bc2f86d36be45bb5d90f44fdcd9e88ecb7b1105caaac103353c",
+      "md5": "b4b14288f7b8c51ad728e31f4eff0425",
+      "category": "asset"
+    },
+    {
+      "path": "android/app/src/main/res/mipmap-mdpi/ic_launcher.png",
+      "size": 3400,
+      "sha256": "dd48cc50b61161a3438e62c110e8b277d7f0180a042c2063db5180f176aae1f0",
+      "md5": "66a06a994e193901842720d7d2745d82",
+      "category": "asset"
+    },
+    {
+      "path": "android/app/src/main/res/mipmap-xhdpi/ic_launcher.png",
+      "size": 11022,
+      "sha256": "1fe50cab3adf9d420caa58660c4f6072a763921dfbe1056bf88719dd23021a23",
+      "md5": "21354aff3472960c3abd38f5e7f68083",
+      "category": "asset"
+    },
+    {
+      "path": "android/app/src/main/res/mipmap-xxhdpi/ic_launcher.png",
+      "size": 22079,
+      "sha256": "e000e110a5e563bae8c7c43b7c17014a9d84a083be8d8e77b5195d4cfcdc0f83",
+      "md5": "07db44c7e9e917260e7779f15ca07910",
+      "category": "asset"
+    },
+    {
+      "path": "android/app/src/main/res/mipmap-xxxhdpi/ic_launcher.png",
+      "size": 37999,
+      "sha256": "362eb4f54be4682af0d4ad400e63ffd01407fcc01a80dabd53a63805506e5d88",
+      "md5": "e32c8d6aa4c906359cad054665e36db6",
+      "category": "asset"
+    },
+    {
+      "path": "android/app/src/main/res/values/styles.xml",
+      "size": 718,
+      "sha256": "a1bee8b5454582571d07f871b9bb5dbe5afd224b20410081eea093229693dd72",
+      "md5": "a683455955282b5957cf6adc304967cf",
+      "category": "asset"
+    },
+    {
+      "path": "android/app/src/main/res/values-night/styles.xml",
+      "size": 522,
+      "sha256": "ba6f02e1e72393731ef253cc4d6b3fa8f3f81c04eaa848a945c3362b904bcae8",
+      "md5": "e1efd267fbf3117fe90c29d35a7e8f2e",
+      "category": "asset"
+    },
+    {
+      "path": "android/gradle/wrapper/gradle-wrapper.jar",
+      "size": 63721,
+      "sha256": "0336f591bc0ec9aa0c9988929b93ecc916b3c1d52aed202c7381db144aa0ef15",
+      "md5": "6cf842e595188f6153a84f2c05815eb5",
+      "category": "asset"
+    },
+    {
+      "path": "android/gradle/wrapper/gradle-wrapper.properties",
+      "size": 200,
+      "sha256": "e52da11bf3e4e9a80da3af87f058dc82bacdc6e4d46ebeb09343076f7377758b",
+      "md5": "869b43a4017378d9be13b7e3deeec192",
+      "category": "asset"
+    },
+    {
+      "path": "assets/icon.ico",
+      "size": 99641,
+      "sha256": "395a2bc85fd6ca1966cd03791a97211354d8f82644d10a5a50c5848b0dc756b2",
+      "md5": "2adcceba7be161e8ba56d03a4555ae9e",
+      "category": "asset"
+    },
+    {
+      "path": "assets/icon.png",
+      "size": 258961,
+      "sha256": "2ddb2d09c38a31a0707e3bdde1e95248554903403b6c6074dcdbe3cfd7caa1ca",
+      "md5": "4f4041567cfb1ccb7d8b9b25f572273e",
+      "category": "asset"
+    },
+    {
+      "path": "assets/logo.png",
+      "size": 775463,
+      "sha256": "9115fe7eb5e3aefcf570645edc5b943377b7d7d2a1e75ae0eff6e3fcb4dbd75e",
+      "md5": "6f9940937200cb68ab1dc95ca27f1d55",
       "category": "asset"
     },
     {
@@ -852,15 +1020,15 @@
     {
       "path": "lib/core/services/tag_service.dart",
       "size": 3559,
-      "sha256": "a96fa046d780328dab924bc43e1ae505087eae107745cb081ae6175668bb0e50",
-      "md5": "5303b330feb888d7a9ca7f9617de5848",
+      "sha256": "236616351115421044678b7e052b2589230c2aecdec720fe75644d9684b161c7",
+      "md5": "adb3f48d62a2aaf0c8ca6272618406f4",
       "category": "asset"
     },
     {
       "path": "lib/core/services/update_service.dart",
       "size": 6546,
-      "sha256": "80abaf79342c6d84797518ae0f4eb2bccc4aa6a46cf14c9f608a5c562f03b2ff",
-      "md5": "f5c20b3ae119a1effb4e6945668333a1",
+      "sha256": "40caf4dace104435f4d014583b021878a3ebb33f5b3ea2b55b0de1c5acf5f807",
+      "md5": "13fd8c0832acca60ed54361011803b3a",
       "category": "asset"
     },
     {
@@ -950,44 +1118,72 @@
     {
       "path": "lib/ui/views/settings_view.dart",
       "size": 16503,
-      "sha256": "457758782c5743d69f34c23609f16766da00de908cacac56583f8b3c55def81f",
-      "md5": "37684872c6db4e16ced0e343ced6f8d2",
+      "sha256": "4756a07cf724dd9aa8a28bd3508a55fb3e935712a3813468c60759a7e8d2c489",
+      "md5": "e030ec26a8981fab79925094916ed72b",
       "category": "ui"
     },
     {
       "path": "linux/CMakeLists.txt",
       "size": 330,
-      "sha256": "0173c2a810c37fe09aeec496b40afc3cef3bf6ed168ba96ca9aee21672589f4c",
-      "md5": "14048c342887d0a78c63c2facac82fac",
+      "sha256": "e34f5c1cb680ddcc89a3fba2eb339ecc9e3329853de63d65bf4982af5e611d93",
+      "md5": "e51dd03fcb25f040ea39514eaa281022",
       "category": "docs"
+    },
+    {
+      "path": "linux/sonance.desktop",
+      "size": 410,
+      "sha256": "b18f91753f74cbe60d4985161d34d71e6a91c49ef12766c47dcf0f18a533a27d",
+      "md5": "d60a5f30790683141c6d1f53cb865801",
+      "category": "asset"
     },
     {
       "path": "macos/Runner/Info.plist",
       "size": 1142,
-      "sha256": "4293bc709a79ccf1fb1407cc212e9d4058acb1d5cc31b4ae194ff2520f941770",
-      "md5": "eaf977dc6a8b39266fdda23db240e314",
+      "sha256": "579c4b1606e76cec6ddfb83c62efa63e6366533f977fdb8f940df4365f52f5d1",
+      "md5": "b52783b27f3778e41dad5961919245c9",
       "category": "asset"
     },
     {
+      "path": "ui/favicon.ico",
+      "size": 5864,
+      "sha256": "eead081f80a95d6d0a1cc91cb9e332f17443c2822f1fc1ceba84814bbfa52bd1",
+      "md5": "98eeb4ba351b21e2134d7681085b9ffa",
+      "category": "ui"
+    },
+    {
       "path": "ui/index.html",
-      "size": 1095582,
-      "sha256": "bf5ff16477dca5203362e1c54c19463ce95cb5ad9496cd5cd48eac5abe0c36e6",
-      "md5": "8f0ceece8bbaf0283f2830cf790d81ff",
+      "size": 1102534,
+      "sha256": "679d4a22d2e47e14e5a747148a23d08f2afd6718cb12fa684319dad28347f07c",
+      "md5": "5308ba7352ce741c20e54fd2cedaf795",
+      "category": "ui"
+    },
+    {
+      "path": "ui/logo.png",
+      "size": 66475,
+      "sha256": "850e886217427a0e69beba010219f91798fbf36d60cb6ce03c6cf9544a5fb28a",
+      "md5": "91fc0b12d462179b2f4727287f2ee15f",
       "category": "ui"
     },
     {
       "path": "ui/manual.html",
       "size": 119025,
-      "sha256": "0d5bc74d15a93a56057a3abb22372e12a322059fe97a0958e976df864823fa89",
-      "md5": "46e9fd6940e29eacedd71debd5b4e2a7",
+      "sha256": "4d781ab7df5c83ec4e0f15a4a257228a06ccfdc84b03fc40221e32c3e8a39f39",
+      "md5": "84a8c8992e9114b176cb6902c1a0b9fa",
       "category": "ui"
     },
     {
       "path": "windows/CMakeLists.txt",
       "size": 786,
-      "sha256": "41ad27caf869e73d9696c4d4b6097d9fe77066bd0243784b39b83cc39c68a89b",
-      "md5": "c75abc3dcef22c80ffcfddbc5182cca1",
+      "sha256": "5fc1b4ee73e16b6b87c403cd3feb2d695e60cb5fd439b5a3dc17fcd381fe50f3",
+      "md5": "0179fe29040b24b54b7adbc85351c463",
       "category": "docs"
+    },
+    {
+      "path": "windows/installer.iss",
+      "size": 1799,
+      "sha256": "f3b290dba6e1e20beae934e4ed82f4a2091b543f194eddd0e1b81d62c35cd023",
+      "md5": "00072b56f660251e44aba7984eade94f",
+      "category": "asset"
     }
   ]
 }

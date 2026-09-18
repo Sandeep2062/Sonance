@@ -18,8 +18,9 @@ import threading
 from pathlib import Path
 from typing import Dict, Any, List, Optional
 import requests
+import sonance_paths
 
-CONFIG_FILE = Path(__file__).parent.resolve() / "scrobbler_config.json"
+CONFIG_FILE = sonance_paths.get_scrobbler_config_path()
 _LOCK = threading.Lock()
 
 LASTFM_API_URL = "https://ws.audioscrobbler.com/2.0/"
@@ -67,7 +68,7 @@ def save_config(cfg: Dict[str, Any]):
 class LastFmClient:
     def __init__(self):
         self.session = requests.Session()
-        self.session.headers.update({"User-Agent": "Sonance/3.6.0 (https://github.com/Sandeep2062/Sonance)"})
+        self.session.headers.update({"User-Agent": "Sonance/3.6.1 (https://github.com/Sandeep2062/Sonance)"})
 
     def _generate_signature(self, params: Dict[str, Any], secret: str) -> str:
         """Generates MD5 api_sig required by Last.fm write APIs."""
@@ -250,7 +251,7 @@ class LastFmClient:
 class ListenBrainzClient:
     def __init__(self):
         self.session = requests.Session()
-        self.session.headers.update({"User-Agent": "Sonance/3.6.0 (https://github.com/Sandeep2062/Sonance)"})
+        self.session.headers.update({"User-Agent": "Sonance/3.6.1 (https://github.com/Sandeep2062/Sonance)"})
 
     def validate_token(self, token: str) -> Dict[str, Any]:
         """Validates a ListenBrainz user token."""

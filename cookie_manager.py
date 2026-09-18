@@ -23,13 +23,12 @@ import webview
 
 import yt_dlp.cookies
 import downloader_engine
+import sonance_paths
 
 APP_DIR = Path(__file__).parent.resolve()
-COOKIES_DIR = APP_DIR / "cookies"
-COOKIES_DIR.mkdir(parents=True, exist_ok=True)
-
+COOKIES_DIR = sonance_paths.get_cookies_dir()
 YOUTUBE_COOKIE_FILE = str(COOKIES_DIR / "youtube_cookies.txt")
-SECRETS_FILE = APP_DIR / "user_secrets.json"
+SECRETS_FILE = sonance_paths.get_secrets_path()
 
 PLATFORM_URLS = {
     "youtube": "https://accounts.google.com/ServiceLogin?service=youtube",

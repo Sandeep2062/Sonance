@@ -12,8 +12,9 @@ import json
 import threading
 from pathlib import Path
 from typing import Dict, Any, List, Optional
+import sonance_paths
 
-LIBRARY_FILE = Path(__file__).parent.resolve() / "user_library.json"
+LIBRARY_FILE = sonance_paths.get_library_path()
 _LOCK = threading.Lock()
 
 

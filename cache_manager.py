@@ -12,9 +12,9 @@ import hashlib
 import shutil
 from pathlib import Path
 from typing import Dict, Any, Optional
+import sonance_paths
 
-CACHE_DIR = Path(__file__).parent.resolve() / "cache" / "audio"
-CACHE_DIR.mkdir(parents=True, exist_ok=True)
+CACHE_DIR = sonance_paths.get_cache_dir()
 
 
 def _get_cache_filename(key: str, ext: str = ".mp3") -> Path:

@@ -1,5 +1,7 @@
 <div align="center">
 
+<img src="assets/logo.png" width="128" height="128" alt="Sonance Logo" style="border-radius:24px; margin-bottom:12px;" />
+
 # 🎵 Sonance
 
 **The ultimate unified music suite — Stream, download Hi-Res lossless, and sing along with real-time synced lyrics.**
@@ -28,7 +30,7 @@ Sonance is engineered from the ground up as a unified audiophile ecosystem:
 
 ```
                       ┌──────────────────────────────────────┐
-                      │            SONANCE v3.6.0            │
+                      │            SONANCE v3.6.1            │
                       └──────────────────┬───────────────────┘
                                          │
          ┌───────────────────────────────┼───────────────────────────────┐

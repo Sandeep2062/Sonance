@@ -121,12 +121,13 @@ import resonance_suppressor
 import vintage_compressor
 import zenith_orchestrator
 import exclusive_audio_engine
+import sonance_paths
 
-APP_VERSION = "3.6.0"
+APP_VERSION = "3.6.1"
 GITHUB_REPO = "Sandeep2062/Sonance"
 APP_DIR = Path(__file__).parent.resolve()
 UI_PATH = APP_DIR / "ui" / "index.html"
-CONFIG_FILE = APP_DIR / "lyrics_gui_config.json"
+CONFIG_FILE = sonance_paths.get_config_path()
 
 
 # ------------------ Local Audio Streaming Server ------------------
@@ -475,33 +476,145 @@ class LyricsAPI:
 
         return {"success": False, "preview": "No matching lyrics found on LRCLIB or Genius for this query."}
 
+    @staticmethod
+    def _is_newer_version(latest: str, current: str) -> bool:
+        try:
+            l_parts = [int(x) for x in re.findall(r'\d+', latest)]
+            c_parts = [int(x) for x in re.findall(r'\d+', current)]
+            for l, c in zip(l_parts, c_parts):
+                if l > c:
+                    return True
+                if l < c:
+                    return False
+            return len(l_parts) > len(c_parts)
+        except Exception:
+            return latest != current
+
     def check_for_updates(self) -> Dict[str, Any]:
-        """Checks GitHub releases for new versions."""
+        """Checks GitHub releases for new versions with cross-platform installer matching."""
         try:
             url = f"https://api.github.com/repos/{GITHUB_REPO}/releases/latest"
             headers = {"Accept": "application/vnd.github.v3+json", "User-Agent": "Sonance"}
-            r = requests.get(url, headers=headers, timeout=5)
+            r = requests.get(url, headers=headers, timeout=6)
             if r.ok:
                 data = r.json()
                 latest_tag = data.get("tag_name", "").lstrip("v")
-                if latest_tag and latest_tag != APP_VERSION:
-                    # Look for windows exe asset
-                    download_url = data.get("html_url")
-                    for asset in data.get("assets", []):
-                        if asset.get("name", "").endswith(".exe"):
-                            download_url = asset.get("browser_download_url")
-                            break
+                if latest_tag and self._is_newer_version(latest_tag, APP_VERSION):
+                    assets = data.get("assets", [])
+                    installer_url = None
+                    portable_url = None
+                    sha256_url = None
+
+                    for asset in assets:
+                        name = asset.get("name", "").lower()
+                        dl_url = asset.get("browser_download_url")
+                        if "sha256" in name:
+                            sha256_url = dl_url
+
+                        if sys.platform == "win32":
+                            if "installer" in name and name.endswith(".exe"):
+                                installer_url = dl_url
+                            elif (not installer_url) and name.endswith(".exe"):
+                                installer_url = dl_url
+                            elif "portable" in name and (name.endswith(".zip") or name.endswith(".exe")):
+                                portable_url = dl_url
+                        elif sys.platform == "darwin":
+                            if name.endswith(".dmg"):
+                                installer_url = dl_url
+                            elif name.endswith(".zip"):
+                                portable_url = dl_url
+                        else:  # Linux
+                            if name.endswith(".deb"):
+                                installer_url = dl_url
+                            elif name.endswith(".appimage") or name.endswith(".tar.xz"):
+                                portable_url = dl_url
+
                     return {
                         "update_available": True,
                         "current_version": APP_VERSION,
                         "latest_version": latest_tag,
-                        "changelog": data.get("body", "Bug fixes and improvements."),
-                        "download_url": download_url,
+                        "changelog": data.get("body", "Bug fixes and performance improvements."),
+                        "download_url": installer_url or portable_url or data.get("html_url"),
+                        "installer_url": installer_url,
+                        "portable_url": portable_url,
+                        "sha256_url": sha256_url,
                     }
-        except Exception:
-            pass
+        except Exception as e:
+            print(f"[!] Update check error: {e}")
 
         return {"update_available": False, "current_version": APP_VERSION}
+
+    def download_and_install_update(self, download_url: str) -> Dict[str, Any]:
+        """Downloads the installer binary in background and launches it."""
+        if not download_url:
+            return {"success": False, "error": "No download URL provided."}
+
+        def _worker():
+            try:
+                import tempfile
+                import subprocess
+
+                temp_dir = Path(tempfile.gettempdir())
+                filename = download_url.split("/")[-1]
+                target_file = temp_dir / filename
+
+                def _notify(pct: float, message: str):
+                    if self._window:
+                        try:
+                            msg_clean = message.replace("'", "\\'")
+                            self._window.evaluate_js(
+                                f"window.onUpdateDownloadProgress && window.onUpdateDownloadProgress({pct}, '{msg_clean}');"
+                            )
+                        except Exception:
+                            pass
+
+                _notify(5, "Connecting to GitHub Releases CDN...")
+                resp = requests.get(download_url, stream=True, timeout=15)
+                resp.raise_for_status()
+
+                total_size = int(resp.headers.get("content-length", 0))
+                downloaded = 0
+
+                with open(target_file, "wb") as f:
+                    for chunk in resp.iter_content(chunk_size=65536):
+                        if chunk:
+                            f.write(chunk)
+                            downloaded += len(chunk)
+                            if total_size > 0:
+                                pct = min(95.0, (downloaded / total_size) * 85.0 + 10.0)
+                                mb_done = downloaded / (1024 * 1024)
+                                mb_total = total_size / (1024 * 1024)
+                                _notify(round(pct, 1), f"Downloading: {mb_done:.1f} MB / {mb_total:.1f} MB")
+
+                _notify(98, "Launching installer...")
+                time.sleep(0.5)
+
+                # Launch installer based on platform
+                if sys.platform == "win32":
+                    subprocess.Popen([str(target_file)], shell=True)
+                elif sys.platform == "darwin":
+                    subprocess.Popen(["open", str(target_file)])
+                else:
+                    subprocess.Popen(["xdg-open", str(target_file)])
+
+                _notify(100, "Installer launched! Closing current version...")
+                time.sleep(1.2)
+                if self._window:
+                    self._window.destroy()
+                os._exit(0)
+
+            except Exception as e:
+                if self._window:
+                    try:
+                        err_msg = str(e).replace("'", "\\'")
+                        self._window.evaluate_js(
+                            f"window.onUpdateDownloadProgress && window.onUpdateDownloadProgress(-1, 'Error: {err_msg}');"
+                        )
+                    except Exception:
+                        pass
+
+        threading.Thread(target=_worker, daemon=True).start()
+        return {"success": True, "message": "Download started in background."}
 
     def search_music(self, query: str, source: str = "all") -> List[Dict[str, Any]]:
         """Multi-source search across Deezer, Spotify metadata, and YouTube."""

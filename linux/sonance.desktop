@@ -1,0 +1,11 @@
+[Desktop Entry]
+Name=Sonance
+Comment=The ultimate unified music suite — Stream, download Hi-Res lossless, and sing along with real-time synced lyrics
+Exec=sonance %U
+Icon=sonance
+Terminal=false
+Type=Application
+Categories=AudioVideo;Audio;Player;Music;
+Keywords=music;audio;player;lyrics;lossless;flac;audiophile;
+MimeType=audio/mpeg;audio/flac;audio/x-flac;audio/mp4;audio/ogg;audio/wav;
+StartupNotify=true
