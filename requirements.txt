@@ -6,3 +6,4 @@ syncedlyrics>=1.0.0
 yt-dlp>=2024.0.0
 mutagen>=1.47.0
 qrcode>=8.0.0
+pillow>=10.0.0

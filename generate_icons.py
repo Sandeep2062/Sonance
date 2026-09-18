@@ -39,10 +39,16 @@ def generate_all_icons():
     img.save(ui_dir / "favicon.ico", format="ICO", sizes=fav_sizes)
     print(f"Saved: {ui_dir / 'favicon.ico'}")
 
-    # 3. Windows Multi-Resolution ICO
+    # 3. Windows Multi-Resolution ICO & macOS ICNS
     ico_sizes = [(16, 16), (32, 32), (48, 48), (64, 64), (128, 128), (256, 256)]
     img.save(assets_dir / "icon.ico", format="ICO", sizes=ico_sizes)
     print(f"Saved: {assets_dir / 'icon.ico'}")
+
+    try:
+        img.save(assets_dir / "icon.icns", format="ICNS")
+        print(f"Saved: {assets_dir / 'icon.icns'}")
+    except Exception as e:
+        print(f"Could not generate ICNS: {e}")
 
     # 4. Android Mipmap Launcher Icons
     android_densities = {

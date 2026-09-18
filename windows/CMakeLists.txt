@@ -22,7 +22,7 @@ endif()
 
 # Application build configuration
 add_definitions(-DUNICODE -D_UNICODE)
-add_definitions(-DFLUTTER_VERSION="3.6.1")
+add_definitions(-DFLUTTER_VERSION="3.6.2")
 
 # Standard Flutter runner includes
 include(flutter/generated_plugins.cmake OPTIONAL)
