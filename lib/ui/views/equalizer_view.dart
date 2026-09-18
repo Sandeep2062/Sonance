@@ -111,11 +111,8 @@ class EqualizerDialog extends ConsumerWidget {
                   Container(
                     padding: const EdgeInsets.symmetric(horizontal: 10),
                     decoration: BoxDecoration(
-                      border: Border.write(
-                        top: BorderSide(color: Theme.of(context).colorScheme.outline),
-                        bottom: BorderSide(color: Theme.of(context).colorScheme.outline),
-                        left: BorderSide(color: Theme.of(context).colorScheme.outline),
-                        right: BorderSide(color: Theme.of(context).colorScheme.outline),
+                      border: Border.all(
+                        color: Theme.of(context).colorScheme.outline.withOpacity(0.3),
                       ),
                       borderRadius: BorderRadius.circular(8),
                     ),

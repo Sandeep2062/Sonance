@@ -148,14 +148,14 @@ class PlayerNotifier extends StateNotifier<PlayerState> {
     try {
       if (track.lyricsFilePath != null && File(track.lyricsFilePath!).existsSync()) {
         final lrcText = await File(track.lyricsFilePath!).readAsString();
-        resolvedLyrics = SyncedLyrics.fromLrcString(lrcText, provider: 'Local LRC');
+        resolvedLyrics = SyncedLyrics.parse(lrcText, provider: 'Local LRC');
       } else if (track.localFilePath != null) {
         final extIndex = track.localFilePath!.lastIndexOf('.');
         if (extIndex != -1) {
           final candidateLrc = File('${track.localFilePath!.substring(0, extIndex)}.lrc');
           if (candidateLrc.existsSync()) {
             final lrcText = await candidateLrc.readAsString();
-            resolvedLyrics = SyncedLyrics.fromLrcString(lrcText, provider: 'Local LRC');
+            resolvedLyrics = SyncedLyrics.parse(lrcText, provider: 'Local LRC');
           }
         }
       }

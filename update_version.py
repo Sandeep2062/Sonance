@@ -194,7 +194,12 @@ def bump_all_versions(raw_version: str) -> Dict[str, str]:
         return re.sub(r'(<key>CFBundleShortVersionString</key>\s*<string>)[^<]+(</string>)', rf'\g<1>{semver}\g<2>', c)
     if update_file(ROOT_DIR / "macos" / "Runner" / "Info.plist", update_macos_plist): updated_count += 1
 
-    # 18. Regenerate offline manual HTML
+    # 18. windows/installer.iss
+    def update_installer_iss(c: str) -> str:
+        return re.sub(r'(#define MyAppVersion ")[^"]+(")', rf'\g<1>{semver}\g<2>', c)
+    if update_file(ROOT_DIR / "windows" / "installer.iss", update_installer_iss): updated_count += 1
+
+    # 19. Regenerate offline manual HTML
     print("\n[*] Regenerating ui/manual.html via docs_generator.py...")
     try:
         from docs_generator import generate_offline_manual

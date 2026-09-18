@@ -44,6 +44,10 @@ class SyncedLyrics {
     return activeIdx;
   }
 
+  /// Factory constructor for parsing raw LRC string (alias for parse)
+  factory SyncedLyrics.fromLrcString(String rawContent, {String? provider}) =>
+      parse(rawContent, provider: provider);
+
   /// Parses raw LRC text into a SyncedLyrics object.
   static SyncedLyrics parse(String rawContent, {String? provider}) {
     if (rawContent.trim().isEmpty) {
