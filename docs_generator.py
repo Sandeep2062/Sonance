@@ -12,7 +12,7 @@ import webbrowser
 from pathlib import Path
 from typing import Dict, Any, Optional
 
-APP_VERSION = "3.0.0"
+APP_VERSION = "3.1.0"
 WORKSTATION_NAME = "Sonance Audiophile Workstation"
 ROOT_DIR = Path(__file__).parent.resolve()
 DEFAULT_MANUAL_PATH = ROOT_DIR / "ui" / "manual.html"
@@ -317,6 +317,16 @@ PHASES_DATA = [
         "desc": "Definitive studio console mastering path combining Solid State Logic (SSL 4000 G-Master Bus Compressor) Quad-VCA dynamics, program-dependent Auto-Release, and sidechain HPF with British Class-A Neve 1073 preamp transformer harmonic saturation and 3-band inductor/Baxandall EQ.",
         "dsp_math": "SSL VCA soft-knee curve: y_{dB} = x_{dB} + ((1/R - 1)*(x_{dB} - T + W/2)^2)/(2W); Neve Marinair saturation: y = (tanh(drive*x + bias) - tanh(bias))/tanh(drive) + 0.04*warmth*x^3",
         "features": ["Solid State Logic (SSL 4000 G-Master Bus Compressor) Quad-VCA emulation", "Program-dependent dual-constant Auto-Release (0.1s fast + 1.2s memory)", "Sidechain High-Pass Filter (60, 90, 120, 185 Hz) preventing kick/bass pumping", "Neve 1073 Class-A preamp transformer saturation & 18 dB/oct HPF", "Proportional-Q mid inductor band & 12 kHz Baxandall air sheen", "Master safety True-Peak ceiling limiter (-0.2 dBFS) & 24-bit PCM WAV export"]
+    },
+    {
+        "phase": 31,
+        "title": "Higher-Order Ambisonics (HOA 1st/2nd/3rd Order) & 360-Degree VR Spatializer Studio",
+        "category": "Spatial Audio & 3D Virtualization",
+        "modules": ["ambisonic_hoa.py"],
+        "cli": "python sonance.py --hoa master.wav [output.wav] --order 3 --mode binaural | --mode bformat --trajectory orbit_helix",
+        "desc": "Encodes stereo audio into real spherical harmonics up to 3rd order (16 channels ACN / SN3D AmbiX) with dynamic 3D spatial trajectories (helix, horizontal orbit, pendulum, overhead halo), air absorption damping, and dual rendering into 3D binaural headphones (Woodworth ITD + pinna notch) or discrete 4/9/16-channel 24-bit PCM AmbiX WAV.",
+        "dsp_math": "Spherical harmonics: Y_l^m(theta, phi) = N_l^m * P_l^{|m|}(sin phi) * trig_m(theta); AmbiX ACN index: n = l^2 + l + m; Inverse-distance damping: A(d) = 1/max(1, d) * exp(-alpha * f * d)",
+        "features": ["1st, 2nd, and 3rd order Ambisonic B-Format encoding (4, 9, 16 channels)", "Industry-standard ACN channel ordering and SN3D normalization (AmbiX)", "5 dynamic 3D motion trajectories (Orbit Helix, Horizontal 360, Pendulum Arc, Overhead, Fixed)", "3D Binaural Headphone Virtualizer via 14-point spherical loudspeaker array with Woodworth ITD delay & pinna notch", "Discrete multichannel 24-bit linear PCM WAV export ready for VR (Quest, Vision Pro) & YouTube 360"]
     }
 ]
 
@@ -374,6 +384,11 @@ MATH_FORMULAS = [
         "name": "Neve 1073 Marinair Transformer Saturation",
         "formula": "y(t) = \\frac{\\tanh(\\text{drive} \\cdot x(t) + \\text{bias}) - \\tanh(\\text{bias})}{\\tanh(\\text{drive})} + \\alpha \\cdot x^3(t)",
         "explanation": "Simulates single-ended Class-A preamp asymmetrical 2nd-order tube/transistor warmth plus magnetic core 3rd-order hysteresis saturation from the vintage British output transformer."
+    },
+    {
+        "name": "Higher-Order Ambisonics Spherical Harmonics (ACN / SN3D)",
+        "formula": "B_l^m(t) = S(t) \\cdot Y_l^m(\\theta, \\phi) = S(t) \\cdot N_l^{|m|} P_l^{|m|}(\\sin\\phi) \\begin{cases} \\cos(m\\theta) & m \\ge 0 \\\\ \\sin(|m|\\theta) & m < 0 \\end{cases}",
+        "explanation": "Decomposes directional sound fields on the surface of a sphere into orthogonal spherical harmonic basis functions of degree l and order m, indexed by Ambisonic Channel Number (ACN n = l^2 + l + m) under Schmidt Semi-Normalized (SN3D) convention."
     }
 ]
 
@@ -1101,7 +1116,7 @@ def build_manual_html() -> str:
                 <div class="meta-tags">
                     <span class="meta-tag">⚡ Version {APP_VERSION}</span>
                     <span class="meta-tag">🎼 {total_phases} Master Phases</span>
-                    <span class="meta-tag">🎛️ 47 DSP Engines &amp; Core Modules</span>
+                    <span class="meta-tag">🎛️ 48 DSP Engines &amp; Core Modules</span>
                     <span class="meta-tag">🌐 100% Offline Single-File Architecture</span>
                 </div>
             </div>

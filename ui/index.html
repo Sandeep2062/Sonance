@@ -1282,6 +1282,9 @@
       <button class="btn btn-secondary" onclick="openConsoleModal()" style="padding:5px 9px; font-size:11px;" id="consoleHeaderBtn" title="British Class-A Console Strip & SSL G-Master Bus Studio">
         🎛️ Console Strip
       </button>
+      <button class="btn btn-secondary" onclick="openHoaModal()" style="padding:5px 9px; font-size:11px;" id="hoaHeaderBtn" title="Higher-Order Ambisonics & 360-Degree VR Spherical Spatializer Studio">
+        🌐 360° Ambisonics
+      </button>
       <button class="btn btn-secondary" onclick="openLrcStudioModal()" style="padding:5px 9px; font-size:11px;" id="lrcStudioHeaderBtn" title="Interactive LRC Studio & Live Time-Stamper">
         ✍️ LRC Studio
       </button>
@@ -7529,6 +7532,138 @@
     </div>
   </div>
 
+  <!-- Phase 31: Higher-Order Ambisonics & 360-Degree VR Spherical Spatializer Modal -->
+  <div class="modal-backdrop" id="hoaModal" style="display:none;">
+    <div class="modal-card" style="width:880px; max-width:96vw; background:#161926; border:1px solid var(--border); border-radius:12px; box-shadow:0 12px 36px rgba(0,0,0,0.7); overflow:hidden;">
+      <div style="padding:16px 20px; background:#121520; border-bottom:1px solid var(--border); display:flex; justify-content:space-between; align-items:center;">
+        <div class="modal-title" style="font-size:14px; font-weight:700; display:flex; align-items:center; gap:8px;">
+          <span>🌐</span>
+          <span>Higher-Order Ambisonics (HOA 1st/2nd/3rd Order) &amp; 360° VR Spatializer</span>
+        </div>
+        <button onclick="closeHoaModal()" style="background:none; border:none; color:var(--text-muted); font-size:16px; cursor:pointer;">✕</button>
+      </div>
+
+      <div style="padding:20px; max-height:75vh; overflow-y:auto; display:flex; flex-direction:column; gap:16px;">
+        <div style="font-size:11px; color:var(--text-dim); line-height:1.5;">
+          Encode sound sources into full 3D spherical harmonic domains up to 3rd order (16 channels ACN / SN3D AmbiX) with dynamic trajectories. Decode to binaural 3D headphones via Woodworth ITD delay and pinna elevation notches, or export discrete multichannel AmbiX WAV for VR engines (Meta Quest, Apple Vision Pro) and YouTube 360.
+        </div>
+
+        <div>
+          <label style="font-size:11px; font-weight:600; color:var(--text-muted); display:block; margin-bottom:6px;">Target Audio File:</label>
+          <div style="display:flex; gap:8px;">
+            <input type="text" id="hoaTargetInput" class="search-input" style="width:100%; font-size:11px;" placeholder="Path to input audio file...">
+            <button class="btn btn-secondary" onclick="loadActiveTrackForHoa()" style="font-size:11px; padding:6px 12px; white-space:nowrap;">Active Track</button>
+          </div>
+        </div>
+
+        <div>
+          <label style="font-size:11px; font-weight:600; color:var(--text-muted); display:block; margin-bottom:6px;">Custom Export Destination (Optional):</label>
+          <input type="text" id="hoaOutputInput" class="search-input" style="width:100%; font-size:11px;" placeholder="Auto-generated if empty: <original>_hoa_<mode>.wav">
+        </div>
+
+        <!-- Ambisonics Order & Render Mode -->
+        <div style="display:grid; grid-template-columns: 1fr 1fr; gap:16px;">
+          <div style="background:#121520; border:1px solid var(--border); border-radius:10px; padding:14px; display:flex; flex-direction:column; gap:10px;">
+            <div style="font-size:12px; font-weight:700; color:var(--cyan);">SPHERICAL HARMONIC ORDER</div>
+            <div>
+              <label style="font-size:10px; font-weight:600; color:var(--text-muted); display:block; margin-bottom:4px;">Ambisonics Resolution:</label>
+              <select id="hoaOrderSelect" class="search-input" style="width:100%; font-size:11px;">
+                <option value="1">1st Order (4 Channels: W, Y, Z, X)</option>
+                <option value="2">2nd Order (9 Channels: W, Y, Z, X, V, T, R, S, U)</option>
+                <option value="3" selected>3rd Order (16 Channels: Full 3D Sphere ACN 0-15)</option>
+              </select>
+            </div>
+            <div style="font-size:10px; color:var(--text-dim); line-height:1.4;">
+              • 1st Order (N=1): 4 channels, broad spatial sweet-spot.<br>
+              • 2nd Order (N=2): 9 channels, high angular localization.<br>
+              • 3rd Order (N=3): 16 channels, mastering-grade 3D VR immersion.
+            </div>
+          </div>
+
+          <div style="background:#121520; border:1px solid var(--border); border-radius:10px; padding:14px; display:flex; flex-direction:column; gap:10px;">
+            <div style="font-size:12px; font-weight:700; color:var(--emerald);">OUTPUT RENDER MODE</div>
+            <div>
+              <label style="font-size:10px; font-weight:600; color:var(--text-muted); display:block; margin-bottom:4px;">Render Format:</label>
+              <select id="hoaModeSelect" class="search-input" style="width:100%; font-size:11px;">
+                <option value="binaural" selected>🎧 3D Binaural Headphones (Virtualizer 2-Ch WAV)</option>
+                <option value="bformat">🌐 Discrete AmbiX Multichannel B-Format WAV</option>
+              </select>
+            </div>
+            <div style="font-size:10px; color:var(--text-dim); line-height:1.4;">
+              • Binaural: Virtual 14-point loudspeaker spherical decoder with head-shadow lowpass and 7.5 kHz pinna notch.<br>
+              • AmbiX: Multichannel 24-bit PCM WAV formatted with ACN sorting &amp; SN3D normalization.
+            </div>
+          </div>
+        </div>
+
+        <!-- 3D Trajectory & Spatial Motion -->
+        <div style="background:#121520; border:1px solid var(--border); border-radius:10px; padding:14px; display:flex; flex-direction:column; gap:12px;">
+          <div style="display:flex; justify-content:space-between; align-items:center; border-bottom:1px solid var(--border); padding-bottom:8px;">
+            <div style="font-size:12px; font-weight:700; color:var(--gold);">🪐 3D SPATIAL TRAJECTORY ENGINE</div>
+            <div style="display:flex; gap:6px;">
+              <button class="btn btn-secondary" onclick="applyHoaPreset('helix')" style="font-size:10px; padding:3px 8px;">🌀 Helix</button>
+              <button class="btn btn-secondary" onclick="applyHoaPreset('horizontal')" style="font-size:10px; padding:3px 8px;">🔄 Horizontal</button>
+              <button class="btn btn-secondary" onclick="applyHoaPreset('pendulum')" style="font-size:10px; padding:3px 8px;">⏱️ Pendulum</button>
+              <button class="btn btn-secondary" onclick="applyHoaPreset('overhead')" style="font-size:10px; padding:3px 8px;">🛸 Overhead</button>
+              <button class="btn btn-secondary" onclick="applyHoaPreset('fixed_front')" style="font-size:10px; padding:3px 8px;">🎯 Front Center</button>
+            </div>
+          </div>
+
+          <div style="display:grid; grid-template-columns: 1fr 1fr 1fr; gap:12px;">
+            <div>
+              <label style="font-size:10px; font-weight:600; color:var(--text-muted); display:block; margin-bottom:4px;">Motion Trajectory:</label>
+              <select id="hoaTrajectorySelect" class="search-input" style="width:100%; font-size:11px;">
+                <option value="orbit_helix" selected>Spherical Orbit Helix (Elevation Spiral)</option>
+                <option value="orbit_horizontal">Horizontal 360° Orbit (Equator Plane)</option>
+                <option value="orbit_pendulum">Pendulum Arc (Left-Right Horizon)</option>
+                <option value="orbit_overhead">Overhead Halo Orbit (+45° to +75° Dome)</option>
+                <option value="fixed">Fixed Spherical Coordinate (Static Anchor)</option>
+              </select>
+            </div>
+
+            <div>
+              <div style="display:flex; justify-content:space-between; margin-bottom:4px;">
+                <label style="font-size:10px; font-weight:600; color:var(--text-muted);">Base Azimuth:</label>
+                <span id="hoaAzimuthVal" style="font-size:10px; color:var(--gold); font-weight:600;">0.0°</span>
+              </div>
+              <input type="range" id="hoaAzimuthSlider" min="-180" max="180" step="5" value="0" style="width:100%;" oninput="document.getElementById('hoaAzimuthVal').innerText = (this.value >= 0 ? '+' : '') + this.value + '°'">
+            </div>
+
+            <div>
+              <div style="display:flex; justify-content:space-between; margin-bottom:4px;">
+                <label style="font-size:10px; font-weight:600; color:var(--text-muted);">Base Elevation:</label>
+                <span id="hoaElevationVal" style="font-size:10px; color:var(--gold); font-weight:600;">0.0°</span>
+              </div>
+              <input type="range" id="hoaElevationSlider" min="-90" max="90" step="5" value="0" style="width:100%;" oninput="document.getElementById('hoaElevationVal').innerText = (this.value >= 0 ? '+' : '') + this.value + '°'">
+            </div>
+          </div>
+
+          <div>
+            <div style="display:flex; justify-content:space-between; margin-bottom:4px;">
+              <label style="font-size:10px; font-weight:600; color:var(--text-muted);">Orbit Cycle Period (Speed):</label>
+              <span id="hoaPeriodVal" style="font-size:10px; color:var(--cyan); font-weight:600;">12.0s</span>
+            </div>
+            <input type="range" id="hoaPeriodSlider" min="3" max="60" step="1" value="12" style="width:100%;" oninput="document.getElementById('hoaPeriodVal').innerText = this.value + '.0s'">
+          </div>
+        </div>
+
+        <div style="display:flex; justify-content:space-between; align-items:center; margin-top:4px;">
+          <span id="hoaStatusText" style="font-size:11px; color:var(--text-dim);">Ready to spatialise into Higher-Order Ambisonics sphere</span>
+          <button class="btn btn-primary" onclick="runHoaAction()" id="processHoaBtn" style="font-size:12px; padding:7px 20px;">
+            🌐 Render Ambisonics Master
+          </button>
+        </div>
+
+        <div id="hoaOutputCard" style="background:#0b0d14; border:1px solid var(--border); border-radius:8px; padding:12px; font-family:monospace; font-size:11px; line-height:1.45; color:var(--cyan); min-height:80px; white-space:pre-wrap; overflow-x:auto;">Select audio file and click Render Ambisonics Master.</div>
+      </div>
+
+      <div style="padding:10px 16px; background:#121520; border-top:1px solid var(--border); display:flex; justify-content:space-between; align-items:center;">
+        <span style="font-size:10px; color:var(--text-dim);">Higher-Order Ambisonics / ACN SN3D AmbiX Standard / 360° Spherical Harmonics</span>
+        <button class="btn btn-secondary" onclick="closeHoaModal()">Close</button>
+      </div>
+    </div>
+  </div>
+
   <!-- Podcast & Long Mix Bookmark Resumption Toast (Phase 10) -->
   <div id="podcastResumeToast" style="display:none; position:fixed; bottom:85px; right:20px; z-index:9999; background:#131722; border:1px solid var(--border); box-shadow:0 8px 24px rgba(0,0,0,0.6); border-radius:10px; padding:10px 14px; align-items:center; gap:10px; backdrop-filter:blur(10px);">
     <span style="font-size:16px;">⏱️</span>
@@ -10542,6 +10677,7 @@
         closeVstModal();
         closeAtmosModal();
         closeConsoleModal();
+        closeHoaModal();
         dismissPodcastResumeToast();
         const popup = document.getElementById('speedStudioPopup');
         if (popup) popup.style.display = 'none';
@@ -18657,6 +18793,126 @@
           }
           if (st) {
             st.innerText = 'Error mastering audio';
+            st.style.color = 'var(--rose)';
+          }
+          if (outCard) outCard.innerText = '✕ Error: ' + (err.message || err);
+        });
+      }
+    }
+
+    // ------------------ Phase 31: Higher-Order Ambisonics & 360-Degree VR Spatializer ------------------
+    function openHoaModal() {
+      const modal = document.getElementById('hoaModal');
+      if (modal) modal.style.display = 'flex';
+    }
+
+    function closeHoaModal() {
+      const modal = document.getElementById('hoaModal');
+      if (modal) modal.style.display = 'none';
+    }
+
+    function loadActiveTrackForHoa() {
+      if (state.currentTrack && state.currentTrack.path) {
+        const inp = document.getElementById('hoaTargetInput');
+        if (inp) inp.value = state.currentTrack.path;
+      } else {
+        showToast('No active track loaded in player');
+      }
+    }
+
+    function applyHoaPreset(pKey) {
+      const trajSel = document.getElementById('hoaTrajectorySelect');
+      const azimSld = document.getElementById('hoaAzimuthSlider');
+      const elevSld = document.getElementById('hoaElevationSlider');
+      const perSld = document.getElementById('hoaPeriodSlider');
+
+      if (pKey === 'helix') {
+        if (trajSel) trajSel.value = 'orbit_helix';
+        if (azimSld) { azimSld.value = 0; document.getElementById('hoaAzimuthVal').innerText = '0.0°'; }
+        if (elevSld) { elevSld.value = 0; document.getElementById('hoaElevationVal').innerText = '0.0°'; }
+        if (perSld) { perSld.value = 12; document.getElementById('hoaPeriodVal').innerText = '12.0s'; }
+      } else if (pKey === 'horizontal') {
+        if (trajSel) trajSel.value = 'orbit_horizontal';
+        if (azimSld) { azimSld.value = 0; document.getElementById('hoaAzimuthVal').innerText = '0.0°'; }
+        if (elevSld) { elevSld.value = 0; document.getElementById('hoaElevationVal').innerText = '0.0°'; }
+        if (perSld) { perSld.value = 14; document.getElementById('hoaPeriodVal').innerText = '14.0s'; }
+      } else if (pKey === 'pendulum') {
+        if (trajSel) trajSel.value = 'orbit_pendulum';
+        if (azimSld) { azimSld.value = 0; document.getElementById('hoaAzimuthVal').innerText = '0.0°'; }
+        if (elevSld) { elevSld.value = 0; document.getElementById('hoaElevationVal').innerText = '0.0°'; }
+        if (perSld) { perSld.value = 8; document.getElementById('hoaPeriodVal').innerText = '8.0s'; }
+      } else if (pKey === 'overhead') {
+        if (trajSel) trajSel.value = 'orbit_overhead';
+        if (azimSld) { azimSld.value = 0; document.getElementById('hoaAzimuthVal').innerText = '0.0°'; }
+        if (elevSld) { elevSld.value = 55; document.getElementById('hoaElevationVal').innerText = '+55.0°'; }
+        if (perSld) { perSld.value = 16; document.getElementById('hoaPeriodVal').innerText = '16.0s'; }
+      } else if (pKey === 'fixed_front') {
+        if (trajSel) trajSel.value = 'fixed';
+        if (azimSld) { azimSld.value = 0; document.getElementById('hoaAzimuthVal').innerText = '0.0°'; }
+        if (elevSld) { elevSld.value = 0; document.getElementById('hoaElevationVal').innerText = '0.0°'; }
+      }
+      showToast('Loaded Ambisonics preset: ' + pKey);
+    }
+
+    function runHoaAction() {
+      const inp = (document.getElementById('hoaTargetInput').value || '').trim();
+      const out = (document.getElementById('hoaOutputInput').value || '').trim() || null;
+      const order = parseInt(document.getElementById('hoaOrderSelect').value, 10) || 3;
+      const mode = document.getElementById('hoaModeSelect').value || 'binaural';
+      const trajectory = document.getElementById('hoaTrajectorySelect').value || 'orbit_helix';
+      const azimuth = parseFloat(document.getElementById('hoaAzimuthSlider').value) || 0.0;
+      const elevation = parseFloat(document.getElementById('hoaElevationSlider').value) || 0.0;
+      const period = parseFloat(document.getElementById('hoaPeriodSlider').value) || 12.0;
+
+      const btn = document.getElementById('processHoaBtn');
+      const st = document.getElementById('hoaStatusText');
+      const outCard = document.getElementById('hoaOutputCard');
+
+      if (!inp) {
+        showToast('Please select input audio file');
+        return;
+      }
+
+      if (btn) {
+        btn.disabled = true;
+        btn.innerText = '🌐 Spatialising Audio...';
+      }
+      if (st) {
+        st.innerText = `Encoding HOA Order ${order} (${(order+1)*(order+1)} Channels) & Rendering ${mode.toUpperCase()}...`;
+        st.style.color = 'var(--cyan)';
+      }
+      if (outCard) outCard.innerText = 'Calculating real spherical harmonics & dynamic spatial trajectories...';
+
+      if (window.pywebview && window.pywebview.api && window.pywebview.api.render_ambisonic_hoa) {
+        window.pywebview.api.render_ambisonic_hoa(
+          inp, out, order, mode, trajectory, azimuth, elevation, period
+        ).then(res => {
+          if (btn) {
+            btn.disabled = false;
+            btn.innerText = '🌐 Render Ambisonics Master';
+          }
+          if (res) {
+            if (st) {
+              st.innerText = '✓ Ambisonic spatial master rendered successfully!';
+              st.style.color = 'var(--emerald)';
+            }
+            let card = `HIGHER-ORDER AMBISONICS (HOA) & 360° VR SPATIAL REPORT\n`;
+            card += `Input Source     : ${res.input_path}\n`;
+            card += `Output Master    : ${res.output_path}\n`;
+            card += `Ambisonic Order  : Order ${res.order} (${res.channels} Ch WAV @ ${res.sample_rate} Hz, 24-bit)\n`;
+            card += `Render Format    : ${res.mode_label}\n`;
+            card += `3D Trajectory    : ${res.trajectory.toUpperCase()} (Period: ${res.orbit_period_sec}s)\n`;
+            card += `Duration / Peak  : ${res.duration_sec}s | Peak: ${res.peak_dbfs} dBFS | RMS: ${res.rms_dbfs} dBFS\n`;
+            if (outCard) outCard.innerText = card;
+            showToast('Ambisonics master rendered successfully!');
+          }
+        }).catch(err => {
+          if (btn) {
+            btn.disabled = false;
+            btn.innerText = '🌐 Render Ambisonics Master';
+          }
+          if (st) {
+            st.innerText = 'Error rendering Ambisonics';
             st.style.color = 'var(--rose)';
           }
           if (outCard) outCard.innerText = '✕ Error: ' + (err.message || err);

@@ -115,8 +115,9 @@ import docs_generator
 import plugin_host
 import spatial_multichannel
 import console_channel_strip
+import ambisonic_hoa
 
-APP_VERSION = "3.0.0"
+APP_VERSION = "3.1.0"
 GITHUB_REPO = "Sandeep2062/Sonance"
 APP_DIR = Path(__file__).parent.resolve()
 UI_PATH = APP_DIR / "ui" / "index.html"
@@ -1867,6 +1868,30 @@ class LyricsAPI:
     def get_console_presets(self) -> Dict[str, Any]:
         """Returns factory presets for British Class-A Console & SSL G-Master Bus Studio."""
         return console_channel_strip.FACTORY_PRESETS
+
+    # ------------------ Phase 31: Higher-Order Ambisonics (HOA) & 360 VR Spatializer ------------------
+    def render_ambisonic_hoa(
+        self,
+        input_path: str,
+        output_path: Optional[str] = None,
+        order: int = 3,
+        mode: str = "binaural",
+        trajectory_type: str = "orbit_helix",
+        base_azimuth_deg: float = 0.0,
+        base_elevation_deg: float = 0.0,
+        orbit_period_sec: float = 12.0,
+    ) -> Dict[str, Any]:
+        """Encodes stereo audio into Higher-Order Ambisonics (1st/2nd/3rd order) and renders binaural 3D or AmbiX B-format."""
+        return ambisonic_hoa.render_ambisonic_hoa(
+            input_path=input_path,
+            output_path=output_path,
+            order=order,
+            mode=mode,
+            trajectory_type=trajectory_type,
+            base_azimuth_deg=base_azimuth_deg,
+            base_elevation_deg=base_elevation_deg,
+            orbit_period_sec=orbit_period_sec,
+        )
 
     def _save_last_folder(self, folder: str):
         try:

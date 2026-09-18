@@ -499,6 +499,13 @@ Examples:
       help="British Class-A Console Channel Strip & SSL G-Master Bus Studio: --console <audio_file> [output_file] [--preset master_bus_glue|analog_warmth|drum_bus_punch|vocal_channel|radio_broadcast]",
   )
   parser.add_argument(
+      "--hoa",
+      "--ambisonics",
+      nargs="*",
+      metavar="PARAM",
+      help="Higher-Order Ambisonics & 360-Degree VR Spatializer: --hoa <audio_file> [output_file] [--order 1|2|3] [--mode binaural|bformat] [--trajectory orbit_helix|orbit_horizontal|orbit_pendulum|fixed] [--azimuth 0] [--elevation 0] [--period 12]",
+  )
+  parser.add_argument(
       "--version",
       action="version",
       version=f"Sonance v{modern_lyrics_downloader.APP_VERSION}",
@@ -2849,6 +2856,79 @@ Examples:
     print(f"[+] SSL Gain Reduct. : -{t['max_gain_reduction_db']:.2f} dB max (Avg: -{t['avg_gain_reduction_db']:.2f} dB)")
     print(f"[+] SSL VCA Settings : Ratio {t['ratio']}:1 | Attack {t['attack_ms']}ms | Release {t['release']} | Makeup +{t['makeup_db']}dB")
     print(f"[+] Neve 1073 Preamp : Drive {n['drive']}x | Low {n['low_shelf']} | Mid {n['mid_band']} | High {n['high_shelf']}")
+    print("=" * 70)
+    return
+
+  if args.hoa is not None:
+    import ambisonic_hoa
+    params = list(args.hoa) + list(unknown)
+    if not params:
+      print("[-] Error: --hoa requires an input audio file.")
+      print("    Usage: python sonance.py --hoa <audio_file> [output_file] [--order 1|2|3] [--mode binaural|bformat] [--trajectory <type>]")
+      return
+
+    inp = params[0]
+    out = None
+    order = 3
+    mode = "binaural"
+    trajectory = "orbit_helix"
+    azimuth = 0.0
+    elevation = 0.0
+    period = 12.0
+
+    idx = 1
+    while idx < len(params):
+      item = params[idx]
+      if item == "--order" and idx + 1 < len(params):
+        order = int(params[idx + 1])
+        idx += 2
+      elif item == "--mode" and idx + 1 < len(params):
+        mode = params[idx + 1].lower()
+        idx += 2
+      elif item in ("--trajectory", "--motion") and idx + 1 < len(params):
+        trajectory = params[idx + 1].lower()
+        idx += 2
+      elif item in ("--azimuth", "--azim") and idx + 1 < len(params):
+        azimuth = float(params[idx + 1])
+        idx += 2
+      elif item in ("--elevation", "--elev") and idx + 1 < len(params):
+        elevation = float(params[idx + 1])
+        idx += 2
+      elif item in ("--period", "--orbit") and idx + 1 < len(params):
+        period = float(params[idx + 1])
+        idx += 2
+      elif not item.startswith("-") and out is None:
+        out = item
+        idx += 1
+      else:
+        idx += 1
+
+    print("=" * 70)
+    print("  SONANCE AUDIOPHILE WORKSTATION v3.1.0")
+    print("  Phase 31: Higher-Order Ambisonics & 360-Degree VR Spatializer Studio")
+    print("=" * 70)
+    print(f"[*] Input Source     : {inp}")
+    print(f"[*] Ambisonic Order  : {order} ({ (order + 1)**2 } Spherical Harmonics Channels)")
+    print(f"[*] Output Mode      : {mode.upper()}")
+    print(f"[*] 3D Trajectory    : {trajectory.upper()} ({period}s orbit)")
+    if trajectory == "fixed":
+      print(f"[*] Target Position  : Azimuth {azimuth:+.1f} deg | Elevation {elevation:+.1f} deg")
+
+    res = ambisonic_hoa.render_ambisonic_hoa(
+        input_path=inp,
+        output_path=out,
+        order=order,
+        mode=mode,
+        trajectory_type=trajectory,
+        base_azimuth_deg=azimuth,
+        base_elevation_deg=elevation,
+        orbit_period_sec=period,
+    )
+
+    print(f"[+] Output Master    : {res['output_path']}")
+    print(f"[+] Audio Format     : 24-bit Linear PCM WAV @ {res['sample_rate']} Hz ({res['duration_sec']}s)")
+    print(f"[+] Channels Exported: {res['channels']} ({res['mode_label']})")
+    print(f"[+] Peak / RMS Level : {res['peak_dbfs']} dBFS / {res['rms_dbfs']} dBFS")
     print("=" * 70)
     return
 
