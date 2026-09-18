@@ -30,7 +30,7 @@ if (keystorePropertiesFile.exists()) {
 
 android {
     namespace "com.sandeep.sonance"
-    compileSdkVersion 34
+    compileSdk = 36
     ndkVersion flutter.ndkVersion
 
     compileOptions {
@@ -49,7 +49,7 @@ android {
     defaultConfig {
         applicationId "com.sandeep.sonance"
         minSdkVersion 21
-        targetSdkVersion 34
+        targetSdkVersion 36
         versionCode flutterVersionCode.toInteger()
         versionName flutterVersionName
     }

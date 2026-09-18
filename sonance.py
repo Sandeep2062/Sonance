@@ -2643,7 +2643,7 @@ Examples:
   if args.vst_scan:
     import plugin_host
     print("=" * 70)
-    print("  SONANCE AUDIOPHILE WORKSTATION v3.6.4")
+    print("  SONANCE AUDIOPHILE WORKSTATION v3.6.5")
     print("  Phase 28: VST3 & CLAP Audio Plugin Scanner")
     print("=" * 70)
     plugins = plugin_host.scan_installed_plugins()
@@ -2679,7 +2679,7 @@ Examples:
         idx += 1
 
     print("=" * 70)
-    print("  SONANCE AUDIOPHILE WORKSTATION v3.6.4")
+    print("  SONANCE AUDIOPHILE WORKSTATION v3.6.5")
     print("  Phase 28: VST3 & CLAP Audio Plugin Host & Rack Studio")
     print("=" * 70)
     print(f"[*] Processing {inp} through VST rack preset '{preset_name}'...")
@@ -2740,7 +2740,7 @@ Examples:
         idx += 1
 
     print("=" * 70)
-    print("  SONANCE AUDIOPHILE WORKSTATION v3.6.4")
+    print("  SONANCE AUDIOPHILE WORKSTATION v3.6.5")
     print("  Phase 29: Dolby Atmos 7.1.4 Bed Spatializer & Multichannel Renderer")
     print("=" * 70)
     print(f"[*] Rendering {inp} into {format_type} Spatial Audio ({mode.upper()} mode)...")
@@ -2880,7 +2880,7 @@ Examples:
       custom_neve["mid_gain_db"] = mid_gain
 
     print("=" * 70)
-    print("  SONANCE AUDIOPHILE WORKSTATION v3.6.4")
+    print("  SONANCE AUDIOPHILE WORKSTATION v3.6.5")
     print("  Phase 30: British Class-A Console Channel Strip & SSL G-Master Bus Studio")
     print("=" * 70)
     print(f"[*] Processing: {inp} through {preset.upper()} preset...")
@@ -2953,7 +2953,7 @@ Examples:
         idx += 1
 
     print("=" * 70)
-    print("  SONANCE AUDIOPHILE WORKSTATION v3.6.4")
+    print("  SONANCE AUDIOPHILE WORKSTATION v3.6.5")
     print("  Phase 31: Higher-Order Ambisonics & 360-Degree VR Spatializer Studio")
     print("=" * 70)
     print(f"[*] Input Source     : {inp}")
@@ -3042,7 +3042,7 @@ Examples:
         idx += 1
 
     print("=" * 70)
-    print("  SONANCE AUDIOPHILE WORKSTATION v3.6.4")
+    print("  SONANCE AUDIOPHILE WORKSTATION v3.6.5")
     print("  Phase 32: Psychoacoustic Subharmonic Bass & Missing Fundamental Studio")
     print("=" * 70)
     print(f"[*] Input Source     : {inp}")
@@ -3131,7 +3131,7 @@ Examples:
         idx += 1
 
     print("=" * 70)
-    print("  SONANCE AUDIOPHILE WORKSTATION v3.6.4")
+    print("  SONANCE AUDIOPHILE WORKSTATION v3.6.5")
     print("  Phase 33: Dynamic Spectral Resonance Suppressor & Surgical De-Resonator")
     print("=" * 70)
     print(f"[*] Input Source     : {inp}")
@@ -3226,7 +3226,7 @@ Examples:
         idx += 1
 
     print("=" * 70)
-    print("  SONANCE AUDIOPHILE WORKSTATION v3.6.4")
+    print("  SONANCE AUDIOPHILE WORKSTATION v3.6.5")
     print("  Phase 34: Vintage Optical & Variable-Mu Master Compressor Studio")
     print("=" * 70)
     print(f"[*] Input Source     : {inp}")
@@ -3287,7 +3287,7 @@ Examples:
         idx += 1
 
     print("=" * 70)
-    print("  SONANCE AUDIOPHILE WORKSTATION v3.6.4")
+    print("  SONANCE AUDIOPHILE WORKSTATION v3.6.5")
     print("  Phase 35 Grand Finale: Zenith Master Orchestration Suite")
     print("=" * 70)
 
@@ -3312,7 +3312,7 @@ Examples:
   if args.audio_devices:
     import exclusive_audio_engine
     print("=" * 70)
-    print("  SONANCE AUDIOPHILE WORKSTATION v3.6.4")
+    print("  SONANCE AUDIOPHILE WORKSTATION v3.6.5")
     print("  Hardware Audio Output Endpoints & Driver Discovery")
     print("=" * 70)
     engine = exclusive_audio_engine.get_engine()
@@ -3368,7 +3368,7 @@ Examples:
         idx += 1
 
     print("=" * 70)
-    print("  SONANCE AUDIOPHILE WORKSTATION v3.6.4")
+    print("  SONANCE AUDIOPHILE WORKSTATION v3.6.5")
     print("  Exclusive Mode DAC Hardware Lock Test")
     print("=" * 70)
     engine = exclusive_audio_engine.get_engine()
@@ -3408,7 +3408,7 @@ Examples:
         idx += 1
 
     print("=" * 70)
-    print("  SONANCE AUDIOPHILE WORKSTATION v3.6.4")
+    print("  SONANCE AUDIOPHILE WORKSTATION v3.6.5")
     print("  Bit-Perfect Exclusive Audio Playback")
     print("=" * 70)
     engine = exclusive_audio_engine.get_engine()

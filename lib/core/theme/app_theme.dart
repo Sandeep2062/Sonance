@@ -44,7 +44,7 @@ class SonanceTheme {
       thickness: 1,
       space: 1,
     ),
-    cardTheme: CardTheme(
+    cardTheme: CardThemeData(
       color: darkCard,
       elevation: 0,
       margin: EdgeInsets.zero,
@@ -87,7 +87,7 @@ class SonanceTheme {
       thickness: 1,
       space: 1,
     ),
-    cardTheme: CardTheme(
+    cardTheme: CardThemeData(
       color: lightCard,
       elevation: 0,
       margin: EdgeInsets.zero,
