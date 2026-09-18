@@ -310,6 +310,7 @@ class ExclusiveAudioEngine:
 
         stereo_data = np.column_stack([wave_data, wave_data])
 
+        stream = None
         try:
             extra = sd.WasapiSettings(exclusive=True) if sys.platform == "win32" else None
             stream = sd.OutputStream(
@@ -321,8 +322,6 @@ class ExclusiveAudioEngine:
             )
             stream.start()
             stream.write(stereo_data)
-            stream.stop()
-            stream.close()
             return {
                 "success": True,
                 "message": f"Hardware Exclusive Lock verified on device {device_id} at {sample_rate} Hz (440 Hz Chime)",
@@ -331,6 +330,16 @@ class ExclusiveAudioEngine:
             }
         except Exception as e:
             return {"success": False, "error": str(e)}
+        finally:
+            if stream is not None:
+                try:
+                    stream.stop()
+                except Exception:
+                    pass
+                try:
+                    stream.close()
+                except Exception:
+                    pass
 
     def play(self, file_path: str, start_time: float = 0.0) -> Dict[str, Any]:
         """Starts bit-perfect exclusive playback of an audio file."""

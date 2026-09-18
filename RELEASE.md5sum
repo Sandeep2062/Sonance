@@ -1,8 +1,8 @@
 c91e9febb271f1cc4bb2a7982eaf4bf5  LICENSE
 b845febb995295aa7c63022e9d009b7d  README.md
-3753e1ff223960e1b7ef7a1ad97dc715  RELEASE.manifest.json
-51aa0d1708d49216c5ea27b989bb0bc9  RELEASE.md5sum
-14aa78d89f8a0d838606a71e4e583a68  RELEASE.sha256sum
+645cb1f9076003bffe4ae98a3b692c87  RELEASE.manifest.json
+6f9b3b8f674c7622371293b901fbb96b  RELEASE.md5sum
+881f4dec4f7c442897377d12b7ca6b6c  RELEASE.sha256sum
 ab710a6799edb8263d64702507aecd40  ab_looper.py
 13ee5e3bfff751c2d33798214f86df06  accuraterip_verifier.py
 34e223dcbdaa6d440786496058fde5b8  album_art_studio.py
@@ -44,7 +44,7 @@ ca7f713eb844787c441408cf4d668506  docs_generator.py
 ec40665c8953c6399f0dc1a778196cf4  downloader_engine.py
 def557fffaa457a30c72c3f33f37bbf1  dr_meter.py
 7abe7f2069f8b48e485b8ad25aefa921  dsd_converter.py
-fc571ea8c3c27b26a72f55129f249a37  exclusive_audio_engine.py
+6735933c7117af6f995b17236993e42e  exclusive_audio_engine.py
 a0a7561c2fcdd18e0fb28983ff9262b0  flac_verifier.py
 4bce5e8f0b67bab7a836df55f40fbf47  formant_shifter.py
 0eb50f37fba3a4af9c534b6f7fe2bb30  headphone_autoeq.py
