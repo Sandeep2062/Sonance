@@ -113,8 +113,9 @@ import tape_echo_delay
 import release_packager
 import docs_generator
 import plugin_host
+import spatial_multichannel
 
-APP_VERSION = "2.8.0"
+APP_VERSION = "2.9.0"
 GITHUB_REPO = "Sandeep2062/Sonance"
 APP_DIR = Path(__file__).parent.resolve()
 UI_PATH = APP_DIR / "ui" / "index.html"
@@ -1815,6 +1816,28 @@ class LyricsAPI:
     def get_vst_factory_presets(self) -> Dict[str, Any]:
         """Returns factory rack chain presets."""
         return plugin_host.FACTORY_PRESETS
+
+    # ------------------ Phase 29: Dolby Atmos 7.1.4 Spatializer & Multichannel Renderer ------------------
+    def render_spatial_714(
+        self,
+        input_path: str,
+        output_path: Optional[str] = None,
+        mode: str = "binaural",
+        format_type: str = "7.1.4",
+        lfe_cutoff_hz: float = 80.0,
+        height_level: float = 0.35,
+        spread: float = 1.15,
+    ) -> Dict[str, Any]:
+        """Renders stereo audio into an immersive 7.1.4 Dolby Atmos spatial bed (binaural or discrete multichannel)."""
+        return spatial_multichannel.render_spatial_714(
+            input_path=input_path,
+            output_path=output_path,
+            mode=mode,
+            format_type=format_type,
+            lfe_cutoff_hz=lfe_cutoff_hz,
+            height_level=height_level,
+            spread=spread,
+        )
 
     def _save_last_folder(self, folder: str):
         try:

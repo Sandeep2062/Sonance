@@ -1276,6 +1276,9 @@
       <button class="btn btn-secondary" onclick="openVstModal()" style="padding:5px 9px; font-size:11px;" id="vstHeaderBtn" title="VST3 & CLAP Audio Plugin Host & Rack Studio">
         🔌 VST Rack
       </button>
+      <button class="btn btn-secondary" onclick="openAtmosModal()" style="padding:5px 9px; font-size:11px;" id="atmosHeaderBtn" title="Dolby Atmos 7.1.4 Bed Spatializer & Multichannel Audio Renderer">
+        🌌 7.1.4 Atmos
+      </button>
       <button class="btn btn-secondary" onclick="openLrcStudioModal()" style="padding:5px 9px; font-size:11px;" id="lrcStudioHeaderBtn" title="Interactive LRC Studio & Live Time-Stamper">
         ✍️ LRC Studio
       </button>
@@ -7174,6 +7177,114 @@
     </div>
   </div>
 
+  <!-- Phase 29: Dolby Atmos 7.1.4 Bed Spatializer & Multichannel Audio Renderer Modal -->
+  <div class="modal-backdrop" id="atmosModal" style="display:none;">
+    <div class="modal-card" style="width:840px; max-width:96vw; background:#161926; border:1px solid var(--border); border-radius:12px; box-shadow:0 12px 36px rgba(0,0,0,0.7); overflow:hidden;">
+      <div style="padding:16px 20px; background:#121520; border-bottom:1px solid var(--border); display:flex; justify-content:space-between; align-items:center;">
+        <div class="modal-title" style="font-size:14px; font-weight:700; display:flex; align-items:center; gap:8px;">
+          <span>🌌</span>
+          <span>Dolby Atmos 7.1.4 Bed Spatializer &amp; Multichannel Audio Renderer</span>
+        </div>
+        <button onclick="closeAtmosModal()" style="background:none; border:none; color:var(--text-muted); font-size:16px; cursor:pointer;">✕</button>
+      </div>
+
+      <div style="padding:20px; max-height:75vh; overflow-y:auto; display:flex; flex-direction:column; gap:16px;">
+        <div style="font-size:11px; color:var(--text-dim); line-height:1.5;">
+          Deconstructs stereo audio into immersive 7.1.4 spatial audio beds with 7 ear-level surround channels (L, C, R, LFE Subwoofer, Lss, Rss, Lsr, Rsr) and 4 overhead ceiling height channels (TFL, TFR, TRL, TRR). Supports 3D binaural headphone virtualizer and discrete 12-channel 24-bit PCM WAV export.
+        </div>
+
+        <div>
+          <label style="font-size:11px; font-weight:600; color:var(--text-muted); display:block; margin-bottom:6px;">Target Audio File:</label>
+          <div style="display:flex; gap:8px;">
+            <input type="text" id="atmosTargetInput" class="search-input" style="width:100%; font-size:11px;" placeholder="Path to input audio file...">
+            <button class="btn btn-secondary" onclick="loadActiveTrackForAtmos()" style="font-size:11px; padding:6px 12px; white-space:nowrap;">Active Track</button>
+          </div>
+        </div>
+
+        <div>
+          <label style="font-size:11px; font-weight:600; color:var(--text-muted); display:block; margin-bottom:6px;">Custom Export Destination (Optional):</label>
+          <input type="text" id="atmosOutputInput" class="search-input" style="width:100%; font-size:11px;" placeholder="Auto-generated if empty: <original>_atmos_binaural.wav or _7point1point4.wav">
+        </div>
+
+        <!-- 3D Speaker Layout Visual Radar -->
+        <div style="background:#0c0f18; border:1px solid var(--border); border-radius:10px; padding:14px; display:flex; justify-content:space-around; align-items:center; flex-wrap:wrap; gap:12px;">
+          <div style="text-align:center;">
+            <div style="font-size:10px; font-weight:700; color:var(--cyan); margin-bottom:4px;">TOP HEIGHTS (4 CHANNELS)</div>
+            <div style="font-family:monospace; font-size:11px; color:#e0e7ff; background:#141928; padding:6px 12px; border-radius:6px; border:1px solid var(--border);">
+              [TFL: -45°/45°]  [TFR: +45°/45°]<br>
+              [TRL: -135°/45°] [TRR: +135°/45°]
+            </div>
+          </div>
+          <div style="text-align:center;">
+            <div style="font-size:10px; font-weight:700; color:var(--gold); margin-bottom:4px;">EAR-LEVEL BED (7.1 CHANNELS)</div>
+            <div style="font-family:monospace; font-size:11px; color:#fef3c7; background:#141928; padding:6px 12px; border-radius:6px; border:1px solid var(--border);">
+              [L: -30°] [C: 0°] [R: +30°] [LFE: SUB]<br>
+              [Lss: -90°] [Rss: +90°] [Lsr: -140°] [Rsr: +140°]
+            </div>
+          </div>
+        </div>
+
+        <!-- Mode & Configuration -->
+        <div style="display:grid; grid-template-columns: 1fr 1fr; gap:14px; background:#121520; padding:14px; border-radius:8px; border:1px solid var(--border);">
+          <div>
+            <label style="font-size:11px; font-weight:600; color:var(--text-muted); display:block; margin-bottom:4px;">Rendering Mode:</label>
+            <select id="atmosModeSelect" class="search-input" style="width:100%; font-size:11px;">
+              <option value="binaural">🎧 Binaural 3D Headphone Virtualizer (2 Channels)</option>
+              <option value="discrete">🔊 Discrete Multichannel Master WAV (Surround Setup)</option>
+            </select>
+          </div>
+
+          <div>
+            <label style="font-size:11px; font-weight:600; color:var(--text-muted); display:block; margin-bottom:4px;">Multichannel Format:</label>
+            <select id="atmosFormatSelect" class="search-input" style="width:100%; font-size:11px;">
+              <option value="7.1.4">7.1.4 Immersive Bed (12 Discrete Channels)</option>
+              <option value="7.1">7.1 Surround Sound (8 Discrete Channels)</option>
+              <option value="5.1">5.1 Cinema Surround (6 Discrete Channels)</option>
+            </select>
+          </div>
+
+          <div>
+            <div style="display:flex; justify-content:space-between; margin-bottom:4px;">
+              <label style="font-size:11px; font-weight:600; color:var(--text-muted);">Overhead Ceiling Height Ambience:</label>
+              <span id="atmosHeightVal" style="font-size:11px; color:var(--cyan); font-weight:600;">35%</span>
+            </div>
+            <input type="range" id="atmosHeightSlider" min="0" max="100" value="35" style="width:100%;" oninput="document.getElementById('atmosHeightVal').innerText = this.value + '%'">
+          </div>
+
+          <div>
+            <div style="display:flex; justify-content:space-between; margin-bottom:4px;">
+              <label style="font-size:11px; font-weight:600; color:var(--text-muted);">LFE Subwoofer Crossover:</label>
+              <span id="atmosLfeVal" style="font-size:11px; color:var(--cyan); font-weight:600;">80 Hz</span>
+            </div>
+            <input type="range" id="atmosLfeSlider" min="60" max="160" step="5" value="80" style="width:100%;" oninput="document.getElementById('atmosLfeVal').innerText = this.value + ' Hz'">
+          </div>
+
+          <div style="grid-column: span 2;">
+            <div style="display:flex; justify-content:space-between; margin-bottom:4px;">
+              <label style="font-size:11px; font-weight:600; color:var(--text-muted);">Surround Field Spatial Spread:</label>
+              <span id="atmosSpreadVal" style="font-size:11px; color:var(--cyan); font-weight:600;">115%</span>
+            </div>
+            <input type="range" id="atmosSpreadSlider" min="50" max="200" step="5" value="115" style="width:100%;" oninput="document.getElementById('atmosSpreadVal').innerText = this.value + '%'">
+          </div>
+        </div>
+
+        <div style="display:flex; justify-content:space-between; align-items:center; margin-top:4px;">
+          <span id="atmosStatusText" style="font-size:11px; color:var(--text-dim);">Ready to spatialise into 7.1.4 Dolby Atmos bed</span>
+          <button class="btn btn-primary" onclick="runAtmosAction()" id="processAtmosBtn" style="font-size:12px; padding:7px 18px;">
+            🌌 Render 7.1.4 Spatial Audio
+          </button>
+        </div>
+
+        <div id="atmosOutputCard" style="background:#0b0d14; border:1px solid var(--border); border-radius:8px; padding:12px; font-family:monospace; font-size:11px; line-height:1.45; color:var(--cyan); min-height:80px; white-space:pre-wrap; overflow-x:auto;">Select audio file and click Render 7.1.4 Spatial Audio.</div>
+      </div>
+
+      <div style="padding:10px 16px; background:#121520; border-top:1px solid var(--border); display:flex; justify-content:space-between; align-items:center;">
+        <span style="font-size:10px; color:var(--text-dim);">ITU-R BS.775 / Dolby Atmos 7.1.4 Immersive Bed Specification</span>
+        <button class="btn btn-secondary" onclick="closeAtmosModal()">Close</button>
+      </div>
+    </div>
+  </div>
+
   <!-- Podcast & Long Mix Bookmark Resumption Toast (Phase 10) -->
   <div id="podcastResumeToast" style="display:none; position:fixed; bottom:85px; right:20px; z-index:9999; background:#131722; border:1px solid var(--border); box-shadow:0 8px 24px rgba(0,0,0,0.6); border-radius:10px; padding:10px 14px; align-items:center; gap:10px; backdrop-filter:blur(10px);">
     <span style="font-size:16px;">⏱️</span>
@@ -10185,6 +10296,7 @@
         closeReleaseModal();
         closeManualModal();
         closeVstModal();
+        closeAtmosModal();
         dismissPodcastResumeToast();
         const popup = document.getElementById('speedStudioPopup');
         if (popup) popup.style.display = 'none';
@@ -18023,6 +18135,91 @@
           }
           if (st) {
             st.innerText = 'Error processing rack';
+            st.style.color = 'var(--rose)';
+          }
+          if (outCard) outCard.innerText = '✕ Error: ' + (err.message || err);
+        });
+      }
+    }
+
+    // ------------------ Phase 29: Dolby Atmos 7.1.4 Spatializer & Multichannel Renderer ------------------
+    function openAtmosModal() {
+      const modal = document.getElementById('atmosModal');
+      if (modal) modal.style.display = 'flex';
+    }
+
+    function closeAtmosModal() {
+      const modal = document.getElementById('atmosModal');
+      if (modal) modal.style.display = 'none';
+    }
+
+    function loadActiveTrackForAtmos() {
+      if (state.currentTrack && state.currentTrack.path) {
+        const inp = document.getElementById('atmosTargetInput');
+        if (inp) inp.value = state.currentTrack.path;
+      } else {
+        showToast('No active track loaded in player');
+      }
+    }
+
+    function runAtmosAction() {
+      const inp = (document.getElementById('atmosTargetInput').value || '').trim();
+      const out = (document.getElementById('atmosOutputInput').value || '').trim() || null;
+      const mode = document.getElementById('atmosModeSelect').value;
+      const fmt = document.getElementById('atmosFormatSelect').value;
+      const height = parseFloat(document.getElementById('atmosHeightSlider').value) / 100.0;
+      const lfe = parseFloat(document.getElementById('atmosLfeSlider').value);
+      const spread = parseFloat(document.getElementById('atmosSpreadSlider').value) / 100.0;
+      const btn = document.getElementById('processAtmosBtn');
+      const st = document.getElementById('atmosStatusText');
+      const outCard = document.getElementById('atmosOutputCard');
+
+      if (!inp) {
+        showToast('Please select input audio file');
+        return;
+      }
+
+      if (btn) {
+        btn.disabled = true;
+        btn.innerText = '🌌 Spatialising Audio...';
+      }
+      if (st) {
+        st.innerText = 'Rendering 7.1.4 spatial audio bed...';
+        st.style.color = 'var(--cyan)';
+      }
+      if (outCard) outCard.innerText = 'Synthesizing discrete 7 surround channels and 4 top height channels...';
+
+      if (window.pywebview && window.pywebview.api && window.pywebview.api.render_spatial_714) {
+        window.pywebview.api.render_spatial_714(inp, out, mode, fmt, lfe, height, spread).then(res => {
+          if (btn) {
+            btn.disabled = false;
+            btn.innerText = '🌌 Render 7.1.4 Spatial Audio';
+          }
+          if (res) {
+            if (st) {
+              st.innerText = '✓ 7.1.4 Spatial Audio rendered successfully!';
+              st.style.color = 'var(--emerald)';
+            }
+            let card = `DOLBY ATMOS 7.1.4 SPATIAL AUDIO REPORT\n`;
+            card += `Input File       : ${res.input_path}\n`;
+            card += `Output File      : ${res.output_path}\n`;
+            card += `Render Mode      : ${res.mode.toUpperCase()} (${res.format} Bed, ${res.channels} Channels)\n`;
+            card += `LFE Crossover    : ${res.lfe_cutoff_hz.toFixed(1)} Hz (Linkwitz-Riley Subwoofer Alignment)\n`;
+            card += `Ceiling Height   : ${res.height_level_pct.toFixed(1)}% Top Front & Rear Ambience\n`;
+            card += `Surround Spread  : ${res.spread_pct.toFixed(1)}% Wide Stereophonic Field\n`;
+            card += `In Peak / RMS    : ${res.in_peak_dbfs.toFixed(2)} dBFS / ${res.in_rms_dbfs.toFixed(2)} dBFS\n`;
+            card += `Out Peak / RMS   : ${res.out_peak_dbfs.toFixed(2)} dBFS / ${res.out_rms_dbfs.toFixed(2)} dBFS\n`;
+            card += `Duration / Rate  : ${res.duration_sec.toFixed(2)}s @ ${res.sample_rate} Hz (Render: ${res.elapsed_sec.toFixed(2)}s)\n`;
+            if (outCard) outCard.innerText = card;
+            showToast('7.1.4 Spatial Audio master generated!');
+          }
+        }).catch(err => {
+          if (btn) {
+            btn.disabled = false;
+            btn.innerText = '🌌 Render 7.1.4 Spatial Audio';
+          }
+          if (st) {
+            st.innerText = 'Error spatialising audio';
             st.style.color = 'var(--rose)';
           }
           if (outCard) outCard.innerText = '✕ Error: ' + (err.message || err);

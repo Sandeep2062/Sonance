@@ -17,7 +17,7 @@ import importlib
 from pathlib import Path
 from typing import Dict, Any, List, Optional, Tuple
 
-APP_VERSION = "2.8.0"
+APP_VERSION = "2.9.0"
 WORKSTATION_NAME = "Sonance Audiophile Workstation"
 ROOT_DIR = Path(__file__).parent.resolve()
 
@@ -83,6 +83,9 @@ CORE_PHASE_MODULES = [
 
     # Phase 28: VST3 & CLAP Audio Plugin Host & Rack
     ("plugin_host", "Phase 28: VST3 & CLAP Audio Plugin Host & Multi-Slot Rack Studio"),
+
+    # Phase 29: Dolby Atmos 7.1.4 Spatializer & Multichannel Audio Renderer
+    ("spatial_multichannel", "Phase 29: Dolby Atmos 7.1.4 Bed Spatializer & Multichannel Audio Renderer"),
 ]
 
 # File classification patterns

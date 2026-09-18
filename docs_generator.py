@@ -12,7 +12,7 @@ import webbrowser
 from pathlib import Path
 from typing import Dict, Any, Optional
 
-APP_VERSION = "2.8.0"
+APP_VERSION = "2.9.0"
 WORKSTATION_NAME = "Sonance Audiophile Workstation"
 ROOT_DIR = Path(__file__).parent.resolve()
 DEFAULT_MANUAL_PATH = ROOT_DIR / "ui" / "manual.html"
@@ -297,6 +297,16 @@ PHASES_DATA = [
         "desc": "Universal plugin host and multi-slot serial effect rack capable of scanning system VST3/CLAP plugins or chaining built-in 64-bit virtual studio models (Pultec EQP-1A, Teletronix LA-2A, Triode Valve Exciter, Haas Stereo Expander, Lexicon 480L Plate Reverb).",
         "dsp_math": "Serial rack transfer function: Y(z) = [ prod_{k=1}^N H_k(z) ] * X(z); Haas delay Delta t = 1.2ms; T4 optical decay: env(t) = 0.6 * e^{-t/60ms} + 0.4 * e^{-t/1.2s}",
         "features": ["System VST3 and CLAP directory scanner for host plugins", "5 built-in 64-bit virtual studio audio FX engines", "3-slot serial mastering rack with individual dry/wet, bypass, and gain staging", "Master ITU-R BS.1770 true-peak safety limiter (-0.2 dBFS)"]
+    },
+    {
+        "phase": 29,
+        "title": "Dolby Atmos 7.1.4 Bed Spatializer & Multichannel Audio Renderer",
+        "category": "Spatial Audio & Multichannel",
+        "modules": ["spatial_multichannel.py"],
+        "cli": "python sonance.py --atmos master.wav [output.wav] --mode binaural | --mode discrete --format 7.1.4",
+        "desc": "Translates stereo masters into an immersive 7.1.4 Dolby Atmos bed (7 ear-level surround + 4 ceiling height channels + dedicated LFE subwoofer crossover) with Woodworth spherical binaural virtualization or discrete 6/8/12-channel 24-bit PCM WAV export.",
+        "dsp_math": "Spherical ITD delay: Delta t = (r/c) * (sin(theta) + 0.5 * theta); 4th-order Linkwitz-Riley LFE crossover: H_{LR4}(s) = (omega_c^2 / (s^2 + sqrt(2)*omega_c*s + omega_c^2))^2",
+        "features": ["12-channel 7.1.4 immersive spatial audio bed generator", "4th-order Linkwitz-Riley LFE crossover filter (60-160 Hz)", "Ceiling height micro-reflection ambience synthesizer (>800 Hz)", "3D Binaural Headphone Virtualizer (Woodworth ITD + ILD) and 24-bit multichannel PCM WAV export (7.1.4, 7.1, 5.1)"]
     }
 ]
 
@@ -350,6 +360,7 @@ MATH_FORMULAS = [
 
 def build_manual_html() -> str:
     """Constructs the complete, standalone offline HTML manual."""
+    total_phases = len(PHASES_DATA)
     # Build phase items
     phase_cards_html = []
     toc_links = []
@@ -1039,7 +1050,7 @@ def build_manual_html() -> str:
         </div>
         <div class="search-box">
             <span class="search-icon">🔍</span>
-            <input type="text" id="manualSearchInput" placeholder="Search 27 phases, DSP algorithms, CLI commands..." onkeyup="filterManualContent()">
+            <input type="text" id="manualSearchInput" placeholder="Search {total_phases} phases, DSP algorithms, CLI commands..." onkeyup="filterManualContent()">
         </div>
         <div class="header-actions">
             <a href="#shortcuts-section" class="btn-link">⌨️ Shortcuts</a>
@@ -1051,7 +1062,7 @@ def build_manual_html() -> str:
 
     <div class="app-container">
         <aside id="sidebarNav">
-            <div class="sidebar-section-title">Master Roadmap (Phases 1-27)</div>
+            <div class="sidebar-section-title">Master Roadmap (Phases 1-{total_phases})</div>
             {"".join(toc_links)}
             
             <div class="sidebar-section-title" style="margin-top:16px;">Reference &amp; Theory</div>
@@ -1069,14 +1080,14 @@ def build_manual_html() -> str:
                 </p>
                 <div class="meta-tags">
                     <span class="meta-tag">⚡ Version {APP_VERSION}</span>
-                    <span class="meta-tag">🎼 27 Master Phases</span>
-                    <span class="meta-tag">🎛️ 42 DSP Engines &amp; Core Modules</span>
+                    <span class="meta-tag">🎼 {total_phases} Master Phases</span>
+                    <span class="meta-tag">🎛️ 46 DSP Engines &amp; Core Modules</span>
                     <span class="meta-tag">🌐 100% Offline Single-File Architecture</span>
                 </div>
             </div>
 
             <div class="section-header" id="catalog-section">
-                <h2>Master Phase Catalog (1 - 27)</h2>
+                <h2>Master Phase Catalog (1 - {total_phases})</h2>
                 <span style="font-size:12px; color:var(--text-muted);">Click any phase to jump</span>
             </div>
 
@@ -1213,7 +1224,7 @@ def main():
     print("  Phase 27 Grand Finale: Offline Audiophile Guide & Handbook Generator")
     print("=" * 70)
 
-    print("[*] Compiling interactive single-file manual for all 27 phases...")
+    print(f"[*] Compiling interactive single-file manual for all {len(PHASES_DATA)} phases...")
     res = generate_offline_manual(args.output)
 
     print(f"[+] Manual Generated Successfully: {res['output_path']}")

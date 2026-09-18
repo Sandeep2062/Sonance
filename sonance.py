@@ -484,6 +484,13 @@ Examples:
       help="VST3 & CLAP audio effect rack chain: --vst-rack <audio_file> [output_file] [--preset mastering_bus|vocal_magic|analog_space]",
   )
   parser.add_argument(
+      "--spatial-714",
+      "--atmos",
+      nargs="*",
+      metavar="PARAM",
+      help="Dolby Atmos 7.1.4 bed spatializer & multichannel renderer: --spatial-714 <audio_file> [output_file] [--mode binaural|discrete] [--format 7.1.4|7.1|5.1] [--lfe-cutoff 80] [--height 0.35] [--spread 1.15]",
+  )
+  parser.add_argument(
       "--version",
       action="version",
       version=f"Sonance v{modern_lyrics_downloader.APP_VERSION}",
@@ -2628,6 +2635,74 @@ Examples:
       print(f"    Slot {s['slot']}: {s['plugin_id']} -> {s['status']} (Mix: {s['dry_wet']})")
     print("=" * 70)
     return
+
+  if args.spatial_714 is not None:
+    import spatial_multichannel
+    atmos_params = list(args.spatial_714) + list(unknown)
+    if not atmos_params:
+      print("[-] Error: --spatial-714 requires an input audio file.")
+      print("    Usage: python sonance.py --spatial-714 <audio_file> [output_file] [--mode binaural|discrete] [--format 7.1.4|7.1|5.1] [--lfe-cutoff 80] [--height 0.35]")
+      return
+    inp = atmos_params[0]
+    out = None
+    mode = "binaural"
+    format_type = "7.1.4"
+    lfe_cut = 80.0
+    height = 0.35
+    spread = 1.15
+
+    idx = 1
+    while idx < len(atmos_params):
+      arg = atmos_params[idx]
+      if arg == "--mode" and idx + 1 < len(atmos_params):
+        mode = atmos_params[idx + 1]
+        idx += 2
+      elif arg == "--format" and idx + 1 < len(atmos_params):
+        format_type = atmos_params[idx + 1]
+        idx += 2
+      elif arg == "--lfe-cutoff" and idx + 1 < len(atmos_params):
+        lfe_cut = float(atmos_params[idx + 1])
+        idx += 2
+      elif arg == "--height" and idx + 1 < len(atmos_params):
+        height = float(atmos_params[idx + 1])
+        idx += 2
+      elif arg == "--spread" and idx + 1 < len(atmos_params):
+        spread = float(atmos_params[idx + 1])
+        idx += 2
+      elif not arg.startswith("-") and out is None:
+        out = arg
+        idx += 1
+      else:
+        idx += 1
+
+    print("=" * 70)
+    print("  SONANCE AUDIOPHILE WORKSTATION v2.9.0")
+    print("  Phase 29: Dolby Atmos 7.1.4 Bed Spatializer & Multichannel Renderer")
+    print("=" * 70)
+    print(f"[*] Rendering {inp} into {format_type} Spatial Audio ({mode.upper()} mode)...")
+
+    res = spatial_multichannel.render_spatial_714(
+        inp,
+        output_path=out,
+        mode=mode,
+        format_type=format_type,
+        lfe_cutoff_hz=lfe_cut,
+        height_level=height,
+        spread=spread,
+    )
+
+    print(f"[+] Input File       : {res['input_path']}")
+    print(f"[+] Output File      : {res['output_path']}")
+    print(f"[+] Render Mode      : {res['mode'].capitalize()} ({res['format']} bed, {res['channels']} channels)")
+    print(f"[+] LFE Crossover    : {res['lfe_cutoff_hz']:.1f} Hz (4th-order Linkwitz-Riley alignment)")
+    print(f"[+] Height Ambience  : {res['height_level_pct']:.1f}% overhead energy")
+    print(f"[+] Surround Spread  : {res['spread_pct']:.1f}%")
+    print(f"[+] In Peak / RMS    : {res['in_peak_dbfs']:.2f} dBFS / {res['in_rms_dbfs']:.2f} dBFS")
+    print(f"[+] Out Peak / RMS   : {res['out_peak_dbfs']:.2f} dBFS / {res['out_rms_dbfs']:.2f} dBFS")
+    print(f"[+] Render Time      : {res['elapsed_sec']:.2f}s ({res['duration_sec']:.1f}s @ {res['sample_rate']} Hz)")
+    print("=" * 70)
+    return
+
 
 
   if args.classic:
