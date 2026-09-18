@@ -1288,6 +1288,9 @@
       <button class="btn btn-secondary" onclick="openBassModal()" style="padding:5px 9px; font-size:11px;" id="bassHeaderBtn" title="Psychoacoustic Subharmonic Bass Synthesizer & Missing Fundamental Studio">
         🔊 Subharmonic Bass
       </button>
+      <button class="btn btn-secondary" onclick="openResonanceModal()" style="padding:5px 9px; font-size:11px;" id="resonanceHeaderBtn" title="Dynamic Spectral Resonance Suppressor & Surgical De-Resonator Studio">
+        🎯 De-Resonator
+      </button>
       <button class="btn btn-secondary" onclick="openLrcStudioModal()" style="padding:5px 9px; font-size:11px;" id="lrcStudioHeaderBtn" title="Interactive LRC Studio & Live Time-Stamper">
         ✍️ LRC Studio
       </button>
@@ -7828,6 +7831,167 @@
     </div>
   </div>
 
+  <!-- Phase 33: Dynamic Spectral Resonance Suppressor & Surgical De-Resonator Modal -->
+  <div class="modal-backdrop" id="resonanceModal" style="display:none;">
+    <div class="modal-card" style="width:880px; max-width:96vw; background:#161926; border:1px solid var(--border); border-radius:12px; box-shadow:0 12px 36px rgba(0,0,0,0.7); overflow:hidden;">
+      <div style="padding:16px 20px; background:#121520; border-bottom:1px solid var(--border); display:flex; justify-content:space-between; align-items:center;">
+        <div class="modal-title" style="font-size:14px; font-weight:700; display:flex; align-items:center; gap:8px;">
+          <span>🎯</span>
+          <span>Dynamic Spectral Resonance Suppressor &amp; Surgical De-Resonator Studio</span>
+        </div>
+        <button onclick="closeResonanceModal()" style="background:none; border:none; color:var(--text-muted); font-size:16px; cursor:pointer;">✕</button>
+      </div>
+
+      <div style="padding:20px; max-height:75vh; overflow-y:auto; display:flex; flex-direction:column; gap:16px;">
+        <div style="font-size:11px; color:var(--text-dim); line-height:1.5;">
+          Dynamic spectral resonance tracking inspired by Oeksound Soothe2 and Soundtheory Gullfoss. Computes 2048-point STFT moving spectral envelope baselines across 40 Bark frequency bands to dynamically detect and surgically suppress harsh sibilance, ringing room modes, nasal vocal honk, and abrasive cymbal bite with 5ms/50ms ballistics and difference Delta "Listen Mode".
+        </div>
+
+        <div>
+          <label style="font-size:11px; font-weight:600; color:var(--text-muted); display:block; margin-bottom:6px;">Target Audio File:</label>
+          <div style="display:flex; gap:8px;">
+            <input type="text" id="resonanceTargetInput" class="search-input" style="width:100%; font-size:11px;" placeholder="Path to input audio file...">
+            <button class="btn btn-secondary" onclick="loadActiveTrackForResonance()" style="font-size:11px; padding:6px 12px; white-space:nowrap;">Active Track</button>
+          </div>
+        </div>
+
+        <div>
+          <label style="font-size:11px; font-weight:600; color:var(--text-muted); display:block; margin-bottom:6px;">Custom Export Destination (Optional):</label>
+          <input type="text" id="resonanceOutputInput" class="search-input" style="width:100%; font-size:11px;" placeholder="Auto-generated if empty: <original>_de_resonated.wav">
+        </div>
+
+        <!-- Factory Presets Selector -->
+        <div>
+          <label style="font-size:11px; font-weight:600; color:var(--text-muted); display:block; margin-bottom:6px;">Surgical De-Resonator Presets:</label>
+          <div style="display:flex; flex-wrap:wrap; gap:8px;">
+            <button class="btn btn-secondary" onclick="applyResonancePreset('tame_harshness')" style="font-size:11px; padding:5px 10px;">✨ Universal Harshness Tamer</button>
+            <button class="btn btn-secondary" onclick="applyResonancePreset('vocal_de_boxer')" style="font-size:11px; padding:5px 10px;">🎤 Vocal De-Boxer &amp; Honk</button>
+            <button class="btn btn-secondary" onclick="applyResonancePreset('muddy_low_mid')" style="font-size:11px; padding:5px 10px;">🎸 Acoustic Muddy Low-Mid</button>
+            <button class="btn btn-secondary" onclick="applyResonancePreset('cymbal_silencer')" style="font-size:11px; padding:5px 10px;">🥁 Cymbal &amp; Sibilance Silencer</button>
+            <button class="btn btn-secondary" onclick="applyResonancePreset('extreme_surgical')" style="font-size:11px; padding:5px 10px;">🔬 Deep Surgical Notch</button>
+          </div>
+        </div>
+
+        <!-- Dual Column: Resonance Tracking & Focus Bandwidth -->
+        <div style="display:grid; grid-template-columns: 1fr 1fr; gap:16px;">
+          <!-- Left: Suppression Controls -->
+          <div style="background:#121520; border:1px solid var(--border); border-radius:10px; padding:14px; display:flex; flex-direction:column; gap:12px;">
+            <div style="font-size:12px; font-weight:700; color:var(--cyan); border-bottom:1px solid var(--border); padding-bottom:6px;">
+              🎯 DYNAMIC SUPPRESSION DEPTH &amp; SENSITIVITY
+            </div>
+
+            <div>
+              <div style="display:flex; justify-content:space-between; margin-bottom:4px;">
+                <label style="font-size:11px; font-weight:600; color:var(--text-muted);">Suppression Depth:</label>
+                <span id="resonanceDepthVal" style="font-size:11px; color:var(--cyan); font-weight:600;">0.55x</span>
+              </div>
+              <input type="range" id="resonanceDepthSlider" min="0.1" max="1.0" step="0.05" value="0.55" style="width:100%;" oninput="document.getElementById('resonanceDepthVal').innerText = parseFloat(this.value).toFixed(2) + 'x'">
+              <div style="font-size:10px; color:var(--text-dim); margin-top:2px;">Dynamic notch attenuation intensity applied to detected peaks.</div>
+            </div>
+
+            <div>
+              <div style="display:flex; justify-content:space-between; margin-bottom:4px;">
+                <label style="font-size:11px; font-weight:600; color:var(--text-muted);">Prominence Threshold:</label>
+                <span id="resonanceThresholdVal" style="font-size:11px; color:var(--gold); font-weight:600;">3.5 dB</span>
+              </div>
+              <input type="range" id="resonanceThresholdSlider" min="1.0" max="8.0" step="0.5" value="3.5" style="width:100%;" oninput="document.getElementById('resonanceThresholdVal').innerText = parseFloat(this.value).toFixed(1) + ' dB'">
+              <div style="font-size:10px; color:var(--text-dim); margin-top:2px;">dB elevation above spectral baseline required to trigger suppression.</div>
+            </div>
+
+            <div>
+              <div style="display:flex; justify-content:space-between; margin-bottom:4px;">
+                <label style="font-size:11px; font-weight:600; color:var(--text-muted);">Surgical Sharpness (Q):</label>
+                <span id="resonanceSharpnessVal" style="font-size:11px; color:var(--purple); font-weight:600;">2.5x</span>
+              </div>
+              <input type="range" id="resonanceSharpnessSlider" min="1.0" max="5.0" step="0.1" value="2.5" style="width:100%;" oninput="document.getElementById('resonanceSharpnessVal').innerText = parseFloat(this.value).toFixed(1) + 'x'">
+              <div style="font-size:10px; color:var(--text-dim); margin-top:2px;">Selectivity of dynamic notches (higher = laser-focused cuts).</div>
+            </div>
+          </div>
+
+          <!-- Right: Focus Bandwidth & Listen Mode -->
+          <div style="background:#121520; border:1px solid var(--border); border-radius:10px; padding:14px; display:flex; flex-direction:column; gap:12px;">
+            <div style="font-size:12px; font-weight:700; color:var(--gold); border-bottom:1px solid var(--border); padding-bottom:6px;">
+              🔍 FOCUS BANDWIDTH &amp; DELTA LISTEN
+            </div>
+
+            <div style="display:grid; grid-template-columns: 1fr 1fr; gap:8px;">
+              <div>
+                <label style="font-size:10px; font-weight:600; color:var(--text-muted); display:block; margin-bottom:4px;">Low-Cut Frequency:</label>
+                <select id="resonanceLowCutSelect" class="search-input" style="width:100%; font-size:11px;">
+                  <option value="40">40 Hz</option>
+                  <option value="80">80 Hz</option>
+                  <option value="150">150 Hz</option>
+                  <option value="300">300 Hz</option>
+                  <option value="1200" selected>1,200 Hz</option>
+                  <option value="3000">3,000 Hz</option>
+                  <option value="5500">5,500 Hz</option>
+                </select>
+                <div style="font-size:10px; color:var(--text-dim); margin-top:2px;">Ignore resonances below.</div>
+              </div>
+              <div>
+                <label style="font-size:10px; font-weight:600; color:var(--text-muted); display:block; margin-bottom:4px;">High-Cut Frequency:</label>
+                <select id="resonanceHighCutSelect" class="search-input" style="width:100%; font-size:11px;">
+                  <option value="1800">1,800 Hz</option>
+                  <option value="4000">4,000 Hz</option>
+                  <option value="6000">6,000 Hz</option>
+                  <option value="9000" selected>9,000 Hz</option>
+                  <option value="12000">12,000 Hz</option>
+                  <option value="16000">16,000 Hz</option>
+                  <option value="20000">20,000 Hz</option>
+                </select>
+                <div style="font-size:10px; color:var(--text-dim); margin-top:2px;">Ignore resonances above.</div>
+              </div>
+            </div>
+
+            <!-- Delta Listen Mode -->
+            <div style="background:#0e111a; border:1px solid var(--border); border-radius:8px; padding:10px; margin-top:4px;">
+              <label style="display:flex; align-items:center; gap:8px; cursor:pointer; font-size:11px; font-weight:600; color:var(--cyan);">
+                <input type="checkbox" id="resonanceListenCheck" style="cursor:pointer;">
+                <span>👂 Delta Listen Mode (Audition Suppressed Energy Only)</span>
+              </label>
+              <div style="font-size:10px; color:var(--text-dim); margin-top:4px; line-height:1.4;">
+                When active, the engine renders strictly what is being carved out (the harsh resonant ring and sibilance), allowing precise surgical auditioning.
+              </div>
+            </div>
+
+            <div style="font-size:10px; color:var(--text-dim); line-height:1.4; margin-top:4px;">
+              Ballistic envelope tracking uses 5ms attack and 50ms release for seamless, artifact-free dynamic attenuation.
+            </div>
+          </div>
+        </div>
+
+        <!-- Master Mixing & Levels -->
+        <div style="background:#0e111a; border:1px solid var(--border); border-radius:8px; padding:12px; display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:12px;">
+          <div style="display:flex; align-items:center; gap:8px;">
+            <label style="font-size:11px; font-weight:600; color:var(--text-muted);">Dry / Wet Mix:</label>
+            <input type="range" id="resonanceDryWetSlider" min="0" max="100" step="5" value="100" style="width:110px;" oninput="document.getElementById('resonanceDryWetVal').innerText = this.value + '%'">
+            <span id="resonanceDryWetVal" style="font-size:11px; color:var(--cyan); font-weight:600; min-width:36px;">100%</span>
+          </div>
+          <div style="display:flex; align-items:center; gap:8px;">
+            <label style="font-size:11px; font-weight:600; color:var(--text-muted);">Output Makeup Gain:</label>
+            <input type="range" id="resonanceGainSlider" min="-6" max="6" step="0.5" value="0.0" style="width:110px;" oninput="document.getElementById('resonanceGainVal').innerText = (this.value >= 0 ? '+' : '') + this.value + ' dB'">
+            <span id="resonanceGainVal" style="font-size:11px; color:var(--emerald); font-weight:600; min-width:48px;">0.0 dB</span>
+          </div>
+          <div style="font-size:10px; color:var(--text-dim);">True-Peak Brickwall Limiter (-0.2 dBFS ceiling) &amp; 24-bit PCM WAV</div>
+        </div>
+
+        <div style="display:flex; justify-content:space-between; align-items:center; margin-top:4px;">
+          <span id="resonanceStatusText" style="font-size:11px; color:var(--text-dim);">Ready to analyze and de-resonate audio</span>
+          <button class="btn btn-primary" onclick="runResonanceAction()" id="processResonanceBtn" style="font-size:12px; padding:7px 20px;">
+            🎯 Render De-Resonator
+          </button>
+        </div>
+
+        <div id="resonanceOutputCard" style="background:#0b0d14; border:1px solid var(--border); border-radius:8px; padding:12px; font-family:monospace; font-size:11px; line-height:1.45; color:var(--cyan); min-height:80px; white-space:pre-wrap; overflow-x:auto;">Select audio file and click Render De-Resonator.</div>
+      </div>
+
+      <div style="padding:10px 16px; background:#121520; border-top:1px solid var(--border); display:flex; justify-content:space-between; align-items:center;">
+        <span style="font-size:10px; color:var(--text-dim);">Oeksound Soothe2 / Soundtheory Gullfoss STFT Spectral Tracking &amp; Surgical Attenuation Engine</span>
+        <button class="btn btn-secondary" onclick="closeResonanceModal()">Close</button>
+      </div>
+    </div>
+  </div>
+
   <!-- Podcast & Long Mix Bookmark Resumption Toast (Phase 10) -->
   <div id="podcastResumeToast" style="display:none; position:fixed; bottom:85px; right:20px; z-index:9999; background:#131722; border:1px solid var(--border); box-shadow:0 8px 24px rgba(0,0,0,0.6); border-radius:10px; padding:10px 14px; align-items:center; gap:10px; backdrop-filter:blur(10px);">
     <span style="font-size:16px;">⏱️</span>
@@ -10843,6 +11007,7 @@
         closeConsoleModal();
         closeHoaModal();
         closeBassModal();
+        closeResonanceModal();
         dismissPodcastResumeToast();
         const popup = document.getElementById('speedStudioPopup');
         if (popup) popup.style.display = 'none';
@@ -18384,8 +18549,8 @@
 
           const audit = res.audit || {};
           let report = `======================================================================\n`;
-          report += `  SONANCE AUDIOPHILE WORKSTATION v2.7.0 RELEASE REPORT\n`;
-          report += `  Phase 27 Grand Finale Release Integrity Verification\n`;
+          report += `  SONANCE AUDIOPHILE WORKSTATION v${res.version || '3.3.0'} RELEASE REPORT\n`;
+          report += `  Universal Release Integrity Verification\n`;
           report += `======================================================================\n`;
           report += `Status              : ${res.status.toUpperCase()}\n`;
           report += `Modules Audited     : ${audit.total_modules || 42}\n`;
@@ -19209,6 +19374,137 @@
           }
           if (st) {
             st.innerText = 'Error processing subharmonic bass';
+            st.style.color = 'var(--rose)';
+          }
+          if (outCard) outCard.innerText = '✕ Error: ' + (err.message || err);
+        });
+      }
+    }
+
+    // ------------------ Phase 33: Dynamic Spectral Resonance Suppressor ------------------
+    function openResonanceModal() {
+      const modal = document.getElementById('resonanceModal');
+      if (modal) modal.style.display = 'flex';
+    }
+
+    function closeResonanceModal() {
+      const modal = document.getElementById('resonanceModal');
+      if (modal) modal.style.display = 'none';
+    }
+
+    function loadActiveTrackForResonance() {
+      if (state.currentTrack && state.currentTrack.path) {
+        const inp = document.getElementById('resonanceTargetInput');
+        if (inp) inp.value = state.currentTrack.path;
+      } else {
+        showToast('No active track loaded in player');
+      }
+    }
+
+    const RESONANCE_PRESETS_DATA = {
+      tame_harshness: { depth: 0.55, th: 3.5, q: 2.5, lc: '1200', hc: '9000', mix: 100 },
+      vocal_de_boxer: { depth: 0.70, th: 3.0, q: 3.5, lc: '300', hc: '1800', mix: 100 },
+      muddy_low_mid: { depth: 0.60, th: 3.0, q: 2.8, lc: '150', hc: '6000', mix: 90 },
+      cymbal_silencer: { depth: 0.65, th: 4.0, q: 2.2, lc: '5500', hc: '16000', mix: 95 },
+      extreme_surgical: { depth: 0.90, th: 2.5, q: 4.5, lc: '80', hc: '16000', mix: 100 }
+    };
+
+    function applyResonancePreset(pKey) {
+      const p = RESONANCE_PRESETS_DATA[pKey];
+      if (!p) return;
+
+      const d = document.getElementById('resonanceDepthSlider');
+      if (d) { d.value = p.depth; document.getElementById('resonanceDepthVal').innerText = p.depth.toFixed(2) + 'x'; }
+
+      const th = document.getElementById('resonanceThresholdSlider');
+      if (th) { th.value = p.th; document.getElementById('resonanceThresholdVal').innerText = p.th.toFixed(1) + ' dB'; }
+
+      const q = document.getElementById('resonanceSharpnessSlider');
+      if (q) { q.value = p.q; document.getElementById('resonanceSharpnessVal').innerText = p.q.toFixed(1) + 'x'; }
+
+      const lc = document.getElementById('resonanceLowCutSelect');
+      if (lc) lc.value = p.lc;
+
+      const hc = document.getElementById('resonanceHighCutSelect');
+      if (hc) hc.value = p.hc;
+
+      const dw = document.getElementById('resonanceDryWetSlider');
+      if (dw) { dw.value = p.mix; document.getElementById('resonanceDryWetVal').innerText = p.mix + '%'; }
+
+      const chk = document.getElementById('resonanceListenCheck');
+      if (chk) chk.checked = false;
+
+      showToast('Loaded De-Resonator preset: ' + pKey);
+    }
+
+    function runResonanceAction() {
+      const inp = (document.getElementById('resonanceTargetInput').value || '').trim();
+      const out = (document.getElementById('resonanceOutputInput').value || '').trim() || null;
+      const depth = parseFloat(document.getElementById('resonanceDepthSlider').value);
+      const th = parseFloat(document.getElementById('resonanceThresholdSlider').value);
+      const q = parseFloat(document.getElementById('resonanceSharpnessSlider').value);
+      const lc = parseFloat(document.getElementById('resonanceLowCutSelect').value);
+      const hc = parseFloat(document.getElementById('resonanceHighCutSelect').value);
+      const listen = document.getElementById('resonanceListenCheck') ? document.getElementById('resonanceListenCheck').checked : false;
+      const mix = parseFloat(document.getElementById('resonanceDryWetSlider').value) / 100.0;
+      const gain = parseFloat(document.getElementById('resonanceGainSlider').value);
+
+      const btn = document.getElementById('processResonanceBtn');
+      const st = document.getElementById('resonanceStatusText');
+      const outCard = document.getElementById('resonanceOutputCard');
+
+      if (!inp) {
+        showToast('Please select input audio file');
+        return;
+      }
+
+      if (btn) {
+        btn.disabled = true;
+        btn.innerText = '🎯 De-Resonating Audio...';
+      }
+      if (st) {
+        st.innerText = 'Analyzing STFT spectral prominence and suppressing resonant peaks...';
+        st.style.color = 'var(--cyan)';
+      }
+      if (outCard) outCard.innerText = 'Executing 2048-point Hann STFT spectral baseline decomposition and ballistic dynamic notch filtering...';
+
+      if (window.pywebview && window.pywebview.api && window.pywebview.api.render_resonance_suppressor) {
+        window.pywebview.api.render_resonance_suppressor(
+          inp, out, 'custom', depth, th, q, lc, hc, listen, mix, gain
+        ).then(res => {
+          if (btn) {
+            btn.disabled = false;
+            btn.innerText = '🎯 Render De-Resonator';
+          }
+          if (res) {
+            if (st) {
+              st.innerText = '✓ De-resonating master rendered successfully!';
+              st.style.color = 'var(--emerald)';
+            }
+            const s = res.settings;
+            let card = `DYNAMIC SPECTRAL RESONANCE SUPPRESSOR REPORT\n`;
+            card += `Input Source     : ${res.input_path}\n`;
+            card += `Output Master    : ${res.output_path}\n`;
+            card += `Master Format    : 24-bit Linear PCM WAV @ ${res.sample_rate} Hz (${res.duration_sec}s)\n`;
+            card += `Mode             : ${res.mode_label}\n`;
+            card += `Peak / RMS Level : ${res.out_peak_dbfs} dBFS / ${res.out_rms_dbfs} dBFS (Input: ${res.in_peak_dbfs} / ${res.in_rms_dbfs} dBFS)\n`;
+            card += `Max Reduction    : ${res.max_reduction_db} dB | Avg Reduction: ${res.avg_reduction_db} dB\n`;
+            card += `Surgical Params  : Depth ${s.depth.toFixed(2)}x | Prominence Threshold ${s.threshold_db.toFixed(1)} dB | Sharpness Q ${s.sharpness.toFixed(1)}x\n`;
+            card += `Focus Bandwidth  : ${s.low_cut_hz.toFixed(0)} Hz - ${s.high_cut_hz.toFixed(0)} Hz | Dry/Wet: ${(s.dry_wet * 100).toFixed(0)}%\n`;
+            if (res.top_resonances && res.top_resonances.length > 0) {
+              const resList = res.top_resonances.map(r => `${r.freq_hz} Hz (score: ${r.intensity_score})`).join(', ');
+              card += `Top Resonances   : ${resList}\n`;
+            }
+            if (outCard) outCard.innerText = card;
+            showToast('De-resonator rendered successfully!');
+          }
+        }).catch(err => {
+          if (btn) {
+            btn.disabled = false;
+            btn.innerText = '🎯 Render De-Resonator';
+          }
+          if (st) {
+            st.innerText = 'Error processing spectral de-resonator';
             st.style.color = 'var(--rose)';
           }
           if (outCard) outCard.innerText = '✕ Error: ' + (err.message || err);

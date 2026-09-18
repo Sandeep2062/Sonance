@@ -12,7 +12,7 @@ import webbrowser
 from pathlib import Path
 from typing import Dict, Any, Optional
 
-APP_VERSION = "3.2.0"
+APP_VERSION = "3.3.0"
 WORKSTATION_NAME = "Sonance Audiophile Workstation"
 ROOT_DIR = Path(__file__).parent.resolve()
 DEFAULT_MANUAL_PATH = ROOT_DIR / "ui" / "manual.html"
@@ -337,6 +337,16 @@ PHASES_DATA = [
         "desc": "Subterranean bass synthesis and psychoacoustic low-end excitation. Emulates the hardware dbx 120XP subharmonic octave divider (24-36 Hz and 36-56 Hz bands) to generate sub-bass one octave down, paired with MaxxBass Chebyshev harmonic overtone synthesis (2nd, 3rd, 4th harmonics) exploiting the auditory cortex missing fundamental effect for massive bass on mobile speakers and headphones. Includes 4th-order subsonic rumble cleanup (20-35 Hz), elliptical bass monomaker (80-150 Hz), analog tube saturation, and True-Peak safety limiting (-0.2 dBFS).",
         "dsp_math": "Subharmonic octave division: f_{sub} = f_0 / 2 via zero-crossing flip-flop tracking; Chebyshev missing fundamental overtones: T_2(x) = 2x^2 - 1, T_3(x) = 4x^3 - 3x, T_4(x) = 8x^4 - 8x^2 + 1; Low-cut subsonic Butterworth: H_{HP4}(s) = s^4 / B_4(s)",
         "features": ["Dual-band subharmonic octave divider (24-36 Hz subterranean & 36-56 Hz kick punch)", "MaxxBass psychoacoustic missing fundamental exciter for small speaker & headphone translation", "Asymmetrical analog tube saturation & transformer warmth", "4th-order Butterworth subsonic rumble high-pass filter (20-35 Hz)", "Elliptical low-end monomaker (80-150 Hz) for club sound system punch and vinyl compliance", "True-Peak brickwall safety limiter (-0.2 dBFS) with 24-bit PCM WAV export"]
+    },
+    {
+        "phase": 33,
+        "title": "Dynamic Spectral Resonance Suppressor & Surgical De-Resonator Studio",
+        "category": "Mastering & Dynamic Spectral Suppression",
+        "modules": ["resonance_suppressor.py"],
+        "cli": "python sonance.py --soothe master.wav [output.wav] --preset tame_harshness | --depth 0.55 --threshold 3.5 --sharpness 2.5 --listen",
+        "desc": "Dynamic spectral resonance tracking inspired by Oeksound Soothe2 and Soundtheory Gullfoss. Computes 2048-point STFT moving spectral envelope baselines across 40 Bark frequency bands, surgically suppressing harsh sibilance, ringing room modes, nasal vocal honk, and abrasive cymbal bite with 5ms/50ms ballistics and difference Delta 'Listen Mode'.",
+        "dsp_math": "Dynamic notch attenuation: \\Delta G(f) = -\\text{depth} \\cdot \\max(0, P_{\\text{prominence}}(f) - \\text{threshold})^{1 + 0.25Q}; Ballistics: g[n] = g[n-1] + \\alpha (g_{\\text{target}} - g[n-1])",
+        "features": ["Dynamic STFT spectral resonance tracking across 40 critical Bark frequency bands", "Surgical prominence notch attenuation carving out acoustic harshness and whistle modes", "Ballistic envelope smoothing (5ms attack / 50ms release) for transparent de-resonating", "Delta 'Listen Mode' difference auditioning isolating strictly the suppressed harshness", "Low-Cut and High-Cut focus bounding filters targeting specific problem frequency zones", "True-Peak brickwall safety limiter (-0.2 dBFS) with 24-bit linear PCM WAV export"]
     }
 ]
 
@@ -409,6 +419,11 @@ MATH_FORMULAS = [
         "name": "MaxxBass Psychoacoustic Missing Fundamental (Chebyshev Polynomials)",
         "formula": "H_{\\text{synth}}(x) = c_2 T_2(x) + c_3 T_3(x) + c_4 T_4(x) = c_2(2x^2 - 1) + c_3(4x^3 - 3x) + c_4(8x^4 - 8x^2 + 1)",
         "explanation": "Generates 2nd, 3rd, and 4th order harmonic overtones of low-frequency fundamentals. The auditory cortex perceives the missing fundamental frequency even on mobile transducers incapable of reproducing physical sub-bass."
+    },
+    {
+        "name": "Dynamic Spectral Resonance Prominence & Ballistic Suppression",
+        "formula": "P(f) = 20 \\log_{10}\\left(\\frac{|X(f)|}{\\text{Env}_{\\text{baseline}}(f)}\\right); \\quad \\Delta G(f) = -\\text{depth} \\cdot \\max(0, P(f) - T)^{1 + 0.25Q}",
+        "explanation": "Extracts dynamic spectral prominence P(f) above a smoothed moving baseline. When prominence exceeds threshold T, applies frequency-dependent notch attenuation smoothed across time with 5ms attack and 50ms release ballistics."
     }
 ]
 
@@ -1136,7 +1151,7 @@ def build_manual_html() -> str:
                 <div class="meta-tags">
                     <span class="meta-tag">⚡ Version {APP_VERSION}</span>
                     <span class="meta-tag">🎼 {total_phases} Master Phases</span>
-                    <span class="meta-tag">🎛️ 49 DSP Engines &amp; Core Modules</span>
+                    <span class="meta-tag">🎛️ 50 DSP Engines &amp; Core Modules</span>
                     <span class="meta-tag">🌐 100% Offline Single-File Architecture</span>
                 </div>
             </div>

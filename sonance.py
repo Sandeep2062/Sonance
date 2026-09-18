@@ -513,6 +513,14 @@ Examples:
       help="Psychoacoustic subharmonic bass synthesizer & missing fundamental studio: --bass <audio_file> [output_file] [--preset club_sub_boom|punchy_kick_thump|earbuds_maxxbass|audiophile_warm_bass|sub_rumble_cleanup] [--sub-24-36 0.85] [--sub-36-56 0.5] [--maxxbass 0.35] [--drive 1.25] [--subsonic-hpf 25] [--monomaker 120] [--mix 0.9]",
   )
   parser.add_argument(
+      "--soothe",
+      "--de-resonate",
+      "--suppress-resonance",
+      nargs="*",
+      metavar="PARAM",
+      help="Dynamic spectral resonance suppressor & de-resonator: --soothe <audio_file> [output_file] [--preset tame_harshness|vocal_de_boxer|muddy_low_mid|cymbal_silencer|extreme_surgical] [--depth 0.55] [--threshold 3.5] [--sharpness 2.5] [--low-cut 1200] [--high-cut 9000] [--listen]",
+  )
+  parser.add_argument(
       "--version",
       action="version",
       version=f"Sonance v{modern_lyrics_downloader.APP_VERSION}",
@@ -2526,8 +2534,8 @@ Examples:
         idx += 1
 
     print("=" * 70)
-    print("  SONANCE AUDIOPHILE WORKSTATION v2.7.0")
-    print("  Phase 27 Grand Finale: Universal Release Packaging & Manifest Auditor")
+    print(f"  SONANCE AUDIOPHILE WORKSTATION v{release_packager.APP_VERSION}")
+    print("  Universal Release Packaging & Manifest Auditor Studio")
     print("=" * 70)
     print("[*] Auditing all 27 phase engines and computing manifests...")
 
@@ -2582,8 +2590,8 @@ Examples:
         idx += 1
 
     print("=" * 70)
-    print("  SONANCE AUDIOPHILE WORKSTATION v2.7.0")
-    print("  Phase 27 Grand Finale: Offline Audiophile Guide & Workstation Manual")
+    print(f"  SONANCE AUDIOPHILE WORKSTATION v{docs_generator.APP_VERSION}")
+    print("  Offline Audiophile Guide & Workstation Manual Studio")
     print("=" * 70)
     print("[*] Generating standalone interactive manual for all 27 phases...")
 
@@ -3029,6 +3037,97 @@ Examples:
     print(f"[+] Subharmonics     : 24-36Hz: {s['sub_24_36_gain']:.2f} ({res['sub_1_rms_dbfs']} dBFS) | 36-56Hz: {s['sub_36_56_gain']:.2f} ({res['sub_2_rms_dbfs']} dBFS)")
     print(f"[+] MaxxBass Missing : Intensity: {s['maxxbass_intensity']:.2f} | HPF Cutoff: {s['maxxbass_cutoff_hz']:.0f} Hz ({res['maxxbass_rms_dbfs']} dBFS)")
     print(f"[+] Low-End Shaping  : Subsonic HPF: {s['subsonic_hpf_hz']:.0f} Hz | Monomaker: {s['monomaker_hz']:.0f} Hz | Tube Drive: {s['tube_drive']:.2f}x")
+    print("=" * 70)
+    return
+
+  if args.soothe is not None:
+    import resonance_suppressor
+    params = list(args.soothe) + list(unknown)
+    if not params:
+      print("[-] Error: --soothe requires an input audio file.")
+      print("    Usage: python sonance.py --soothe <audio_file> [output_file] [--preset <name>] [--depth <val>] [--threshold <dB>] [--listen]")
+      return
+
+    inp = params[0]
+    out = None
+    preset = "tame_harshness"
+    depth = None
+    threshold = None
+    sharpness = None
+    low_cut = None
+    high_cut = None
+    listen = False
+    mix = None
+    gain = 0.0
+
+    idx = 1
+    while idx < len(params):
+      item = params[idx]
+      if item == "--preset" and idx + 1 < len(params):
+        preset = params[idx + 1]
+        idx += 2
+      elif item in ("--depth", "-d") and idx + 1 < len(params):
+        depth = float(params[idx + 1])
+        idx += 2
+      elif item in ("--threshold", "-t") and idx + 1 < len(params):
+        threshold = float(params[idx + 1])
+        idx += 2
+      elif item in ("--sharpness", "-q") and idx + 1 < len(params):
+        sharpness = float(params[idx + 1])
+        idx += 2
+      elif item == "--low-cut" and idx + 1 < len(params):
+        low_cut = float(params[idx + 1])
+        idx += 2
+      elif item == "--high-cut" and idx + 1 < len(params):
+        high_cut = float(params[idx + 1])
+        idx += 2
+      elif item in ("--listen", "--delta"):
+        listen = True
+        idx += 1
+      elif item in ("--mix", "--dry-wet") and idx + 1 < len(params):
+        mix = float(params[idx + 1])
+        idx += 2
+      elif item in ("--gain", "--makeup") and idx + 1 < len(params):
+        gain = float(params[idx + 1])
+        idx += 2
+      elif not item.startswith("-") and out is None:
+        out = item
+        idx += 1
+      else:
+        idx += 1
+
+    print("=" * 70)
+    print("  SONANCE AUDIOPHILE WORKSTATION v3.3.0")
+    print("  Phase 33: Dynamic Spectral Resonance Suppressor & Surgical De-Resonator")
+    print("=" * 70)
+    print(f"[*] Input Source     : {inp}")
+    print(f"[*] Preset Selected  : {preset.upper()}")
+    if listen:
+      print("[!] LISTEN MODE ACTIVE: Auditioning suppressed delta resonances only")
+
+    res = resonance_suppressor.render_resonance_suppressor(
+        input_path=inp,
+        output_path=out,
+        preset=preset,
+        depth=depth,
+        threshold_db=threshold,
+        sharpness=sharpness,
+        low_cut_hz=low_cut,
+        high_cut_hz=high_cut,
+        listen_mode=listen,
+        dry_wet=mix,
+        output_gain_db=gain,
+    )
+
+    s = res["settings"]
+    print(f"[+] Output Master    : {res['output_path']}")
+    print(f"[+] Audio Format     : 24-bit Linear PCM WAV @ {res['sample_rate']} Hz ({res['duration_sec']}s)")
+    print(f"[+] Mode             : {res['mode_label']}")
+    print(f"[+] Max Reduction    : {res['max_reduction_db']:.2f} dB (Avg: {res['avg_reduction_db']:.2f} dB)")
+    print(f"[+] Focus Bandwidth  : {s['low_cut_hz']:.0f} Hz - {s['high_cut_hz']:.0f} Hz (Sharpness Q: {s['sharpness']:.1f}x)")
+    if res["top_resonances"]:
+      res_str = ", ".join([f"{r['freq_hz']} Hz ({r['intensity_score']})" for r in res["top_resonances"]])
+      print(f"[+] Detected Resonances: {res_str}")
     print("=" * 70)
     return
 

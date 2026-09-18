@@ -117,8 +117,9 @@ import spatial_multichannel
 import console_channel_strip
 import ambisonic_hoa
 import subharmonic_bass
+import resonance_suppressor
 
-APP_VERSION = "3.2.0"
+APP_VERSION = "3.3.0"
 GITHUB_REPO = "Sandeep2062/Sonance"
 APP_DIR = Path(__file__).parent.resolve()
 UI_PATH = APP_DIR / "ui" / "index.html"
@@ -1926,6 +1927,40 @@ class LyricsAPI:
             tube_drive=tube_drive,
             subsonic_hpf_hz=subsonic_hpf_hz,
             monomaker_hz=monomaker_hz,
+            dry_wet=dry_wet,
+            output_gain_db=output_gain_db,
+        )
+
+    # ------------------ Phase 33: Dynamic Spectral Resonance Suppressor ------------------
+    def get_resonance_presets(self) -> Dict[str, Any]:
+        """Returns factory presets for Dynamic Spectral Resonance Suppressor Studio."""
+        return resonance_suppressor.FACTORY_PRESETS
+
+    def render_resonance_suppressor(
+        self,
+        input_path: str,
+        output_path: Optional[str] = None,
+        preset: str = "tame_harshness",
+        depth: Optional[float] = None,
+        threshold_db: Optional[float] = None,
+        sharpness: Optional[float] = None,
+        low_cut_hz: Optional[float] = None,
+        high_cut_hz: Optional[float] = None,
+        listen_mode: bool = False,
+        dry_wet: Optional[float] = None,
+        output_gain_db: float = 0.0,
+    ) -> Dict[str, Any]:
+        """Dynamically tracks and surgically de-resonates harsh acoustic peaks and sibilance."""
+        return resonance_suppressor.render_resonance_suppressor(
+            input_path=input_path,
+            output_path=output_path,
+            preset=preset,
+            depth=depth,
+            threshold_db=threshold_db,
+            sharpness=sharpness,
+            low_cut_hz=low_cut_hz,
+            high_cut_hz=high_cut_hz,
+            listen_mode=listen_mode,
             dry_wet=dry_wet,
             output_gain_db=output_gain_db,
         )

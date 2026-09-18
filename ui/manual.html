@@ -617,7 +617,7 @@
         </div>
         <div class="search-box">
             <span class="search-icon">🔍</span>
-            <input type="text" id="manualSearchInput" placeholder="Search 32 phases, DSP algorithms, CLI commands..." onkeyup="filterManualContent()">
+            <input type="text" id="manualSearchInput" placeholder="Search 33 phases, DSP algorithms, CLI commands..." onkeyup="filterManualContent()">
         </div>
         <div class="header-actions">
             <a href="#shortcuts-section" class="btn-link">⌨️ Shortcuts</a>
@@ -629,7 +629,7 @@
 
     <div class="app-container">
         <aside id="sidebarNav">
-            <div class="sidebar-section-title">Master Roadmap (Phases 1-32)</div>
+            <div class="sidebar-section-title">Master Roadmap (Phases 1-33)</div>
             <a href="#phase-1" class="toc-item" onclick="setActiveLink(this)">
             <span class="toc-num">01</span>
             <span class="toc-name">Core Multi-Threaded Engine, Synchronized Lyrics & Metadata Tagging</span>
@@ -726,6 +726,9 @@
         </a><a href="#phase-32" class="toc-item" onclick="setActiveLink(this)">
             <span class="toc-num">32</span>
             <span class="toc-name">Psychoacoustic Subharmonic Bass Synthesizer & Missing Fundamental Studio</span>
+        </a><a href="#phase-33" class="toc-item" onclick="setActiveLink(this)">
+            <span class="toc-num">33</span>
+            <span class="toc-name">Dynamic Spectral Resonance Suppressor & Surgical De-Resonator Studio</span>
         </a>
             
             <div class="sidebar-section-title" style="margin-top:16px;">Reference &amp; Theory</div>
@@ -742,15 +745,15 @@
                     bit-exact CD extraction, stem separation, and over 25 professional mastering and DSP engineering studios.
                 </p>
                 <div class="meta-tags">
-                    <span class="meta-tag">⚡ Version 3.2.0</span>
-                    <span class="meta-tag">🎼 32 Master Phases</span>
-                    <span class="meta-tag">🎛️ 49 DSP Engines &amp; Core Modules</span>
+                    <span class="meta-tag">⚡ Version 3.3.0</span>
+                    <span class="meta-tag">🎼 33 Master Phases</span>
+                    <span class="meta-tag">🎛️ 50 DSP Engines &amp; Core Modules</span>
                     <span class="meta-tag">🌐 100% Offline Single-File Architecture</span>
                 </div>
             </div>
 
             <div class="section-header" id="catalog-section">
-                <h2>Master Phase Catalog (1 - 32)</h2>
+                <h2>Master Phase Catalog (1 - 33)</h2>
                 <span style="font-size:12px; color:var(--text-muted);">Click any phase to jump</span>
             </div>
 
@@ -1747,6 +1750,37 @@
             </div>
         </article>
         
+        <article class="phase-card" id="phase-33">
+            <div class="phase-card-header">
+                <div class="phase-badge-row">
+                    <span class="phase-pill">PHASE 33</span>
+                    <span class="phase-cat">Mastering & Dynamic Spectral Suppression</span>
+                </div>
+                <h2 class="phase-title">Dynamic Spectral Resonance Suppressor & Surgical De-Resonator Studio</h2>
+                <div class="module-bar"><span class="badge-module">resonance_suppressor.py</span></div>
+            </div>
+            
+            <p class="phase-desc">Dynamic spectral resonance tracking inspired by Oeksound Soothe2 and Soundtheory Gullfoss. Computes 2048-point STFT moving spectral envelope baselines across 40 Bark frequency bands, surgically suppressing harsh sibilance, ringing room modes, nasal vocal honk, and abrasive cymbal bite with 5ms/50ms ballistics and difference Delta 'Listen Mode'.</p>
+            
+            <div class="code-box">
+                <div class="code-label">CLI INVOCATION</div>
+                <div class="code-line">
+                    <code>python sonance.py --soothe master.wav [output.wav] --preset tame_harshness | --depth 0.55 --threshold 3.5 --sharpness 2.5 --listen</code>
+                    <button class="copy-btn" onclick="copyCode(this, 'python sonance.py --soothe master.wav [output.wav] --preset tame_harshness | --depth 0.55 --threshold 3.5 --sharpness 2.5 --listen')">Copy</button>
+                </div>
+            </div>
+            
+            <div class="math-box">
+                <div class="math-label">MATHEMATICAL / DSP FOUNDATION</div>
+                <div class="math-equation">Dynamic notch attenuation: \Delta G(f) = -\text{depth} \cdot \max(0, P_{\text{prominence}}(f) - \text{threshold})^{1 + 0.25Q}; Ballistics: g[n] = g[n-1] + \alpha (g_{\text{target}} - g[n-1])</div>
+            </div>
+            
+            <div class="features-box">
+                <div class="features-label">KEY CAPABILITIES</div>
+                <ul class="features-list"><li>Dynamic STFT spectral resonance tracking across 40 critical Bark frequency bands</li><li>Surgical prominence notch attenuation carving out acoustic harshness and whistle modes</li><li>Ballistic envelope smoothing (5ms attack / 50ms release) for transparent de-resonating</li><li>Delta 'Listen Mode' difference auditioning isolating strictly the suppressed harshness</li><li>Low-Cut and High-Cut focus bounding filters targeting specific problem frequency zones</li><li>True-Peak brickwall safety limiter (-0.2 dBFS) with 24-bit linear PCM WAV export</li></ul>
+            </div>
+        </article>
+        
 
             <div class="section-header" id="shortcuts-section">
                 <h2>Master Keyboard Shortcuts</h2>
@@ -1883,6 +1917,12 @@
             <h3 class="formula-title">MaxxBass Psychoacoustic Missing Fundamental (Chebyshev Polynomials)</h3>
             <div class="formula-math">H_{\text{synth}}(x) = c_2 T_2(x) + c_3 T_3(x) + c_4 T_4(x) = c_2(2x^2 - 1) + c_3(4x^3 - 3x) + c_4(8x^4 - 8x^2 + 1)</div>
             <p class="formula-desc">Generates 2nd, 3rd, and 4th order harmonic overtones of low-frequency fundamentals. The auditory cortex perceives the missing fundamental frequency even on mobile transducers incapable of reproducing physical sub-bass.</p>
+        </div>
+        
+        <div class="formula-card">
+            <h3 class="formula-title">Dynamic Spectral Resonance Prominence & Ballistic Suppression</h3>
+            <div class="formula-math">P(f) = 20 \log_{10}\left(\frac{|X(f)|}{\text{Env}_{\text{baseline}}(f)}\right); \quad \Delta G(f) = -\text{depth} \cdot \max(0, P(f) - T)^{1 + 0.25Q}</div>
+            <p class="formula-desc">Extracts dynamic spectral prominence P(f) above a smoothed moving baseline. When prominence exceeds threshold T, applies frequency-dependent notch attenuation smoothed across time with 5ms attack and 50ms release ballistics.</p>
         </div>
         
             </div>
