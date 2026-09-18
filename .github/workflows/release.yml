@@ -15,13 +15,32 @@ jobs:
     runs-on: windows-latest
     steps:
       - name: Checkout Code
-        uses: actions/checkout@v6
+        uses: actions/checkout@v4
 
       - name: Set up Flutter
         uses: subosito/flutter-action@v2
         with:
           channel: 'stable'
           cache: true
+
+      - name: Scaffold Windows Desktop Runner
+        run: |
+          Copy-Item pubspec.yaml -Destination pubspec.yaml.bak
+          $backupDir = New-Item -ItemType Directory -Path "$env:RUNNER_TEMP\win_backup" -Force
+          if (Test-Path windows/installer.iss) {
+            Copy-Item windows/installer.iss -Destination $backupDir.FullName -Force
+          }
+          if (Test-Path windows) {
+            Remove-Item -Path windows -Recurse -Force
+          }
+          flutter create --platforms=windows --org com.sandeep --project-name sonance .
+          Copy-Item pubspec.yaml.bak -Destination pubspec.yaml -Force
+          if (Test-Path "$($backupDir.FullName)\installer.iss") {
+            Copy-Item "$($backupDir.FullName)\installer.iss" -Destination windows/installer.iss -Force
+          }
+          if (Test-Path assets/icon.ico) {
+            Copy-Item assets/icon.ico -Destination windows/runner/resources/app_icon.ico -Force
+          }
 
       - name: Install Flutter Dependencies
         run: flutter pub get
@@ -32,18 +51,27 @@ jobs:
       - name: Stage Native Release Files
         run: |
           New-Item -ItemType Directory -Force -Path dist/Sonance
-          Copy-Item -Path build/windows/x64/runner/Release/* -Destination dist/Sonance/ -Recurse -Force
+          if (Test-Path build/windows/x64/runner/Release) {
+            Copy-Item -Path build/windows/x64/runner/Release/* -Destination dist/Sonance/ -Recurse -Force
+          } elseif (Test-Path build/windows/runner/Release) {
+            Copy-Item -Path build/windows/runner/Release/* -Destination dist/Sonance/ -Recurse -Force
+          }
+          if (Test-Path dist/Sonance/sonance.exe) {
+            Copy-Item dist/Sonance/sonance.exe -Destination dist/Sonance/Sonance.exe -Force
+          }
 
       - name: Compile Inno Setup Native Installer
         run: |
-          & "C:\Program Files (x86)\Inno Setup 6\ISCC.exe" windows/installer.iss
+          $ver = "${{ github.ref_name }}".TrimStart("v")
+          if (-not $ver) { $ver = "4.0.0" }
+          & "C:\Program Files (x86)\Inno Setup 6\ISCC.exe" /DMyAppVersion=$ver windows/installer.iss
 
       - name: Create Portable Zip Package
         run: |
           Compress-Archive -Path dist/Sonance/* -DestinationPath dist/Sonance-Windows-x86_64-portable.zip
 
       - name: Upload Windows Artifacts
-        uses: actions/upload-artifact@v6
+        uses: actions/upload-artifact@v4
         with:
           name: windows-binaries
           path: |
@@ -55,10 +83,10 @@ jobs:
     runs-on: ubuntu-24.04
     steps:
       - name: Checkout Code
-        uses: actions/checkout@v6
+        uses: actions/checkout@v4
 
       - name: Set up Java 17
-        uses: actions/setup-java@v6
+        uses: actions/setup-java@v4
         with:
           distribution: 'temurin'
           java-version: '17'
@@ -99,7 +127,7 @@ jobs:
           fi
 
       - name: Upload Android Artifact
-        uses: actions/upload-artifact@v6
+        uses: actions/upload-artifact@v4
         with:
           name: android-binary
           path: artifacts/Sonance-android-all-arch.apk
@@ -109,7 +137,7 @@ jobs:
     runs-on: ubuntu-24.04
     steps:
       - name: Checkout Code
-        uses: actions/checkout@v6
+        uses: actions/checkout@v4
 
       - name: Install Linux Build Dependencies
         run: |
@@ -122,6 +150,20 @@ jobs:
           channel: 'stable'
           cache: true
 
+      - name: Scaffold Linux Desktop Runner
+        run: |
+          cp pubspec.yaml pubspec.yaml.bak
+          mkdir -p /tmp/linux_backup
+          if [ -f linux/sonance.desktop ]; then
+            cp linux/sonance.desktop /tmp/linux_backup/
+          fi
+          rm -rf linux
+          flutter create --platforms=linux --org com.sandeep --project-name sonance .
+          cp pubspec.yaml.bak pubspec.yaml
+          if [ -f /tmp/linux_backup/sonance.desktop ]; then
+            cp /tmp/linux_backup/sonance.desktop linux/sonance.desktop
+          fi
+
       - name: Install Flutter Dependencies
         run: flutter pub get
 
@@ -130,6 +172,11 @@ jobs:
 
       - name: Package Debian Installer (.deb) & Tarball
         run: |
+          PKG_VER="${GITHUB_REF_NAME#v}"
+          if [ -z "$PKG_VER" ]; then
+            PKG_VER="4.0.0"
+          fi
+
           mkdir -p deb_pkg/opt/sonance
           mkdir -p deb_pkg/usr/bin
           mkdir -p deb_pkg/usr/share/applications
@@ -139,12 +186,16 @@ jobs:
           mkdir -p dist
           cp -r build/linux/x64/release/bundle/* deb_pkg/opt/sonance/
           ln -s /opt/sonance/sonance deb_pkg/usr/bin/sonance
-          cp assets/logo.png deb_pkg/usr/share/icons/hicolor/256x256/apps/sonance.png || true
+          if [ -f assets/logo.png ]; then
+            cp assets/logo.png deb_pkg/usr/share/icons/hicolor/256x256/apps/sonance.png
+          elif [ -f assets/icon.png ]; then
+            cp assets/icon.png deb_pkg/usr/share/icons/hicolor/256x256/apps/sonance.png
+          fi
           cp linux/sonance.desktop deb_pkg/usr/share/applications/
 
           cat <<EOF > deb_pkg/DEBIAN/control
           Package: sonance
-          Version: 3.6.8
+          Version: $PKG_VER
           Section: sound
           Priority: optional
           Architecture: amd64
@@ -156,7 +207,7 @@ jobs:
           tar -cJf dist/Sonance-linux-x86_64.tar.xz -C build/linux/x64/release/bundle .
 
       - name: Upload Linux Artifacts
-        uses: actions/upload-artifact@v6
+        uses: actions/upload-artifact@v4
         with:
           name: linux-binaries
           path: |
@@ -168,7 +219,7 @@ jobs:
     runs-on: macos-latest
     steps:
       - name: Checkout Code
-        uses: actions/checkout@v6
+        uses: actions/checkout@v4
 
       - name: Set up Flutter
         uses: subosito/flutter-action@v2
@@ -176,22 +227,43 @@ jobs:
           channel: 'stable'
           cache: true
 
+      - name: Scaffold macOS Desktop Runner
+        run: |
+          cp pubspec.yaml pubspec.yaml.bak
+          rm -rf macos
+          flutter create --platforms=macos --org com.sandeep --project-name sonance .
+          cp pubspec.yaml.bak pubspec.yaml
+
+          # Enable outgoing network connections (client) in App Sandbox entitlements
+          /usr/libexec/PlistBuddy -c "Add :com.apple.security.network.client bool true" macos/Runner/DebugProfile.entitlements || /usr/libexec/PlistBuddy -c "Set :com.apple.security.network.client true" macos/Runner/DebugProfile.entitlements || true
+          /usr/libexec/PlistBuddy -c "Add :com.apple.security.network.client bool true" macos/Runner/Release.entitlements || /usr/libexec/PlistBuddy -c "Set :com.apple.security.network.client true" macos/Runner/Release.entitlements || true
+
+          # Enable arbitrary HTTP/HTTPS loads for streaming in Info.plist
+          /usr/libexec/PlistBuddy -c "Add :NSAppTransportSecurity dict" macos/Runner/Info.plist || true
+          /usr/libexec/PlistBuddy -c "Add :NSAppTransportSecurity:NSAllowsArbitraryLoads bool true" macos/Runner/Info.plist || /usr/libexec/PlistBuddy -c "Set :NSAppTransportSecurity:NSAllowsArbitraryLoads true" macos/Runner/Info.plist || true
+
       - name: Install Flutter Dependencies
         run: flutter pub get
 
       - name: Build Flutter macOS Native Release
-        run: flutter build macos --release
+        run: flutter build macos --release --no-codesign
 
       - name: Package macOS DMG Installer
         run: |
           mkdir -p dmg_root
           mkdir -p dist
-          cp -R build/macos/Build/Products/Release/sonance.app dmg_root/Sonance.app
+          APP_PATH=$(find build/macos/Build/Products/Release -maxdepth 1 -name "*.app" | head -n 1)
+          if [ -z "$APP_PATH" ]; then
+            echo "Error: No .app found in build output!"
+            exit 1
+          fi
+          echo "Found built app at: $APP_PATH"
+          cp -R "$APP_PATH" dmg_root/Sonance.app
           ln -s /Applications dmg_root/Applications
           hdiutil create -volname "Sonance" -srcfolder dmg_root -ov -format UDZO dist/Sonance-macos-universal.dmg
 
       - name: Upload macOS Artifact
-        uses: actions/upload-artifact@v6
+        uses: actions/upload-artifact@v4
         with:
           name: macos-binary
           path: dist/Sonance-macos-universal.dmg
@@ -203,10 +275,10 @@ jobs:
     if: startsWith(github.ref, 'refs/tags/')
     steps:
       - name: Checkout Code
-        uses: actions/checkout@v6
+        uses: actions/checkout@v4
 
       - name: Download All Artifacts
-        uses: actions/download-artifact@v7
+        uses: actions/download-artifact@v4
         with:
           path: staging
 
@@ -216,8 +288,8 @@ jobs:
           find staging/ -type f -exec cp {} release-assets/ \;
 
           cd release-assets
-          sha256sum * > RELEASE.sha256sum
-          md5sum * > RELEASE.md5sum
+          sha256sum Sonance* > RELEASE.sha256sum
+          md5sum Sonance* > RELEASE.md5sum
 
           echo "=== SHA-256 Manifest ==="
           cat RELEASE.sha256sum
@@ -225,7 +297,7 @@ jobs:
           cat RELEASE.md5sum
 
       - name: Publish GitHub Release
-        uses: softprops/action-gh-release@v3
+        uses: softprops/action-gh-release@v2
         with:
           files: |
             release-assets/*
