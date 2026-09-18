@@ -2,7 +2,7 @@
 ; Generates production-grade native Windows Installer
 
 #define MyAppName "Sonance"
-#define MyAppVersion "3.6.6"
+#define MyAppVersion "3.6.7"
 #define MyAppPublisher "Sandeep Khadka"
 #define MyAppURL "https://github.com/Sandeep2062/Sonance"
 #define MyAppExeName "Sonance.exe"
