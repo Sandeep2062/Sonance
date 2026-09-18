@@ -529,6 +529,14 @@ Examples:
       help="Vintage optical & variable-mu compressor: --la2a <audio_file> [output_file] [--mode la2a|fairchild] [--preset la2a_smooth_vocal|la2a_acoustic_warmth|fairchild_master_bus|fairchild_drum_crush|vintage_warm_glue] [--reduction 50] [--hpf 90] [--hf-emphasis] [--tc 1-6] [--drive 1.25] [--makeup 2.0] [--mix 1.0]",
   )
   parser.add_argument(
+      "--zenith",
+      "--master",
+      "--orchestrate",
+      nargs="*",
+      metavar="PARAM",
+      help="The Grand Workstation Zenith & Master Orchestration Suite: --zenith <audio_file_or_dir> [output] [--profile audiophile_pure_master|club_edm_banger|acoustic_intimate|broadcast_radio_sheen|vinyl_cutting_prep] [--batch]",
+  )
+  parser.add_argument(
       "--version",
       action="version",
       version=f"Sonance v{modern_lyrics_downloader.APP_VERSION}",
@@ -3229,6 +3237,57 @@ Examples:
     print(f"[+] Peak Gain Reduct : {res['max_gain_reduction_db']:.2f} dB (Avg: {res['avg_gain_reduction_db']:.2f} dB)")
     print(f"[+] Dynamics Crest   : {res['crest_factor_in_db']:.2f} dB -> {res['crest_factor_out_db']:.2f} dB")
     print(f"[+] Tube Drive Stage : {s['tube_drive']:.2f}x | Makeup: {s['makeup_gain_db']:+.1f} dB | Mix: {int(s['dry_wet']*100)}%")
+    print("=" * 70)
+    return
+
+  if args.zenith is not None:
+    import zenith_orchestrator
+    params = list(args.zenith) + list(unknown)
+    if not params:
+      print("[-] Error: --zenith requires an input audio file or folder.")
+      print("    Usage: python sonance.py --zenith <audio_file_or_dir> [output] [--profile <name>] [--batch]")
+      return
+
+    inp = params[0]
+    out = None
+    profile = "audiophile_pure_master"
+    is_batch = False
+
+    idx = 1
+    while idx < len(params):
+      item = params[idx]
+      if item == "--profile" and idx + 1 < len(params):
+        profile = params[idx + 1]
+        idx += 2
+      elif item in ("--batch", "-b"):
+        is_batch = True
+        idx += 1
+      elif not item.startswith("-") and out is None:
+        out = item
+        idx += 1
+      else:
+        idx += 1
+
+    print("=" * 70)
+    print("  SONANCE AUDIOPHILE WORKSTATION v3.5.0")
+    print("  Phase 35 Grand Finale: Zenith Master Orchestration Suite")
+    print("=" * 70)
+
+    if is_batch or os.path.isdir(inp):
+      print(f"[*] Batch Album Mode: Processing {inp}...")
+      res = zenith_orchestrator.batch_master_directory(inp, out, profile=profile)
+      print(f"[+] Total Tracks Mastered: {res['processed_count']} / {res['total_files']} ({res['total_elapsed_sec']}s)")
+      print(f"[+] Destination Directory: {res['output_directory']}")
+    else:
+      print(f"[*] Single Master Mode: {inp}")
+      print(f"[*] Selected Profile  : {profile.upper()}")
+      res = zenith_orchestrator.render_zenith_master(inp, out, profile=profile)
+      print(f"[+] Output Master     : {res['output_path']}")
+      print(f"[+] Stages Executed   : {res['stages_executed']} / 7 Serial Mastering Stages")
+      print(f"[+] Elapsed Render    : {res['elapsed_seconds']}s")
+      print(f"[+] Input -> Output   : Peak {res['in_stats']['peak_dbfs']} -> {res['out_stats']['peak_dbfs']} dBFS")
+      print(f"[+] Dynamic Density   : +{res['density_gain_db']:.2f} dB Crest Factor Compression")
+      print(f"[+] SHA-256 Checksum  : {res['sha256']}")
     print("=" * 70)
     return
 

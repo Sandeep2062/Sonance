@@ -119,8 +119,9 @@ import ambisonic_hoa
 import subharmonic_bass
 import resonance_suppressor
 import vintage_compressor
+import zenith_orchestrator
 
-APP_VERSION = "3.4.0"
+APP_VERSION = "3.5.0"
 GITHUB_REPO = "Sandeep2062/Sonance"
 APP_DIR = Path(__file__).parent.resolve()
 UI_PATH = APP_DIR / "ui" / "index.html"
@@ -2000,6 +2001,26 @@ class LyricsAPI:
             makeup_gain_db=makeup_gain_db,
             dry_wet=dry_wet,
             stereo_link=stereo_link,
+        )
+
+    # ------------------ Phase 35: The Grand Workstation Zenith Suite ------------------
+    def get_zenith_profiles(self) -> Dict[str, Any]:
+        """Returns macro master profiles for The Grand Workstation Zenith Suite."""
+        return zenith_orchestrator.ZENITH_PROFILES
+
+    def render_zenith_master(
+        self,
+        input_path: str,
+        output_path: Optional[str] = None,
+        profile: str = "audiophile_pure_master",
+        stage_overrides: Optional[Dict[str, Any]] = None,
+    ) -> Dict[str, Any]:
+        """Executes the complete 7-stage Zenith Master Orchestration pipeline."""
+        return zenith_orchestrator.render_zenith_master(
+            input_path=input_path,
+            output_path=output_path,
+            profile=profile,
+            stage_overrides=stage_overrides,
         )
 
     def _save_last_folder(self, folder: str):

@@ -17,7 +17,7 @@ import importlib
 from pathlib import Path
 from typing import Dict, Any, List, Optional, Tuple
 
-APP_VERSION = "3.4.0"
+APP_VERSION = "3.5.0"
 WORKSTATION_NAME = "Sonance Audiophile Workstation"
 ROOT_DIR = Path(__file__).parent.resolve()
 
@@ -101,6 +101,9 @@ CORE_PHASE_MODULES = [
 
     # Phase 34: Vintage Optical & Variable-Mu Master Compressor Studio
     ("vintage_compressor", "Phase 34: Vintage Optical & Variable-Mu Master Compressor Studio"),
+
+    # Phase 35: The Grand Workstation Zenith & Master Orchestration Suite
+    ("zenith_orchestrator", "Phase 35: The Grand Workstation Zenith & Master Orchestration Suite"),
 ]
 
 # File classification patterns

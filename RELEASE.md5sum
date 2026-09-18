@@ -1,8 +1,8 @@
 c91e9febb271f1cc4bb2a7982eaf4bf5  LICENSE
-15ebabf4b0fb160638df2a63b9df3e4e  README.md
-2c32f2be654970be767bc012ac1059a5  RELEASE.manifest.json
-9dfc94a6ade630a84e4bae22289fe1fe  RELEASE.md5sum
-36207257aa112a51944b2845b19ea319  RELEASE.sha256sum
+0134c7439a48843a078c24d010040dcc  README.md
+758bdc54b7e959f3584d187679911558  RELEASE.manifest.json
+00736f41fc79d31b7ba508d1446374a1  RELEASE.md5sum
+3807613f80d73035c802880ae06353a4  RELEASE.sha256sum
 ab710a6799edb8263d64702507aecd40  ab_looper.py
 13ee5e3bfff751c2d33798214f86df06  accuraterip_verifier.py
 34e223dcbdaa6d440786496058fde5b8  album_art_studio.py
@@ -40,7 +40,7 @@ e9a57446bbba687e3c6dd96a2d8d4904  device_sync.py
 9939d0b8ca88dbad0a66bebae85d146d  discord_rpc.py
 6c3bebd753d235ed65574fcd2a2ff632  dj_automix.py
 d4a11fc832da7cc4c451fd3e0b8ad931  dj_mixer.py
-aef442d2df174d2cfa223331946230d5  docs_generator.py
+d5b3530eeeccf17dce8a5cc40a1e5bc9  docs_generator.py
 ec40665c8953c6399f0dc1a778196cf4  downloader_engine.py
 def557fffaa457a30c72c3f33f37bbf1  dr_meter.py
 7abe7f2069f8b48e485b8ad25aefa921  dsd_converter.py
@@ -65,7 +65,7 @@ a3fecf8f257531c317292a76445978bb  lyrics_translator.py
 c5d08f6f024d593c7bb5ca91e41ee547  lyrics_video_maker.py
 f8bb0f537fe8021d5f527cb314980afd  mastering_limiter.py
 f7a776a17008d6e7bab9f4e0aba90574  midside_processor.py
-101d9e2cb4e555bd347833282e81b18d  modern_lyrics_downloader.py
+2b443f8bdb18bd3e56bbeb7be4377e9b  modern_lyrics_downloader.py
 f795908c8054a1d9a6895c6671a3e0d3  parametric_eq.py
 cdf72cc2081ee1e1941450ee52285d59  phase_correlation.py
 06f86c0563bfa985ad13a6a29c806272  pitch_shifter.py
@@ -74,7 +74,7 @@ bf793615391d7b86c2c1b322d9cad98b  playlist_doctor.py
 c4da8655ef2e5cf66efed9bd6a6c1c35  playlist_manager.py
 cf620aaa4079039bc65c0fc7be0608fe  plugin_host.py
 aa152e188c28efe0dd89b502d0d8d56a  pubspec.yaml
-6cc476733b03e8cf7dc6564da8d1efbe  release_packager.py
+43237e9a6c260ca606ecb31c21c82250  release_packager.py
 07c1bdc11a0f17dd876504a6c0a280b8  remote_server.py
 78550b5f662dc40e8202e4da92b3e218  replaygain_normalizer.py
 63c211ecbba321a043f5a81db96100fd  requirements.txt
@@ -83,7 +83,7 @@ aa152e188c28efe0dd89b502d0d8d56a  pubspec.yaml
 0f13661c1bb64a6e68bcb737e8b6737b  room_ir_synthesizer.py
 3764c39bb9ce2ffdb75f0c9f0980b2ff  scrobbler.py
 1ef6784cb008fddc3aaf7c232694dd6d  smart_playlists.py
-fb56857be311562712c6c082cd125fcc  sonance.py
+9c9e7e3a62f01b9e1eedeb854ce18a0d  sonance.py
 5aaa71ca9a054b1a8fb15ce8e9ae566b  spatial_multichannel.py
 64152f73eb2dcc564a243ff437b449bb  spectrum_analyzer.py
 d86743a03d3aeb9ecffb846b1ee8bb76  stems_remixer.py
@@ -97,6 +97,7 @@ bb3c819823eb9d490a2274cd9efa37d8  track_splitter.py
 f556a85509e74dc9939f9867db6cf4bf  vocal_separator.py
 30b0f49941a77bd0b0f345ade0577285  word_aligner.py
 f9c1ca4136be9b93a6ebc0b5b767dafc  word_karaoke.py
+73f88c05be7128edabe383f2954e23a6  zenith_orchestrator.py
 88b4e8a514b1c0e2f8a9e321c7a9cad1  android/app/src/main/AndroidManifest.xml
 19d9797570d50db29948e3490d4f9d3c  lib/app.dart
 f56fb3b34d7d2d0342021bb6a78e4a7f  lib/main.dart
@@ -125,6 +126,6 @@ ba381111226995a7309163076d59c55f  lib/ui/views/local_view.dart
 f9cf61965048228485e01f9b9ea23ea3  lib/ui/views/settings_view.dart
 185955d82321a1941e6c163bc30174df  linux/CMakeLists.txt
 fbdf3eb0788a5a1ce9c85491b5b21d53  macos/Runner/Info.plist
-2b8e6710e78d8558a5fefccb3b16d949  ui/index.html
-0f1296f7487e594275ae9011094333c1  ui/manual.html
+295f549a76e300e3607251b354532dc1  ui/index.html
+ddfc5f1fff40698939a9650b2437d0cd  ui/manual.html
 f234b425504f6588d9eaac27fc57bbe2  windows/CMakeLists.txt

@@ -1294,6 +1294,9 @@
       <button class="btn btn-secondary" onclick="openVintageCompModal()" style="padding:5px 9px; font-size:11px;" id="vintageCompHeaderBtn" title="Vintage Optical & Variable-Mu Master Compressor Studio (LA-2A & Fairchild 670)">
         📻 Vintage Tube
       </button>
+      <button class="btn btn-secondary" onclick="openZenithModal()" style="padding:5px 9px; font-size:11px; background:linear-gradient(135deg, rgba(245,158,11,0.2), rgba(0,242,254,0.2)); border:1px solid var(--gold);" id="zenithHeaderBtn" title="The Grand Workstation Zenith & Master Orchestration Suite (7-Stage Mastering Pipeline)">
+        👑 Zenith Suite
+      </button>
       <button class="btn btn-secondary" onclick="openLrcStudioModal()" style="padding:5px 9px; font-size:11px;" id="lrcStudioHeaderBtn" title="Interactive LRC Studio & Live Time-Stamper">
         ✍️ LRC Studio
       </button>
@@ -8162,6 +8165,139 @@
     </div>
   </div>
 
+  <!-- Phase 35: The Grand Workstation Zenith & Master Orchestration Suite Modal -->
+  <div class="modal-backdrop" id="zenithModal" style="display:none;">
+    <div class="modal-card" style="width:920px; max-width:96vw; background:#161926; border:1px solid var(--gold); border-radius:12px; box-shadow:0 16px 48px rgba(0,0,0,0.8), 0 0 24px rgba(245,158,11,0.15); overflow:hidden;">
+      <div style="padding:16px 20px; background:linear-gradient(135deg, #121520, #1b1928); border-bottom:1px solid var(--gold); display:flex; justify-content:space-between; align-items:center;">
+        <div class="modal-title" style="font-size:14px; font-weight:700; display:flex; align-items:center; gap:8px; color:#fff;">
+          <span style="font-size:18px;">👑</span>
+          <span style="background:linear-gradient(135deg, #fff, var(--gold)); -webkit-background-clip:text; -webkit-text-fill-color:transparent;">The Grand Workstation Zenith &amp; Master Orchestration Suite</span>
+        </div>
+        <button onclick="closeZenithModal()" style="background:none; border:none; color:var(--text-muted); font-size:16px; cursor:pointer;">✕</button>
+      </div>
+
+      <div style="padding:20px; max-height:75vh; overflow-y:auto; display:flex; flex-direction:column; gap:16px;">
+        <div style="font-size:11px; color:var(--text-dim); line-height:1.5;">
+          The culminating pinnacle of the Sonance 35-Phase Grand Horizon. Executes an unbroken, multi-stage serial mastering pipeline chaining 7 world-class physical DSP engines in sequence: <strong>1. Spectral De-Resonator</strong>, <strong>2. Subharmonic Bass Synthesizer</strong>, <strong>3. British Class-A Console Strip</strong>, <strong>4. Vintage Dynamics Glue</strong>, <strong>5. Mid/Side Spatial Panorama</strong>, <strong>6. Master Studer Tape Saturation</strong>, and <strong>7. Audiophile Lookahead True-Peak Limiter</strong> with automated batch album processing and cryptographic verification.
+        </div>
+
+        <div>
+          <label style="font-size:11px; font-weight:600; color:var(--text-muted); display:block; margin-bottom:6px;">Target Audio File or Album Directory:</label>
+          <div style="display:flex; gap:8px;">
+            <input type="text" id="zenithTargetInput" class="search-input" style="width:100%; font-size:11px;" placeholder="Path to input audio file or folder...">
+            <button class="btn btn-secondary" onclick="loadActiveTrackForZenith()" style="font-size:11px; padding:6px 12px; white-space:nowrap;">Active Track</button>
+          </div>
+        </div>
+
+        <div>
+          <label style="font-size:11px; font-weight:600; color:var(--text-muted); display:block; margin-bottom:6px;">Custom Export Destination (Optional):</label>
+          <input type="text" id="zenithOutputInput" class="search-input" style="width:100%; font-size:11px;" placeholder="Auto-generated if empty: <original>_ZenithMaster.wav">
+        </div>
+
+        <!-- Master Macro Profiles Selector -->
+        <div>
+          <label style="font-size:11px; font-weight:600; color:var(--text-muted); display:block; margin-bottom:6px;">Zenith Master Macro Profiles:</label>
+          <div style="display:flex; flex-wrap:wrap; gap:8px;">
+            <button class="btn btn-secondary" onclick="applyZenithProfile('audiophile_pure_master')" id="zprof_audiophile_pure_master" style="font-size:11px; padding:5px 10px; border-color:var(--gold);">✨ Audiophile Pure Master</button>
+            <button class="btn btn-secondary" onclick="applyZenithProfile('club_edm_banger')" id="zprof_club_edm_banger" style="font-size:11px; padding:5px 10px;">💥 Club &amp; EDM Banger</button>
+            <button class="btn btn-secondary" onclick="applyZenithProfile('acoustic_intimate')" id="zprof_acoustic_intimate" style="font-size:11px; padding:5px 10px;">🎻 Acoustic Intimate</button>
+            <button class="btn btn-secondary" onclick="applyZenithProfile('broadcast_radio_sheen')" id="zprof_broadcast_radio_sheen" style="font-size:11px; padding:5px 10px;">📻 Broadcast Radio Sheen</button>
+            <button class="btn btn-secondary" onclick="applyZenithProfile('vinyl_cutting_prep')" id="zprof_vinyl_cutting_prep" style="font-size:11px; padding:5px 10px;">💿 Vinyl Lathe Cutting Prep</button>
+          </div>
+        </div>
+
+        <!-- 7-Stage Serial Pipeline Flowchart -->
+        <div style="background:#121520; border:1px solid var(--border); border-radius:10px; padding:14px; display:flex; flex-direction:column; gap:10px;">
+          <div style="font-size:12px; font-weight:700; color:var(--gold); border-bottom:1px solid var(--border); padding-bottom:6px; display:flex; justify-content:space-between; align-items:center;">
+            <span>⛓️ 7-STAGE SERIAL MASTERING PIPELINE</span>
+            <span style="font-size:10px; color:var(--text-dim); font-weight:normal;">Uncheck to bypass any stage</span>
+          </div>
+
+          <div style="display:grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap:10px; font-size:11px;">
+            <label style="background:#0e111a; border:1px solid var(--border); border-radius:6px; padding:8px 10px; display:flex; align-items:center; gap:8px; cursor:pointer;">
+              <input type="checkbox" id="zenithStage1Check" checked style="cursor:pointer;">
+              <div>
+                <div style="font-weight:700; color:var(--cyan);">1. De-Resonator</div>
+                <div style="font-size:9px; color:var(--text-dim);">STFT spectral de-harsh</div>
+              </div>
+            </label>
+
+            <label style="background:#0e111a; border:1px solid var(--border); border-radius:6px; padding:8px 10px; display:flex; align-items:center; gap:8px; cursor:pointer;">
+              <input type="checkbox" id="zenithStage2Check" checked style="cursor:pointer;">
+              <div>
+                <div style="font-weight:700; color:var(--cyan);">2. Subharmonic Bass</div>
+                <div style="font-size:9px; color:var(--text-dim);">dbx 120XP &amp; MaxxBass</div>
+              </div>
+            </label>
+
+            <label style="background:#0e111a; border:1px solid var(--border); border-radius:6px; padding:8px 10px; display:flex; align-items:center; gap:8px; cursor:pointer;">
+              <input type="checkbox" id="zenithStage3Check" checked style="cursor:pointer;">
+              <div>
+                <div style="font-weight:700; color:var(--cyan);">3. Class-A Console</div>
+                <div style="font-size:9px; color:var(--text-dim);">Neve 1073 &amp; Baxandall</div>
+              </div>
+            </label>
+
+            <label style="background:#0e111a; border:1px solid var(--border); border-radius:6px; padding:8px 10px; display:flex; align-items:center; gap:8px; cursor:pointer;">
+              <input type="checkbox" id="zenithStage4Check" checked style="cursor:pointer;">
+              <div>
+                <div style="font-weight:700; color:var(--cyan);">4. Vintage Dynamics</div>
+                <div style="font-size:9px; color:var(--text-dim);">LA-2A &amp; Fairchild 670</div>
+              </div>
+            </label>
+
+            <label style="background:#0e111a; border:1px solid var(--border); border-radius:6px; padding:8px 10px; display:flex; align-items:center; gap:8px; cursor:pointer;">
+              <input type="checkbox" id="zenithStage5Check" checked style="cursor:pointer;">
+              <div>
+                <div style="font-weight:700; color:var(--cyan);">5. Mid/Side Width</div>
+                <div style="font-size:9px; color:var(--text-dim);">M/S Matrix &amp; Monomaker</div>
+              </div>
+            </label>
+
+            <label style="background:#0e111a; border:1px solid var(--border); border-radius:6px; padding:8px 10px; display:flex; align-items:center; gap:8px; cursor:pointer;">
+              <input type="checkbox" id="zenithStage6Check" checked style="cursor:pointer;">
+              <div>
+                <div style="font-weight:700; color:var(--cyan);">6. Analog Tape</div>
+                <div style="font-size:9px; color:var(--text-dim);">Studer A800 Saturation</div>
+              </div>
+            </label>
+
+            <label style="background:#0e111a; border:1px solid var(--border); border-radius:6px; padding:8px 10px; display:flex; align-items:center; gap:8px; cursor:pointer;">
+              <input type="checkbox" id="zenithStage7Check" checked style="cursor:pointer;">
+              <div>
+                <div style="font-weight:700; color:var(--gold);">7. True-Peak Limiter</div>
+                <div style="font-size:9px; color:var(--text-dim);">-0.2 dBFS Brickwall</div>
+              </div>
+            </label>
+          </div>
+        </div>
+
+        <!-- Master Batch Mode & Options -->
+        <div style="background:#0e111a; border:1px solid var(--border); border-radius:8px; padding:12px; display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:12px;">
+          <label style="display:flex; align-items:center; gap:8px; cursor:pointer; font-size:11px; font-weight:600; color:var(--gold);">
+            <input type="checkbox" id="zenithBatchCheck" style="cursor:pointer;">
+            <span>📁 Batch Album Mode (Master all supported tracks in target folder)</span>
+          </label>
+          <div style="font-size:10px; color:var(--text-dim);">Output Format: 24-bit linear PCM WAV with SHA-256 cryptographic manifest</div>
+        </div>
+
+        <div style="display:flex; justify-content:space-between; align-items:center; margin-top:4px;">
+          <span id="zenithStatusText" style="font-size:11px; color:var(--text-dim);">Ready to orchestrate master chain across all 7 stages</span>
+          <button class="btn btn-primary" onclick="runZenithAction()" id="processZenithBtn" style="font-size:12px; padding:7px 24px; background:linear-gradient(135deg, #f59e0b, #00f2fe); border:none; color:#000; font-weight:700;">
+            👑 Execute Zenith Master
+          </button>
+        </div>
+
+        <div id="zenithOutputCard" style="background:#0b0d14; border:1px solid var(--border); border-radius:8px; padding:12px; font-family:monospace; font-size:11px; line-height:1.45; color:var(--cyan); min-height:90px; white-space:pre-wrap; overflow-x:auto;">Select audio file or album directory and click Execute Zenith Master.</div>
+      </div>
+
+      <div style="padding:10px 16px; background:#121520; border-top:1px solid var(--border); display:flex; justify-content:space-between; align-items:center;">
+        <span style="font-size:10px; color:var(--gold);">Sonance 35-Phase Grand Workstation Horizon • 52 Audited Core DSP Engines</span>
+        <button class="btn btn-secondary" onclick="closeZenithModal()">Close</button>
+      </div>
+    </div>
+  </div>
+
   <!-- Podcast & Long Mix Bookmark Resumption Toast (Phase 10) -->
   <div id="podcastResumeToast" style="display:none; position:fixed; bottom:85px; right:20px; z-index:9999; background:#131722; border:1px solid var(--border); box-shadow:0 8px 24px rgba(0,0,0,0.6); border-radius:10px; padding:10px 14px; align-items:center; gap:10px; backdrop-filter:blur(10px);">
     <span style="font-size:16px;">⏱️</span>
@@ -11179,6 +11315,7 @@
         closeBassModal();
         closeResonanceModal();
         closeVintageCompModal();
+        closeZenithModal();
         dismissPodcastResumeToast();
         const popup = document.getElementById('speedStudioPopup');
         if (popup) popup.style.display = 'none';
@@ -19835,6 +19972,141 @@
           }
           if (st) {
             st.innerText = 'Error processing vintage compressor';
+            st.style.color = 'var(--rose)';
+          }
+          if (outCard) outCard.innerText = '✕ Error: ' + (err.message || err);
+        });
+      }
+    }
+
+    // ------------------ Phase 35: The Grand Workstation Zenith Suite ------------------
+    let currentZenithProfile = 'audiophile_pure_master';
+
+    function openZenithModal() {
+      const modal = document.getElementById('zenithModal');
+      if (modal) modal.style.display = 'flex';
+    }
+
+    function closeZenithModal() {
+      const modal = document.getElementById('zenithModal');
+      if (modal) modal.style.display = 'none';
+    }
+
+    function loadActiveTrackForZenith() {
+      if (state.currentTrack && state.currentTrack.path) {
+        const inp = document.getElementById('zenithTargetInput');
+        if (inp) inp.value = state.currentTrack.path;
+      } else {
+        showToast('No active track loaded in player');
+      }
+    }
+
+    const ZENITH_PROFILES_DATA = {
+      audiophile_pure_master: { s1: true, s2: true, s3: true, s4: true, s5: true, s6: true, s7: true },
+      club_edm_banger: { s1: true, s2: true, s3: true, s4: true, s5: true, s6: true, s7: true },
+      acoustic_intimate: { s1: true, s2: false, s3: true, s4: true, s5: true, s6: true, s7: true },
+      broadcast_radio_sheen: { s1: true, s2: true, s3: true, s4: true, s5: true, s6: true, s7: true },
+      vinyl_cutting_prep: { s1: true, s2: true, s3: true, s4: true, s5: true, s6: true, s7: true }
+    };
+
+    function applyZenithProfile(pKey) {
+      currentZenithProfile = pKey;
+      const p = ZENITH_PROFILES_DATA[pKey];
+      if (!p) return;
+
+      ['audiophile_pure_master', 'club_edm_banger', 'acoustic_intimate', 'broadcast_radio_sheen', 'vinyl_cutting_prep'].forEach(k => {
+        const b = document.getElementById('zprof_' + k);
+        if (b) {
+          b.style.borderColor = (k === pKey) ? 'var(--gold)' : 'var(--border)';
+          b.style.color = (k === pKey) ? 'var(--gold)' : 'var(--text)';
+        }
+      });
+
+      const c1 = document.getElementById('zenithStage1Check'); if (c1) c1.checked = p.s1;
+      const c2 = document.getElementById('zenithStage2Check'); if (c2) c2.checked = p.s2;
+      const c3 = document.getElementById('zenithStage3Check'); if (c3) c3.checked = p.s3;
+      const c4 = document.getElementById('zenithStage4Check'); if (c4) c4.checked = p.s4;
+      const c5 = document.getElementById('zenithStage5Check'); if (c5) c5.checked = p.s5;
+      const c6 = document.getElementById('zenithStage6Check'); if (c6) c6.checked = p.s6;
+      const c7 = document.getElementById('zenithStage7Check'); if (c7) c7.checked = p.s7;
+
+      showToast('Loaded Zenith Macro Profile: ' + pKey);
+    }
+
+    function runZenithAction() {
+      const inp = (document.getElementById('zenithTargetInput').value || '').trim();
+      const out = (document.getElementById('zenithOutputInput').value || '').trim() || null;
+      const profile = currentZenithProfile;
+
+      const btn = document.getElementById('processZenithBtn');
+      const st = document.getElementById('zenithStatusText');
+      const outCard = document.getElementById('zenithOutputCard');
+
+      if (!inp) {
+        showToast('Please select input audio file or album directory');
+        return;
+      }
+
+      const overrides = {
+        de_resonance: { enabled: document.getElementById('zenithStage1Check') ? document.getElementById('zenithStage1Check').checked : true },
+        sub_bass: { enabled: document.getElementById('zenithStage2Check') ? document.getElementById('zenithStage2Check').checked : true },
+        console_strip: { enabled: document.getElementById('zenithStage3Check') ? document.getElementById('zenithStage3Check').checked : true },
+        vintage_comp: { enabled: document.getElementById('zenithStage4Check') ? document.getElementById('zenithStage4Check').checked : true },
+        midside: { enabled: document.getElementById('zenithStage5Check') ? document.getElementById('zenithStage5Check').checked : true },
+        analog_tape: { enabled: document.getElementById('zenithStage6Check') ? document.getElementById('zenithStage6Check').checked : true },
+        master_limiter: { enabled: document.getElementById('zenithStage7Check') ? document.getElementById('zenithStage7Check').checked : true }
+      };
+
+      if (btn) {
+        btn.disabled = true;
+        btn.innerText = '👑 Orchestrating Zenith Master...';
+      }
+      if (st) {
+        st.innerText = 'Executing 7-stage master serial chain (De-Resonator ➔ Bass ➔ Console ➔ Vintage Dynamics ➔ M/S ➔ Tape ➔ Limiter)...';
+        st.style.color = 'var(--gold)';
+      }
+      if (outCard) outCard.innerText = 'Initializing serial mastering chain pipeline across all 7 physical DSP engines...';
+
+      if (window.pywebview && window.pywebview.api && window.pywebview.api.render_zenith_master) {
+        window.pywebview.api.render_zenith_master(inp, out, profile, overrides).then(res => {
+          if (btn) {
+            btn.disabled = false;
+            btn.innerText = '👑 Execute Zenith Master';
+          }
+          if (res) {
+            if (st) {
+              st.innerText = '✓ The Grand Zenith Master rendered successfully!';
+              st.style.color = 'var(--emerald)';
+            }
+            let card = `======================================================================\n`;
+            card += `  THE GRAND WORKSTATION ZENITH MASTER REPORT\n`;
+            card += `  Sonance 35-Phase Grand Finale Mastering Pipeline\n`;
+            card += `======================================================================\n`;
+            card += `Profile Applied   : ${res.profile_name}\n`;
+            card += `Input Source      : ${res.input_path}\n`;
+            card += `Master Output     : ${res.output_path}\n`;
+            card += `Elapsed Time      : ${res.elapsed_seconds}s (${res.stages_executed} Stages Executed)\n`;
+            card += `Audio Format      : 24-bit Linear PCM WAV @ ${res.out_stats.sample_rate} Hz (${res.out_stats.duration_sec}s)\n`;
+            card += `Peak Level        : ${res.in_stats.peak_dbfs} dBFS ➔ ${res.out_stats.peak_dbfs} dBFS\n`;
+            card += `RMS Loudness      : ${res.in_stats.rms_dbfs} dBFS ➔ ${res.out_stats.rms_dbfs} dBFS\n`;
+            card += `Crest Factor      : ${res.in_stats.crest_factor_db} dB ➔ ${res.out_stats.crest_factor_db} dB (+${res.density_gain_db} dB dynamic density)\n`;
+            card += `SHA-256 Checksum  : ${res.sha256}\n\n`;
+            card += `SERIAL PIPELINE TELEMETRY:\n`;
+            if (res.stage_telemetry) {
+              res.stage_telemetry.forEach(s => {
+                card += `  [Stage ${s.stage}] ${s.name} (${s.engine})\n`;
+              });
+            }
+            if (outCard) outCard.innerText = card;
+            showToast('Zenith Master rendered successfully!');
+          }
+        }).catch(err => {
+          if (btn) {
+            btn.disabled = false;
+            btn.innerText = '👑 Execute Zenith Master';
+          }
+          if (st) {
+            st.innerText = 'Error executing Zenith Master orchestration';
             st.style.color = 'var(--rose)';
           }
           if (outCard) outCard.innerText = '✕ Error: ' + (err.message || err);

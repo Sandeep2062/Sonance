@@ -12,7 +12,7 @@ import webbrowser
 from pathlib import Path
 from typing import Dict, Any, Optional
 
-APP_VERSION = "3.4.0"
+APP_VERSION = "3.5.0"
 WORKSTATION_NAME = "Sonance Audiophile Workstation"
 ROOT_DIR = Path(__file__).parent.resolve()
 DEFAULT_MANUAL_PATH = ROOT_DIR / "ui" / "manual.html"
@@ -357,6 +357,16 @@ PHASES_DATA = [
         "desc": "Physical modeling of dual legendary studio dynamics: the Teletronix LA-2A T4 electro-optical cell with dual-stage memory release (60ms fast initial decay + 0.5s-4.5s program-dependent memory tail) and R37 high-frequency emphasis; paired with the Fairchild 670 remote-cutoff variable-mu dual-triode 6386 tube compressor with 6 stepped time-constant positions, sidechain HPF (60-185 Hz), analog tube saturation, and True-Peak safety limiting.",
         "dsp_math": "LA-2A T4 optical decay: y_{\\text{rel}}(t) = 0.5 e^{-t/0.06} + 0.5 e^{-t/\\tau_{\\text{slow}}}; \\quad \\text{Fairchild 6386 Variable-Mu}: \\mu(V_g) = \\frac{\\mu_0}{1 + k \\cdot |V_g|^{1.2}}",
         "features": ["Teletronix LA-2A T4 electro-optical attenuator with non-linear photocell luminescence response", "Dual-stage optical release with multi-second memory accumulation effect", "Fairchild 670 remote-cutoff variable-mu dual-triode 6386 physical tube model", "6 classic stepped hardware time-constant positions including dual-time auto-release", "Sidechain high-pass filter (60, 90, 120, 185 Hz) preventing low-end pumping", "LA-2A R37 high-frequency sidechain emphasis trimming", "12AX7 / 6386 tube harmonic saturation & transformer warmth", "True-Peak brickwall safety limiter (-0.2 dBFS) with 24-bit linear PCM WAV export"]
+    },
+    {
+        "phase": 35,
+        "title": "The Grand Workstation Zenith & Master Orchestration Suite",
+        "category": "Grand Workstation Finale & Multi-Stage Orchestration",
+        "modules": ["zenith_orchestrator.py"],
+        "cli": "python sonance.py --zenith master.wav [output.wav] --profile audiophile_pure_master | --batch ./AlbumFolder",
+        "desc": "The crowning zenith of the 35-Phase Sonance Audiophile Workstation. Orchestrates an end-to-end 7-stage serial mastering pipeline: 1. Spectral De-Resonator, 2. Subharmonic Bass & Missing Fundamental, 3. British Class-A Console & Baxandall EQ, 4. Vintage Optical/Variable-Mu Dynamics, 5. Mid/Side Spatial Panorama, 6. Studer A800 Analog Tape Saturation, and 7. True-Peak Lookahead Brickwall Limiter with automated batch album processing and cryptographic verification.",
+        "dsp_math": "Master serial pipeline transfer function: Y(z) = H_{\\text{Limiter}}(z) \\circ H_{\\text{Tape}}(z) \\circ H_{\\text{M/S}}(z) \\circ H_{\\text{Vintage}}(z) \\circ H_{\\text{Console}}(z) \\circ H_{\\text{Bass}}(z) \\circ H_{\\text{DeRes}}(z) [X(z)]",
+        "features": ["7-stage unbroken serial mastering pipeline executing across world-class physical DSP engines", "5 mastering macro profiles (Audiophile Pure Master, Club/EDM Banger, Acoustic Intimate, Broadcast Sheen, Vinyl Lathe)", "Individual stage bypass and parameter overrides for custom mastering chains", "Automated batch album processing ensuring cohesive track-to-track loudness and tone", "Full audio telemetry: peak dBFS, RMS loudness, dynamic crest factor, and SHA-256 integrity manifest", "24-bit linear PCM WAV master export with true-peak inter-sample protection"]
     }
 ]
 
@@ -444,6 +454,11 @@ MATH_FORMULAS = [
         "name": "Fairchild 670 Variable-Mu Remote-Cutoff Gain Transfer",
         "formula": "\\mu(V_g) = \\frac{\\mu_0}{1 + k \\cdot |V_g|^{1.2}}, \\quad \\text{GR}_{\\text{dB}} = 20 \\log_{10}\\left(\\frac{1}{1 + 1.6 \\cdot |V_g|^{1.15}}\\right)",
         "explanation": "Remote-cutoff dual-triode 6386 tube physical model where rectified control voltage Vg dynamically reduces amplification factor mu without a fixed threshold or sharp knee, creating an ultra-smooth, continuous variable ratio."
+    },
+    {
+        "name": "Master Serial Pipeline Discrete Transfer Composition",
+        "formula": "Y(z) = \\prod_{k=N}^1 \\mathcal{T}_k \\left[ X(z) \\right] = \\left( \\mathcal{T}_{\\text{Limiter}} \\circ \\mathcal{T}_{\\text{Tape}} \\circ \\mathcal{T}_{\\text{M/S}} \\circ \\mathcal{T}_{\\text{Dyn}} \\circ \\mathcal{T}_{\\text{Console}} \\circ \\mathcal{T}_{\\text{Bass}} \\circ \\mathcal{T}_{\\text{DeRes}} \\right) X(z)",
+        "explanation": "Composes N non-linear, time-variant discrete mastering stages in strict causal sequence. Each stage processes the conditioned output of the previous stage, ensuring surgical artifact removal precedes dynamic expansion, saturation, and final true-peak brickwall limiting."
     }
 ]
 
@@ -1171,7 +1186,7 @@ def build_manual_html() -> str:
                 <div class="meta-tags">
                     <span class="meta-tag">⚡ Version {APP_VERSION}</span>
                     <span class="meta-tag">🎼 {total_phases} Master Phases</span>
-                    <span class="meta-tag">🎛️ 51 DSP Engines &amp; Core Modules</span>
+                    <span class="meta-tag">🎛️ 52 DSP Engines &amp; Core Modules</span>
                     <span class="meta-tag">🌐 100% Offline Single-File Architecture</span>
                 </div>
             </div>
