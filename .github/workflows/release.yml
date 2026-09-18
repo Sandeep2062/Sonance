@@ -89,7 +89,7 @@ jobs:
       - name: Build Android Universal Release APK
         run: |
           mkdir -p artifacts
-          flutter build apk --release
+          flutter build apk --release --android-skip-build-dependency-validation
           if [ -f build/app/outputs/flutter-apk/app-release.apk ]; then
             cp build/app/outputs/flutter-apk/app-release.apk artifacts/Sonance-android-all-arch.apk
           elif [ -f build/app/outputs/apk/release/app-release.apk ]; then
@@ -141,7 +141,7 @@ jobs:
 
           cat <<EOF > deb_pkg/DEBIAN/control
           Package: sonance
-          Version: 3.6.3
+          Version: 3.6.4
           Section: sound
           Priority: optional
           Architecture: amd64
