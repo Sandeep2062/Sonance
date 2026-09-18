@@ -491,6 +491,14 @@ Examples:
       help="Dolby Atmos 7.1.4 bed spatializer & multichannel renderer: --spatial-714 <audio_file> [output_file] [--mode binaural|discrete] [--format 7.1.4|7.1|5.1] [--lfe-cutoff 80] [--height 0.35] [--spread 1.15]",
   )
   parser.add_argument(
+      "--console",
+      "--channel-strip",
+      "--ssl-comp",
+      nargs="*",
+      metavar="PARAM",
+      help="British Class-A Console Channel Strip & SSL G-Master Bus Studio: --console <audio_file> [output_file] [--preset master_bus_glue|analog_warmth|drum_bus_punch|vocal_channel|radio_broadcast]",
+  )
+  parser.add_argument(
       "--version",
       action="version",
       version=f"Sonance v{modern_lyrics_downloader.APP_VERSION}",
@@ -2700,6 +2708,147 @@ Examples:
     print(f"[+] In Peak / RMS    : {res['in_peak_dbfs']:.2f} dBFS / {res['in_rms_dbfs']:.2f} dBFS")
     print(f"[+] Out Peak / RMS   : {res['out_peak_dbfs']:.2f} dBFS / {res['out_rms_dbfs']:.2f} dBFS")
     print(f"[+] Render Time      : {res['elapsed_sec']:.2f}s ({res['duration_sec']:.1f}s @ {res['sample_rate']} Hz)")
+    print("=" * 70)
+    return
+
+  if args.console is not None:
+    import console_channel_strip
+    params = list(args.console) + list(unknown)
+    if not params:
+      print("[-] Error: --console requires an input audio file.")
+      print("    Usage: python sonance.py --console <audio_file> [output_file] [--preset <name>]")
+      return
+
+    inp = params[0]
+    out = None
+    preset = "master_bus_glue"
+    threshold = None
+    ratio = None
+    attack = None
+    release = None
+    hpf = None
+    makeup = None
+    dry_wet = None
+    drive = None
+    warmth = None
+    high_shelf = None
+    low_shelf = None
+    mid_gain = None
+    crosstalk = -65.0
+    noise = False
+    gain = 0.0
+
+    idx = 1
+    while idx < len(params):
+      item = params[idx]
+      if item == "--preset" and idx + 1 < len(params):
+        preset = params[idx + 1]
+        idx += 2
+      elif item == "--threshold" and idx + 1 < len(params):
+        threshold = float(params[idx + 1])
+        idx += 2
+      elif item == "--ratio" and idx + 1 < len(params):
+        ratio = float(params[idx + 1])
+        idx += 2
+      elif item == "--attack" and idx + 1 < len(params):
+        attack = float(params[idx + 1])
+        idx += 2
+      elif item == "--release" and idx + 1 < len(params):
+        release = float(params[idx + 1])
+        idx += 2
+      elif item == "--hpf" and idx + 1 < len(params):
+        hpf = float(params[idx + 1])
+        idx += 2
+      elif item == "--makeup" and idx + 1 < len(params):
+        makeup = float(params[idx + 1])
+        idx += 2
+      elif item == "--dry-wet" and idx + 1 < len(params):
+        dry_wet = float(params[idx + 1])
+        idx += 2
+      elif item == "--drive" and idx + 1 < len(params):
+        drive = float(params[idx + 1])
+        idx += 2
+      elif item == "--warmth" and idx + 1 < len(params):
+        warmth = float(params[idx + 1])
+        idx += 2
+      elif item == "--high-shelf" and idx + 1 < len(params):
+        high_shelf = float(params[idx + 1])
+        idx += 2
+      elif item == "--low-shelf" and idx + 1 < len(params):
+        low_shelf = float(params[idx + 1])
+        idx += 2
+      elif item == "--mid-gain" and idx + 1 < len(params):
+        mid_gain = float(params[idx + 1])
+        idx += 2
+      elif item == "--crosstalk" and idx + 1 < len(params):
+        crosstalk = float(params[idx + 1])
+        idx += 2
+      elif item == "--noise":
+        noise = True
+        idx += 1
+      elif item == "--gain" and idx + 1 < len(params):
+        gain = float(params[idx + 1])
+        idx += 2
+      elif not item.startswith("-") and out is None:
+        out = item
+        idx += 1
+      else:
+        idx += 1
+
+    custom_ssl = {}
+    if threshold is not None:
+      custom_ssl["threshold_db"] = threshold
+    if ratio is not None:
+      custom_ssl["ratio"] = ratio
+    if attack is not None:
+      custom_ssl["attack_ms"] = attack
+    if release is not None:
+      custom_ssl["release_sec"] = release
+    if hpf is not None:
+      custom_ssl["sidechain_hpf_hz"] = hpf
+    if makeup is not None:
+      custom_ssl["makeup_gain_db"] = makeup
+    if dry_wet is not None:
+      custom_ssl["dry_wet"] = dry_wet
+
+    custom_neve = {}
+    if drive is not None:
+      custom_neve["preamp_drive"] = drive
+    if warmth is not None:
+      custom_neve["transformer_warmth"] = warmth
+    if high_shelf is not None:
+      custom_neve["high_shelf_gain_db"] = high_shelf
+    if low_shelf is not None:
+      custom_neve["low_shelf_gain_db"] = low_shelf
+    if mid_gain is not None:
+      custom_neve["mid_gain_db"] = mid_gain
+
+    print("=" * 70)
+    print("  SONANCE AUDIOPHILE WORKSTATION v3.0.0")
+    print("  Phase 30: British Class-A Console Channel Strip & SSL G-Master Bus Studio")
+    print("=" * 70)
+    print(f"[*] Processing: {inp} through {preset.upper()} preset...")
+
+    res = console_channel_strip.render_console_strip(
+        input_path=inp,
+        output_path=out,
+        preset=preset,
+        custom_ssl=custom_ssl or None,
+        custom_neve=custom_neve or None,
+        crosstalk_db=crosstalk,
+        analog_noise=noise,
+        output_gain_db=gain,
+    )
+
+    t = res["compressor_telemetry"]
+    n = res["neve_summary"]
+
+    print(f"[+] Output Master    : {res['output_path']}")
+    print(f"[+] Audio Format     : 24-bit Linear PCM WAV @ {res['sample_rate']} Hz ({res['duration_sec']}s)")
+    print(f"[+] Peak / RMS Level : {res['peak_db']} dBFS / {res['rms_db']} dBFS (Crest Factor: {res['crest_factor_db']} dB)")
+    print(f"[+] SSL Gain Reduct. : -{t['max_gain_reduction_db']:.2f} dB max (Avg: -{t['avg_gain_reduction_db']:.2f} dB)")
+    print(f"[+] SSL VCA Settings : Ratio {t['ratio']}:1 | Attack {t['attack_ms']}ms | Release {t['release']} | Makeup +{t['makeup_db']}dB")
+    print(f"[+] Neve 1073 Preamp : Drive {n['drive']}x | Low {n['low_shelf']} | Mid {n['mid_band']} | High {n['high_shelf']}")
     print("=" * 70)
     return
 

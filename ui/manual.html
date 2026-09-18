@@ -617,7 +617,7 @@
         </div>
         <div class="search-box">
             <span class="search-icon">🔍</span>
-            <input type="text" id="manualSearchInput" placeholder="Search 29 phases, DSP algorithms, CLI commands..." onkeyup="filterManualContent()">
+            <input type="text" id="manualSearchInput" placeholder="Search 30 phases, DSP algorithms, CLI commands..." onkeyup="filterManualContent()">
         </div>
         <div class="header-actions">
             <a href="#shortcuts-section" class="btn-link">⌨️ Shortcuts</a>
@@ -629,7 +629,7 @@
 
     <div class="app-container">
         <aside id="sidebarNav">
-            <div class="sidebar-section-title">Master Roadmap (Phases 1-29)</div>
+            <div class="sidebar-section-title">Master Roadmap (Phases 1-30)</div>
             <a href="#phase-1" class="toc-item" onclick="setActiveLink(this)">
             <span class="toc-num">01</span>
             <span class="toc-name">Core Multi-Threaded Engine, Synchronized Lyrics & Metadata Tagging</span>
@@ -717,6 +717,9 @@
         </a><a href="#phase-29" class="toc-item" onclick="setActiveLink(this)">
             <span class="toc-num">29</span>
             <span class="toc-name">Dolby Atmos 7.1.4 Bed Spatializer & Multichannel Audio Renderer</span>
+        </a><a href="#phase-30" class="toc-item" onclick="setActiveLink(this)">
+            <span class="toc-num">30</span>
+            <span class="toc-name">British Class-A Console Channel Strip & SSL G-Master Bus Compressor Studio</span>
         </a>
             
             <div class="sidebar-section-title" style="margin-top:16px;">Reference &amp; Theory</div>
@@ -733,15 +736,15 @@
                     bit-exact CD extraction, stem separation, and over 25 professional mastering and DSP engineering studios.
                 </p>
                 <div class="meta-tags">
-                    <span class="meta-tag">⚡ Version 2.9.0</span>
-                    <span class="meta-tag">🎼 29 Master Phases</span>
-                    <span class="meta-tag">🎛️ 46 DSP Engines &amp; Core Modules</span>
+                    <span class="meta-tag">⚡ Version 3.0.0</span>
+                    <span class="meta-tag">🎼 30 Master Phases</span>
+                    <span class="meta-tag">🎛️ 47 DSP Engines &amp; Core Modules</span>
                     <span class="meta-tag">🌐 100% Offline Single-File Architecture</span>
                 </div>
             </div>
 
             <div class="section-header" id="catalog-section">
-                <h2>Master Phase Catalog (1 - 29)</h2>
+                <h2>Master Phase Catalog (1 - 30)</h2>
                 <span style="font-size:12px; color:var(--text-muted);">Click any phase to jump</span>
             </div>
 
@@ -1645,6 +1648,37 @@
             </div>
         </article>
         
+        <article class="phase-card" id="phase-30">
+            <div class="phase-card-header">
+                <div class="phase-badge-row">
+                    <span class="phase-pill">PHASE 30</span>
+                    <span class="phase-cat">Studio FX & Console Mastering</span>
+                </div>
+                <h2 class="phase-title">British Class-A Console Channel Strip & SSL G-Master Bus Compressor Studio</h2>
+                <div class="module-bar"><span class="badge-module">console_channel_strip.py</span></div>
+            </div>
+            
+            <p class="phase-desc">Definitive studio console mastering path combining Solid State Logic (SSL 4000 G-Master Bus Compressor) Quad-VCA dynamics, program-dependent Auto-Release, and sidechain HPF with British Class-A Neve 1073 preamp transformer harmonic saturation and 3-band inductor/Baxandall EQ.</p>
+            
+            <div class="code-box">
+                <div class="code-label">CLI INVOCATION</div>
+                <div class="code-line">
+                    <code>python sonance.py --console in.wav [out.wav] --preset master_bus_glue | --threshold -14 --ratio 2.0 --hpf 90</code>
+                    <button class="copy-btn" onclick="copyCode(this, 'python sonance.py --console in.wav [out.wav] --preset master_bus_glue | --threshold -14 --ratio 2.0 --hpf 90')">Copy</button>
+                </div>
+            </div>
+            
+            <div class="math-box">
+                <div class="math-label">MATHEMATICAL / DSP FOUNDATION</div>
+                <div class="math-equation">SSL VCA soft-knee curve: y_{dB} = x_{dB} + ((1/R - 1)*(x_{dB} - T + W/2)^2)/(2W); Neve Marinair saturation: y = (tanh(drive*x + bias) - tanh(bias))/tanh(drive) + 0.04*warmth*x^3</div>
+            </div>
+            
+            <div class="features-box">
+                <div class="features-label">KEY CAPABILITIES</div>
+                <ul class="features-list"><li>Solid State Logic (SSL 4000 G-Master Bus Compressor) Quad-VCA emulation</li><li>Program-dependent dual-constant Auto-Release (0.1s fast + 1.2s memory)</li><li>Sidechain High-Pass Filter (60, 90, 120, 185 Hz) preventing kick/bass pumping</li><li>Neve 1073 Class-A preamp transformer saturation & 18 dB/oct HPF</li><li>Proportional-Q mid inductor band & 12 kHz Baxandall air sheen</li><li>Master safety True-Peak ceiling limiter (-0.2 dBFS) & 24-bit PCM WAV export</li></ul>
+            </div>
+        </article>
+        
 
             <div class="section-header" id="shortcuts-section">
                 <h2>Master Keyboard Shortcuts</h2>
@@ -1751,6 +1785,18 @@
             <h3 class="formula-title">Analog Tape Saturation Transfer Function</h3>
             <div class="formula-math">y[n] = tanh( drive * x[n] + bias ) + alpha * (x[n] - x[n-1])</div>
             <p class="formula-desc">Hyperbolic tangent non-linear soft clipping emulates magnetic particle alignment saturation, introducing warm odd harmonics and natural transient compression.</p>
+        </div>
+        
+        <div class="formula-card">
+            <h3 class="formula-title">SSL 4000 Quad-VCA Master Bus Compression</h3>
+            <div class="formula-math">y_{dB} = T + (x_{dB} - T) / R,   \text{for } x_{dB} > T + W/2</div>
+            <p class="formula-desc">Quad-VCA log-domain gain reduction with soft-knee transition and dual-time constant Auto-Release (tau_fast=100ms, tau_slow=1200ms) delivering classic cohesive mix bus 'glue'.</p>
+        </div>
+        
+        <div class="formula-card">
+            <h3 class="formula-title">Neve 1073 Marinair Transformer Saturation</h3>
+            <div class="formula-math">y(t) = \frac{\tanh(\text{drive} \cdot x(t) + \text{bias}) - \tanh(\text{bias})}{\tanh(\text{drive})} + \alpha \cdot x^3(t)</div>
+            <p class="formula-desc">Simulates single-ended Class-A preamp asymmetrical 2nd-order tube/transistor warmth plus magnetic core 3rd-order hysteresis saturation from the vintage British output transformer.</p>
         </div>
         
             </div>

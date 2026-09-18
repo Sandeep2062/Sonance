@@ -12,7 +12,7 @@ import webbrowser
 from pathlib import Path
 from typing import Dict, Any, Optional
 
-APP_VERSION = "2.9.0"
+APP_VERSION = "3.0.0"
 WORKSTATION_NAME = "Sonance Audiophile Workstation"
 ROOT_DIR = Path(__file__).parent.resolve()
 DEFAULT_MANUAL_PATH = ROOT_DIR / "ui" / "manual.html"
@@ -307,6 +307,16 @@ PHASES_DATA = [
         "desc": "Translates stereo masters into an immersive 7.1.4 Dolby Atmos bed (7 ear-level surround + 4 ceiling height channels + dedicated LFE subwoofer crossover) with Woodworth spherical binaural virtualization or discrete 6/8/12-channel 24-bit PCM WAV export.",
         "dsp_math": "Spherical ITD delay: Delta t = (r/c) * (sin(theta) + 0.5 * theta); 4th-order Linkwitz-Riley LFE crossover: H_{LR4}(s) = (omega_c^2 / (s^2 + sqrt(2)*omega_c*s + omega_c^2))^2",
         "features": ["12-channel 7.1.4 immersive spatial audio bed generator", "4th-order Linkwitz-Riley LFE crossover filter (60-160 Hz)", "Ceiling height micro-reflection ambience synthesizer (>800 Hz)", "3D Binaural Headphone Virtualizer (Woodworth ITD + ILD) and 24-bit multichannel PCM WAV export (7.1.4, 7.1, 5.1)"]
+    },
+    {
+        "phase": 30,
+        "title": "British Class-A Console Channel Strip & SSL G-Master Bus Compressor Studio",
+        "category": "Studio FX & Console Mastering",
+        "modules": ["console_channel_strip.py"],
+        "cli": "python sonance.py --console in.wav [out.wav] --preset master_bus_glue | --threshold -14 --ratio 2.0 --hpf 90",
+        "desc": "Definitive studio console mastering path combining Solid State Logic (SSL 4000 G-Master Bus Compressor) Quad-VCA dynamics, program-dependent Auto-Release, and sidechain HPF with British Class-A Neve 1073 preamp transformer harmonic saturation and 3-band inductor/Baxandall EQ.",
+        "dsp_math": "SSL VCA soft-knee curve: y_{dB} = x_{dB} + ((1/R - 1)*(x_{dB} - T + W/2)^2)/(2W); Neve Marinair saturation: y = (tanh(drive*x + bias) - tanh(bias))/tanh(drive) + 0.04*warmth*x^3",
+        "features": ["Solid State Logic (SSL 4000 G-Master Bus Compressor) Quad-VCA emulation", "Program-dependent dual-constant Auto-Release (0.1s fast + 1.2s memory)", "Sidechain High-Pass Filter (60, 90, 120, 185 Hz) preventing kick/bass pumping", "Neve 1073 Class-A preamp transformer saturation & 18 dB/oct HPF", "Proportional-Q mid inductor band & 12 kHz Baxandall air sheen", "Master safety True-Peak ceiling limiter (-0.2 dBFS) & 24-bit PCM WAV export"]
     }
 ]
 
@@ -354,6 +364,16 @@ MATH_FORMULAS = [
         "name": "Analog Tape Saturation Transfer Function",
         "formula": "y[n] = tanh( drive * x[n] + bias ) + alpha * (x[n] - x[n-1])",
         "explanation": "Hyperbolic tangent non-linear soft clipping emulates magnetic particle alignment saturation, introducing warm odd harmonics and natural transient compression."
+    },
+    {
+        "name": "SSL 4000 Quad-VCA Master Bus Compression",
+        "formula": "y_{dB} = T + (x_{dB} - T) / R,   \\text{for } x_{dB} > T + W/2",
+        "explanation": "Quad-VCA log-domain gain reduction with soft-knee transition and dual-time constant Auto-Release (tau_fast=100ms, tau_slow=1200ms) delivering classic cohesive mix bus 'glue'."
+    },
+    {
+        "name": "Neve 1073 Marinair Transformer Saturation",
+        "formula": "y(t) = \\frac{\\tanh(\\text{drive} \\cdot x(t) + \\text{bias}) - \\tanh(\\text{bias})}{\\tanh(\\text{drive})} + \\alpha \\cdot x^3(t)",
+        "explanation": "Simulates single-ended Class-A preamp asymmetrical 2nd-order tube/transistor warmth plus magnetic core 3rd-order hysteresis saturation from the vintage British output transformer."
     }
 ]
 
@@ -1081,7 +1101,7 @@ def build_manual_html() -> str:
                 <div class="meta-tags">
                     <span class="meta-tag">⚡ Version {APP_VERSION}</span>
                     <span class="meta-tag">🎼 {total_phases} Master Phases</span>
-                    <span class="meta-tag">🎛️ 46 DSP Engines &amp; Core Modules</span>
+                    <span class="meta-tag">🎛️ 47 DSP Engines &amp; Core Modules</span>
                     <span class="meta-tag">🌐 100% Offline Single-File Architecture</span>
                 </div>
             </div>

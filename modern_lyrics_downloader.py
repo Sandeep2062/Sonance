@@ -114,8 +114,9 @@ import release_packager
 import docs_generator
 import plugin_host
 import spatial_multichannel
+import console_channel_strip
 
-APP_VERSION = "2.9.0"
+APP_VERSION = "3.0.0"
 GITHUB_REPO = "Sandeep2062/Sonance"
 APP_DIR = Path(__file__).parent.resolve()
 UI_PATH = APP_DIR / "ui" / "index.html"
@@ -1838,6 +1839,34 @@ class LyricsAPI:
             height_level=height_level,
             spread=spread,
         )
+
+    # ------------------ Phase 30: British Class-A Console Channel Strip & SSL G-Comp ------------------
+    def render_console_strip(
+        self,
+        input_path: str,
+        output_path: Optional[str] = None,
+        preset: str = "master_bus_glue",
+        custom_ssl: Optional[Dict[str, Any]] = None,
+        custom_neve: Optional[Dict[str, Any]] = None,
+        crosstalk_db: float = -65.0,
+        analog_noise: bool = False,
+        output_gain_db: float = 0.0,
+    ) -> Dict[str, Any]:
+        """Renders audio through the British Class-A Console Channel Strip & SSL 4000 G-Master Bus Compressor."""
+        return console_channel_strip.render_console_strip(
+            input_path=input_path,
+            output_path=output_path,
+            preset=preset,
+            custom_ssl=custom_ssl,
+            custom_neve=custom_neve,
+            crosstalk_db=crosstalk_db,
+            analog_noise=analog_noise,
+            output_gain_db=output_gain_db,
+        )
+
+    def get_console_presets(self) -> Dict[str, Any]:
+        """Returns factory presets for British Class-A Console & SSL G-Master Bus Studio."""
+        return console_channel_strip.FACTORY_PRESETS
 
     def _save_last_folder(self, folder: str):
         try:

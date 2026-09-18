@@ -17,7 +17,7 @@ import importlib
 from pathlib import Path
 from typing import Dict, Any, List, Optional, Tuple
 
-APP_VERSION = "2.9.0"
+APP_VERSION = "3.0.0"
 WORKSTATION_NAME = "Sonance Audiophile Workstation"
 ROOT_DIR = Path(__file__).parent.resolve()
 
@@ -86,6 +86,9 @@ CORE_PHASE_MODULES = [
 
     # Phase 29: Dolby Atmos 7.1.4 Spatializer & Multichannel Audio Renderer
     ("spatial_multichannel", "Phase 29: Dolby Atmos 7.1.4 Bed Spatializer & Multichannel Audio Renderer"),
+
+    # Phase 30: British Class-A Console Channel Strip & SSL G-Master Bus Studio
+    ("console_channel_strip", "Phase 30: British Class-A Console Channel Strip & SSL G-Master Bus Studio"),
 ]
 
 # File classification patterns

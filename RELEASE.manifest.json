@@ -1,23 +1,23 @@
 {
   "project": "Sonance Audiophile Workstation",
-  "version": "2.9.0",
+  "version": "3.0.0",
   "phase": "Phase 27 (Grand Finale Release)",
-  "timestamp": "2026-09-18 01:30:44 UTC",
+  "timestamp": "2026-09-18 01:40:11 UTC",
   "audit": {
-    "total_modules_audited": 46,
-    "passed_count": 46,
+    "total_modules_audited": 47,
+    "passed_count": 47,
     "failed_count": 0,
     "integrity_percent": "100.0%"
   },
   "summary": {
-    "total_files": 125,
-    "total_bytes": 2554659,
-    "total_bytes_formatted": "2.44 MB",
+    "total_files": 126,
+    "total_bytes": 2630898,
+    "total_bytes_formatted": "2.51 MB",
     "categories": {
       "asset": 24,
       "docs": 3,
       "config": 2,
-      "core": 63,
+      "core": 64,
       "dsp": 23,
       "ui": 10
     }
@@ -32,30 +32,30 @@
     },
     {
       "path": "README.md",
-      "size": 51884,
-      "sha256": "eb6348471378c5d3e55fb9cd641b4d01b4c2ce8373542f5b15fcc5e3e8e2572a",
-      "md5": "f9f78cf944fef7cdfef4b5b133d2b428",
+      "size": 53417,
+      "sha256": "f5617e622c7e51a53047709af6f166b3a98e24a645465ad5a8d94888d7ea368b",
+      "md5": "e8ea79129a70b31a852de013563f7ca8",
       "category": "docs"
     },
     {
       "path": "RELEASE.manifest.json",
-      "size": 29966,
-      "sha256": "591282bbb43977dc642dd19b7e36018097b38ba9b74d5ea436a93745b6f63daa",
-      "md5": "36985d7ce8c46ab28c15f1c53c3cd056",
+      "size": 30207,
+      "sha256": "ca52571c5be78c825535d4c7750e5c874f910b110772576e4beb43dc29a3aeba",
+      "md5": "7fdcaae3fa670ecba393a64edc831d4d",
       "category": "config"
     },
     {
       "path": "RELEASE.md5sum",
-      "size": 7025,
-      "sha256": "288a81d3f5689ad6b2b4cea78feae31266720e590149b8b6c329b1b9b2e19950",
-      "md5": "9503388aeb281f06376402c153e8597c",
+      "size": 7084,
+      "sha256": "b9b0259a6d1241d125305e2653c6322a5f42d897df571cd2bbc4063970608f47",
+      "md5": "f83d7189246c4de6b4b5c52e6fb8c501",
       "category": "asset"
     },
     {
       "path": "RELEASE.sha256sum",
-      "size": 10993,
-      "sha256": "8dc44858e41aecaaa219f7cd74a1a4e0c878d5f2c2e40f8ce358ae455fda9f40",
-      "md5": "a846656def2caf0c8241d8da015a9211",
+      "size": 11084,
+      "sha256": "c510310690cd77933856b5550a61a5226f2d71f09e04552a2f8bdb9f79d9dd04",
+      "md5": "38e901741f92186d224d9415cbc3e871",
       "category": "asset"
     },
     {
@@ -234,6 +234,13 @@
       "category": "core"
     },
     {
+      "path": "console_channel_strip.py",
+      "size": 33544,
+      "sha256": "0c13679dbef23ca0921a0d937ece45517a327120f9d03670720eb98aeb5386d9",
+      "md5": "9dc489054a3ba34dd3c637233fe55cf7",
+      "category": "core"
+    },
+    {
       "path": "cookie_manager.py",
       "size": 9204,
       "sha256": "f5b20e88dc8b2fc0191697938fa7c41a24be0ce8381d48a83f3830506160eda4",
@@ -305,9 +312,9 @@
     },
     {
       "path": "docs_generator.py",
-      "size": 55268,
-      "sha256": "c400032ac328ae5a67365f63977d76ea177824e788df923c81d818043988cb19",
-      "md5": "f5792177ca1b3bb35a60a93f4f7d45fd",
+      "size": 57378,
+      "sha256": "60ff8ffe5a948b2ba03e6e4cf1cb42ce27baf15d4ba4a1cebb75e05182e5983d",
+      "md5": "3ddf3f5b8488aa949ae7b59d63aeefaf",
       "category": "core"
     },
     {
@@ -480,9 +487,9 @@
     },
     {
       "path": "modern_lyrics_downloader.py",
-      "size": 81238,
-      "sha256": "b16a9bf654e3ae72f27b2a9793eded3f30ff143f5d0c82f927f20d92bb3f1935",
-      "md5": "2e8625ce59e184de174e27e6be5b659b",
+      "size": 82443,
+      "sha256": "90e8114c3d6c69221f54e4cdef1bb92bfb658dfd2963aaeb71c226157a859c7f",
+      "md5": "f84abb09ff319009af72f330d798734e",
       "category": "core"
     },
     {
@@ -543,9 +550,9 @@
     },
     {
       "path": "release_packager.py",
-      "size": 17075,
-      "sha256": "27b5e480adac4fa03a4db814de1952efa42bdfcc7752d52d4e06e4d65160517f",
-      "md5": "f8683e346b5e19f459f334804d4617f5",
+      "size": 17264,
+      "sha256": "7b9bad904d3624886b7b940aed9b93c8f9d3c9db51f76d783e4c1749a1aad990",
+      "md5": "33cf21549f0cddbcb41b191af40526e1",
       "category": "core"
     },
     {
@@ -599,9 +606,9 @@
     },
     {
       "path": "sonance.py",
-      "size": 102686,
-      "sha256": "1e5fee2516e89c163d9fe61b44d95d73e43ca7157e03a371aad3428286d2541e",
-      "md5": "ebb88ca8dbace2c5a51d8a87c830ea81",
+      "size": 107886,
+      "sha256": "3e9b166b17e538216a59799887d78329c8d2c9cc06a39c6d8994ce4f59ba7d5a",
+      "md5": "c89864cddb5b212cbdb3feb19cc798b6",
       "category": "core"
     },
     {
@@ -879,16 +886,16 @@
     },
     {
       "path": "ui/index.html",
-      "size": 945420,
-      "sha256": "c1809c228415b4d5fea67cb00a2c009a633f6ad77375404993cffd94301254fa",
-      "md5": "33cd8be6cf6c1d60ff44632797813d3a",
+      "size": 973743,
+      "sha256": "41614050eda3e55ce7930c811a1e842cc0c16eb49df2550f941e931b8226252a",
+      "md5": "172c67aa2bc38324f034d9b17d4cc0c8",
       "category": "ui"
     },
     {
       "path": "ui/manual.html",
-      "size": 91964,
-      "sha256": "398082e043b2767c106eee34cf6b9684473fe09ba3446abd4af0072e41acc224",
-      "md5": "409d8ec6c0a6fdc51062948a182d2f7d",
+      "size": 95708,
+      "sha256": "effa610e6e9d961050bea29f5768b310bbeddb96e57143875a3e1712d60997d3",
+      "md5": "8cc9ebacfccde15eff73897f76e2f05a",
       "category": "ui"
     },
     {

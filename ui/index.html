@@ -1279,6 +1279,9 @@
       <button class="btn btn-secondary" onclick="openAtmosModal()" style="padding:5px 9px; font-size:11px;" id="atmosHeaderBtn" title="Dolby Atmos 7.1.4 Bed Spatializer & Multichannel Audio Renderer">
         🌌 7.1.4 Atmos
       </button>
+      <button class="btn btn-secondary" onclick="openConsoleModal()" style="padding:5px 9px; font-size:11px;" id="consoleHeaderBtn" title="British Class-A Console Strip & SSL G-Master Bus Studio">
+        🎛️ Console Strip
+      </button>
       <button class="btn btn-secondary" onclick="openLrcStudioModal()" style="padding:5px 9px; font-size:11px;" id="lrcStudioHeaderBtn" title="Interactive LRC Studio & Live Time-Stamper">
         ✍️ LRC Studio
       </button>
@@ -7285,6 +7288,247 @@
     </div>
   </div>
 
+  <!-- Phase 30: British Class-A Console Channel Strip & SSL G-Master Bus Compressor Modal -->
+  <div class="modal-backdrop" id="consoleModal" style="display:none;">
+    <div class="modal-card" style="width:900px; max-width:96vw; background:#161926; border:1px solid var(--border); border-radius:12px; box-shadow:0 12px 36px rgba(0,0,0,0.7); overflow:hidden;">
+      <div style="padding:16px 20px; background:#121520; border-bottom:1px solid var(--border); display:flex; justify-content:space-between; align-items:center;">
+        <div class="modal-title" style="font-size:14px; font-weight:700; display:flex; align-items:center; gap:8px;">
+          <span>🎛️</span>
+          <span>British Class-A Console Channel Strip &amp; SSL G-Master Bus Studio</span>
+        </div>
+        <button onclick="closeConsoleModal()" style="background:none; border:none; color:var(--text-muted); font-size:16px; cursor:pointer;">✕</button>
+      </div>
+
+      <div style="padding:20px; max-height:75vh; overflow-y:auto; display:flex; flex-direction:column; gap:16px;">
+        <div style="font-size:11px; color:var(--text-dim); line-height:1.5;">
+          Legendary studio console mastering path: Solid State Logic (SSL 4000 G-Master Bus Compressor) with Quad-VCA detection, sidechain HPF, and Auto-Release glue, paired with British Class-A Neve 1073 preamp transformer saturation, 18 dB/oct high-pass, and 3-band inductor/Baxandall EQ.
+        </div>
+
+        <div>
+          <label style="font-size:11px; font-weight:600; color:var(--text-muted); display:block; margin-bottom:6px;">Target Audio File:</label>
+          <div style="display:flex; gap:8px;">
+            <input type="text" id="consoleTargetInput" class="search-input" style="width:100%; font-size:11px;" placeholder="Path to input audio file...">
+            <button class="btn btn-secondary" onclick="loadActiveTrackForConsole()" style="font-size:11px; padding:6px 12px; white-space:nowrap;">Active Track</button>
+          </div>
+        </div>
+
+        <div>
+          <label style="font-size:11px; font-weight:600; color:var(--text-muted); display:block; margin-bottom:6px;">Custom Export Destination (Optional):</label>
+          <input type="text" id="consoleOutputInput" class="search-input" style="width:100%; font-size:11px;" placeholder="Auto-generated if empty: <original>_console_master.wav">
+        </div>
+
+        <!-- Factory Presets Selector -->
+        <div>
+          <label style="font-size:11px; font-weight:600; color:var(--text-muted); display:block; margin-bottom:6px;">Master Console Presets:</label>
+          <div style="display:flex; flex-wrap:wrap; gap:8px;">
+            <button class="btn btn-secondary" onclick="applyConsolePreset('master_bus_glue')" style="font-size:11px; padding:5px 10px;">✨ Master Bus Glue</button>
+            <button class="btn btn-secondary" onclick="applyConsolePreset('analog_warmth')" style="font-size:11px; padding:5px 10px;">🔥 Analog Warmth</button>
+            <button class="btn btn-secondary" onclick="applyConsolePreset('drum_bus_punch')" style="font-size:11px; padding:5px 10px;">🥁 Drum Bus Punch</button>
+            <button class="btn btn-secondary" onclick="applyConsolePreset('vocal_channel')" style="font-size:11px; padding:5px 10px;">🎤 Lead Vocal Strip</button>
+            <button class="btn btn-secondary" onclick="applyConsolePreset('radio_broadcast')" style="font-size:11px; padding:5px 10px;">📻 Radio Broadcast</button>
+            <button class="btn btn-secondary" onclick="applyConsolePreset('clean_transparent')" style="font-size:11px; padding:5px 10px;">💎 Clean Polish</button>
+          </div>
+        </div>
+
+        <!-- Two Column Studio Modules: Neve 1073 & SSL 4000 G-Bus -->
+        <div style="display:grid; grid-template-columns: 1fr 1fr; gap:16px;">
+          <!-- Neve 1073 Preamp & Inductor EQ -->
+          <div style="background:#121520; border:1px solid var(--border); border-radius:10px; padding:14px; display:flex; flex-direction:column; gap:12px;">
+            <div style="display:flex; justify-content:space-between; align-items:center; border-bottom:1px solid var(--border); padding-bottom:8px;">
+              <div style="font-size:12px; font-weight:700; color:var(--gold);">🇬🇧 NEVE 1073 PREAMP &amp; EQ</div>
+              <label style="font-size:11px; color:var(--text-dim); display:flex; align-items:center; gap:4px; cursor:pointer;">
+                <input type="checkbox" id="neveBypassCheck"> Bypass
+              </label>
+            </div>
+
+            <div>
+              <div style="display:flex; justify-content:space-between; margin-bottom:4px;">
+                <label style="font-size:11px; font-weight:600; color:var(--text-muted);">Preamp Drive:</label>
+                <span id="neveDriveVal" style="font-size:11px; color:var(--gold); font-weight:600;">1.25x</span>
+              </div>
+              <input type="range" id="neveDriveSlider" min="1.0" max="4.0" step="0.05" value="1.25" style="width:100%;" oninput="document.getElementById('neveDriveVal').innerText = this.value + 'x'">
+            </div>
+
+            <div>
+              <div style="display:flex; justify-content:space-between; margin-bottom:4px;">
+                <label style="font-size:11px; font-weight:600; color:var(--text-muted);">Transformer Warmth:</label>
+                <span id="neveWarmthVal" style="font-size:11px; color:var(--gold); font-weight:600;">25%</span>
+              </div>
+              <input type="range" id="neveWarmthSlider" min="0" max="100" step="5" value="25" style="width:100%;" oninput="document.getElementById('neveWarmthVal').innerText = this.value + '%'">
+            </div>
+
+            <div style="display:grid; grid-template-columns: 1fr 1fr; gap:8px;">
+              <div>
+                <label style="font-size:10px; font-weight:600; color:var(--text-muted); display:block; margin-bottom:4px;">HPF Filter:</label>
+                <select id="neveHpfSelect" class="search-input" style="width:100%; font-size:11px;">
+                  <option value="0">Bypass</option>
+                  <option value="45" selected>45 Hz</option>
+                  <option value="70">70 Hz</option>
+                  <option value="160">160 Hz</option>
+                  <option value="360">360 Hz</option>
+                </select>
+              </div>
+              <div>
+                <label style="font-size:10px; font-weight:600; color:var(--text-muted); display:block; margin-bottom:4px;">High Shelf (12 kHz):</label>
+                <input type="range" id="neveHighShelfSlider" min="-16" max="16" step="0.5" value="1.5" style="width:100%;" oninput="document.getElementById('neveHighShelfVal').innerText = (this.value >= 0 ? '+' : '') + this.value + ' dB'">
+                <div id="neveHighShelfVal" style="text-align:right; font-size:10px; color:var(--gold); font-weight:600;">+1.5 dB</div>
+              </div>
+            </div>
+
+            <div>
+              <div style="display:flex; justify-content:space-between; margin-bottom:4px;">
+                <label style="font-size:10px; font-weight:600; color:var(--text-muted);">Low Shelf Gain &amp; Freq:</label>
+                <span id="neveLowShelfVal" style="font-size:10px; color:var(--gold); font-weight:600;">+1.5 dB</span>
+              </div>
+              <div style="display:flex; gap:8px; align-items:center;">
+                <select id="neveLowShelfFreqSelect" class="search-input" style="width:90px; font-size:11px;">
+                  <option value="35">35 Hz</option>
+                  <option value="60" selected>60 Hz</option>
+                  <option value="110">110 Hz</option>
+                  <option value="220">220 Hz</option>
+                </select>
+                <input type="range" id="neveLowShelfSlider" min="-16" max="16" step="0.5" value="1.5" style="flex:1;" oninput="document.getElementById('neveLowShelfVal').innerText = (this.value >= 0 ? '+' : '') + this.value + ' dB'">
+              </div>
+            </div>
+
+            <div>
+              <div style="display:flex; justify-content:space-between; margin-bottom:4px;">
+                <label style="font-size:10px; font-weight:600; color:var(--text-muted);">Mid Inductor Band Gain &amp; Freq:</label>
+                <span id="neveMidVal" style="font-size:10px; color:var(--gold); font-weight:600;">+1.0 dB</span>
+              </div>
+              <div style="display:flex; gap:8px; align-items:center;">
+                <select id="neveMidFreqSelect" class="search-input" style="width:90px; font-size:11px;">
+                  <option value="360">360 Hz</option>
+                  <option value="700">700 Hz</option>
+                  <option value="1600">1.6 kHz</option>
+                  <option value="3200" selected>3.2 kHz</option>
+                  <option value="4800">4.8 kHz</option>
+                  <option value="7200">7.2 kHz</option>
+                </select>
+                <input type="range" id="neveMidSlider" min="-18" max="18" step="0.5" value="1.0" style="flex:1;" oninput="document.getElementById('neveMidVal').innerText = (this.value >= 0 ? '+' : '') + this.value + ' dB'">
+              </div>
+            </div>
+          </div>
+
+          <!-- SSL 4000 G-Master Bus Compressor -->
+          <div style="background:#121520; border:1px solid var(--border); border-radius:10px; padding:14px; display:flex; flex-direction:column; gap:12px;">
+            <div style="display:flex; justify-content:space-between; align-items:center; border-bottom:1px solid var(--border); padding-bottom:8px;">
+              <div style="font-size:12px; font-weight:700; color:var(--cyan);">🎛️ SSL 4000 G-BUS COMPRESSOR</div>
+              <label style="font-size:11px; color:var(--text-dim); display:flex; align-items:center; gap:4px; cursor:pointer;">
+                <input type="checkbox" id="sslBypassCheck"> Bypass
+              </label>
+            </div>
+
+            <div>
+              <div style="display:flex; justify-content:space-between; margin-bottom:4px;">
+                <label style="font-size:11px; font-weight:600; color:var(--text-muted);">Threshold:</label>
+                <span id="sslThresholdVal" style="font-size:11px; color:var(--cyan); font-weight:600;">-14.0 dB</span>
+              </div>
+              <input type="range" id="sslThresholdSlider" min="-30" max="10" step="0.5" value="-14" style="width:100%;" oninput="document.getElementById('sslThresholdVal').innerText = this.value + ' dB'">
+            </div>
+
+            <div style="display:grid; grid-template-columns: 1fr 1fr; gap:8px;">
+              <div>
+                <label style="font-size:10px; font-weight:600; color:var(--text-muted); display:block; margin-bottom:4px;">Ratio:</label>
+                <select id="sslRatioSelect" class="search-input" style="width:100%; font-size:11px;">
+                  <option value="1.5">1.5 : 1 (Gentle)</option>
+                  <option value="2.0" selected>2 : 1 (Master Glue)</option>
+                  <option value="4.0">4 : 1 (Bus Punch)</option>
+                  <option value="10.0">10 : 1 (Brick Limit)</option>
+                </select>
+              </div>
+              <div>
+                <label style="font-size:10px; font-weight:600; color:var(--text-muted); display:block; margin-bottom:4px;">Attack Time:</label>
+                <select id="sslAttackSelect" class="search-input" style="width:100%; font-size:11px;">
+                  <option value="0.1">0.1 ms (Peak)</option>
+                  <option value="0.3">0.3 ms</option>
+                  <option value="1.0">1.0 ms</option>
+                  <option value="3.0">3.0 ms</option>
+                  <option value="10.0">10.0 ms</option>
+                  <option value="30.0" selected>30.0 ms (Punch)</option>
+                </select>
+              </div>
+            </div>
+
+            <div style="display:grid; grid-template-columns: 1fr 1fr; gap:8px;">
+              <div>
+                <label style="font-size:10px; font-weight:600; color:var(--text-muted); display:block; margin-bottom:4px;">Release Time:</label>
+                <select id="sslReleaseSelect" class="search-input" style="width:100%; font-size:11px;">
+                  <option value="-1.0" selected>Auto (Program)</option>
+                  <option value="0.1">0.1 s</option>
+                  <option value="0.3">0.3 s</option>
+                  <option value="0.6">0.6 s</option>
+                  <option value="1.2">1.2 s</option>
+                </select>
+              </div>
+              <div>
+                <label style="font-size:10px; font-weight:600; color:var(--text-muted); display:block; margin-bottom:4px;">Sidechain HPF:</label>
+                <select id="sslHpfSelect" class="search-input" style="width:100%; font-size:11px;">
+                  <option value="0">Bypass</option>
+                  <option value="60">60 Hz</option>
+                  <option value="90" selected>90 Hz</option>
+                  <option value="120">120 Hz</option>
+                  <option value="185">185 Hz</option>
+                </select>
+              </div>
+            </div>
+
+            <div style="display:grid; grid-template-columns: 1fr 1fr; gap:8px;">
+              <div>
+                <div style="display:flex; justify-content:space-between; margin-bottom:4px;">
+                  <label style="font-size:10px; font-weight:600; color:var(--text-muted);">Makeup Gain:</label>
+                  <span id="sslMakeupVal" style="font-size:10px; color:var(--cyan); font-weight:600;">+2.0 dB</span>
+                </div>
+                <input type="range" id="sslMakeupSlider" min="-6" max="18" step="0.5" value="2.0" style="width:100%;" oninput="document.getElementById('sslMakeupVal').innerText = (this.value >= 0 ? '+' : '') + this.value + ' dB'">
+              </div>
+              <div>
+                <div style="display:flex; justify-content:space-between; margin-bottom:4px;">
+                  <label style="font-size:10px; font-weight:600; color:var(--text-muted);">Dry / Wet Mix:</label>
+                  <span id="sslDryWetVal" style="font-size:10px; color:var(--cyan); font-weight:600;">100%</span>
+                </div>
+                <input type="range" id="sslDryWetSlider" min="0" max="100" step="5" value="100" style="width:100%;" oninput="document.getElementById('sslDryWetVal').innerText = this.value + '%'">
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Master Console Summing & Crosstalk Options -->
+        <div style="background:#0e111a; border:1px solid var(--border); border-radius:8px; padding:12px; display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:12px;">
+          <div style="display:flex; align-items:center; gap:8px;">
+            <label style="font-size:11px; font-weight:600; color:var(--text-muted);">Analog Crosstalk:</label>
+            <select id="consoleCrosstalkSelect" class="search-input" style="width:110px; font-size:11px;">
+              <option value="-80">-80 dB (Clean)</option>
+              <option value="-65" selected>-65 dB (Classic)</option>
+              <option value="-55">-55 dB (Warm)</option>
+            </select>
+          </div>
+          <label style="font-size:11px; color:var(--text-dim); display:flex; align-items:center; gap:6px; cursor:pointer;">
+            <input type="checkbox" id="consoleNoiseCheck"> Analog Thermal Noise (-90 dBFS)
+          </label>
+          <div style="display:flex; align-items:center; gap:8px;">
+            <label style="font-size:11px; font-weight:600; color:var(--text-muted);">Output Gain:</label>
+            <input type="range" id="consoleGainSlider" min="-12" max="12" step="0.5" value="0.0" style="width:100px;" oninput="document.getElementById('consoleGainVal').innerText = (this.value >= 0 ? '+' : '') + this.value + ' dB'">
+            <span id="consoleGainVal" style="font-size:11px; color:var(--emerald); font-weight:600; min-width:48px;">0.0 dB</span>
+          </div>
+        </div>
+
+        <div style="display:flex; justify-content:space-between; align-items:center; margin-top:4px;">
+          <span id="consoleStatusText" style="font-size:11px; color:var(--text-dim);">Ready to process through British Console &amp; SSL G-Master Bus</span>
+          <button class="btn btn-primary" onclick="runConsoleAction()" id="processConsoleBtn" style="font-size:12px; padding:7px 20px;">
+            🎛️ Render Console Master
+          </button>
+        </div>
+
+        <div id="consoleOutputCard" style="background:#0b0d14; border:1px solid var(--border); border-radius:8px; padding:12px; font-family:monospace; font-size:11px; line-height:1.45; color:var(--cyan); min-height:80px; white-space:pre-wrap; overflow-x:auto;">Select audio file and click Render Console Master.</div>
+      </div>
+
+      <div style="padding:10px 16px; background:#121520; border-top:1px solid var(--border); display:flex; justify-content:space-between; align-items:center;">
+        <span style="font-size:10px; color:var(--text-dim);">Solid State Logic 4000 G VCA / Neve 1073 Marinair Physical Emulation</span>
+        <button class="btn btn-secondary" onclick="closeConsoleModal()">Close</button>
+      </div>
+    </div>
+  </div>
+
   <!-- Podcast & Long Mix Bookmark Resumption Toast (Phase 10) -->
   <div id="podcastResumeToast" style="display:none; position:fixed; bottom:85px; right:20px; z-index:9999; background:#131722; border:1px solid var(--border); box-shadow:0 8px 24px rgba(0,0,0,0.6); border-radius:10px; padding:10px 14px; align-items:center; gap:10px; backdrop-filter:blur(10px);">
     <span style="font-size:16px;">⏱️</span>
@@ -10297,6 +10541,7 @@
         closeManualModal();
         closeVstModal();
         closeAtmosModal();
+        closeConsoleModal();
         dismissPodcastResumeToast();
         const popup = document.getElementById('speedStudioPopup');
         if (popup) popup.style.display = 'none';
@@ -18220,6 +18465,198 @@
           }
           if (st) {
             st.innerText = 'Error spatialising audio';
+            st.style.color = 'var(--rose)';
+          }
+          if (outCard) outCard.innerText = '✕ Error: ' + (err.message || err);
+        });
+      }
+    }
+
+    // ------------------ Phase 30: British Class-A Console Channel Strip & SSL G-Comp ------------------
+    function openConsoleModal() {
+      const modal = document.getElementById('consoleModal');
+      if (modal) modal.style.display = 'flex';
+    }
+
+    function closeConsoleModal() {
+      const modal = document.getElementById('consoleModal');
+      if (modal) modal.style.display = 'none';
+    }
+
+    function loadActiveTrackForConsole() {
+      if (state.currentTrack && state.currentTrack.path) {
+        const inp = document.getElementById('consoleTargetInput');
+        if (inp) inp.value = state.currentTrack.path;
+      } else {
+        showToast('No active track loaded in player');
+      }
+    }
+
+    const CONSOLE_PRESETS_DATA = {
+      master_bus_glue: {
+        ssl: { threshold: -13.5, ratio: '2.0', attack: '30.0', release: '-1.0', hpf: '90', makeup: 2.2, dry_wet: 100, bypass: false },
+        neve: { drive: 1.2, warmth: 25, hpf: '45', low_hz: '60', low_gain: 1.0, mid_hz: '3200', mid_gain: 0.5, high_gain: 1.8, bypass: false },
+        crosstalk: '-65', noise: false, gain: 0.0
+      },
+      analog_warmth: {
+        ssl: { threshold: -10.0, ratio: '1.5', attack: '30.0', release: '0.6', hpf: '120', makeup: 1.0, dry_wet: 100, bypass: false },
+        neve: { drive: 2.8, warmth: 75, hpf: '45', low_hz: '60', low_gain: 2.5, mid_hz: '1600', mid_gain: 1.0, high_gain: 1.2, bypass: false },
+        crosstalk: '-60', noise: false, gain: -0.5
+      },
+      drum_bus_punch: {
+        ssl: { threshold: -16.0, ratio: '4.0', attack: '10.0', release: '0.1', hpf: '120', makeup: 4.0, dry_wet: 75, bypass: false },
+        neve: { drive: 1.5, warmth: 35, hpf: '45', low_hz: '110', low_gain: 1.8, mid_hz: '4800', mid_gain: 2.0, high_gain: 1.5, bypass: false },
+        crosstalk: '-70', noise: false, gain: 0.0
+      },
+      vocal_channel: {
+        ssl: { threshold: -15.0, ratio: '2.0', attack: '3.0', release: '0.3', hpf: '185', makeup: 2.5, dry_wet: 100, bypass: false },
+        neve: { drive: 1.3, warmth: 30, hpf: '70', low_hz: '110', low_gain: -1.0, mid_hz: '1600', mid_gain: 1.8, high_gain: 2.5, bypass: false },
+        crosstalk: '-75', noise: false, gain: 0.0
+      },
+      radio_broadcast: {
+        ssl: { threshold: -18.0, ratio: '10.0', attack: '1.0', release: '0.3', hpf: '90', makeup: 5.0, dry_wet: 90, bypass: false },
+        neve: { drive: 1.4, warmth: 20, hpf: '45', low_hz: '60', low_gain: 1.0, mid_hz: '3200', mid_gain: 2.2, high_gain: 2.0, bypass: false },
+        crosstalk: '-65', noise: false, gain: 0.0
+      },
+      clean_transparent: {
+        ssl: { threshold: -10.0, ratio: '1.5', attack: '30.0', release: '-1.0', hpf: '90', makeup: 1.0, dry_wet: 100, bypass: false },
+        neve: { drive: 1.0, warmth: 5, hpf: '0', low_hz: '35', low_gain: 0.5, mid_hz: '3200', mid_gain: 0.0, high_gain: 1.0, bypass: false },
+        crosstalk: '-80', noise: false, gain: 0.0
+      }
+    };
+
+    function applyConsolePreset(pKey) {
+      const p = CONSOLE_PRESETS_DATA[pKey];
+      if (!p) return;
+
+      const sThresh = document.getElementById('sslThresholdSlider');
+      if (sThresh) { sThresh.value = p.ssl.threshold; document.getElementById('sslThresholdVal').innerText = p.ssl.threshold + ' dB'; }
+      const sRatio = document.getElementById('sslRatioSelect');
+      if (sRatio) sRatio.value = p.ssl.ratio;
+      const sAtt = document.getElementById('sslAttackSelect');
+      if (sAtt) sAtt.value = p.ssl.attack;
+      const sRel = document.getElementById('sslReleaseSelect');
+      if (sRel) sRel.value = p.ssl.release;
+      const sHpf = document.getElementById('sslHpfSelect');
+      if (sHpf) sHpf.value = p.ssl.hpf;
+      const sMk = document.getElementById('sslMakeupSlider');
+      if (sMk) { sMk.value = p.ssl.makeup; document.getElementById('sslMakeupVal').innerText = (p.ssl.makeup >= 0 ? '+' : '') + p.ssl.makeup + ' dB'; }
+      const sDw = document.getElementById('sslDryWetSlider');
+      if (sDw) { sDw.value = p.ssl.dry_wet; document.getElementById('sslDryWetVal').innerText = p.ssl.dry_wet + '%'; }
+      const sByp = document.getElementById('sslBypassCheck');
+      if (sByp) sByp.checked = p.ssl.bypass;
+
+      const nDrv = document.getElementById('neveDriveSlider');
+      if (nDrv) { nDrv.value = p.neve.drive; document.getElementById('neveDriveVal').innerText = p.neve.drive + 'x'; }
+      const nWrm = document.getElementById('neveWarmthSlider');
+      if (nWrm) { nWrm.value = p.neve.warmth; document.getElementById('neveWarmthVal').innerText = p.neve.warmth + '%'; }
+      const nHpf = document.getElementById('neveHpfSelect');
+      if (nHpf) nHpf.value = p.neve.hpf;
+      const nLsF = document.getElementById('neveLowShelfFreqSelect');
+      if (nLsF) nLsF.value = p.neve.low_hz;
+      const nLs = document.getElementById('neveLowShelfSlider');
+      if (nLs) { nLs.value = p.neve.low_gain; document.getElementById('neveLowShelfVal').innerText = (p.neve.low_gain >= 0 ? '+' : '') + p.neve.low_gain + ' dB'; }
+      const nMdF = document.getElementById('neveMidFreqSelect');
+      if (nMdF) nMdF.value = p.neve.mid_hz;
+      const nMd = document.getElementById('neveMidSlider');
+      if (nMd) { nMd.value = p.neve.mid_gain; document.getElementById('neveMidVal').innerText = (p.neve.mid_gain >= 0 ? '+' : '') + p.neve.mid_gain + ' dB'; }
+      const nHs = document.getElementById('neveHighShelfSlider');
+      if (nHs) { nHs.value = p.neve.high_gain; document.getElementById('neveHighShelfVal').innerText = (p.neve.high_gain >= 0 ? '+' : '') + p.neve.high_gain + ' dB'; }
+      const nByp = document.getElementById('neveBypassCheck');
+      if (nByp) nByp.checked = p.neve.bypass;
+
+      const cXtalk = document.getElementById('consoleCrosstalkSelect');
+      if (cXtalk) cXtalk.value = p.crosstalk;
+      const cNoise = document.getElementById('consoleNoiseCheck');
+      if (cNoise) cNoise.checked = p.noise;
+      const cGain = document.getElementById('consoleGainSlider');
+      if (cGain) { cGain.value = p.gain; document.getElementById('consoleGainVal').innerText = (p.gain >= 0 ? '+' : '') + p.gain + ' dB'; }
+
+      showToast('Loaded preset: ' + pKey);
+    }
+
+    function runConsoleAction() {
+      const inp = (document.getElementById('consoleTargetInput').value || '').trim();
+      const out = (document.getElementById('consoleOutputInput').value || '').trim() || null;
+      const btn = document.getElementById('processConsoleBtn');
+      const st = document.getElementById('consoleStatusText');
+      const outCard = document.getElementById('consoleOutputCard');
+
+      if (!inp) {
+        showToast('Please select input audio file');
+        return;
+      }
+
+      const customSsl = {
+        threshold_db: parseFloat(document.getElementById('sslThresholdSlider').value),
+        ratio: parseFloat(document.getElementById('sslRatioSelect').value),
+        attack_ms: parseFloat(document.getElementById('sslAttackSelect').value),
+        release_sec: parseFloat(document.getElementById('sslReleaseSelect').value),
+        sidechain_hpf_hz: parseFloat(document.getElementById('sslHpfSelect').value),
+        makeup_gain_db: parseFloat(document.getElementById('sslMakeupSlider').value),
+        dry_wet: parseFloat(document.getElementById('sslDryWetSlider').value) / 100.0,
+        bypass: document.getElementById('sslBypassCheck').checked
+      };
+
+      const customNeve = {
+        preamp_drive: parseFloat(document.getElementById('neveDriveSlider').value),
+        transformer_warmth: parseFloat(document.getElementById('neveWarmthSlider').value) / 100.0,
+        hpf_hz: parseFloat(document.getElementById('neveHpfSelect').value),
+        low_shelf_hz: parseFloat(document.getElementById('neveLowShelfFreqSelect').value),
+        low_shelf_gain_db: parseFloat(document.getElementById('neveLowShelfSlider').value),
+        mid_freq_hz: parseFloat(document.getElementById('neveMidFreqSelect').value),
+        mid_gain_db: parseFloat(document.getElementById('neveMidSlider').value),
+        high_shelf_gain_db: parseFloat(document.getElementById('neveHighShelfSlider').value),
+        bypass: document.getElementById('neveBypassCheck').checked
+      };
+
+      const crosstalkDb = parseFloat(document.getElementById('consoleCrosstalkSelect').value);
+      const analogNoise = document.getElementById('consoleNoiseCheck').checked;
+      const outputGainDb = parseFloat(document.getElementById('consoleGainSlider').value);
+
+      if (btn) {
+        btn.disabled = true;
+        btn.innerText = '🎛️ Mastering Audio...';
+      }
+      if (st) {
+        st.innerText = 'Processing through Neve 1073 & SSL 4000 G-Bus...';
+        st.style.color = 'var(--cyan)';
+      }
+      if (outCard) outCard.innerText = 'Simulating Quad-VCA dynamics and Class-A transformer harmonics...';
+
+      if (window.pywebview && window.pywebview.api && window.pywebview.api.render_console_strip) {
+        window.pywebview.api.render_console_strip(
+          inp, out, 'custom', customSsl, customNeve, crosstalkDb, analogNoise, outputGainDb
+        ).then(res => {
+          if (btn) {
+            btn.disabled = false;
+            btn.innerText = '🎛️ Render Console Master';
+          }
+          if (res) {
+            if (st) {
+              st.innerText = '✓ Console master rendered successfully!';
+              st.style.color = 'var(--emerald)';
+            }
+            const t = res.compressor_telemetry;
+            const n = res.neve_summary;
+            let card = `BRITISH CONSOLE STRIP & SSL G-BUS MASTER REPORT\n`;
+            card += `Input File       : ${res.input_path}\n`;
+            card += `Output Master    : ${res.output_path}\n`;
+            card += `Master Format    : 24-bit PCM WAV @ ${res.sample_rate} Hz (${res.duration_sec}s)\n`;
+            card += `Peak / RMS Level : ${res.peak_db} dBFS / ${res.rms_db} dBFS (Crest Factor: ${res.crest_factor_db} dB)\n`;
+            card += `SSL Max Gain Red : -${t.max_gain_reduction_db.toFixed(2)} dB (Avg: -${t.avg_gain_reduction_db.toFixed(2)} dB)\n`;
+            card += `SSL Bus Settings : Ratio ${t.ratio}:1 | Attack ${t.attack_ms}ms | Release ${t.release} | Makeup +${t.makeup_db}dB\n`;
+            card += `Neve 1073 Preamp : Drive ${n.drive}x | Low ${n.low_shelf} | Mid ${n.mid_band} | High ${n.high_shelf}\n`;
+            if (outCard) outCard.innerText = card;
+            showToast('Console master generated successfully!');
+          }
+        }).catch(err => {
+          if (btn) {
+            btn.disabled = false;
+            btn.innerText = '🎛️ Render Console Master';
+          }
+          if (st) {
+            st.innerText = 'Error mastering audio';
             st.style.color = 'var(--rose)';
           }
           if (outCard) outCard.innerText = '✕ Error: ' + (err.message || err);
