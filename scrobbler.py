@@ -15,6 +15,8 @@ import time
 import json
 import hashlib
 import threading
+import urllib.parse
+import re
 from pathlib import Path
 from typing import Dict, Any, List, Optional
 import requests
@@ -68,7 +70,7 @@ def save_config(cfg: Dict[str, Any]):
 class LastFmClient:
     def __init__(self):
         self.session = requests.Session()
-        self.session.headers.update({"User-Agent": "Sonance/3.6.7 (https://github.com/Sandeep2062/Sonance)"})
+        self.session.headers.update({"User-Agent": "Sonance/4.0.0 (https://github.com/Sandeep2062/Sonance)"})
 
     def _generate_signature(self, params: Dict[str, Any], secret: str) -> str:
         """Generates MD5 api_sig required by Last.fm write APIs."""
@@ -148,8 +150,99 @@ class LastFmClient:
         except Exception:
             return False
 
+    def _fetch_wikipedia_artist(self, artist: str) -> Dict[str, Any]:
+        """Fetches artist bio and portrait thumbnail from Wikipedia REST API with disambiguation fallback."""
+        clean_artist = re.sub(r"\s*[\(\[\{]?(?:feat\.?|ft\.?|prod\.?).*?[\)\]\}]?$", "", artist, flags=re.IGNORECASE).strip()
+        if not clean_artist:
+            clean_artist = artist.strip()
+
+        ca_slug = clean_artist.replace(" ", "_")
+        candidates = [
+            ca_slug,
+            f"{ca_slug}_(musician)",
+            f"{ca_slug}_(rapper)",
+            f"{ca_slug}_(singer)",
+            f"{ca_slug}_(band)",
+        ]
+        headers = {"User-Agent": "SonanceMusicPlayer/1.0 (https://github.com/Sandeep2062/Sonance)"}
+
+        for slug in candidates:
+            try:
+                url = f"https://en.wikipedia.org/api/rest_v1/page/summary/{urllib.parse.quote(slug)}"
+                r = self.session.get(url, headers=headers, timeout=5)
+                if r.status_code == 200:
+                    data = r.json()
+                    extract = data.get("extract", "").strip()
+                    if data.get("type") != "disambiguation" and extract and len(extract) > 40:
+                        thumb = data.get("thumbnail", {}).get("source") or data.get("originalimage", {}).get("source")
+                        return {
+                            "bio": extract,
+                            "image_url": thumb,
+                            "title": data.get("title", clean_artist)
+                        }
+            except Exception:
+                pass
+
+        # If direct page lookup failed, search Wikipedia
+        try:
+            search_url = f"https://en.wikipedia.org/w/api.php?action=query&list=search&srsearch={urllib.parse.quote(clean_artist + ' musician')}&utf8=&format=json"
+            sr = self.session.get(search_url, headers=headers, timeout=5).json()
+            items = sr.get("query", {}).get("search", [])
+            if items:
+                top_title = items[0].get("title", "")
+                if top_title:
+                    url = f"https://en.wikipedia.org/api/rest_v1/page/summary/{urllib.parse.quote(top_title.replace(' ', '_'))}"
+                    r = self.session.get(url, headers=headers, timeout=5)
+                    if r.status_code == 200:
+                        data = r.json()
+                        extract = data.get("extract", "").strip()
+                        if extract:
+                            thumb = data.get("thumbnail", {}).get("source") or data.get("originalimage", {}).get("source")
+                            return {
+                                "bio": extract,
+                                "image_url": thumb,
+                                "title": data.get("title", top_title)
+                            }
+        except Exception:
+            pass
+
+        return {}
+
+    def _fetch_deezer_artist(self, artist: str) -> Dict[str, Any]:
+        """Fetches artist details, fans count, image, and related artists from Deezer API."""
+        clean_artist = re.sub(r"\s*[\(\[\{]?(?:feat\.?|ft\.?|prod\.?).*?[\)\]\}]?$", "", artist, flags=re.IGNORECASE).strip()
+        if not clean_artist:
+            clean_artist = artist.strip()
+
+        res = {"image_url": None, "fans": 0, "similar_artists": []}
+        headers = {"User-Agent": "SonanceMusicPlayer/1.0"}
+
+        try:
+            search_url = f"https://api.deezer.com/search/artist?q={urllib.parse.quote(clean_artist)}"
+            r = self.session.get(search_url, headers=headers, timeout=5)
+            if r.status_code == 200:
+                data = r.json().get("data", [])
+                if data:
+                    top = data[0]
+                    res["image_url"] = top.get("picture_big") or top.get("picture_medium")
+                    res["fans"] = int(top.get("nb_fan", 0))
+                    artist_id = top.get("id")
+                    if artist_id:
+                        try:
+                            rel_url = f"https://api.deezer.com/artist/{artist_id}/related"
+                            rr = self.session.get(rel_url, headers=headers, timeout=5)
+                            if rr.status_code == 200:
+                                related_data = rr.json().get("data", [])
+                                res["similar_artists"] = [a.get("name") for a in related_data[:8] if a.get("name")]
+                        except Exception:
+                            pass
+        except Exception:
+            pass
+
+        return res
+
     def get_artist_info(self, artist: str) -> Dict[str, Any]:
-        """Fetches artist bio, genres/tags, and listener counts."""
+        """Fetches artist bio, genres/tags, portrait image, and listener counts with Last.fm, Wikipedia & Deezer fallbacks."""
         cfg = load_config()
         api_key = cfg.get("lastfm_api_key") or DEFAULT_LASTFM_API_KEY
 
@@ -160,31 +253,58 @@ class LastFmClient:
             "format": "json",
             "autocorrect": "1",
         }
+        name = artist
+        bio = ""
+        tags = []
+        similar = []
+        listeners = "0"
+        playcount = "0"
+        image_url = None
+
         try:
             r = self.session.get(LASTFM_API_URL, params=params, timeout=8)
             data = r.json().get("artist", {})
+            name = data.get("name", artist)
             bio = data.get("bio", {}).get("summary", "")
             if "<a href=" in bio:
                 bio = bio.split("<a href=")[0].strip()
 
             tags = [t.get("name") for t in data.get("tags", {}).get("tag", []) if isinstance(t, dict)]
             similar = [s.get("name") for s in data.get("similar", {}).get("artist", []) if isinstance(s, dict)]
-            listeners = data.get("stats", {}).get("listeners", "0")
-            playcount = data.get("stats", {}).get("playcount", "0")
+            listeners = str(data.get("stats", {}).get("listeners", "0"))
+            playcount = str(data.get("stats", {}).get("playcount", "0"))
+        except Exception:
+            pass
 
-            return {
-                "name": data.get("name", artist),
-                "bio": bio or "No biography available.",
-                "tags": tags[:8],
-                "similar_artists": similar[:6],
-                "listeners": listeners,
-                "playcount": playcount,
-            }
-        except Exception as e:
-            return {"name": artist, "bio": "Failed to retrieve artist info.", "tags": [], "similar_artists": [], "error": str(e)}
+        # Multi-provider fallback: Wikipedia & Deezer
+        deezer_info = self._fetch_deezer_artist(artist)
+        if deezer_info.get("image_url"):
+            image_url = deezer_info["image_url"]
+        if deezer_info.get("fans") and (listeners == "0" or not listeners):
+            listeners = str(deezer_info["fans"])
+        if not similar and deezer_info.get("similar_artists"):
+            similar = deezer_info["similar_artists"]
+
+        if not bio or bio.lower().startswith("no biography") or len(bio) < 25:
+            wiki_info = self._fetch_wikipedia_artist(artist)
+            if wiki_info.get("bio"):
+                bio = wiki_info["bio"]
+            if not image_url and wiki_info.get("image_url"):
+                image_url = wiki_info["image_url"]
+
+        return {
+            "name": name,
+            "bio": bio or "No biography available.",
+            "tags": tags[:8],
+            "similar_artists": similar[:8],
+            "listeners": listeners,
+            "playcount": playcount,
+            "image_url": image_url,
+            "fans": deezer_info.get("fans", 0),
+        }
 
     def get_similar_tracks(self, artist: str, track: str, limit: int = 10) -> List[Dict[str, Any]]:
-        """Gets recommended/similar tracks for the current song."""
+        """Gets recommended/similar tracks for the current song with Last.fm & Deezer fallback."""
         cfg = load_config()
         api_key = cfg.get("lastfm_api_key") or DEFAULT_LASTFM_API_KEY
 
@@ -211,9 +331,32 @@ class LastFmClient:
                     "match": float(t.get("match", 0.0)),
                     "duration": int(t.get("duration", 0)),
                 })
-            return results
+            if results:
+                return results
         except Exception:
-            return []
+            pass
+
+        # Deezer search fallback for recommended tracks
+        try:
+            headers = {"User-Agent": "SonanceMusicPlayer/1.0"}
+            q = f"{artist} {track}".strip()
+            r = self.session.get(f"https://api.deezer.com/search?q={urllib.parse.quote(q)}", headers=headers, timeout=5)
+            if r.status_code == 200:
+                tracks = r.json().get("data", [])
+                results = []
+                for t in tracks[:limit]:
+                    results.append({
+                        "title": t.get("title", ""),
+                        "artist": t.get("artist", {}).get("name", artist) if isinstance(t.get("artist"), dict) else str(t.get("artist")),
+                        "match": 1.0,
+                        "duration": int(t.get("duration", 0)),
+                    })
+                if results:
+                    return results
+        except Exception:
+            pass
+
+        return []
 
     def get_session_from_token(self, token: str) -> Dict[str, Any]:
         """Exchanges an authorized web token for a permanent session key."""
@@ -251,7 +394,7 @@ class LastFmClient:
 class ListenBrainzClient:
     def __init__(self):
         self.session = requests.Session()
-        self.session.headers.update({"User-Agent": "Sonance/3.6.7 (https://github.com/Sandeep2062/Sonance)"})
+        self.session.headers.update({"User-Agent": "Sonance/4.0.0 (https://github.com/Sandeep2062/Sonance)"})
 
     def validate_token(self, token: str) -> Dict[str, Any]:
         """Validates a ListenBrainz user token."""

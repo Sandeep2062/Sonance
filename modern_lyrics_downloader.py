@@ -26,10 +26,13 @@ import socket
 import threading
 import urllib.parse
 from pathlib import Path
-from http.server import HTTPServer, BaseHTTPRequestHandler
+from http.server import ThreadingHTTPServer, BaseHTTPRequestHandler
 from typing import Optional, Dict, Any, List
 import requests
-import webview
+try:
+    import webview
+except ImportError:
+    webview = None
 
 import lyrics_engine
 import downloader_engine
@@ -123,7 +126,7 @@ import zenith_orchestrator
 import exclusive_audio_engine
 import sonance_paths
 
-APP_VERSION = "3.6.7"
+APP_VERSION = "4.0.0"
 GITHUB_REPO = "Sandeep2062/Sonance"
 APP_DIR = Path(__file__).parent.resolve()
 UI_PATH = APP_DIR / "ui" / "index.html"
@@ -146,44 +149,96 @@ class AudioStreamHandler(BaseHTTPRequestHandler):
     def log_message(self, format, *args):
         pass  # Suppress console clutter
 
+    def send_cors_headers(self):
+        self.send_header("Access-Control-Allow-Origin", "*")
+        self.send_header("Access-Control-Allow-Private-Network", "true")
+        self.send_header("Access-Control-Allow-Methods", "GET, HEAD, OPTIONS")
+        self.send_header("Access-Control-Allow-Headers", "*")
+        self.send_header("Access-Control-Expose-Headers", "Content-Range, Content-Length, Accept-Ranges")
+
     def do_OPTIONS(self):
         self.send_response(200)
-        self.send_header("Access-Control-Allow-Origin", "*")
-        self.send_header("Access-Control-Allow-Methods", "GET, OPTIONS")
-        self.send_header("Access-Control-Allow-Headers", "Range")
+        self.send_cors_headers()
         self.end_headers()
+
+    def do_HEAD(self):
+        parsed = urllib.parse.urlparse(self.path)
+        qs = urllib.parse.parse_qs(parsed.query)
+        if parsed.path == "/stream":
+            self.handle_audio_stream(qs, head_only=True)
+        else:
+            self.send_response(200)
+            self.send_cors_headers()
+            self.end_headers()
 
     def do_GET(self):
         parsed = urllib.parse.urlparse(self.path)
         qs = urllib.parse.parse_qs(parsed.query)
 
-        if parsed.path == "/stream":
+        if parsed.path in ("/", "/index.html"):
+            self.handle_static_file(UI_PATH, "text/html; charset=utf-8")
+        elif parsed.path == "/favicon.ico":
+            self.handle_static_file(APP_DIR / "ui" / "favicon.ico", "image/x-icon")
+        elif parsed.path == "/logo.png":
+            self.handle_static_file(APP_DIR / "ui" / "logo.png", "image/png")
+        elif parsed.path == "/manual.html":
+            self.handle_static_file(APP_DIR / "ui" / "manual.html", "text/html; charset=utf-8")
+        elif parsed.path == "/stream":
             self.handle_audio_stream(qs)
         elif parsed.path == "/cover":
             self.handle_cover_art(qs)
         else:
             self.send_response(404)
+            self.send_cors_headers()
             self.end_headers()
+
+    def handle_static_file(self, file_path, content_type):
+        p = Path(file_path)
+        if not p.exists():
+            self.send_response(404)
+            self.send_cors_headers()
+            self.end_headers()
+            return
+        data = p.read_bytes()
+        self.send_response(200)
+        self.send_header("Content-Type", content_type)
+        self.send_header("Content-Length", str(len(data)))
+        self.send_cors_headers()
+        self.end_headers()
+        try:
+            self.wfile.write(data)
+        except (ConnectionResetError, ConnectionAbortedError, BrokenPipeError):
+            pass
 
     def handle_cover_art(self, qs):
         path_list = qs.get("path", [])
         if not path_list:
             self.send_response(400)
+            self.send_cors_headers()
             self.end_headers()
             return
 
         file_path = path_list[0]
         if not os.path.exists(file_path):
             self.send_response(404)
+            self.send_cors_headers()
             self.end_headers()
             return
 
         image_data = None
+        content_type = "image/jpeg"
         if lyrics_engine.HAS_TINYTAG:
             try:
                 from tinytag import TinyTag
                 tag = TinyTag.get(file_path, image=True)
-                image_data = tag.get_image()
+                if hasattr(tag, "images"):
+                    cover_img = tag.images.any
+                    if cover_img is not None:
+                        image_data = cover_img.data
+                        if getattr(cover_img, "mime_type", None):
+                            content_type = cover_img.mime_type
+                elif hasattr(tag, "get_image"):
+                    image_data = tag.get_image()
             except Exception:
                 pass
 
@@ -193,38 +248,63 @@ class AudioStreamHandler(BaseHTTPRequestHandler):
                 uri = t.get("cover_data_uri", "")
                 if uri and uri.startswith("data:"):
                     header, b64_str = uri.split(",", 1)
+                    if ";" in header:
+                        ct = header.split(";", 1)[0].replace("data:", "").strip()
+                        if ct:
+                            content_type = ct
                     image_data = base64.b64decode(b64_str)
             except Exception:
                 pass
 
         if image_data:
             self.send_response(200)
-            self.send_header("Content-Type", "image/jpeg")
+            self.send_header("Content-Type", content_type)
             self.send_header("Content-Length", str(len(image_data)))
-            self.send_header("Access-Control-Allow-Origin", "*")
+            self.send_cors_headers()
             self.end_headers()
-            self.wfile.write(image_data)
+            try:
+                self.wfile.write(image_data)
+            except (ConnectionResetError, ConnectionAbortedError, BrokenPipeError):
+                pass
         else:
             self.send_response(404)
+            self.send_cors_headers()
             self.end_headers()
 
-    def handle_audio_stream(self, qs):
+    def handle_audio_stream(self, qs, head_only=False):
         path_list = qs.get("path", [])
         if not path_list:
             self.send_response(400)
+            self.send_cors_headers()
             self.end_headers()
             return
 
         file_path = path_list[0]
         if not os.path.exists(file_path):
             self.send_response(404)
+            self.send_cors_headers()
             self.end_headers()
             return
 
         file_size = os.path.getsize(file_path)
-        mime_type, _ = mimetypes.guess_type(file_path)
+        ext = os.path.splitext(file_path)[1].lower()
+        AUDIO_MIME_MAP = {
+            ".flac": "audio/flac",
+            ".mp3": "audio/mpeg",
+            ".wav": "audio/wav",
+            ".ogg": "audio/ogg",
+            ".m4a": "audio/mp4",
+            ".aac": "audio/aac",
+            ".opus": "audio/opus",
+            ".wma": "audio/x-ms-wma",
+            ".aiff": "audio/aiff",
+            ".aif": "audio/aiff",
+        }
+        mime_type = AUDIO_MIME_MAP.get(ext)
         if not mime_type:
-            mime_type = "audio/mpeg"
+            mime_type, _ = mimetypes.guess_type(file_path)
+            if not mime_type:
+                mime_type = "audio/mpeg"
 
         range_header = self.headers.get("Range")
         if range_header:
@@ -241,19 +321,23 @@ class AudioStreamHandler(BaseHTTPRequestHandler):
                 self.send_header("Content-Range", f"bytes {start}-{end}/{file_size}")
                 self.send_header("Content-Length", str(length))
                 self.send_header("Accept-Ranges", "bytes")
-                self.send_header("Access-Control-Allow-Origin", "*")
+                self.send_cors_headers()
                 self.end_headers()
 
-                with open(file_path, "rb") as f:
-                    f.seek(start)
-                    bytes_left = length
-                    while bytes_left > 0:
-                        chunk_size = min(bytes_left, 64 * 1024)
-                        chunk = f.read(chunk_size)
-                        if not chunk:
-                            break
-                        self.wfile.write(chunk)
-                        bytes_left -= len(chunk)
+                if not head_only:
+                    try:
+                        with open(file_path, "rb") as f:
+                            f.seek(start)
+                            bytes_left = length
+                            while bytes_left > 0:
+                                chunk_size = min(bytes_left, 64 * 1024)
+                                chunk = f.read(chunk_size)
+                                if not chunk:
+                                    break
+                                self.wfile.write(chunk)
+                                bytes_left -= len(chunk)
+                    except (ConnectionResetError, ConnectionAbortedError, BrokenPipeError):
+                        pass
                 return
 
         # Full content
@@ -261,22 +345,31 @@ class AudioStreamHandler(BaseHTTPRequestHandler):
         self.send_header("Content-Type", mime_type)
         self.send_header("Content-Length", str(file_size))
         self.send_header("Accept-Ranges", "bytes")
-        self.send_header("Access-Control-Allow-Origin", "*")
+        self.send_cors_headers()
         self.end_headers()
 
-        with open(file_path, "rb") as f:
-            while True:
-                chunk = f.read(64 * 1024)
-                if not chunk:
-                    break
-                self.wfile.write(chunk)
+        if not head_only:
+            try:
+                with open(file_path, "rb") as f:
+                    while True:
+                        chunk = f.read(64 * 1024)
+                        if not chunk:
+                            break
+                        self.wfile.write(chunk)
+            except (ConnectionResetError, ConnectionAbortedError, BrokenPipeError):
+                pass
 
 
-def start_audio_server():
-    server = HTTPServer(("127.0.0.1", STREAM_PORT), AudioStreamHandler)
-    server.serve_forever()
+_audio_server_thread = None
 
-threading.Thread(target=start_audio_server, daemon=True).start()
+def ensure_audio_server():
+    global _audio_server_thread
+    if _audio_server_thread is None:
+        def _run():
+            server = ThreadingHTTPServer(("127.0.0.1", STREAM_PORT), AudioStreamHandler)
+            server.serve_forever()
+        _audio_server_thread = threading.Thread(target=_run, daemon=True)
+        _audio_server_thread.start()
 
 
 # ------------------ Desktop API Bridge ------------------
@@ -325,8 +418,91 @@ class LyricsAPI:
                 pass
         return ""
 
+    def _get_library_cache_path(self) -> Path:
+        cache_dir = sonance_paths.get_cache_dir()
+        cache_dir.mkdir(parents=True, exist_ok=True)
+        return cache_dir / "library_cache.json"
+
+    def _load_library_cache(self, folder: str) -> Dict[str, Any]:
+        """Loads cached library metadata for a directory."""
+        cache_file = self._get_library_cache_path()
+        if not cache_file.exists():
+            return {}
+        try:
+            with open(cache_file, "r", encoding="utf-8") as f:
+                data = json.load(f)
+            folder_key = os.path.normpath(folder).lower()
+            return data.get(folder_key, {})
+        except Exception:
+            return {}
+
+    def _save_library_cache(self, folder: str, cached_items: Dict[str, Any]):
+        """Persists library metadata cache for a directory."""
+        cache_file = self._get_library_cache_path()
+        try:
+            data = {}
+            if cache_file.exists():
+                try:
+                    with open(cache_file, "r", encoding="utf-8") as f:
+                        data = json.load(f)
+                except Exception:
+                    data = {}
+            folder_key = os.path.normpath(folder).lower()
+            data[folder_key] = {
+                "folder": folder,
+                "version": 2,
+                "items": cached_items,
+            }
+            with open(cache_file, "w", encoding="utf-8") as f:
+                json.dump(data, f, ensure_ascii=False)
+        except Exception:
+            pass
+
+    def get_cached_library(self, folder: Optional[str] = None) -> List[Dict[str, Any]]:
+        """Returns instantly hydrated tracks from disk cache with 0 disk reads."""
+        target_dir = folder or self._current_folder or self.get_last_folder()
+        if not target_dir or not os.path.exists(target_dir):
+            return []
+
+        self._current_folder = target_dir
+        cache_data = self._load_library_cache(target_dir)
+        items = cache_data.get("items", {})
+        if not items:
+            return []
+
+        fav_items = playlist_manager.get_favorites()
+        fav_ids = {t.get("id") or t.get("path") for t in fav_items}
+
+        tracks = []
+        for idx, (full_path, item) in enumerate(items.items()):
+            tracks.append({
+                "id": full_path,
+                "index": idx,
+                "filename": item.get("filename", os.path.basename(full_path)),
+                "path": full_path,
+                "title": item.get("title", ""),
+                "artist": item.get("artist", "Unknown"),
+                "album": item.get("album", "Unknown Album"),
+                "duration": item.get("duration", 0),
+                "quality": item.get("quality", "Standard"),
+                "bitrate": item.get("bitrate", "Unknown"),
+                "samplerate": item.get("samplerate", 44100),
+                "bitdepth": item.get("bitdepth", 16),
+                "format": item.get("format", "MP3"),
+                "state": item.get("state", "none"),
+                "stream_url": f"http://127.0.0.1:{STREAM_PORT}/stream?path={urllib.parse.quote(full_path)}",
+                "cover_url": f"http://127.0.0.1:{STREAM_PORT}/cover?path={urllib.parse.quote(full_path)}",
+                "is_favorite": full_path in fav_ids,
+                "checked": False,
+            })
+
+        self._tracks = tracks
+        return tracks
+
     def scan_library(self, folder: Optional[str] = None) -> List[Dict[str, Any]]:
-        """Scans directory for audio tracks, detects LRC status and technical audio quality."""
+        """Scans directory for audio tracks with fast incremental mtime/size caching.
+        Reuses cached metadata when files are unchanged, eliminating 200MB/s disk thrashing.
+        """
         target_dir = folder or self._current_folder
         if not target_dir or not os.path.exists(target_dir):
             return []
@@ -334,6 +510,9 @@ class LyricsAPI:
         self._current_folder = target_dir
         fav_items = playlist_manager.get_favorites()
         fav_ids = {t.get("id") or t.get("path") for t in fav_items}
+
+        existing_cache = self._load_library_cache(target_dir).get("items", {})
+        updated_cache: Dict[str, Any] = {}
         tracks = []
         idx = 0
         audio_exts = (".mp3", ".flac", ".m4a", ".ogg", ".wav")
@@ -342,39 +521,92 @@ class LyricsAPI:
             for f in sorted(files):
                 if f.lower().endswith(audio_exts):
                     full_path = os.path.join(root, f)
-                    lrc_path = os.path.splitext(full_path)[0] + ".lrc"
+                    try:
+                        file_stat = os.stat(full_path)
+                        f_mtime = file_stat.st_mtime
+                        f_size = file_stat.st_size
+                    except OSError:
+                        continue
 
-                    state = "none"
+                    lrc_path = os.path.splitext(full_path)[0] + ".lrc"
+                    lrc_mtime = 0.0
                     if os.path.exists(lrc_path):
                         try:
-                            with open(lrc_path, "r", encoding="utf-8", errors="ignore") as lf:
-                                content = lf.read()
-                            state = lyrics_engine.analyze_lrc_content(content)
+                            lrc_mtime = os.stat(lrc_path).st_mtime
+                        except OSError:
+                            pass
+
+                    # Check if cached entry is valid (0-ms bypass!)
+                    cached = existing_cache.get(full_path)
+                    if (
+                        cached
+                        and abs(cached.get("mtime", 0) - f_mtime) < 0.01
+                        and cached.get("size") == f_size
+                        and abs(cached.get("lrc_mtime", 0) - lrc_mtime) < 0.01
+                    ):
+                        state = cached.get("state", "none")
+                        title = cached.get("title", f)
+                        artist = cached.get("artist", "Unknown")
+                        album = cached.get("album", "Unknown Album")
+                        duration = cached.get("duration", 0)
+                        quality = cached.get("quality", "Standard")
+                        bitrate = cached.get("bitrate", "Unknown")
+                        samplerate = cached.get("samplerate", 44100)
+                        bitdepth = cached.get("bitdepth", 16)
+                        fmt = cached.get("format", "MP3")
+                    else:
+                        # File is new or changed: inspect tags & LRC
+                        state = "none"
+                        if lrc_mtime > 0:
+                            try:
+                                with open(lrc_path, "r", encoding="utf-8", errors="ignore") as lf:
+                                    content = lf.read()
+                                state = lyrics_engine.analyze_lrc_content(content)
+                            except Exception:
+                                state = "none"
+
+                        meta = lyrics_engine.get_audio_metadata(full_path)
+                        fn_artist, fn_title = lyrics_engine.clean_filename_to_artist_title(f)
+                        inferred_artist = ""
+                        inferred_album = ""
+                        try:
+                            rel = os.path.relpath(full_path, target_dir)
+                            parts = rel.split(os.sep)
+                            if len(parts) >= 2:
+                                inferred_artist = parts[0]
+                            if len(parts) >= 3:
+                                inferred_album = parts[1]
                         except Exception:
-                            state = "none"
+                            pass
 
-                    # Get metadata (ID3 / Tag / Technical Specs)
-                    meta = lyrics_engine.get_audio_metadata(full_path)
-                    fn_artist, fn_title = lyrics_engine.clean_filename_to_artist_title(f)
+                        artist = meta["artist"] or fn_artist or inferred_artist or "Unknown"
+                        title = meta["title"] or fn_title or f
+                        album = meta["album"] or inferred_album or "Unknown Album"
+                        duration = meta["duration"]
+                        quality = meta["quality"]
+                        bitrate = meta["bitrate"]
+                        samplerate = meta["samplerate"]
+                        bitdepth = meta["bitdepth"]
+                        fmt = meta["format"]
 
-                    # Inferred artist & album from standard folder structure
-                    inferred_artist = ""
-                    inferred_album = ""
-                    try:
-                        rel = os.path.relpath(full_path, target_dir)
-                        parts = rel.split(os.sep)
-                        if len(parts) >= 2:
-                            inferred_artist = parts[0]
-                        if len(parts) >= 3:
-                            inferred_album = parts[1]
-                    except Exception:
-                        pass
+                    # Cache record
+                    updated_cache[full_path] = {
+                        "filename": f,
+                        "mtime": f_mtime,
+                        "size": f_size,
+                        "lrc_mtime": lrc_mtime,
+                        "state": state,
+                        "title": title,
+                        "artist": artist,
+                        "album": album,
+                        "duration": duration,
+                        "quality": quality,
+                        "bitrate": bitrate,
+                        "samplerate": samplerate,
+                        "bitdepth": bitdepth,
+                        "format": fmt,
+                    }
 
-                    artist = meta["artist"] or fn_artist or inferred_artist or "Unknown"
-                    title = meta["title"] or fn_title or f
-                    album = meta["album"] or inferred_album or "Unknown Album"
-
-                    # Stream URL for player
                     stream_url = f"http://127.0.0.1:{STREAM_PORT}/stream?path={urllib.parse.quote(full_path)}"
                     cover_url = f"http://127.0.0.1:{STREAM_PORT}/cover?path={urllib.parse.quote(full_path)}"
 
@@ -387,12 +619,12 @@ class LyricsAPI:
                         "title": title,
                         "artist": artist,
                         "album": album,
-                        "duration": meta["duration"],
-                        "quality": meta["quality"],
-                        "bitrate": meta["bitrate"],
-                        "samplerate": meta["samplerate"],
-                        "bitdepth": meta["bitdepth"],
-                        "format": meta["format"],
+                        "duration": duration,
+                        "quality": quality,
+                        "bitrate": bitrate,
+                        "samplerate": samplerate,
+                        "bitdepth": bitdepth,
+                        "format": fmt,
                         "state": state,
                         "stream_url": stream_url,
                         "cover_url": cover_url,
@@ -402,6 +634,7 @@ class LyricsAPI:
                     idx += 1
 
         self._tracks = tracks
+        self._save_library_cache(target_dir, updated_cache)
         return tracks
 
     def rescan_library(self) -> List[Dict[str, Any]]:
@@ -620,6 +853,10 @@ class LyricsAPI:
         """Multi-source search across Deezer, Spotify metadata, and YouTube."""
         return downloader_engine.search_music_catalog(query, source=source)
 
+    def resolve_stream_preview(self, query_or_url: str) -> Dict[str, Any]:
+        """Resolves direct streamable audio URL and codec information via yt-dlp."""
+        return downloader_engine.resolve_stream_preview_url(query_or_url)
+
     def add_to_queue(self, track_data: Dict[str, Any], output_format: str = "mp3") -> str:
         """Adds a track to the download queue with simultaneous synced lyrics."""
         return downloader_engine.queue_manager.add_task(track_data, output_format=output_format)
@@ -660,6 +897,10 @@ class LyricsAPI:
         """Opens embedded WebView login for YouTube, Deezer, Spotify, or SoundCloud."""
         return cookie_manager.open_browser_login(platform)
 
+    def save_active_login(self, platform: str) -> Dict[str, Any]:
+        """Manually captures and saves cookies from the active popup login window."""
+        return cookie_manager.save_active_login_cookies(platform)
+
     def extract_browser_cookies(self, browser_name: str) -> Dict[str, Any]:
         """Extracts cookies directly from installed browser (Chrome, Edge, Firefox, Brave)."""
         return cookie_manager.extract_cookies_from_browser(browser_name)
@@ -667,6 +908,42 @@ class LyricsAPI:
     def get_cookie_status(self) -> Dict[str, Any]:
         """Checks active cookies status for YouTube, Deezer, Spotify, Qobuz."""
         return cookie_manager.get_cookie_status()
+
+    def validate_and_save_deezer(self, arl: str) -> Dict[str, Any]:
+        """Validates Deezer ARL against Deezer API before saving."""
+        check = downloader_engine.validate_deezer_arl(arl)
+        if check.get("valid"):
+            cfg = downloader_engine.load_auth_config()
+            cfg["deezer_arl"] = arl.strip()
+            downloader_engine.save_auth_config(cfg)
+            return {"success": True, "message": check.get("message", "Deezer ARL saved successfully!"), "username": check.get("username", "")}
+        return {"success": False, "error": check.get("error", "Invalid Deezer ARL cookie.")}
+
+    def validate_and_save_qobuz(self, user_id: str, token: str, app_id: str = "", app_secret: str = "") -> Dict[str, Any]:
+        """Validates Qobuz user credentials against Qobuz API before saving."""
+        check = downloader_engine.validate_qobuz_credentials(user_id, token, app_id, app_secret)
+        if check.get("valid"):
+            cfg = downloader_engine.load_auth_config()
+            cfg["qobuz_id"] = user_id.strip()
+            cfg["qobuz_token"] = token.strip()
+            if app_id.strip():
+                cfg["qobuz_app_id"] = app_id.strip()
+            if app_secret.strip():
+                cfg["qobuz_app_secret"] = app_secret.strip()
+            downloader_engine.save_auth_config(cfg)
+            return {"success": True, "message": check.get("message", "Qobuz credentials saved successfully!"), "username": check.get("username", "")}
+        return {"success": False, "error": check.get("error", "Invalid Qobuz credentials.")}
+
+    def validate_and_save_spotify(self, client_id: str, client_secret: str) -> Dict[str, Any]:
+        """Validates Spotify developer credentials against Spotify API before saving."""
+        check = downloader_engine.validate_spotify_credentials(client_id, client_secret)
+        if check.get("valid"):
+            cfg = downloader_engine.load_auth_config()
+            cfg["spotify_client_id"] = client_id.strip()
+            cfg["spotify_client_secret"] = client_secret.strip()
+            downloader_engine.save_auth_config(cfg)
+            return {"success": True, "message": check.get("message", "Spotify credentials saved successfully!")}
+        return {"success": False, "error": check.get("error", "Invalid Spotify developer credentials.")}
 
     # ------------------ Favorites & Playlists ------------------
     def toggle_favorite(self, track_data: Dict[str, Any]) -> bool:
@@ -776,6 +1053,10 @@ class LyricsAPI:
         """Queries MusicBrainz and web databases to auto-fill tags and cover art."""
         return tag_editor.auto_fetch_metadata(title, artist)
 
+    def batch_update_album_tags(self, file_paths: List[str], common_tags: Dict[str, Any], track_renumbering: Optional[List[Dict[str, Any]]] = None) -> Dict[str, Any]:
+        """Batch updates common album metadata and sequential track renumbering."""
+        return tag_editor.batch_update_album_tags(file_paths, common_tags, track_renumbering=track_renumbering)
+
     # ------------------ Live Lyrics Timing Offset ------------------
     def shift_lrc_offset(self, file_path: str, offset_ms: int) -> Dict[str, Any]:
         """Permanently shifts all timestamps in the .lrc file by offset_ms."""
@@ -802,6 +1083,16 @@ class LyricsAPI:
                     self._window.resize(1160, 780)
                     self._window.on_top = False
                 return {"success": True, "is_mini": enable}
+        except Exception as e:
+            return {"success": False, "error": str(e)}
+        return {"success": False, "error": "Window not initialized"}
+
+    def toggle_fullscreen(self) -> Dict[str, Any]:
+        """Toggles true native OS fullscreen mode."""
+        try:
+            if self._window:
+                self._window.toggle_fullscreen()
+                return {"success": True, "fullscreen": getattr(self._window, "fullscreen", False)}
         except Exception as e:
             return {"success": False, "error": str(e)}
         return {"success": False, "error": "Window not initialized"}
@@ -1216,9 +1507,9 @@ class LyricsAPI:
         return res
 
     # ------------------ Phase 17: FLAC MD5 Stream Integrity Auditor -------------
-    def audit_flac_integrity(self, file_or_dir: str) -> Dict[str, Any]:
+    def audit_flac_integrity(self, file_or_dir: str, is_folder: bool = False, *args, **kwargs) -> Dict[str, Any]:
         """Verifies FLAC STREAMINFO MD5 checksum to detect bit rot or corruption."""
-        if os.path.isdir(file_or_dir):
+        if is_folder or (os.path.exists(file_or_dir) and os.path.isdir(file_or_dir)):
             return flac_verifier.verify_flac_directory(file_or_dir)
         return flac_verifier.verify_single_flac(file_or_dir)
 
@@ -2216,16 +2507,26 @@ class LyricsAPI:
 
 
 def main():
+    if webview is None:
+        print("[-] pywebview is not installed.")
+        print("    Sonance now defaults to the ultra-lightweight Native Flutter desktop app (~40-80 MB RAM).")
+        print("[*] Launching native lightweight GUI instead...")
+        import lyrics_downloader_ultimate
+        return
+
+    ensure_audio_server()
     api = LyricsAPI()
 
+    app_url = f"http://127.0.0.1:{STREAM_PORT}/"
     window = webview.create_window(
         title=f"Sonance v{APP_VERSION}",
-        url=str(UI_PATH),
+        url=app_url,
         js_api=api,
         width=1160,
         height=780,
-        min_size=(960, 640),
-        background_color="#0f1117",
+        min_size=(340, 200),
+        resizable=True,
+        background_color="#000000",
     )
     api.set_window(window)
     webview.start(debug=False)

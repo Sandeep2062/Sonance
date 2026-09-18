@@ -292,7 +292,7 @@ def auto_fetch_metadata(title: str, artist: str) -> Dict[str, Any]:
     """
     clean_q = f'recording:"{title}" AND artist:"{artist}"'
     url = "https://musicbrainz.org/ws/2/recording/"
-    headers = {"User-Agent": "Sonance/3.6.7 (https://github.com/Sandeep2062/Sonance)"}
+    headers = {"User-Agent": "Sonance/4.0.0 (https://github.com/Sandeep2062/Sonance)"}
 
     result = {
         "title": title,
@@ -348,3 +348,82 @@ def auto_fetch_metadata(title: str, artist: str) -> Dict[str, Any]:
             pass
 
     return result
+
+
+def batch_update_album_tags(
+    file_paths: List[str],
+    common_tags: Dict[str, Any],
+    track_renumbering: Optional[List[Dict[str, Any]]] = None,
+) -> Dict[str, Any]:
+    """
+    Batch updates metadata tags across multiple tracks (Mp3tag-style):
+    - Applies common tags (album name, artist, album artist, year, genre, cover art)
+    - Applies track renumbering 1..N and custom track titles if provided
+    """
+    if not file_paths:
+        return {"success": False, "error": "No file paths provided", "updated_count": 0}
+
+    total_count = len(file_paths)
+    renumber_map = {}
+    if track_renumbering:
+        for item in track_renumbering:
+            p = item.get("path")
+            if p:
+                renumber_map[p] = item
+
+    updated = 0
+    errors = []
+
+    for idx, fpath in enumerate(file_paths, 1):
+        try:
+            current = read_tags(fpath)
+            if not current.get("success"):
+                errors.append(f"{os.path.basename(fpath)}: {current.get('error', 'Failed to read')}")
+                continue
+
+            tags_to_write = dict(current)
+
+            # Apply common tags if provided and not empty
+            if "album" in common_tags and common_tags["album"] != "":
+                tags_to_write["album"] = str(common_tags["album"]).strip()
+            if "artist" in common_tags and common_tags["artist"] != "":
+                tags_to_write["artist"] = str(common_tags["artist"]).strip()
+            if "album_artist" in common_tags and common_tags["album_artist"] != "":
+                tags_to_write["album_artist"] = str(common_tags["album_artist"]).strip()
+            if "year" in common_tags and common_tags["year"] != "":
+                tags_to_write["year"] = str(common_tags["year"]).strip()
+            if "genre" in common_tags and common_tags["genre"] != "":
+                tags_to_write["genre"] = str(common_tags["genre"]).strip()
+            if common_tags.get("cover_data_uri"):
+                tags_to_write["cover_data_uri"] = common_tags["cover_data_uri"]
+            elif common_tags.get("remove_cover"):
+                tags_to_write["remove_cover"] = True
+
+            # Track renumbering
+            if fpath in renumber_map:
+                r_item = renumber_map[fpath]
+                if "track_number" in r_item:
+                    tags_to_write["track_number"] = str(r_item["track_number"]).strip()
+                if "total_tracks" in r_item:
+                    tags_to_write["total_tracks"] = str(r_item["total_tracks"]).strip()
+                if "title" in r_item and r_item["title"]:
+                    tags_to_write["title"] = str(r_item["title"]).strip()
+            elif common_tags.get("renumber_1_to_n"):
+                tags_to_write["track_number"] = str(idx)
+                tags_to_write["total_tracks"] = str(total_count)
+
+            res = write_tags(fpath, tags_to_write)
+            if res.get("success"):
+                updated += 1
+            else:
+                errors.append(f"{os.path.basename(fpath)}: {res.get('error')}")
+        except Exception as e:
+            errors.append(f"{os.path.basename(fpath)}: {str(e)}")
+
+    return {
+        "success": updated > 0,
+        "updated_count": updated,
+        "total_count": total_count,
+        "errors": errors,
+    }
+

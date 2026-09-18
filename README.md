@@ -30,7 +30,7 @@ Sonance is engineered from the ground up as a unified audiophile ecosystem:
 
 ```
                       ┌──────────────────────────────────────┐
-                      │            SONANCE v3.6.7            │
+                      │            SONANCE v4.0.0            │
                       └──────────────────┬───────────────────┘
                                          │
          ┌───────────────────────────────┼───────────────────────────────┐
@@ -46,15 +46,25 @@ Sonance is engineered from the ground up as a unified audiophile ecosystem:
 
 ---
 
+## ⚡ Ultra-Lightweight Native Architecture (~40–80 MB RAM)
+
+Sonance is built as a **100% pure native desktop workstation** with zero WebView2, zero Chromium, and zero Electron overhead:
+
+- **Minimal Working Set**: Consumes only **~40–80 MB RAM** at idle (a **5–10× reduction** compared to browser-based players).
+- **On-Demand DSP Workers**: Deep audio processing (Mastering, Lossless Verification, Format Conversion, Library Diagnosis) executes through ephemeral worker processes that immediately return 100% of memory to the operating system upon completion.
+- **Instant Boot Time**: Native compilation ensures sub-second launch times without Chromium multi-process spin-up delays.
+
+---
+
 ## 🖥️ Supported Platforms & System Requirements
 
 Sonance runs natively across desktop and mobile platforms with dedicated bit-perfect audio output pipelines for each operating system:
 
 | Platform | Minimum OS Version | Recommended | Audio Architecture | Package Types Available |
 |:---|:---|:---|:---|:---|
-| **Windows** | Windows 10 (64-bit) | Windows 11 (64-bit) | WASAPI Exclusive Mode, ASIO Direct, Shared AudioDG | Portable Setup `.exe`, `.nupkg` |
-| **macOS** | macOS 11.0 (Big Sur) | macOS 13+ (Ventura, Sonoma, Sequoia) | CoreAudio Hog Mode, System Default | Universal `.dmg` (Apple Silicon & Intel) |
-| **Linux** | Ubuntu 20.04 / Debian 11 | Ubuntu 22.04+ / Arch / Fedora | ALSA Direct Hardware DMA (`hw:X,Y`), PipeWire, PulseAudio | Portable `.AppImage`, `.deb`, `.tar.xz` |
+| **Windows** | Windows 10 (64-bit) | Windows 11 (64-bit) | WASAPI Exclusive Mode, ASIO Direct, Shared AudioDG | Native Flutter `.exe`, Inno Setup Installer, Portable `.zip` |
+| **macOS** | macOS 11.0 (Big Sur) | macOS 13+ (Ventura, Sonoma, Sequoia) | CoreAudio Hog Mode, System Default | Native Flutter Universal `.dmg` (Apple Silicon & Intel) |
+| **Linux** | Ubuntu 20.04 / Debian 11 | Ubuntu 22.04+ / Arch / Fedora | ALSA Direct Hardware DMA (`hw:X,Y`), PipeWire, PulseAudio | Native Flutter `.deb`, `.tar.xz` |
 | **Android** | Android 5.0 (Lollipop, API 21) | **Android 8.0+ / 10+** | AAudio Exclusive Mode (`EXCLUSIVE`), Direct USB DAC Passthrough | Universal `.apk` (`Sonance-android-all-arch.apk`) |
 
 > [!NOTE]

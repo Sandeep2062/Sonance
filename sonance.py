@@ -20,9 +20,10 @@ if sys.platform == "win32":
   except Exception:
     pass
 
-import modern_lyrics_downloader
 import cookie_manager
 import discord_rpc
+
+APP_VERSION = "3.6.8"
 
 
 def main():
@@ -32,8 +33,10 @@ def main():
       allow_abbrev=False,
       epilog="""
 Examples:
-  python sonance.py                 # Launch modern desktop application (Default)
+  python sonance.py                 # Launch lightweight native desktop application (Default)
+  python sonance.py --flutter       # Launch native Flutter desktop music suite
   python sonance.py --classic       # Launch classic tkinter GUI
+  python sonance.py --webview       # Launch legacy WebView2 interface (~400-800 MB RAM)
   python sonance.py --extract-cookies chrome  # Extract cookies from Chrome
   python sonance.py --extract-cookies edge    # Extract cookies from Microsoft Edge
         """,
@@ -43,6 +46,23 @@ Examples:
       "--classic",
       action="store_true",
       help="Launch the classic lightweight tkinter interface",
+  )
+  parser.add_argument(
+      "--light",
+      "--native",
+      dest="light",
+      action="store_true",
+      help="Launch lightweight native UI (zero Chromium/WebView2 overhead, ~30-50 MB RAM)",
+  )
+  parser.add_argument(
+      "--flutter",
+      action="store_true",
+      help="Launch the native Flutter desktop music player",
+  )
+  parser.add_argument(
+      "--webview",
+      action="store_true",
+      help="Launch legacy WebView2 interface (Chromium multi-process, ~400-800 MB RAM)",
   )
   parser.add_argument(
       "--extract-cookies",
@@ -557,7 +577,7 @@ Examples:
   parser.add_argument(
       "--version",
       action="version",
-      version=f"Sonance v{modern_lyrics_downloader.APP_VERSION}",
+      version=f"Sonance v{APP_VERSION}",
   )
 
   args, unknown = parser.parse_known_args()
@@ -574,6 +594,7 @@ Examples:
     return
 
   if args.check_update:
+    import modern_lyrics_downloader
     api = modern_lyrics_downloader.LyricsAPI()
     res = api.check_for_updates()
     if res.get("update_available"):
@@ -584,7 +605,7 @@ Examples:
       print(f"[+] Download: {res.get('download_url')}")
     else:
       print(
-          f"[*] Sonance is up to date (v{modern_lyrics_downloader.APP_VERSION})."
+          f"[*] Sonance is up to date (v{APP_VERSION})."
       )
     return
 
@@ -2643,7 +2664,7 @@ Examples:
   if args.vst_scan:
     import plugin_host
     print("=" * 70)
-    print("  SONANCE AUDIOPHILE WORKSTATION v3.6.7")
+    print("  SONANCE AUDIOPHILE WORKSTATION v4.0.0")
     print("  Phase 28: VST3 & CLAP Audio Plugin Scanner")
     print("=" * 70)
     plugins = plugin_host.scan_installed_plugins()
@@ -2679,7 +2700,7 @@ Examples:
         idx += 1
 
     print("=" * 70)
-    print("  SONANCE AUDIOPHILE WORKSTATION v3.6.7")
+    print("  SONANCE AUDIOPHILE WORKSTATION v4.0.0")
     print("  Phase 28: VST3 & CLAP Audio Plugin Host & Rack Studio")
     print("=" * 70)
     print(f"[*] Processing {inp} through VST rack preset '{preset_name}'...")
@@ -2740,7 +2761,7 @@ Examples:
         idx += 1
 
     print("=" * 70)
-    print("  SONANCE AUDIOPHILE WORKSTATION v3.6.7")
+    print("  SONANCE AUDIOPHILE WORKSTATION v4.0.0")
     print("  Phase 29: Dolby Atmos 7.1.4 Bed Spatializer & Multichannel Renderer")
     print("=" * 70)
     print(f"[*] Rendering {inp} into {format_type} Spatial Audio ({mode.upper()} mode)...")
@@ -2880,7 +2901,7 @@ Examples:
       custom_neve["mid_gain_db"] = mid_gain
 
     print("=" * 70)
-    print("  SONANCE AUDIOPHILE WORKSTATION v3.6.7")
+    print("  SONANCE AUDIOPHILE WORKSTATION v4.0.0")
     print("  Phase 30: British Class-A Console Channel Strip & SSL G-Master Bus Studio")
     print("=" * 70)
     print(f"[*] Processing: {inp} through {preset.upper()} preset...")
@@ -2953,7 +2974,7 @@ Examples:
         idx += 1
 
     print("=" * 70)
-    print("  SONANCE AUDIOPHILE WORKSTATION v3.6.7")
+    print("  SONANCE AUDIOPHILE WORKSTATION v4.0.0")
     print("  Phase 31: Higher-Order Ambisonics & 360-Degree VR Spatializer Studio")
     print("=" * 70)
     print(f"[*] Input Source     : {inp}")
@@ -3042,7 +3063,7 @@ Examples:
         idx += 1
 
     print("=" * 70)
-    print("  SONANCE AUDIOPHILE WORKSTATION v3.6.7")
+    print("  SONANCE AUDIOPHILE WORKSTATION v4.0.0")
     print("  Phase 32: Psychoacoustic Subharmonic Bass & Missing Fundamental Studio")
     print("=" * 70)
     print(f"[*] Input Source     : {inp}")
@@ -3131,7 +3152,7 @@ Examples:
         idx += 1
 
     print("=" * 70)
-    print("  SONANCE AUDIOPHILE WORKSTATION v3.6.7")
+    print("  SONANCE AUDIOPHILE WORKSTATION v4.0.0")
     print("  Phase 33: Dynamic Spectral Resonance Suppressor & Surgical De-Resonator")
     print("=" * 70)
     print(f"[*] Input Source     : {inp}")
@@ -3226,7 +3247,7 @@ Examples:
         idx += 1
 
     print("=" * 70)
-    print("  SONANCE AUDIOPHILE WORKSTATION v3.6.7")
+    print("  SONANCE AUDIOPHILE WORKSTATION v4.0.0")
     print("  Phase 34: Vintage Optical & Variable-Mu Master Compressor Studio")
     print("=" * 70)
     print(f"[*] Input Source     : {inp}")
@@ -3287,7 +3308,7 @@ Examples:
         idx += 1
 
     print("=" * 70)
-    print("  SONANCE AUDIOPHILE WORKSTATION v3.6.7")
+    print("  SONANCE AUDIOPHILE WORKSTATION v4.0.0")
     print("  Phase 35 Grand Finale: Zenith Master Orchestration Suite")
     print("=" * 70)
 
@@ -3312,7 +3333,7 @@ Examples:
   if args.audio_devices:
     import exclusive_audio_engine
     print("=" * 70)
-    print("  SONANCE AUDIOPHILE WORKSTATION v3.6.7")
+    print("  SONANCE AUDIOPHILE WORKSTATION v4.0.0")
     print("  Hardware Audio Output Endpoints & Driver Discovery")
     print("=" * 70)
     engine = exclusive_audio_engine.get_engine()
@@ -3368,7 +3389,7 @@ Examples:
         idx += 1
 
     print("=" * 70)
-    print("  SONANCE AUDIOPHILE WORKSTATION v3.6.7")
+    print("  SONANCE AUDIOPHILE WORKSTATION v4.0.0")
     print("  Exclusive Mode DAC Hardware Lock Test")
     print("=" * 70)
     engine = exclusive_audio_engine.get_engine()
@@ -3408,7 +3429,7 @@ Examples:
         idx += 1
 
     print("=" * 70)
-    print("  SONANCE AUDIOPHILE WORKSTATION v3.6.7")
+    print("  SONANCE AUDIOPHILE WORKSTATION v4.0.0")
     print("  Bit-Perfect Exclusive Audio Playback")
     print("=" * 70)
     engine = exclusive_audio_engine.get_engine()
@@ -3422,24 +3443,46 @@ Examples:
     print("[*] Streaming bit-perfect PCM directly to hardware DAC...")
     return
 
-  if args.classic:
-    print("[*] Launching Sonance (Classic Tkinter UI)...")
-    import lyrics_downloader_ultimate
-  else:
-    print("[*] Starting Sonance Music Platform...")
+  if args.webview:
+    print("[*] Starting Sonance Legacy Web UI (WebView2)...")
     if args.remote:
       import remote_server
       res = remote_server.remote_server.start()
       if res.get("success"):
         print(f"[+] Wi-Fi Mobile Remote active: {res.get('url')}")
 
-    # Attempt Discord RPC connection in background
     try:
       discord_rpc.rpc_manager.connect()
     except Exception:
       pass
 
+    import modern_lyrics_downloader
     modern_lyrics_downloader.main()
+    return
+
+  if args.classic:
+    print("[*] Launching Sonance (Classic Tkinter UI)...")
+    import lyrics_downloader_ultimate
+    return
+
+  # Default: Pure Lightweight Native Desktop Mode (Flutter if compiled, else Tkinter native GUI)
+  print("[*] Starting Sonance Native Workstation (~40-80 MB RAM)...")
+  import subprocess
+  flutter_bins = [
+      os.path.join(os.path.dirname(__file__), "build", "windows", "x64", "runner", "Release", "sonance.exe"),
+      os.path.join(os.path.dirname(__file__), "dist", "Sonance-Windows-Native", "sonance.exe"),
+  ]
+  launched = False
+  for fb in flutter_bins:
+    if os.path.isfile(fb):
+      print(f"[*] Launching Sonance Native Flutter Desktop: {fb}")
+      subprocess.Popen([fb])
+      launched = True
+      break
+
+  if not launched:
+    print("[*] Launching Sonance Lightweight Native Interface (~30-50 MB RAM, zero WebView)...")
+    import lyrics_downloader_ultimate
 
 
 if __name__ == "__main__":

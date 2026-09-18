@@ -153,10 +153,11 @@ def analyze_spectrum(file_path: str, max_duration_sec: float = 60.0) -> Dict[str
     avg_power /= max(1, n_frames)
     avg_magnitude = np.sqrt(avg_power)
 
-    # Avoid log of zero
+    # Window coherent gain normalization: for Hann window sum(w)/2 normalizes peak amplitude
+    win_norm = max(1.0, float(np.sum(window) / 2.0))
     epsilon = 1e-12
     power_safe = np.maximum(avg_power, epsilon)
-    mag_db = 20.0 * np.log10(np.maximum(avg_magnitude, epsilon) / (n_fft / 2.0))
+    mag_db = 20.0 * np.log10(np.maximum(avg_magnitude, epsilon) / win_norm)
     peak_db = float(np.max(mag_db))
 
     # --- Spectral Metrics ---
@@ -184,12 +185,11 @@ def analyze_spectrum(file_path: str, max_duration_sec: float = 60.0) -> Dict[str
     flatness = float(geometric_mean / arithmetic_mean) if arithmetic_mean > 0 else 0.0
 
     # 4. Brickwall Cutoff Detection (Threshold below peak energy)
-    # Search from high frequencies down to detect where magnitude drops below noise floor (-60dB from peak)
+    # Search from high frequencies down to detect where magnitude drops below noise floor (-55dB from peak)
     threshold_db = peak_db - 55.0
     cutoff_hz = nyquist
     found_cutoff = False
 
-    # Check top 40% of spectrum for steep cliff
     for k in range(len(freqs) - 1, 10, -1):
         if mag_db[k] > threshold_db:
             cutoff_hz = float(freqs[k])
@@ -198,7 +198,6 @@ def analyze_spectrum(file_path: str, max_duration_sec: float = 60.0) -> Dict[str
 
     # Determine High-Res Authenticity
     if nyquist > 24000:
-        # Sample rate is 88.2kHz, 96kHz, 176.4kHz, or 192kHz
         if cutoff_hz > 24000:
             hi_res_status = "GENUINE_HI_RES"
             authenticity_verdict = f"True Hi-Res Audio (Active ultrasonic content up to {int(cutoff_hz)} Hz)"
@@ -218,15 +217,60 @@ def analyze_spectrum(file_path: str, max_duration_sec: float = 60.0) -> Dict[str
         hi_res_status = "STANDARD_REDBOOK_CD"
         authenticity_verdict = f"Authentic Redbook CD Lossless Bandwidth (Full 20 Hz - {int(cutoff_hz)} Hz spectrum)"
 
-    # Downsample spectrum for UI display (100 frequency bins)
-    num_ui_bins = 100
-    bin_indices = np.linspace(0, len(freqs) - 1, num_ui_bins, dtype=int)
-    ui_freqs = [round(float(freqs[idx]), 1) for idx in bin_indices]
-    ui_dbs = [round(float(mag_db[idx]), 1) for idx in bin_indices]
+    # Logarithmically spaced frequency bands for UI graph (140 bands from 20 Hz to Nyquist)
+    # Aggregates maximum energy across all bins in each band so harmonic peaks are never missed
+    num_ui_bins = 140
+    edges = np.geomspace(20.0, nyquist, num_ui_bins + 1)
+    ui_freqs = []
+    ui_dbs = []
+
+    for i in range(num_ui_bins):
+        low, high = edges[i], edges[i + 1]
+        mask = (freqs >= low) & (freqs < high)
+        center_f = float(np.sqrt(low * high))
+        ui_freqs.append(round(center_f, 1))
+        if np.any(mask):
+            val = float(np.max(mag_db[mask]))
+        else:
+            idx = min(np.searchsorted(freqs, center_f), len(freqs) - 1)
+            val = float(mag_db[idx])
+        ui_dbs.append(round(val, 1))
 
     # Peak frequency
     peak_idx = int(np.argmax(mag_db))
     peak_freq_hz = round(float(freqs[peak_idx]), 1)
+
+    # 2D Time-Frequency Spectrogram Waterfall (140 time slices x 70 frequency bands)
+    n_time_slices = 140
+    n_freq_bands = 70
+    spec_window = np.hanning(min(2048, max(256, n_samples)))
+    spec_win_norm = max(1.0, float(np.sum(spec_window) / 2.0))
+    spec_n_fft = len(spec_window)
+    spec_freqs = np.fft.rfftfreq(spec_n_fft, d=1.0 / sr)
+    spec_freq_edges = np.geomspace(20.0, nyquist, n_freq_bands + 1)
+    time_indices = np.linspace(0, max(0, n_samples - spec_n_fft), n_time_slices, dtype=int)
+
+    spectrogram_2d = []
+    for t_start in time_indices:
+        chunk = mono[t_start : t_start + spec_n_fft]
+        if len(chunk) < spec_n_fft:
+            chunk = np.pad(chunk, (0, spec_n_fft - len(chunk)))
+        frame_mag = np.abs(np.fft.rfft(chunk * spec_window))
+        frame_db = 20.0 * np.log10(np.maximum(frame_mag, 1e-9) / spec_win_norm)
+
+        col = []
+        for fi in range(n_freq_bands):
+            low, high = spec_freq_edges[fi], spec_freq_edges[fi + 1]
+            mask = (spec_freqs >= low) & (spec_freqs < high)
+            if np.any(mask):
+                val_db = float(np.max(frame_db[mask]))
+            else:
+                idx = min(np.searchsorted(spec_freqs, np.sqrt(low * high)), len(spec_freqs) - 1)
+                val_db = float(frame_db[idx])
+            # Normalize -90 dBFS .. 0 dBFS to 0 .. 255 integer
+            norm_val = int(np.clip((val_db + 90.0) / 90.0 * 255.0, 0, 255))
+            col.append(norm_val)
+        spectrogram_2d.append(col)
 
     return {
         "success": True,
@@ -247,6 +291,7 @@ def analyze_spectrum(file_path: str, max_duration_sec: float = 60.0) -> Dict[str
         "authenticity_verdict": authenticity_verdict,
         "ui_freqs": ui_freqs,
         "ui_dbs": ui_dbs,
+        "spectrogram_2d": spectrogram_2d,
     }
 
 

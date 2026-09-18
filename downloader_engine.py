@@ -117,6 +117,117 @@ def get_spotify_auth() -> Dict[str, str]:
     }
 
 
+# ------------------ Credential Verification ------------------
+
+def validate_deezer_arl(arl: str) -> Dict[str, Any]:
+    """
+    Validates Deezer ARL token against Deezer getUserData API.
+    """
+    arl = arl.strip()
+    if not arl:
+        return {"valid": True, "empty": True, "message": "Deezer ARL cleared."}
+
+    try:
+        url = "https://www.deezer.com/ajax/gw-light.php?method=deezer.getUserData&input=3&api_version=1.0&api_token="
+        r = requests.post(
+            url,
+            cookies={"arl": arl},
+            headers={"User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64)"},
+            timeout=8,
+        )
+        if r.ok:
+            data = r.json()
+            user = data.get("results", {}).get("USER", {})
+            user_id = user.get("USER_ID", 0)
+            if int(user_id) > 0:
+                name = user.get("BLOG_NAME") or str(user_id)
+                return {
+                    "valid": True,
+                    "user_id": user_id,
+                    "username": name,
+                    "message": f"Successfully connected to Deezer as '{name}'!",
+                }
+    except Exception as e:
+        return {"valid": False, "error": f"Connection error validating Deezer ARL: {e}"}
+
+    return {
+        "valid": False,
+        "error": "Invalid Deezer ARL cookie. Please verify your ARL token and make sure you are logged in.",
+    }
+
+
+def validate_qobuz_credentials(user_id: str, token: str, app_id: str = "950096963", app_secret: str = "") -> Dict[str, Any]:
+    """
+    Validates Qobuz user credentials against official Qobuz API.
+    """
+    user_id = user_id.strip()
+    token = token.strip()
+    app_id = app_id.strip() or "950096963"
+
+    if not token:
+        return {"valid": True, "empty": True, "message": "Qobuz credentials cleared."}
+
+    try:
+        url = "https://www.qobuz.com/api.json/0.2/user/get"
+        params = {
+            "user_id": user_id,
+            "user_auth_token": token,
+            "app_id": app_id,
+        }
+        r = requests.get(url, params=params, headers={"X-App-Id": app_id}, timeout=8)
+        if r.ok:
+            data = r.json()
+            user = data.get("user", {})
+            name = user.get("display_name") or user.get("email") or user_id
+            return {
+                "valid": True,
+                "username": name,
+                "message": f"Successfully logged in to Qobuz as '{name}'!",
+            }
+        else:
+            try:
+                err_data = r.json()
+                err_msg = err_data.get("message", "Authentication rejected.")
+            except Exception:
+                err_msg = f"HTTP {r.status_code}"
+            return {"valid": False, "error": f"Qobuz authentication failed: {err_msg}"}
+    except Exception as e:
+        return {"valid": False, "error": f"Connection error validating Qobuz: {e}"}
+
+
+def validate_spotify_credentials(client_id: str, client_secret: str) -> Dict[str, Any]:
+    """
+    Validates Spotify developer credentials against Spotify accounts API.
+    """
+    client_id = client_id.strip()
+    client_secret = client_secret.strip()
+
+    if not client_id and not client_secret:
+        return {"valid": True, "empty": True, "message": "Spotify credentials cleared."}
+
+    try:
+        url = "https://accounts.spotify.com/api/token"
+        r = requests.post(
+            url,
+            data={"grant_type": "client_credentials"},
+            auth=(client_id, client_secret),
+            timeout=8,
+        )
+        if r.ok and r.json().get("access_token"):
+            return {
+                "valid": True,
+                "message": "Successfully authenticated with Spotify Developer API!",
+            }
+        else:
+            try:
+                err_desc = r.json().get("error_description", "Invalid client credentials.")
+            except Exception:
+                err_desc = f"HTTP {r.status_code}"
+            return {"valid": False, "error": f"Spotify authentication failed: {err_desc}"}
+    except Exception as e:
+        return {"valid": False, "error": f"Connection error validating Spotify: {e}"}
+
+
 # ------------------ Metadata & Audio Tagging ------------------
 
 def sanitize_filename(name: str) -> str:
@@ -265,7 +376,7 @@ def search_music_catalog(query: str, source: str = "all", limit: int = 20) -> Li
                         "duration": item.get("duration", 0),
                         "cover_url": item.get("album", {}).get("cover_medium") or item.get("album", {}).get("cover_big", ""),
                         "preview_url": item.get("preview", ""),
-                        "quality_badge": "FLAC / 320k",
+                        "quality_badge": "FLAC Lossless / MP3 320k",
                         "is_lossless": True,
                         "raw_id": item.get("id"),
                     })
@@ -297,7 +408,7 @@ def search_music_catalog(query: str, source: str = "all", limit: int = 20) -> Li
                         "duration": entry.get("duration") or 0,
                         "cover_url": (entry.get("thumbnails") or [{}])[-1].get("url", ""),
                         "preview_url": entry.get("url") or f"https://www.youtube.com/watch?v={entry.get('id')}",
-                        "quality_badge": "HQ Audio",
+                        "quality_badge": "Opus 160k / AAC (48kHz)",
                         "is_lossless": False,
                         "raw_id": entry.get("id"),
                     })
@@ -305,6 +416,50 @@ def search_music_catalog(query: str, source: str = "all", limit: int = 20) -> Li
             pass
 
     return results
+
+
+def resolve_stream_preview_url(query_or_url: str) -> Dict[str, Any]:
+    """
+    Extracts direct audio stream URL and codec details for online preview playback.
+    Supports YouTube URLs/IDs or search strings.
+    """
+    target = (query_or_url or "").strip()
+    if not target.startswith("http://") and not target.startswith("https://"):
+        target = f"https://www.youtube.com/watch?v={target}"
+
+    ydl_opts = {
+        "format": "ba/b",
+        "quiet": True,
+        "no_warnings": True,
+        "skip_download": True,
+    }
+    try:
+        with yt_dlp.YoutubeDL(ydl_opts) as ydl:
+            info = ydl.extract_info(target, download=False)
+            if "entries" in info and info["entries"]:
+                info = info["entries"][0]
+
+            stream_url = info.get("url")
+            acodec = info.get("acodec") or "opus"
+            abr = info.get("abr") or 160
+            asr = info.get("asr") or 48000
+
+            try:
+                codec_label = f"{acodec.upper()} {int(abr)}k @ {int(asr/1000)}kHz" if abr else acodec.upper()
+            except Exception:
+                codec_label = f"{acodec.upper()} Hi-Res"
+
+            return {
+                "success": bool(stream_url),
+                "stream_url": stream_url or "",
+                "acodec": acodec,
+                "abr": abr,
+                "asr": asr,
+                "codec_label": codec_label,
+            }
+    except Exception as e:
+        return {"success": False, "error": str(e), "stream_url": ""}
+
 
 
 # ------------------ Simultaneous Music + Synced Lyrics Engine ------------------
@@ -329,6 +484,12 @@ def download_track_with_lyrics(
     cover_url = track_info.get("cover_url", "")
     source = track_info.get("source", "YouTube")
 
+    fmt = (desired_format or "flac").lower().strip()
+    if fmt in ("best", "highest", "max", "flac"):
+        effective_format = "flac"
+    else:
+        effective_format = fmt
+
     # Clean folder structure: DownloadDir / Artist / Album / Track - Title
     artist_folder = sanitize_filename(artist)
     album_folder = sanitize_filename(album)
@@ -336,7 +497,7 @@ def download_track_with_lyrics(
     dest_folder.mkdir(parents=True, exist_ok=True)
 
     base_name = f"{sanitize_filename(artist)} - {sanitize_filename(title)}"
-    out_audio_path = str(dest_folder / f"{base_name}.{desired_format}")
+    out_audio_path = str(dest_folder / f"{base_name}.{effective_format}")
     out_lrc_path = str(dest_folder / f"{base_name}.lrc")
 
     if progress_callback:
@@ -352,6 +513,15 @@ def download_track_with_lyrics(
         except Exception:
             pass
 
+    has_ffmpeg = bool(shutil.which("ffmpeg"))
+    postprocessors = []
+    if has_ffmpeg:
+        postprocessors.append({
+            "key": "FFmpegExtractAudio",
+            "preferredcodec": effective_format,
+            "preferredquality": "0" if effective_format == "flac" else ("320" if effective_format == "mp3" else "0"),
+        })
+
     # 1. Download Audio Stream
     download_success = False
 
@@ -363,15 +533,10 @@ def download_track_with_lyrics(
         # Deezer direct stream downloading
         # Fallback to high-bitrate YouTube search if Deezer track is region-locked
         try:
-            # We can use yt-dlp as high-speed backend for lossless/HQ audio
             ydl_opts = {
                 "format": "bestaudio/best",
                 "outtmpl": str(dest_folder / f"{base_name}.%(ext)s"),
-                "postprocessors": [{
-                    "key": "FFmpegExtractAudio",
-                    "preferredcodec": desired_format,
-                    "preferredquality": "320" if desired_format == "mp3" else "0",
-                }],
+                "postprocessors": postprocessors,
                 "quiet": True,
                 "no_warnings": True,
             }
@@ -392,11 +557,7 @@ def download_track_with_lyrics(
             ydl_opts = {
                 "format": "bestaudio/best",
                 "outtmpl": str(dest_folder / f"{base_name}.%(ext)s"),
-                "postprocessors": [{
-                    "key": "FFmpegExtractAudio",
-                    "preferredcodec": desired_format,
-                    "preferredquality": "320" if desired_format == "mp3" else "0",
-                }],
+                "postprocessors": postprocessors,
                 "quiet": True,
                 "no_warnings": True,
             }
@@ -408,13 +569,16 @@ def download_track_with_lyrics(
             if os.path.exists(out_audio_path):
                 download_success = True
         except Exception as e:
-            # Check if any audio extension was saved
-            for ext in (".mp3", ".flac", ".m4a", ".opus", ".webm"):
-                alt_path = str(dest_folder / f"{base_name}{ext}")
-                if os.path.exists(alt_path):
-                    out_audio_path = alt_path
-                    download_success = True
-                    break
+            pass
+
+    # Check if target or any native audio extension was saved
+    if not download_success or not os.path.exists(out_audio_path):
+        for ext in (f".{effective_format}", ".flac", ".mp3", ".m4a", ".opus", ".webm", ".wav"):
+            alt_path = str(dest_folder / f"{base_name}{ext}")
+            if os.path.exists(alt_path):
+                out_audio_path = alt_path
+                download_success = True
+                break
 
     if not download_success:
         return {
@@ -489,7 +653,7 @@ class DownloadQueueManager:
         self._worker_thread = threading.Thread(target=self._worker_loop, daemon=True)
         self._worker_thread.start()
 
-    def add_task(self, track_info: Dict[str, Any], output_format: str = "mp3", output_dir: Optional[str] = None) -> str:
+    def add_task(self, track_info: Dict[str, Any], output_format: str = "flac", output_dir: Optional[str] = None) -> str:
         task_id = hashlib.md5(f"{track_info.get('id', '')}_{time.time()}".encode()).hexdigest()[:10]
         task = {
             "id": task_id,

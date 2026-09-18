@@ -66,6 +66,7 @@ venv.bak/
 # User / Local configurations
 lyrics_gui_config.json
 user_secrets.json
+listening_history.json
 *.local
 
 # IDEs

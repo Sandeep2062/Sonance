@@ -21,7 +21,12 @@ import subprocess
 import wave
 from typing import Dict, Any, List, Optional
 
-import numpy as np
+try:
+    import numpy as np
+    HAVE_NUMPY = True
+except ImportError:
+    np = None
+    HAVE_NUMPY = False
 
 
 def check_ffmpeg() -> bool:
@@ -172,6 +177,11 @@ def separate_stems(
     # If FFmpeg is not available, check if we can run native NumPy DSP on WAV
     if not check_ffmpeg():
         if audio_file.lower().endswith(".wav"):
+            if not HAVE_NUMPY or np is None:
+                return {
+                    "success": False,
+                    "error": "NumPy is not installed. Please install FFmpeg or install NumPy (`pip install numpy`) for stem separation.",
+                }
             try:
                 return _separate_wav_numpy(audio_file, output_directory, base_name, mode)
             except Exception as e:

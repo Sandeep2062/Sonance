@@ -112,7 +112,7 @@ class ExclusiveAudioEngine:
 
     def _load_config(self) -> Dict[str, Any]:
         default_config = {
-            "mode": "wasapi_exclusive" if sys.platform == "win32" else "shared",
+            "mode": "shared",
             "device_id": None,
             "buffer_size": 256,
             "bit_perfect_lock": True,
@@ -263,7 +263,10 @@ class ExclusiveAudioEngine:
         settings = None
         if is_exclusive and sys.platform == "win32":
             try:
-                settings = sd.WasapiSettings(exclusive=True)
+                dev_info = sd.query_devices(device_id)
+                api_name = sd.query_hostapis(dev_info["hostapi"])["name"]
+                if "WASAPI" in api_name:
+                    settings = sd.WasapiSettings(exclusive=True)
             except Exception:
                 settings = None
 
@@ -312,7 +315,16 @@ class ExclusiveAudioEngine:
 
         stream = None
         try:
-            extra = sd.WasapiSettings(exclusive=True) if sys.platform == "win32" else None
+            extra = None
+            if sys.platform == "win32" and device_id is not None:
+                try:
+                    dev_info = sd.query_devices(device_id)
+                    api_name = sd.query_hostapis(dev_info["hostapi"])["name"]
+                    if "WASAPI" in api_name:
+                        extra = sd.WasapiSettings(exclusive=True)
+                except Exception:
+                    extra = None
+
             stream = sd.OutputStream(
                 device=device_id,
                 samplerate=sample_rate,

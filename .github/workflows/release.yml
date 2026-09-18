@@ -11,26 +11,28 @@ permissions:
 
 jobs:
   build-windows:
-    name: Build Windows Installer & Portable
+    name: Build Windows Installer & Portable (Native Flutter)
     runs-on: windows-latest
     steps:
       - name: Checkout Code
         uses: actions/checkout@v6
 
-      - name: Set up Python 3.11
-        uses: actions/setup-python@v7
+      - name: Set up Flutter
+        uses: subosito/flutter-action@v2
         with:
-          python-version: '3.11'
-          cache: 'pip'
+          channel: 'stable'
+          cache: true
 
-      - name: Install Dependencies
-        run: |
-          python -m pip install --upgrade pip
-          pip install -r requirements.txt pyinstaller
+      - name: Install Flutter Dependencies
+        run: flutter pub get
 
-      - name: Build Windows Application with PyInstaller
+      - name: Build Flutter Windows Native Release
+        run: flutter build windows --release
+
+      - name: Stage Native Release Files
         run: |
-          pyinstaller --noconsole --onedir --name "Sonance" --icon "assets/icon.ico" --add-data "ui;ui" --add-data "assets;assets" modern_lyrics_downloader.py
+          New-Item -ItemType Directory -Force -Path dist/Sonance
+          Copy-Item -Path build/windows/x64/runner/Release/* -Destination dist/Sonance/ -Recurse -Force
 
       - name: Compile Inno Setup Native Installer
         run: |
@@ -103,28 +105,28 @@ jobs:
           path: artifacts/Sonance-android-all-arch.apk
 
   build-linux:
-    name: Build Linux Packages (deb, tar.xz)
+    name: Build Linux Packages (deb, tar.xz) (Native Flutter)
     runs-on: ubuntu-24.04
     steps:
       - name: Checkout Code
         uses: actions/checkout@v6
 
-      - name: Set up Python 3.11
-        uses: actions/setup-python@v7
-        with:
-          python-version: '3.11'
-          cache: 'pip'
-
-      - name: Install System Dependencies & PyInstaller
+      - name: Install Linux Build Dependencies
         run: |
           sudo apt-get update
-          sudo apt-get install -y libwebkit2gtk-4.1-dev
-          python -m pip install --upgrade pip
-          pip install -r requirements.txt pyinstaller
+          sudo apt-get install -y clang cmake ninja-build pkg-config libgtk-3-dev liblzma-dev
 
-      - name: Build Linux Binary with PyInstaller
-        run: |
-          pyinstaller --noconsole --onedir --name "sonance" --add-data "ui:ui" --add-data "assets:assets" modern_lyrics_downloader.py
+      - name: Set up Flutter
+        uses: subosito/flutter-action@v2
+        with:
+          channel: 'stable'
+          cache: true
+
+      - name: Install Flutter Dependencies
+        run: flutter pub get
+
+      - name: Build Flutter Linux Native Release
+        run: flutter build linux --release
 
       - name: Package Debian Installer (.deb) & Tarball
         run: |
@@ -134,23 +136,24 @@ jobs:
           mkdir -p deb_pkg/usr/share/icons/hicolor/256x256/apps
           mkdir -p deb_pkg/DEBIAN
 
-          cp -r dist/sonance/* deb_pkg/opt/sonance/
+          mkdir -p dist
+          cp -r build/linux/x64/release/bundle/* deb_pkg/opt/sonance/
           ln -s /opt/sonance/sonance deb_pkg/usr/bin/sonance
           cp assets/logo.png deb_pkg/usr/share/icons/hicolor/256x256/apps/sonance.png || true
           cp linux/sonance.desktop deb_pkg/usr/share/applications/
 
           cat <<EOF > deb_pkg/DEBIAN/control
           Package: sonance
-          Version: 3.6.7
+          Version: 3.6.8
           Section: sound
           Priority: optional
           Architecture: amd64
           Maintainer: Sandeep Khadka
-          Description: Audiophile music suite and lossless streaming engine.
+          Description: Audiophile music suite and lossless streaming engine (Native Flutter).
           EOF
 
           dpkg-deb --build deb_pkg dist/Sonance-linux-x86_64.deb
-          tar -cJf dist/Sonance-linux-x86_64.tar.xz -C dist sonance
+          tar -cJf dist/Sonance-linux-x86_64.tar.xz -C build/linux/x64/release/bundle .
 
       - name: Upload Linux Artifacts
         uses: actions/upload-artifact@v6
@@ -161,31 +164,29 @@ jobs:
             dist/Sonance-linux-x86_64.tar.xz
 
   build-macos:
-    name: Build macOS Universal DMG
+    name: Build macOS Universal DMG (Native Flutter)
     runs-on: macos-latest
     steps:
       - name: Checkout Code
         uses: actions/checkout@v6
 
-      - name: Set up Python 3.11
-        uses: actions/setup-python@v7
+      - name: Set up Flutter
+        uses: subosito/flutter-action@v2
         with:
-          python-version: '3.11'
-          cache: 'pip'
+          channel: 'stable'
+          cache: true
 
-      - name: Install Dependencies
-        run: |
-          python -m pip install --upgrade pip
-          pip install -r requirements.txt pyinstaller pillow
+      - name: Install Flutter Dependencies
+        run: flutter pub get
 
-      - name: Build macOS Application Bundle with PyInstaller
-        run: |
-          pyinstaller --noconsole --windowed --name "Sonance" --icon "assets/icon.icns" --add-data "ui:ui" --add-data "assets:assets" modern_lyrics_downloader.py
+      - name: Build Flutter macOS Native Release
+        run: flutter build macos --release
 
       - name: Package macOS DMG Installer
         run: |
           mkdir -p dmg_root
-          cp -R dist/Sonance.app dmg_root/
+          mkdir -p dist
+          cp -R build/macos/Build/Products/Release/sonance.app dmg_root/Sonance.app
           ln -s /Applications dmg_root/Applications
           hdiutil create -volname "Sonance" -srcfolder dmg_root -ov -format UDZO dist/Sonance-macos-universal.dmg
 

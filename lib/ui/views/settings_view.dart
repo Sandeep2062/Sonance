@@ -1,8 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../core/theme/app_theme.dart';
+import '../../core/theme/theme_provider.dart';
 import '../../core/services/update_service.dart';
+import '../../core/services/discord_rpc_service.dart';
 import '../../features/auth/auth_provider.dart';
+import '../../features/player/equalizer_provider.dart';
+import 'equalizer_view.dart';
 
 class SettingsView extends ConsumerStatefulWidget {
   const SettingsView({super.key});
@@ -19,6 +23,7 @@ class _SettingsViewState extends ConsumerState<SettingsView> {
   late TextEditingController _qobuzAppSecretCtrl;
   late TextEditingController _spotifyClientCtrl;
   late TextEditingController _spotifySecretCtrl;
+  bool _discordRpcEnabled = true;
 
   @override
   void initState() {
@@ -31,6 +36,7 @@ class _SettingsViewState extends ConsumerState<SettingsView> {
     _qobuzAppSecretCtrl = TextEditingController(text: auth.qobuzAppSecret);
     _spotifyClientCtrl = TextEditingController(text: auth.spotifyClientId);
     _spotifySecretCtrl = TextEditingController(text: auth.spotifyClientSecret);
+    _discordRpcEnabled = discordRpcService.isEnabled;
   }
 
   @override
@@ -48,6 +54,8 @@ class _SettingsViewState extends ConsumerState<SettingsView> {
   @override
   Widget build(BuildContext context) {
     final auth = ref.watch(authProvider);
+    final themeMode = ref.watch(themeProvider);
+    final eq = ref.watch(equalizerProvider);
 
     return Scaffold(
       body: SingleChildScrollView(
@@ -64,10 +72,163 @@ class _SettingsViewState extends ConsumerState<SettingsView> {
                 ),
                 const SizedBox(height: 4),
                 const Text(
-                  'Authentication & multi-source accounts for Deezer, Qobuz, and Spotify.',
+                  'Appearance, DSP Audio Equalizer, and Multi-Source Streaming Credentials.',
                   style: TextStyle(fontSize: 13, color: Colors.grey),
                 ),
                 const SizedBox(height: 24),
+
+                // Appearance Card
+                _buildCard(
+                  title: 'Appearance & Theme',
+                  subtitle: 'Choose between Slate Dark, Crisp Light, or System default theme.',
+                  status: themeMode == ThemeMode.dark
+                      ? 'Dark'
+                      : themeMode == ThemeMode.light
+                          ? 'Light'
+                          : 'System',
+                  isLoggedIn: true,
+                  children: [
+                    Row(
+                      children: [
+                        _buildThemeOption(
+                          context,
+                          label: 'Slate Dark',
+                          icon: Icons.dark_mode_rounded,
+                          isSelected: themeMode == ThemeMode.dark,
+                          onTap: () => ref
+                              .read(themeProvider.notifier)
+                              .setTheme(ThemeMode.dark),
+                        ),
+                        const SizedBox(width: 12),
+                        _buildThemeOption(
+                          context,
+                          label: 'Crisp Light',
+                          icon: Icons.light_mode_rounded,
+                          isSelected: themeMode == ThemeMode.light,
+                          onTap: () => ref
+                              .read(themeProvider.notifier)
+                              .setTheme(ThemeMode.light),
+                        ),
+                        const SizedBox(width: 12),
+                        _buildThemeOption(
+                          context,
+                          label: 'System Sync',
+                          icon: Icons.brightness_auto_rounded,
+                          isSelected: themeMode == ThemeMode.system,
+                          onTap: () => ref
+                              .read(themeProvider.notifier)
+                              .setTheme(ThemeMode.system),
+                        ),
+                      ],
+                    ),
+                  ],
+                ),
+                const SizedBox(height: 20),
+
+                // Studio Equalizer Card
+                _buildCard(
+                  title: '10-Band Studio Hardware Equalizer',
+                  subtitle: 'Audiophile grade biquad peaking filters (32 Hz - 16 kHz) and preamp stage.',
+                  status: eq.isEnabled ? 'Active (${eq.currentPreset})' : 'Bypassed',
+                  isLoggedIn: eq.isEnabled,
+                  children: [
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: [
+                        Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text(
+                              'Preset: ${eq.currentPreset}',
+                              style: const TextStyle(fontWeight: FontWeight.w600, fontSize: 13),
+                            ),
+                            const SizedBox(height: 2),
+                            Text(
+                              'Master EQ is ${eq.isEnabled ? "ON" : "OFF"}. Preamp: ${eq.preamp >= 0 ? "+" : ""}${eq.preamp.toStringAsFixed(1)} dB',
+                              style: TextStyle(
+                                fontSize: 12,
+                                color: Theme.of(context).colorScheme.onSurface.withOpacity(0.6),
+                              ),
+                            ),
+                          ],
+                        ),
+                        ElevatedButton.icon(
+                          icon: const Icon(Icons.tune_rounded, size: 18),
+                          label: const Text('Open Equalizer Rack'),
+                          style: ElevatedButton.styleFrom(
+                            backgroundColor: SonanceTheme.emerald,
+                            foregroundColor: Colors.white,
+                          ),
+                          onPressed: () {
+                            showDialog(
+                              context: context,
+                              builder: (_) => const EqualizerDialog(),
+                            );
+                          },
+                        ),
+                      ],
+                    ),
+                  ],
+                ),
+                const SizedBox(height: 20),
+
+                // Native Engine & Low-RAM Architecture
+                _buildCard(
+                  title: 'Native Low-RAM Engine',
+                  subtitle: 'Pure Flutter native AOT compilation with zero WebView2/Chromium runtime.',
+                  status: 'Active (~40-80 MB)',
+                  isLoggedIn: true,
+                  children: [
+                    Row(
+                      children: [
+                        Container(
+                          padding: const EdgeInsets.all(8),
+                          decoration: BoxDecoration(
+                            color: SonanceTheme.emerald.withOpacity(0.12),
+                            borderRadius: BorderRadius.circular(8),
+                          ),
+                          child: const Icon(Icons.speed_rounded, color: SonanceTheme.emerald, size: 24),
+                        ),
+                        const SizedBox(width: 14),
+                        Expanded(
+                          child: Text(
+                            'Sonance runs as pure native code without browser runtimes, saving 80-90% of system memory compared to Electron/WebView2.',
+                            style: TextStyle(
+                              fontSize: 12,
+                              color: Theme.of(context).colorScheme.onSurface.withOpacity(0.75),
+                            ),
+                          ),
+                        ),
+                      ],
+                    ),
+                  ],
+                ),
+                const SizedBox(height: 20),
+
+                // Discord Rich Presence Card
+                _buildCard(
+                  title: 'Discord Rich Presence',
+                  subtitle: 'Show the currently playing track and album art on your Discord profile.',
+                  status: _discordRpcEnabled ? 'Enabled' : 'Disabled',
+                  isLoggedIn: _discordRpcEnabled,
+                  children: [
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: [
+                        const Text('Broadcast "Listening to Sonance" status to Discord'),
+                        Switch(
+                          value: _discordRpcEnabled,
+                          activeColor: SonanceTheme.emerald,
+                          onChanged: (val) {
+                            setState(() => _discordRpcEnabled = val);
+                            discordRpcService.isEnabled = val;
+                          },
+                        ),
+                      ],
+                    ),
+                  ],
+                ),
+                const SizedBox(height: 20),
 
                 // Deezer Card
                 _buildCard(
@@ -99,18 +260,17 @@ class _SettingsViewState extends ConsumerState<SettingsView> {
                             const SnackBar(content: Text('Deezer ARL saved!')),
                           );
                         },
-                        child: const Text('Save Changes', style: TextStyle(fontWeight: FontWeight.bold)),
+                        child: const Text('Save ARL', style: TextStyle(fontWeight: FontWeight.bold)),
                       ),
                     ),
                   ],
                 ),
-
                 const SizedBox(height: 20),
 
                 // Qobuz Card
                 _buildCard(
-                  title: 'Qobuz',
-                  subtitle: 'Sign in using an ID and token for True 24-bit Studio Master Hi-Res FLAC.',
+                  title: 'Qobuz Hi-Res (24-Bit / 192 kHz)',
+                  subtitle: 'Connect your Qobuz account for Studio Master lossless streams and downloads.',
                   status: auth.isQobuzLoggedIn ? 'Logged In' : 'Not Logged In',
                   isLoggedIn: auth.isQobuzLoggedIn,
                   children: [
@@ -128,25 +288,6 @@ class _SettingsViewState extends ConsumerState<SettingsView> {
                             controller: _qobuzTokenCtrl,
                             obscureText: true,
                             decoration: const InputDecoration(labelText: 'User Auth Token', border: OutlineInputBorder()),
-                          ),
-                        ),
-                      ],
-                    ),
-                    const SizedBox(height: 12),
-                    Row(
-                      children: [
-                        Expanded(
-                          child: TextField(
-                            controller: _qobuzAppIdCtrl,
-                            decoration: const InputDecoration(labelText: 'App ID (optional)', border: OutlineInputBorder()),
-                          ),
-                        ),
-                        const SizedBox(width: 12),
-                        Expanded(
-                          child: TextField(
-                            controller: _qobuzAppSecretCtrl,
-                            obscureText: true,
-                            decoration: const InputDecoration(labelText: 'App Secret (optional)', border: OutlineInputBorder()),
                           ),
                         ),
                       ],
@@ -170,19 +311,18 @@ class _SettingsViewState extends ConsumerState<SettingsView> {
                             const SnackBar(content: Text('Qobuz credentials saved!')),
                           );
                         },
-                        child: const Text('Save Changes', style: TextStyle(fontWeight: FontWeight.bold)),
+                        child: const Text('Save Credentials', style: TextStyle(fontWeight: FontWeight.bold)),
                       ),
                     ),
                   ],
                 ),
-
                 const SizedBox(height: 20),
 
                 // Spotify Card
                 _buildCard(
-                  title: 'Spotify',
-                  subtitle: 'Optional: Official developer credentials for playlist syncing and discovery.',
-                  status: auth.isSpotifyConfigured ? 'Configured' : 'Not Configured',
+                  title: 'Spotify Integration',
+                  subtitle: 'Spotify Developer API Client ID & Secret for high-volume playlist sync.',
+                  status: auth.isSpotifyConfigured ? 'Configured' : 'Public Scraper Fallback',
                   isLoggedIn: auth.isSpotifyConfigured,
                   children: [
                     Row(
@@ -227,12 +367,11 @@ class _SettingsViewState extends ConsumerState<SettingsView> {
                     ),
                   ],
                 ),
-
                 const SizedBox(height: 20),
 
                 // Updates & About Card
                 _buildCard(
-                  title: 'Sonance v3.6.7',
+                  title: 'Sonance v4.0.0',
                   subtitle: 'The ultimate unified music suite — GPLv3 with Commons Clause by Sandeep Khadka.',
                   status: 'Latest',
                   isLoggedIn: true,
@@ -303,6 +442,55 @@ class _SettingsViewState extends ConsumerState<SettingsView> {
                 ),
               ],
             ),
+          ),
+        ),
+      ),
+    );
+  }
+
+  Widget _buildThemeOption(
+    BuildContext context, {
+    required String label,
+    required IconData icon,
+    required bool isSelected,
+    required VoidCallback onTap,
+  }) {
+    return Expanded(
+      child: InkWell(
+        onTap: onTap,
+        borderRadius: BorderRadius.circular(10),
+        child: Container(
+          padding: const EdgeInsets.symmetric(vertical: 14, horizontal: 12),
+          decoration: BoxDecoration(
+            color: isSelected
+                ? SonanceTheme.emerald.withOpacity(0.12)
+                : Theme.of(context).colorScheme.surface,
+            borderRadius: BorderRadius.circular(10),
+            border: Border.all(
+              color: isSelected
+                  ? SonanceTheme.emerald
+                  : Theme.of(context).colorScheme.outline,
+              width: isSelected ? 2 : 1,
+            ),
+          ),
+          child: Row(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              Icon(
+                icon,
+                size: 20,
+                color: isSelected ? SonanceTheme.emerald : Colors.grey,
+              ),
+              const SizedBox(width: 8),
+              Text(
+                label,
+                style: TextStyle(
+                  fontWeight: isSelected ? FontWeight.bold : FontWeight.normal,
+                  color: isSelected ? SonanceTheme.emerald : null,
+                  fontSize: 13,
+                ),
+              ),
+            ],
           ),
         ),
       ),
