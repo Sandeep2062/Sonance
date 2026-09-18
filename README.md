@@ -30,7 +30,7 @@ Sonance is engineered from the ground up as a unified audiophile ecosystem:
 
 ```
                       ┌──────────────────────────────────────┐
-                      │            SONANCE v3.6.5            │
+                      │            SONANCE v3.6.6            │
                       └──────────────────┬───────────────────┘
                                          │
          ┌───────────────────────────────┼───────────────────────────────┐

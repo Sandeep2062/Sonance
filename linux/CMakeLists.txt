@@ -8,7 +8,7 @@ cmake_policy(SET CMP0063 NEW)
 set(CMAKE_INSTALL_RPATH "$ORIGIN/lib")
 
 # Apply Flutter build settings
-add_definitions(-DFLUTTER_VERSION="3.6.5")
+add_definitions(-DFLUTTER_VERSION="3.6.6")
 
 # Standard Linux GTK runner settings
 include(flutter/generated_plugins.cmake OPTIONAL)

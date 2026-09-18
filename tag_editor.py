@@ -292,7 +292,7 @@ def auto_fetch_metadata(title: str, artist: str) -> Dict[str, Any]:
     """
     clean_q = f'recording:"{title}" AND artist:"{artist}"'
     url = "https://musicbrainz.org/ws/2/recording/"
-    headers = {"User-Agent": "Sonance/3.6.5 (https://github.com/Sandeep2062/Sonance)"}
+    headers = {"User-Agent": "Sonance/3.6.6 (https://github.com/Sandeep2062/Sonance)"}
 
     result = {
         "title": title,

@@ -114,7 +114,7 @@ def lookup_musicbrainz_disc(disc_id: str) -> Dict[str, Any]:
         return {"success": False, "error": "No DiscID specified."}
 
     url = f"https://musicbrainz.org/ws/2/discid/{disc_id}?inc=artists+recordings+releases&fmt=json"
-    headers = {"User-Agent": "Sonance/3.6.5 (sandeepkhadka9090@gmail.com)"}
+    headers = {"User-Agent": "Sonance/3.6.6 (sandeepkhadka9090@gmail.com)"}
 
     try:
         req = urllib.request.Request(url, headers=headers)
