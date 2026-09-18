@@ -27,7 +27,7 @@ Sonance is engineered from the ground up as a unified audiophile ecosystem:
 
 ```
                       ┌──────────────────────────────────────┐
-                      │             SONANCE v3.6             │
+                      │            SONANCE v3.6.0            │
                       └──────────────────┬───────────────────┘
                                          │
          ┌───────────────────────────────┼───────────────────────────────┐
@@ -304,6 +304,23 @@ Pre-built binaries are published under [Releases](https://github.com/Sandeep2062
 To verify download integrity on Windows PowerShell:
 ```powershell
 Get-FileHash -Algorithm SHA256 .\Sonance-windows-x86_64-setup.exe
+```
+
+---
+
+## 🏷️ Version Bumper & Release Automation
+
+To update the version across all 17 components of Sonance (Flutter, Python, HTML/JS, CMake, Info.plist, and release manifests):
+
+```bash
+# Bash / Linux / macOS / Git Bash (interactive prompt or argument)
+./bump_version.sh 3.7.0
+
+# Windows PowerShell (interactive prompt or argument)
+.\bump_version.ps1 3.7.0
+
+# Direct Python engine
+python update_version.py 3.7.0
 ```
 
 ---

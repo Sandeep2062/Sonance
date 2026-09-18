@@ -2,7 +2,7 @@
   "project": "Sonance Audiophile Workstation",
   "version": "3.6.0",
   "phase": "Phase 27 (Grand Finale Release)",
-  "timestamp": "2026-09-18 03:18:48 UTC",
+  "timestamp": "2026-09-18 03:41:10 UTC",
   "audit": {
     "total_modules_audited": 53,
     "passed_count": 53,
@@ -10,14 +10,14 @@
     "integrity_percent": "100.0%"
   },
   "summary": {
-    "total_files": 135,
-    "total_bytes": 3003471,
+    "total_files": 138,
+    "total_bytes": 2996916,
     "total_bytes_formatted": "2.86 MB",
     "categories": {
-      "asset": 26,
+      "asset": 28,
       "docs": 3,
       "config": 3,
-      "core": 69,
+      "core": 70,
       "dsp": 24,
       "ui": 10
     }
@@ -32,30 +32,30 @@
     },
     {
       "path": "README.md",
-      "size": 62490,
-      "sha256": "f4037795f57a7680dfb3e9e4f3cc60362b99ff64849ea85543ebc238354cd0d9",
-      "md5": "b845febb995295aa7c63022e9d009b7d",
+      "size": 62453,
+      "sha256": "25a7655622464aaad8e4c9d4a4918f1f4c3b6c9e79813794e432f4cb09f2462e",
+      "md5": "44ada5fc7f8a4e649b10b5ebc7442cce",
       "category": "docs"
     },
     {
       "path": "RELEASE.manifest.json",
-      "size": 32670,
-      "sha256": "332acca6daa52458a40eb8537b3cd9a9cd9f91f78d5890190bd6ecbf96fa684d",
-      "md5": "1d994022db1fc8e713e7f2b8d9f741dd",
+      "size": 33371,
+      "sha256": "8acb6f0510324a4f700522304ac2fd63600b2fdfd1408925668f855cc4b3c3ab",
+      "md5": "dbb8eaed7dfed332a3cba1a9c039d4fb",
       "category": "config"
     },
     {
       "path": "RELEASE.md5sum",
-      "size": 7736,
-      "sha256": "b2a82f7264aadb6f3270f487e30c9ac4fdf135c255b39d88fd8515bf3c2cae7e",
-      "md5": "d8dbf448680e458d99276ca747b60a95",
+      "size": 7892,
+      "sha256": "2cffb281c99b429d70f990f43527369947a3b02c578596d61a30b250a79014fe",
+      "md5": "82f1716ca95d7557cb12b65f6ccef9de",
       "category": "asset"
     },
     {
       "path": "RELEASE.sha256sum",
-      "size": 12056,
-      "sha256": "649aca7da0ece982ce2c96c6fdcb107c5d7d04722f90d1cb21ea664003cc2180",
-      "md5": "4972598ee63ad188d29f37c6b787d3f7",
+      "size": 12308,
+      "sha256": "f8609a0bbf143f91a3bac2d468b9d4ddc67b54cff51e749ab339d43217d4ee56",
+      "md5": "0c7fdd25c65dfaee0d8fa108620da744",
       "category": "asset"
     },
     {
@@ -74,9 +74,9 @@
     },
     {
       "path": "album_art_studio.py",
-      "size": 11544,
-      "sha256": "b7e04eb67132ab57fef45e04af68e3295eac01f2cbb7a4320145d4ae0a404795",
-      "md5": "34e223dcbdaa6d440786496058fde5b8",
+      "size": 11558,
+      "sha256": "4aec221fdb933cbd48348ccc999ae11febc592f5a5a2a0ba2417fa100d155c60",
+      "md5": "2f8ab1e5a2eaa586c9c3f4a001d08fc0",
       "category": "core"
     },
     {
@@ -213,6 +213,20 @@
       "category": "dsp"
     },
     {
+      "path": "bump_version.ps1",
+      "size": 1150,
+      "sha256": "4cc5550f19eebe001aa58b7947ba9db2d15f01612bcdfc97bbe704fd28a075ec",
+      "md5": "d16c49173165016dddde3a106a6af6a7",
+      "category": "asset"
+    },
+    {
+      "path": "bump_version.sh",
+      "size": 1379,
+      "sha256": "db06ddd2827ccfad334afc33913fef7db8c557327c3d74e7b53ffee4b9f98465",
+      "md5": "003692e5cbc44e84bf4ff2b1807ec480",
+      "category": "asset"
+    },
+    {
       "path": "cache_manager.py",
       "size": 2375,
       "sha256": "13772f6f4f1dea256dbfe1bca3c20cad668be89a62cfe841d7ebeca2d2c3a110",
@@ -222,8 +236,8 @@
     {
       "path": "cd_ripper.py",
       "size": 8203,
-      "sha256": "4cfb9b100e82d4b87c3c5d253070b86593a2ec12c80a5fda5534ce978d036427",
-      "md5": "e1ea21ad228ca50f51d1ccf48998c7c7",
+      "sha256": "c07d177a262448af24530ea4c6a22cef58c4dce29cc7db96616433edf456cddc",
+      "md5": "28a6d672b09de0b302e8abc5fc412191",
       "category": "core"
     },
     {
@@ -319,16 +333,16 @@
     },
     {
       "path": "docs_generator.py",
-      "size": 71519,
-      "sha256": "0ecca31f7cf11adc72e70925f8cdac513b25c33376f9897f126f4f7564a7a939",
-      "md5": "ca7f713eb844787c441408cf4d668506",
+      "size": 71502,
+      "sha256": "41062f9cc941b8d2e62ebd43cd01142bbe297b0c39be86b9bf4b12aca9989d7a",
+      "md5": "90059d3219b7774a96f42edb150a0647",
       "category": "core"
     },
     {
       "path": "downloader_engine.py",
-      "size": 20442,
-      "sha256": "63e8a64488021f068784ab5c9e4c4ec2ae3ee02b17a593ed16810a6311cd46d8",
-      "md5": "ec40665c8953c6399f0dc1a778196cf4",
+      "size": 20437,
+      "sha256": "2e8a3f21887bd3b06a30b3e117af026734fe1aa458c86956d80c2788e0bef85d",
+      "md5": "500aeb7b47fc415b11df80f7758462c2",
       "category": "core"
     },
     {
@@ -389,9 +403,9 @@
     },
     {
       "path": "library_organizer.py",
-      "size": 8814,
-      "sha256": "7453de343b967209278d2433d6f9a872ed16629b4ecd8271665b2dffde481ed7",
-      "md5": "696a7234334e2eb67d968f9ed224a71d",
+      "size": 8802,
+      "sha256": "52062e8c68e56532b4be0146f62eb7d78b35521ec54cd06f6ab15976dd584a98",
+      "md5": "81f3f0898a6291ad711c252c56a9a507",
       "category": "core"
     },
     {
@@ -501,9 +515,9 @@
     },
     {
       "path": "modern_lyrics_downloader.py",
-      "size": 91546,
-      "sha256": "57d7a91c52a3ce917762b7d38fc3b7fb50add3296e2e8647254e277277f6b807",
-      "md5": "aa3c0e84c111ec3997e8292362493a16",
+      "size": 91551,
+      "sha256": "a8cb4c6330d1d7c4f290970643409a71ca2e720b590ef425ec7cf8d49c54dcd4",
+      "md5": "8a37893d0d107bce21ae9134bd5c91c0",
       "category": "core"
     },
     {
@@ -557,9 +571,9 @@
     },
     {
       "path": "pubspec.yaml",
-      "size": 1132,
-      "sha256": "1b190cff6775773e48719f4ab87af34f62043f116b2fed1836253b7e6d74549b",
-      "md5": "aa152e188c28efe0dd89b502d0d8d56a",
+      "size": 1090,
+      "sha256": "7b1141fb4d956c3b358175a080b292bf935a374fc02d2e0ee2dca8cf7f4b1927",
+      "md5": "cde46141ce5dfa095efeb9a2106a8e14",
       "category": "config"
     },
     {
@@ -614,8 +628,8 @@
     {
       "path": "scrobbler.py",
       "size": 12569,
-      "sha256": "a68b9bc3c8b61faff3aac4e89fe91c8de43f50602228dcf096f71b55b6228147",
-      "md5": "3764c39bb9ce2ffdb75f0c9f0980b2ff",
+      "sha256": "8c1e4d67a4b7b41d4cc4666fa1bbc3b7fea07b32959b960fde42764168a62232",
+      "md5": "74ed10eb583d626c7b65cb4eeb62e651",
       "category": "core"
     },
     {
@@ -628,8 +642,8 @@
     {
       "path": "sonance.py",
       "size": 129459,
-      "sha256": "48e13f032d5c87bc8ccf61cd5932c86cf50dcc71f9d922a8e1d68b87e4a0792d",
-      "md5": "feafd31210c8ed8cd3c5efad020bdddc",
+      "sha256": "5ac799727798f0a88608a796312aa76fe9151be48d000280a4b966df58f294f2",
+      "md5": "e43fbd6edd96a39ad0cb451e90faa2f3",
       "category": "core"
     },
     {
@@ -669,9 +683,9 @@
     },
     {
       "path": "tag_editor.py",
-      "size": 13796,
-      "sha256": "dcf55c66ea55c7528753693e9e844e0315d1f441ca87170a87c3c27e1a02b3e8",
-      "md5": "cb0aeb64e000fe94bf3c0793104c751c",
+      "size": 13803,
+      "sha256": "a034a395c9e1b85456e99f16762756ad6a39aaaaaa3559742b462b779d13955c",
+      "md5": "c868b9dd0597bfbd0ac87652e3632b57",
       "category": "core"
     },
     {
@@ -694,6 +708,13 @@
       "sha256": "847d3807ae53631ba61f32f78eba1b05fa3d9a4ac0076c95f8d12687c0080a9f",
       "md5": "99cc1a1c487630279356d8007e4b5f05",
       "category": "dsp"
+    },
+    {
+      "path": "update_version.py",
+      "size": 10714,
+      "sha256": "b1ac8abb2625b889b7c69eccb5123876c85ef0e6fe271ea5db2b4849d3f3ed0e",
+      "md5": "acab54287cf9421991774ccaa2e1c661",
+      "category": "core"
     },
     {
       "path": "vintage_compressor.py",
@@ -831,15 +852,15 @@
     {
       "path": "lib/core/services/tag_service.dart",
       "size": 3559,
-      "sha256": "86d78c2edb36c9558e7585414ba27e1938ebae05855a0240616e2b0a64b2d063",
-      "md5": "34cc9351d4182bd17b275b70b25990e7",
+      "sha256": "a96fa046d780328dab924bc43e1ae505087eae107745cb081ae6175668bb0e50",
+      "md5": "5303b330feb888d7a9ca7f9617de5848",
       "category": "asset"
     },
     {
       "path": "lib/core/services/update_service.dart",
       "size": 6546,
-      "sha256": "7170e00d353d2f32351195d2311efe6a041b86b73d3cc29620cc745a4e620711",
-      "md5": "82f3ca8240b04257034fb69459878998",
+      "sha256": "80abaf79342c6d84797518ae0f4eb2bccc4aa6a46cf14c9f608a5c562f03b2ff",
+      "md5": "f5c20b3ae119a1effb4e6945668333a1",
       "category": "asset"
     },
     {
@@ -928,44 +949,44 @@
     },
     {
       "path": "lib/ui/views/settings_view.dart",
-      "size": 16537,
-      "sha256": "e1d47bc962ccc04365bba1de90d41806ad271cc5ff678759ff7887b5b859be8c",
-      "md5": "9640f246ac5dd20845b3992c82aea89b",
+      "size": 16503,
+      "sha256": "457758782c5743d69f34c23609f16766da00de908cacac56583f8b3c55def81f",
+      "md5": "37684872c6db4e16ced0e343ced6f8d2",
       "category": "ui"
     },
     {
       "path": "linux/CMakeLists.txt",
       "size": 330,
-      "sha256": "30740ca3ca73f11f43563c6a49de43d6994fe4f5c6aa1271df368578ddf4bc85",
-      "md5": "185955d82321a1941e6c163bc30174df",
+      "sha256": "0173c2a810c37fe09aeec496b40afc3cef3bf6ed168ba96ca9aee21672589f4c",
+      "md5": "14048c342887d0a78c63c2facac82fac",
       "category": "docs"
     },
     {
       "path": "macos/Runner/Info.plist",
       "size": 1142,
-      "sha256": "965fd8482ef2128a4b4cf2b866b371e54e14e2cd0b6e5e95d73d414d3ad36c0c",
-      "md5": "fbdf3eb0788a5a1ce9c85491b5b21d53",
+      "sha256": "4293bc709a79ccf1fb1407cc212e9d4058acb1d5cc31b4ae194ff2520f941770",
+      "md5": "eaf977dc6a8b39266fdda23db240e314",
       "category": "asset"
     },
     {
       "path": "ui/index.html",
-      "size": 1116351,
-      "sha256": "013ca6b7a4183110a49e465ee00ce634826c191f2066728a53ceb804bd18577c",
-      "md5": "3ce1863c13d90e82cd8466f4a3b1dbdd",
+      "size": 1095582,
+      "sha256": "bf5ff16477dca5203362e1c54c19463ce95cb5ad9496cd5cd48eac5abe0c36e6",
+      "md5": "8f0ceece8bbaf0283f2830cf790d81ff",
       "category": "ui"
     },
     {
       "path": "ui/manual.html",
-      "size": 119042,
-      "sha256": "8c6d01f3df026259f42a7fc4a5defaf5621f06793b95a223c10c76de8384eef3",
-      "md5": "c2f2829801b3f5e714a8c9bd64084aeb",
+      "size": 119025,
+      "sha256": "0d5bc74d15a93a56057a3abb22372e12a322059fe97a0958e976df864823fa89",
+      "md5": "46e9fd6940e29eacedd71debd5b4e2a7",
       "category": "ui"
     },
     {
       "path": "windows/CMakeLists.txt",
       "size": 786,
-      "sha256": "6c7c8211d0433fec659862f95d4f3c734136bca9f24bc80b3d5bd143968c1b6a",
-      "md5": "f234b425504f6588d9eaac27fc57bbe2",
+      "sha256": "41ad27caf869e73d9696c4d4b6097d9fe77066bd0243784b39b83cc39c68a89b",
+      "md5": "c75abc3dcef22c80ffcfddbc5182cca1",
       "category": "docs"
     }
   ]
