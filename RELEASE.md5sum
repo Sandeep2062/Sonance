@@ -1,8 +1,8 @@
 c91e9febb271f1cc4bb2a7982eaf4bf5  LICENSE
 b845febb995295aa7c63022e9d009b7d  README.md
-12910b5491de94762b137366a9596cc0  RELEASE.manifest.json
-09ad63d4c9944f1cfbc6b29642c4280e  RELEASE.md5sum
-021eed40f67718cfef5e1a815a1ad2c0  RELEASE.sha256sum
+3753e1ff223960e1b7ef7a1ad97dc715  RELEASE.manifest.json
+51aa0d1708d49216c5ea27b989bb0bc9  RELEASE.md5sum
+14aa78d89f8a0d838606a71e4e583a68  RELEASE.sha256sum
 ab710a6799edb8263d64702507aecd40  ab_looper.py
 13ee5e3bfff751c2d33798214f86df06  accuraterip_verifier.py
 34e223dcbdaa6d440786496058fde5b8  album_art_studio.py
@@ -101,6 +101,7 @@ f9c1ca4136be9b93a6ebc0b5b767dafc  word_karaoke.py
 73f88c05be7128edabe383f2954e23a6  zenith_orchestrator.py
 e4b5ecd7b833311a5467f5a8462f771c  android/app/src/main/AndroidManifest.xml
 08359915b920fe834585858ad285eb07  android/app/src/main/kotlin/com/sandeep/sonance/MainActivity.kt
+74bc62c8f67b9a1e74ef8d403b3ffd0d  cache/exclusive_audio_config.json
 19d9797570d50db29948e3490d4f9d3c  lib/app.dart
 f56fb3b34d7d2d0342021bb6a78e4a7f  lib/main.dart
 6ec9cb65714c0509e7c35a762c58ccf7  lib/core/models/lyrics.dart

@@ -2,7 +2,7 @@
   "project": "Sonance Audiophile Workstation",
   "version": "3.6.0",
   "phase": "Phase 27 (Grand Finale Release)",
-  "timestamp": "2026-09-18 02:45:55 UTC",
+  "timestamp": "2026-09-18 02:51:32 UTC",
   "audit": {
     "total_modules_audited": 53,
     "passed_count": 53,
@@ -10,13 +10,13 @@
     "integrity_percent": "100.0%"
   },
   "summary": {
-    "total_files": 134,
-    "total_bytes": 2963544,
+    "total_files": 135,
+    "total_bytes": 2965032,
     "total_bytes_formatted": "2.83 MB",
     "categories": {
       "asset": 26,
       "docs": 3,
-      "config": 2,
+      "config": 3,
       "core": 69,
       "dsp": 24,
       "ui": 10
@@ -39,23 +39,23 @@
     },
     {
       "path": "RELEASE.manifest.json",
-      "size": 31636,
-      "sha256": "dee468437df31eee0aec9ea767a578e8ae690561192547072264fdef711795da",
-      "md5": "12910b5491de94762b137366a9596cc0",
+      "size": 32420,
+      "sha256": "02d6136ffdfd180754f7e9af2a7e34422a524e79a5df688b781ea25992647230",
+      "md5": "3753e1ff223960e1b7ef7a1ad97dc715",
       "category": "config"
     },
     {
       "path": "RELEASE.md5sum",
-      "size": 7425,
-      "sha256": "dfec99f6dce1196c0ef8d459facef5313fcda0051cd1d83f8d2fbc2a20a1fba6",
-      "md5": "09ad63d4c9944f1cfbc6b29642c4280e",
+      "size": 7667,
+      "sha256": "1cb86fbf5e97fbf3a949a52f5c2cd06b75e3f0aded4907d5e694b8fb4db7de18",
+      "md5": "51aa0d1708d49216c5ea27b989bb0bc9",
       "category": "asset"
     },
     {
       "path": "RELEASE.sha256sum",
-      "size": 11617,
-      "sha256": "d86316366ea6842cbed3a27cf12f39fcf3c9196d5ca847e20f5643e93d7fcacc",
-      "md5": "021eed40f67718cfef5e1a815a1ad2c0",
+      "size": 11955,
+      "sha256": "d29e35bf58e9b4eaeaefa1dc541662414a37e510d8a20ad9c32b9a932a245d2a",
+      "md5": "14aa78d89f8a0d838606a71e4e583a68",
       "category": "asset"
     },
     {
@@ -743,6 +743,13 @@
       "sha256": "0dd129d2d951584161cb577e6ace23a6a1c26ab02ad1694b577a023226d36018",
       "md5": "08359915b920fe834585858ad285eb07",
       "category": "asset"
+    },
+    {
+      "path": "cache/exclusive_audio_config.json",
+      "size": 124,
+      "sha256": "66bf2fa6ce1e199af60c343bb3a143835dcc8775d840eece3651ff96583c9281",
+      "md5": "74bc62c8f67b9a1e74ef8d403b3ffd0d",
+      "category": "config"
     },
     {
       "path": "lib/app.dart",
