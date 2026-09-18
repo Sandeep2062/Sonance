@@ -69,7 +69,7 @@ class TagService {
       final url = 'https://musicbrainz.org/ws/2/recording/?query=$query&fmt=json';
       final res = await http.get(
         Uri.parse(url),
-        headers: {'User-Agent': 'Sonance/3.6.2 (https://github.com/Sandeep2062/Sonance)'},
+        headers: {'User-Agent': 'Sonance/3.6.3 (https://github.com/Sandeep2062/Sonance)'},
       ).timeout(const Duration(seconds: 6));
 
       if (res.statusCode == 200) {

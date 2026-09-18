@@ -123,7 +123,7 @@ import zenith_orchestrator
 import exclusive_audio_engine
 import sonance_paths
 
-APP_VERSION = "3.6.2"
+APP_VERSION = "3.6.3"
 GITHUB_REPO = "Sandeep2062/Sonance"
 APP_DIR = Path(__file__).parent.resolve()
 UI_PATH = APP_DIR / "ui" / "index.html"

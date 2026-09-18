@@ -1,8 +1,8 @@
 {
   "project": "Sonance Audiophile Workstation",
-  "version": "3.6.2",
+  "version": "3.6.3",
   "phase": "Phase 27 (Grand Finale Release)",
-  "timestamp": "2026-09-18 05:06:22 UTC",
+  "timestamp": "2026-09-18 05:12:29 UTC",
   "audit": {
     "total_modules_audited": 53,
     "passed_count": 53,
@@ -33,29 +33,29 @@
     {
       "path": "README.md",
       "size": 19985,
-      "sha256": "5c3ae650f325652baf0710602ba77de97cb00a775c2102ca347c76ae1fd6343e",
-      "md5": "c1152be9cd5f35204093754a6ef0e18c",
+      "sha256": "cdb4a89c99ec00d80837ac6c16eb721cc2ac31326d1a8018300c45e50d757d1c",
+      "md5": "5b565a88c7c92c0ff7b12621345e96f6",
       "category": "docs"
     },
     {
       "path": "RELEASE.manifest.json",
       "size": 40542,
-      "sha256": "38c68a8b3e4b0ee2c2de87bf4fa394b370c877c75ca7b742d2cad5e76a65c18b",
-      "md5": "2b3b2eba925bde6b8dc7021da795ce90",
+      "sha256": "af45aefb71801ce7cee8552e097691e19f2f0d2aaa3ad89068011d9f5b24dae1",
+      "md5": "f9c2f99f510057d0ea6edc215f27e524",
       "category": "config"
     },
     {
       "path": "RELEASE.md5sum",
       "size": 9827,
-      "sha256": "1c0a7dca2bdcac517f68eb3dd5378b05a851c9fe1c096968596bf4d3b66668fc",
-      "md5": "ec7fefc9a2d2b6d48b453ccbe6115d91",
+      "sha256": "0a0e80010b0432bac28d8654c1087ebc7cd90711e40579b8f7b064b4e3bfc96a",
+      "md5": "6e05dbddad79024206729bfcf39aa3b9",
       "category": "asset"
     },
     {
       "path": "RELEASE.sha256sum",
       "size": 15171,
-      "sha256": "21bac33682e65fa4f5c58499edbbee999ae4d8ac9bff76914b7d749ea2edc362",
-      "md5": "1e47f936ffa11dfb773d0eb0f17e7db9",
+      "sha256": "baad6d6615d14801e7cada5862e93df16915a80ceb60e7c32163073986b00dfe",
+      "md5": "a16dcc0f7984c4702511881cf7232136",
       "category": "asset"
     },
     {
@@ -236,8 +236,8 @@
     {
       "path": "cd_ripper.py",
       "size": 8203,
-      "sha256": "4466b8766cb116503cc144bac13361765912a50f7807a08e51d1e693e33720ed",
-      "md5": "76f5eb88887fd43086e7c9cea41b6671",
+      "sha256": "e2058224a5299d95d73ddbd7c23030c2e6b184f3d8c2d518e6b1bd0314157711",
+      "md5": "2ebf92594a839b876588b51bc631b061",
       "category": "core"
     },
     {
@@ -334,8 +334,8 @@
     {
       "path": "docs_generator.py",
       "size": 71502,
-      "sha256": "5eafef01e7865a7eb97bc2cf290009be79851d84722bd981b68534f854cd36ea",
-      "md5": "266fa89d578e109ca78fb480c60df87f",
+      "sha256": "36c4006c547444e38d9029921c6ff6ce3c362055dcb01ef5df2486f3cec3cbd0",
+      "md5": "8cda9dd308719af5e36dcfbf8db7a59c",
       "category": "core"
     },
     {
@@ -523,8 +523,8 @@
     {
       "path": "modern_lyrics_downloader.py",
       "size": 96688,
-      "sha256": "1b5049ded2494385b548e33b831d6b62b08a011c0101256406a4bc5a08d0d8fa",
-      "md5": "5e0ede69aa0983211182c6d5c51ab15d",
+      "sha256": "9732f66d6cd484840c25cc958e9276210c127a3686546939cd3ccdfcc749c969",
+      "md5": "ae98e472c400f9c5852da33e54d94500",
       "category": "core"
     },
     {
@@ -579,15 +579,15 @@
     {
       "path": "pubspec.yaml",
       "size": 1090,
-      "sha256": "6bef5b8cd7d3a8cd1035269cb979d7d17007343a4ef1c403c71c520f163801d4",
-      "md5": "81590318edd5036d1750ad4370f0d28b",
+      "sha256": "d1cd52944e45ffa92f45673cc69d947b12fcd7c2b050053fff90e25ab2302097",
+      "md5": "e11d24be5624bf1a5648a9668f11bf24",
       "category": "config"
     },
     {
       "path": "release_packager.py",
       "size": 18352,
-      "sha256": "662fa1e52725f7ef3a7f8d5145ed487ccd47dfafdf8a2010ba32e0d7c6af0980",
-      "md5": "aae1db6ae9840a6e9000f00b4955b5fc",
+      "sha256": "b16263ebd4a81211111993d1c8ad76f3c064c589e3d1f6394c85c12ed7151a0d",
+      "md5": "1a9f4071dc8164f83445233f6d609fcf",
       "category": "core"
     },
     {
@@ -635,8 +635,8 @@
     {
       "path": "scrobbler.py",
       "size": 12574,
-      "sha256": "45f38b0828e4628fabf64b449b33a7f3ac0bf2325defd2913d9a27cf3f54685f",
-      "md5": "b5a79c4115d5b862c0df370469c81c93",
+      "sha256": "d571d43d6e622622423e9f3e00764e91581b91bc5d2881264f159ad46ba8bcbe",
+      "md5": "fefc6cbc10b614ea024c668a1fc87a7c",
       "category": "core"
     },
     {
@@ -649,8 +649,8 @@
     {
       "path": "sonance.py",
       "size": 129459,
-      "sha256": "d0bf4821143c70ac1b5bdb8d096f607a03b1375d5dacbb03db586099e3c8ca49",
-      "md5": "0c7f54d947489865544e0929d4b4bf97",
+      "sha256": "9f1a0f73e7aadab58143bf18831c3d9e6b2d4b8023a2f516557b6e941526243d",
+      "md5": "af568073d9acafb226fe139b57b16365",
       "category": "core"
     },
     {
@@ -698,8 +698,8 @@
     {
       "path": "tag_editor.py",
       "size": 13803,
-      "sha256": "3886a8c4905fac7ecadb5f0d80c5d2796470dae51118b14fd59ed438251aa834",
-      "md5": "e94721618122d811c2cdf9446ea813d0",
+      "sha256": "e9e2a36716e0689841922b4e1b6b3c813de2f6481a5cef1cfeef0531e607802c",
+      "md5": "97fb072e00d35a08512afe532a7c824e",
       "category": "core"
     },
     {
@@ -817,8 +817,8 @@
     {
       "path": "android/app/build.gradle",
       "size": 2284,
-      "sha256": "2800e8b94abd7e11653045c0125807dbe641a155bdf966364c0b3f6bda2b84b8",
-      "md5": "be0ceed477b4a05879b3f9d067081eb5",
+      "sha256": "fa92ee749e9e7a1cb35e074ebd578c0f97586cfcffd9106133059d5aed736b56",
+      "md5": "cd46a72dfeb4a7e354ecf568da595abc",
       "category": "ui"
     },
     {
@@ -1027,15 +1027,15 @@
     {
       "path": "lib/core/services/tag_service.dart",
       "size": 3559,
-      "sha256": "d8ea140a7a113966947e32a08c45cc88569a6b0d5f6ece57abeabcb73b35976b",
-      "md5": "f3a012bca53444553b3d6ebb2ccd7764",
+      "sha256": "c638072c907aa76c9dd1dfc354a5bdb16e08ab3835873b381ae0121eb27c7c22",
+      "md5": "02d74421a61ef5531f6a42ad21e4d17f",
       "category": "asset"
     },
     {
       "path": "lib/core/services/update_service.dart",
       "size": 6546,
-      "sha256": "d178c363cea8bb9bd8f6383889d827d20cb8800c454438909eaefb5f7ee15e90",
-      "md5": "c35d21991a270a9120a861560b3ca355",
+      "sha256": "b4d2a1da398d0d680caf3a35e88c1ab2ce9f5aef196871a7f2a9b39d9a56579f",
+      "md5": "daf07584fbb0a250721158853f35367a",
       "category": "asset"
     },
     {
@@ -1125,15 +1125,15 @@
     {
       "path": "lib/ui/views/settings_view.dart",
       "size": 16503,
-      "sha256": "fcae017b457d09175872ba2e3261c0b62f5342cc1b89632e45522dde24541b72",
-      "md5": "eb85eb9a58fbef91530b15f3bbe3707f",
+      "sha256": "2a102c727605311baa7bb51f8d5168f914b700fbcb26b7a44b440f82d3e53442",
+      "md5": "d1e68455ab31c0606fcc74a835890f98",
       "category": "ui"
     },
     {
       "path": "linux/CMakeLists.txt",
       "size": 330,
-      "sha256": "315e57e58c12eed13ec5ff2201fe5820137917a3139a527f34f3686148ec94c2",
-      "md5": "fe80006a8994b82df52f177df03df932",
+      "sha256": "a5dcda43887e7ab0766d9d48876e36826ed22a5af1772e1b58211164f3d76b43",
+      "md5": "293f089a673c03444d9a74b215a7e52d",
       "category": "docs"
     },
     {
@@ -1146,8 +1146,8 @@
     {
       "path": "macos/Runner/Info.plist",
       "size": 1142,
-      "sha256": "c9e97fe5dd3c7cff9b1d0ee527c686fa3a46a8e1d7537f4790f9956a1a95960e",
-      "md5": "382721591b65ae3d7597467549c9ab66",
+      "sha256": "e5e64d5037aaa902d0184ae57832768b0f13fd1f5a62dadd9ee779e53af981a1",
+      "md5": "8689c80193f302d08542215102c1c542",
       "category": "asset"
     },
     {
@@ -1160,8 +1160,8 @@
     {
       "path": "ui/index.html",
       "size": 1102534,
-      "sha256": "3c549ab0cea558ec3df3e92d430710dc1ca87632bdc515b73031982eb2d5edb7",
-      "md5": "e9f320116df6558ab676235054274f38",
+      "sha256": "f972121958d4f16280714430823bddccbde33a9b9a2ec6851fdc7ed821d15e04",
+      "md5": "5ef5327978fb4cef4ff959221cd19f8e",
       "category": "ui"
     },
     {
@@ -1174,22 +1174,22 @@
     {
       "path": "ui/manual.html",
       "size": 119025,
-      "sha256": "25cd91d0b0f0385f617c0fecaa6b7ee64df1772cd630abf58b1950016b208a54",
-      "md5": "e245fe769a56fe09276e68b870b6b2fe",
+      "sha256": "2dda5fa9fc3ef1f0f124b474605da38abf12d1363d460188b1d0acc98e4a47c6",
+      "md5": "6a575e1af9a41e354040655dae2ffee9",
       "category": "ui"
     },
     {
       "path": "windows/CMakeLists.txt",
       "size": 786,
-      "sha256": "ad695f7270769941ab7a2adbecdc6c8558ded709833aed94a2735259ba5a523f",
-      "md5": "36f5b1e4af64925a6dd90a0df3d246cc",
+      "sha256": "841269e668aff328bb1fd278ad914951002fb3c6e9c3c13aa9cff3000fb29d75",
+      "md5": "1b0136b0aacf8e57fa5f68393fb40433",
       "category": "docs"
     },
     {
       "path": "windows/installer.iss",
       "size": 1799,
-      "sha256": "9c4229c0140314b88d6f8433efdd36ab2c9ddb30e9e30a95699eb9aca8a638aa",
-      "md5": "f20972a49a26e228b1df19ce4ee52a32",
+      "sha256": "ea38c2104df3ac4d5ca1527c421d4e367595535c3ca31066f575c25528169dce",
+      "md5": "1dce0213b603bd5919800c79628c1fd8",
       "category": "asset"
     }
   ]
