@@ -12,7 +12,7 @@ import webbrowser
 from pathlib import Path
 from typing import Dict, Any, Optional
 
-APP_VERSION = "3.3.0"
+APP_VERSION = "3.4.0"
 WORKSTATION_NAME = "Sonance Audiophile Workstation"
 ROOT_DIR = Path(__file__).parent.resolve()
 DEFAULT_MANUAL_PATH = ROOT_DIR / "ui" / "manual.html"
@@ -347,6 +347,16 @@ PHASES_DATA = [
         "desc": "Dynamic spectral resonance tracking inspired by Oeksound Soothe2 and Soundtheory Gullfoss. Computes 2048-point STFT moving spectral envelope baselines across 40 Bark frequency bands, surgically suppressing harsh sibilance, ringing room modes, nasal vocal honk, and abrasive cymbal bite with 5ms/50ms ballistics and difference Delta 'Listen Mode'.",
         "dsp_math": "Dynamic notch attenuation: \\Delta G(f) = -\\text{depth} \\cdot \\max(0, P_{\\text{prominence}}(f) - \\text{threshold})^{1 + 0.25Q}; Ballistics: g[n] = g[n-1] + \\alpha (g_{\\text{target}} - g[n-1])",
         "features": ["Dynamic STFT spectral resonance tracking across 40 critical Bark frequency bands", "Surgical prominence notch attenuation carving out acoustic harshness and whistle modes", "Ballistic envelope smoothing (5ms attack / 50ms release) for transparent de-resonating", "Delta 'Listen Mode' difference auditioning isolating strictly the suppressed harshness", "Low-Cut and High-Cut focus bounding filters targeting specific problem frequency zones", "True-Peak brickwall safety limiter (-0.2 dBFS) with 24-bit linear PCM WAV export"]
+    },
+    {
+        "phase": 34,
+        "title": "Vintage Optical & Variable-Mu Master Compressor Studio",
+        "category": "Mastering & Vintage Dynamics",
+        "modules": ["vintage_compressor.py"],
+        "cli": "python sonance.py --la2a in.wav [out.wav] --reduction 55 --drive 1.25 | --fairchild in.wav --tc 5 --makeup 2.0",
+        "desc": "Physical modeling of dual legendary studio dynamics: the Teletronix LA-2A T4 electro-optical cell with dual-stage memory release (60ms fast initial decay + 0.5s-4.5s program-dependent memory tail) and R37 high-frequency emphasis; paired with the Fairchild 670 remote-cutoff variable-mu dual-triode 6386 tube compressor with 6 stepped time-constant positions, sidechain HPF (60-185 Hz), analog tube saturation, and True-Peak safety limiting.",
+        "dsp_math": "LA-2A T4 optical decay: y_{\\text{rel}}(t) = 0.5 e^{-t/0.06} + 0.5 e^{-t/\\tau_{\\text{slow}}}; \\quad \\text{Fairchild 6386 Variable-Mu}: \\mu(V_g) = \\frac{\\mu_0}{1 + k \\cdot |V_g|^{1.2}}",
+        "features": ["Teletronix LA-2A T4 electro-optical attenuator with non-linear photocell luminescence response", "Dual-stage optical release with multi-second memory accumulation effect", "Fairchild 670 remote-cutoff variable-mu dual-triode 6386 physical tube model", "6 classic stepped hardware time-constant positions including dual-time auto-release", "Sidechain high-pass filter (60, 90, 120, 185 Hz) preventing low-end pumping", "LA-2A R37 high-frequency sidechain emphasis trimming", "12AX7 / 6386 tube harmonic saturation & transformer warmth", "True-Peak brickwall safety limiter (-0.2 dBFS) with 24-bit linear PCM WAV export"]
     }
 ]
 
@@ -424,6 +434,16 @@ MATH_FORMULAS = [
         "name": "Dynamic Spectral Resonance Prominence & Ballistic Suppression",
         "formula": "P(f) = 20 \\log_{10}\\left(\\frac{|X(f)|}{\\text{Env}_{\\text{baseline}}(f)}\\right); \\quad \\Delta G(f) = -\\text{depth} \\cdot \\max(0, P(f) - T)^{1 + 0.25Q}",
         "explanation": "Extracts dynamic spectral prominence P(f) above a smoothed moving baseline. When prominence exceeds threshold T, applies frequency-dependent notch attenuation smoothed across time with 5ms attack and 50ms release ballistics."
+    },
+    {
+        "name": "Teletronix LA-2A T4 Electro-Optical Memory Decay",
+        "formula": "y_{\\text{rel}}(t) = 0.5 \\cdot e^{-t/0.060} + 0.5 \\cdot e^{-t/\\tau_{\\text{slow}}}, \\quad \\tau_{\\text{slow}} = 0.5 + \\min(4.0, 0.25 \\cdot \\text{History}_{\\text{GR}})",
+        "explanation": "Dual-stage photocell ballistic release modeled after cadmium sulfide (CdS) photoresistors: 50% initial release drops in 60ms, while the remaining 50% decay exhibits a multi-second memory tail scaling with sustained past gain reduction."
+    },
+    {
+        "name": "Fairchild 670 Variable-Mu Remote-Cutoff Gain Transfer",
+        "formula": "\\mu(V_g) = \\frac{\\mu_0}{1 + k \\cdot |V_g|^{1.2}}, \\quad \\text{GR}_{\\text{dB}} = 20 \\log_{10}\\left(\\frac{1}{1 + 1.6 \\cdot |V_g|^{1.15}}\\right)",
+        "explanation": "Remote-cutoff dual-triode 6386 tube physical model where rectified control voltage Vg dynamically reduces amplification factor mu without a fixed threshold or sharp knee, creating an ultra-smooth, continuous variable ratio."
     }
 ]
 
@@ -1151,7 +1171,7 @@ def build_manual_html() -> str:
                 <div class="meta-tags">
                     <span class="meta-tag">⚡ Version {APP_VERSION}</span>
                     <span class="meta-tag">🎼 {total_phases} Master Phases</span>
-                    <span class="meta-tag">🎛️ 50 DSP Engines &amp; Core Modules</span>
+                    <span class="meta-tag">🎛️ 51 DSP Engines &amp; Core Modules</span>
                     <span class="meta-tag">🌐 100% Offline Single-File Architecture</span>
                 </div>
             </div>

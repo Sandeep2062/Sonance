@@ -118,8 +118,9 @@ import console_channel_strip
 import ambisonic_hoa
 import subharmonic_bass
 import resonance_suppressor
+import vintage_compressor
 
-APP_VERSION = "3.3.0"
+APP_VERSION = "3.4.0"
 GITHUB_REPO = "Sandeep2062/Sonance"
 APP_DIR = Path(__file__).parent.resolve()
 UI_PATH = APP_DIR / "ui" / "index.html"
@@ -1963,6 +1964,42 @@ class LyricsAPI:
             listen_mode=listen_mode,
             dry_wet=dry_wet,
             output_gain_db=output_gain_db,
+        )
+
+    # ------------------ Phase 34: Vintage Optical & Variable-Mu Compressor ------------------
+    def get_vintage_compressor_presets(self) -> Dict[str, Any]:
+        """Returns factory presets for Vintage Optical & Variable-Mu Master Compressor Studio."""
+        return vintage_compressor.FACTORY_PRESETS
+
+    def render_vintage_compressor(
+        self,
+        input_path: str,
+        output_path: Optional[str] = None,
+        preset: str = "la2a_smooth_vocal",
+        mode: Optional[str] = None,
+        peak_reduction: Optional[float] = None,
+        sidechain_hpf_hz: Optional[float] = None,
+        hf_emphasis: Optional[bool] = None,
+        time_constant: Optional[int] = None,
+        tube_drive: Optional[float] = None,
+        makeup_gain_db: Optional[float] = None,
+        dry_wet: Optional[float] = None,
+        stereo_link: Optional[bool] = None,
+    ) -> Dict[str, Any]:
+        """Renders audio through Teletronix LA-2A or Fairchild 670 vintage dynamics physical model."""
+        return vintage_compressor.render_vintage_compressor(
+            input_path=input_path,
+            output_path=output_path,
+            preset=preset,
+            mode=mode,
+            peak_reduction=peak_reduction,
+            sidechain_hpf_hz=sidechain_hpf_hz,
+            hf_emphasis=hf_emphasis,
+            time_constant=time_constant,
+            tube_drive=tube_drive,
+            makeup_gain_db=makeup_gain_db,
+            dry_wet=dry_wet,
+            stereo_link=stereo_link,
         )
 
     def _save_last_folder(self, folder: str):

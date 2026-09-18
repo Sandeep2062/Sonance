@@ -1291,6 +1291,9 @@
       <button class="btn btn-secondary" onclick="openResonanceModal()" style="padding:5px 9px; font-size:11px;" id="resonanceHeaderBtn" title="Dynamic Spectral Resonance Suppressor & Surgical De-Resonator Studio">
         🎯 De-Resonator
       </button>
+      <button class="btn btn-secondary" onclick="openVintageCompModal()" style="padding:5px 9px; font-size:11px;" id="vintageCompHeaderBtn" title="Vintage Optical & Variable-Mu Master Compressor Studio (LA-2A & Fairchild 670)">
+        📻 Vintage Tube
+      </button>
       <button class="btn btn-secondary" onclick="openLrcStudioModal()" style="padding:5px 9px; font-size:11px;" id="lrcStudioHeaderBtn" title="Interactive LRC Studio & Live Time-Stamper">
         ✍️ LRC Studio
       </button>
@@ -7992,6 +7995,173 @@
     </div>
   </div>
 
+  <!-- Phase 34: Vintage Optical & Variable-Mu Master Compressor Modal -->
+  <div class="modal-backdrop" id="vintageCompModal" style="display:none;">
+    <div class="modal-card" style="width:880px; max-width:96vw; background:#161926; border:1px solid var(--border); border-radius:12px; box-shadow:0 12px 36px rgba(0,0,0,0.7); overflow:hidden;">
+      <div style="padding:16px 20px; background:#121520; border-bottom:1px solid var(--border); display:flex; justify-content:space-between; align-items:center;">
+        <div class="modal-title" style="font-size:14px; font-weight:700; display:flex; align-items:center; gap:8px;">
+          <span>📻</span>
+          <span>Vintage Optical &amp; Variable-Mu Master Compressor Studio</span>
+        </div>
+        <button onclick="closeVintageCompModal()" style="background:none; border:none; color:var(--text-muted); font-size:16px; cursor:pointer;">✕</button>
+      </div>
+
+      <div style="padding:20px; max-height:75vh; overflow-y:auto; display:flex; flex-direction:column; gap:16px;">
+        <div style="font-size:11px; color:var(--text-dim); line-height:1.5;">
+          Physical modeling of dual iconic vintage studio dynamics: the <strong>Teletronix LA-2A</strong> T4 electro-optical cell featuring dual-stage program-dependent memory release (60ms initial decay + 0.5s to 4.5s multi-second memory tail), and the <strong>Fairchild 670</strong> remote-cutoff variable-mu dual-triode 6386 tube compressor with 6 stepped time constants, sidechain HPF, and warm transformer harmonic saturation.
+        </div>
+
+        <div>
+          <label style="font-size:11px; font-weight:600; color:var(--text-muted); display:block; margin-bottom:6px;">Target Audio File:</label>
+          <div style="display:flex; gap:8px;">
+            <input type="text" id="vintageCompTargetInput" class="search-input" style="width:100%; font-size:11px;" placeholder="Path to input audio file...">
+            <button class="btn btn-secondary" onclick="loadActiveTrackForVintageComp()" style="font-size:11px; padding:6px 12px; white-space:nowrap;">Active Track</button>
+          </div>
+        </div>
+
+        <div>
+          <label style="font-size:11px; font-weight:600; color:var(--text-muted); display:block; margin-bottom:6px;">Custom Export Destination (Optional):</label>
+          <input type="text" id="vintageCompOutputInput" class="search-input" style="width:100%; font-size:11px;" placeholder="Auto-generated if empty: <original>_vintage_master.wav">
+        </div>
+
+        <!-- Topology Model Selector -->
+        <div>
+          <label style="font-size:11px; font-weight:600; color:var(--text-muted); display:block; margin-bottom:6px;">Vintage Compressor Topology:</label>
+          <div style="display:flex; gap:12px;">
+            <button class="btn btn-primary" id="vcompModeLa2aBtn" onclick="setVintageCompMode('la2a')" style="font-size:11px; padding:6px 16px; flex:1;">
+              💡 Teletronix LA-2A (T4 Optical)
+            </button>
+            <button class="btn btn-secondary" id="vcompModeFairchildBtn" onclick="setVintageCompMode('fairchild')" style="font-size:11px; padding:6px 16px; flex:1;">
+              ⚡ Fairchild 670 (Variable-Mu Tube)
+            </button>
+          </div>
+        </div>
+
+        <!-- Factory Presets Selector -->
+        <div>
+          <label style="font-size:11px; font-weight:600; color:var(--text-muted); display:block; margin-bottom:6px;">Vintage Compressor Presets:</label>
+          <div style="display:flex; flex-wrap:wrap; gap:8px;">
+            <button class="btn btn-secondary" onclick="applyVintageCompPreset('la2a_smooth_vocal')" style="font-size:11px; padding:5px 10px;">🎤 LA-2A Silky Vocal Leveler</button>
+            <button class="btn btn-secondary" onclick="applyVintageCompPreset('la2a_acoustic_warmth')" style="font-size:11px; padding:5px 10px;">🎸 LA-2A Acoustic &amp; Piano</button>
+            <button class="btn btn-secondary" onclick="applyVintageCompPreset('fairchild_master_bus')" style="font-size:11px; padding:5px 10px;">🎛️ Fairchild Mix Bus Glue</button>
+            <button class="btn btn-secondary" onclick="applyVintageCompPreset('fairchild_drum_crush')" style="font-size:11px; padding:5px 10px;">🥁 Fairchild Drum Punch</button>
+            <button class="btn btn-secondary" onclick="applyVintageCompPreset('vintage_warm_glue')" style="font-size:11px; padding:5px 10px;">✨ Vintage Master Warmth</button>
+          </div>
+        </div>
+
+        <!-- Dual Column: Dynamics & Tone Shaping -->
+        <div style="display:grid; grid-template-columns: 1fr 1fr; gap:16px;">
+          <!-- Left: Compression Dynamics -->
+          <div style="background:#121520; border:1px solid var(--border); border-radius:10px; padding:14px; display:flex; flex-direction:column; gap:12px;">
+            <div style="font-size:12px; font-weight:700; color:var(--cyan); border-bottom:1px solid var(--border); padding-bottom:6px;">
+              ⚡ DYNAMICS &amp; TIME CONSTANTS
+            </div>
+
+            <div>
+              <div style="display:flex; justify-content:space-between; margin-bottom:4px;">
+                <label style="font-size:11px; font-weight:600; color:var(--text-muted);">Peak Reduction / Threshold:</label>
+                <span id="vintageCompReductionVal" style="font-size:11px; color:var(--cyan); font-weight:600;">50%</span>
+              </div>
+              <input type="range" id="vintageCompReductionSlider" min="0" max="100" step="1" value="50" style="width:100%;" oninput="document.getElementById('vintageCompReductionVal').innerText = this.value + '%'">
+              <div style="font-size:10px; color:var(--text-dim); margin-top:2px;">Compression drive into the T4 optical cell or variable-mu grid.</div>
+            </div>
+
+            <!-- Fairchild Time Constant Container -->
+            <div id="vcompTcContainer">
+              <label style="font-size:10px; font-weight:600; color:var(--text-muted); display:block; margin-bottom:4px;">Fairchild Time Constant Position:</label>
+              <select id="vintageCompTcSelect" class="search-input" style="width:100%; font-size:11px;">
+                <option value="1">Pos 1: 0.2ms / 0.3s (Fast Transients)</option>
+                <option value="2">Pos 2: 0.2ms / 0.8s (Punchy Rhythm)</option>
+                <option value="3">Pos 3: 0.4ms / 2.0s (Vocal &amp; Bass)</option>
+                <option value="4">Pos 4: 0.4ms / 5.0s (Lush Acoustic)</option>
+                <option value="5" selected>Pos 5: 0.4ms / Auto (2s peak, 10s memory)</option>
+                <option value="6">Pos 6: 0.2ms / Auto (0.3s peak, 10s memory)</option>
+              </select>
+              <div style="font-size:10px; color:var(--text-dim); margin-top:2px;">Stepped attack/release network based on the 670 hardware rotary switch.</div>
+            </div>
+
+            <!-- LA-2A R37 HF Emphasis & Stereo Link -->
+            <div style="display:flex; flex-direction:column; gap:8px; margin-top:4px;">
+              <label style="display:flex; align-items:center; gap:8px; cursor:pointer; font-size:11px; font-weight:600; color:var(--gold);">
+                <input type="checkbox" id="vintageCompHfCheck" style="cursor:pointer;" checked>
+                <span>💡 LA-2A R37 HF Sidechain Emphasis (+4.5 dB &gt;1.2 kHz)</span>
+              </label>
+              <label style="display:flex; align-items:center; gap:8px; cursor:pointer; font-size:11px; font-weight:600; color:var(--cyan);">
+                <input type="checkbox" id="vintageCompStereoLinkCheck" style="cursor:pointer;" checked>
+                <span>🔗 Linked Stereo Sidechain (Prevents stereo image drift)</span>
+              </label>
+            </div>
+          </div>
+
+          <!-- Right: Tone Shaping & Tube Saturation -->
+          <div style="background:#121520; border:1px solid var(--border); border-radius:10px; padding:14px; display:flex; flex-direction:column; gap:12px;">
+            <div style="font-size:12px; font-weight:700; color:var(--gold); border-bottom:1px solid var(--border); padding-bottom:6px;">
+              🔥 ANALOG TUBE SATURATION &amp; FILTERS
+            </div>
+
+            <div>
+              <div style="display:flex; justify-content:space-between; margin-bottom:4px;">
+                <label style="font-size:11px; font-weight:600; color:var(--text-muted);">6386 / 12AX7 Tube Drive:</label>
+                <span id="vintageCompDriveVal" style="font-size:11px; color:var(--gold); font-weight:600;">1.25x</span>
+              </div>
+              <input type="range" id="vintageCompDriveSlider" min="1.0" max="2.5" step="0.05" value="1.25" style="width:100%;" oninput="document.getElementById('vintageCompDriveVal').innerText = parseFloat(this.value).toFixed(2) + 'x'">
+              <div style="font-size:10px; color:var(--text-dim); margin-top:2px;">Asymmetrical soft clipping and transformer iron harmonic thickness.</div>
+            </div>
+
+            <div style="display:grid; grid-template-columns: 1fr 1fr; gap:8px;">
+              <div>
+                <label style="font-size:10px; font-weight:600; color:var(--text-muted); display:block; margin-bottom:4px;">Sidechain HPF:</label>
+                <select id="vintageCompHpfSelect" class="search-input" style="width:100%; font-size:11px;">
+                  <option value="0">Bypass (Flat)</option>
+                  <option value="60">60 Hz</option>
+                  <option value="90" selected>90 Hz (Standard)</option>
+                  <option value="120">120 Hz (Tight)</option>
+                  <option value="185">185 Hz (Voice Focus)</option>
+                </select>
+                <div style="font-size:10px; color:var(--text-dim); margin-top:2px;">Prevents bass pumping.</div>
+              </div>
+              <div>
+                <label style="font-size:10px; font-weight:600; color:var(--text-muted); display:block; margin-bottom:4px;">Output Makeup Gain:</label>
+                <div style="display:flex; align-items:center; gap:6px; margin-top:4px;">
+                  <input type="range" id="vintageCompMakeupSlider" min="-6" max="12" step="0.5" value="2.5" style="width:100%;" oninput="document.getElementById('vintageCompMakeupVal').innerText = (this.value >= 0 ? '+' : '') + parseFloat(this.value).toFixed(1) + ' dB'">
+                  <span id="vintageCompMakeupVal" style="font-size:11px; color:var(--emerald); font-weight:600; min-width:48px;">+2.5 dB</span>
+                </div>
+              </div>
+            </div>
+
+            <div style="font-size:10px; color:var(--text-dim); line-height:1.4; margin-top:4px;">
+              The LA-2A T4 cell exhibits a dual-stage release: 50% decay completes in 60ms, while the remaining 50% releases over 0.5s to 4.5s depending on input density.
+            </div>
+          </div>
+        </div>
+
+        <!-- Master Mixing & Levels -->
+        <div style="background:#0e111a; border:1px solid var(--border); border-radius:8px; padding:12px; display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:12px;">
+          <div style="display:flex; align-items:center; gap:8px;">
+            <label style="font-size:11px; font-weight:600; color:var(--text-muted);">Parallel Dry / Wet Mix:</label>
+            <input type="range" id="vintageCompDryWetSlider" min="0" max="100" step="5" value="100" style="width:110px;" oninput="document.getElementById('vintageCompDryWetVal').innerText = this.value + '%'">
+            <span id="vintageCompDryWetVal" style="font-size:11px; color:var(--cyan); font-weight:600; min-width:36px;">100%</span>
+          </div>
+          <div style="font-size:10px; color:var(--text-dim);">Built-in True-Peak Brickwall Limiter (-0.2 dBFS safety ceiling) &amp; 24-bit PCM WAV</div>
+        </div>
+
+        <div style="display:flex; justify-content:space-between; align-items:center; margin-top:4px;">
+          <span id="vintageCompStatusText" style="font-size:11px; color:var(--text-dim);">Ready to process audio with vintage analog dynamics</span>
+          <button class="btn btn-primary" onclick="runVintageCompAction()" id="processVintageCompBtn" style="font-size:12px; padding:7px 20px;">
+            📻 Render Vintage Master
+          </button>
+        </div>
+
+        <div id="vintageCompOutputCard" style="background:#0b0d14; border:1px solid var(--border); border-radius:8px; padding:12px; font-family:monospace; font-size:11px; line-height:1.45; color:var(--cyan); min-height:80px; white-space:pre-wrap; overflow-x:auto;">Select audio file and click Render Vintage Master.</div>
+      </div>
+
+      <div style="padding:10px 16px; background:#121520; border-top:1px solid var(--border); display:flex; justify-content:space-between; align-items:center;">
+        <span style="font-size:10px; color:var(--text-dim);">Teletronix LA-2A T4 Electro-Optical &amp; Fairchild 670 Variable-Mu Tube Physics Model</span>
+        <button class="btn btn-secondary" onclick="closeVintageCompModal()">Close</button>
+      </div>
+    </div>
+  </div>
+
   <!-- Podcast & Long Mix Bookmark Resumption Toast (Phase 10) -->
   <div id="podcastResumeToast" style="display:none; position:fixed; bottom:85px; right:20px; z-index:9999; background:#131722; border:1px solid var(--border); box-shadow:0 8px 24px rgba(0,0,0,0.6); border-radius:10px; padding:10px 14px; align-items:center; gap:10px; backdrop-filter:blur(10px);">
     <span style="font-size:16px;">⏱️</span>
@@ -11008,6 +11178,7 @@
         closeHoaModal();
         closeBassModal();
         closeResonanceModal();
+        closeVintageCompModal();
         dismissPodcastResumeToast();
         const popup = document.getElementById('speedStudioPopup');
         if (popup) popup.style.display = 'none';
@@ -19505,6 +19676,165 @@
           }
           if (st) {
             st.innerText = 'Error processing spectral de-resonator';
+            st.style.color = 'var(--rose)';
+          }
+          if (outCard) outCard.innerText = '✕ Error: ' + (err.message || err);
+        });
+      }
+    }
+
+    // ------------------ Phase 34: Vintage Optical & Variable-Mu Compressor ------------------
+    let currentVintageCompMode = 'la2a';
+
+    function openVintageCompModal() {
+      const modal = document.getElementById('vintageCompModal');
+      if (modal) modal.style.display = 'flex';
+    }
+
+    function closeVintageCompModal() {
+      const modal = document.getElementById('vintageCompModal');
+      if (modal) modal.style.display = 'none';
+    }
+
+    function setVintageCompMode(m) {
+      currentVintageCompMode = m;
+      const la2aBtn = document.getElementById('vcompModeLa2aBtn');
+      const fcBtn = document.getElementById('vcompModeFairchildBtn');
+      const tcBox = document.getElementById('vcompTcContainer');
+
+      if (m === 'fairchild') {
+        if (fcBtn) { fcBtn.className = 'btn btn-primary'; }
+        if (la2aBtn) { la2aBtn.className = 'btn btn-secondary'; }
+        if (tcBox) tcBox.style.display = 'block';
+      } else {
+        if (la2aBtn) { la2aBtn.className = 'btn btn-primary'; }
+        if (fcBtn) { fcBtn.className = 'btn btn-secondary'; }
+        if (tcBox) tcBox.style.display = 'none';
+      }
+    }
+
+    function loadActiveTrackForVintageComp() {
+      if (state.currentTrack && state.currentTrack.path) {
+        const inp = document.getElementById('vintageCompTargetInput');
+        if (inp) inp.value = state.currentTrack.path;
+      } else {
+        showToast('No active track loaded in player');
+      }
+    }
+
+    const VINTAGE_COMP_PRESETS_DATA = {
+      la2a_smooth_vocal: { mode: 'la2a', pr: 55, hpf: '90', hf: true, tc: '5', drv: 1.25, mk: 3.5, mix: 100, link: true },
+      la2a_acoustic_warmth: { mode: 'la2a', pr: 40, hpf: '120', hf: false, tc: '5', drv: 1.15, mk: 2.0, mix: 90, link: true },
+      fairchild_master_bus: { mode: 'fairchild', pr: 45, hpf: '90', hf: false, tc: '5', drv: 1.20, mk: 1.5, mix: 100, link: true },
+      fairchild_drum_crush: { mode: 'fairchild', pr: 70, hpf: '60', hf: false, tc: '2', drv: 1.50, mk: 4.0, mix: 75, link: true },
+      vintage_warm_glue: { mode: 'la2a', pr: 35, hpf: '120', hf: false, tc: '4', drv: 1.30, mk: 1.0, mix: 85, link: true }
+    };
+
+    function applyVintageCompPreset(pKey) {
+      const p = VINTAGE_COMP_PRESETS_DATA[pKey];
+      if (!p) return;
+
+      setVintageCompMode(p.mode);
+
+      const pr = document.getElementById('vintageCompReductionSlider');
+      if (pr) { pr.value = p.pr; document.getElementById('vintageCompReductionVal').innerText = p.pr + '%'; }
+
+      const tc = document.getElementById('vintageCompTcSelect');
+      if (tc) tc.value = p.tc;
+
+      const hf = document.getElementById('vintageCompHfCheck');
+      if (hf) hf.checked = p.hf;
+
+      const link = document.getElementById('vintageCompStereoLinkCheck');
+      if (link) link.checked = p.link;
+
+      const drv = document.getElementById('vintageCompDriveSlider');
+      if (drv) { drv.value = p.drv; document.getElementById('vintageCompDriveVal').innerText = p.drv.toFixed(2) + 'x'; }
+
+      const hpf = document.getElementById('vintageCompHpfSelect');
+      if (hpf) hpf.value = p.hpf;
+
+      const mk = document.getElementById('vintageCompMakeupSlider');
+      if (mk) { mk.value = p.mk; document.getElementById('vintageCompMakeupVal').innerText = (p.mk >= 0 ? '+' : '') + p.mk.toFixed(1) + ' dB'; }
+
+      const dw = document.getElementById('vintageCompDryWetSlider');
+      if (dw) { dw.value = p.mix; document.getElementById('vintageCompDryWetVal').innerText = p.mix + '%'; }
+
+      showToast('Loaded Vintage Compressor preset: ' + pKey);
+    }
+
+    function runVintageCompAction() {
+      const inp = (document.getElementById('vintageCompTargetInput').value || '').trim();
+      const out = (document.getElementById('vintageCompOutputInput').value || '').trim() || null;
+      const mode = currentVintageCompMode;
+      const reduction = parseFloat(document.getElementById('vintageCompReductionSlider').value);
+      const hpf = parseFloat(document.getElementById('vintageCompHpfSelect').value);
+      const hf = document.getElementById('vintageCompHfCheck') ? document.getElementById('vintageCompHfCheck').checked : false;
+      const tc = parseInt(document.getElementById('vintageCompTcSelect').value);
+      const drive = parseFloat(document.getElementById('vintageCompDriveSlider').value);
+      const makeup = parseFloat(document.getElementById('vintageCompMakeupSlider').value);
+      const mix = parseFloat(document.getElementById('vintageCompDryWetSlider').value) / 100.0;
+      const link = document.getElementById('vintageCompStereoLinkCheck') ? document.getElementById('vintageCompStereoLinkCheck').checked : true;
+
+      const btn = document.getElementById('processVintageCompBtn');
+      const st = document.getElementById('vintageCompStatusText');
+      const outCard = document.getElementById('vintageCompOutputCard');
+
+      if (!inp) {
+        showToast('Please select input audio file');
+        return;
+      }
+
+      if (btn) {
+        btn.disabled = true;
+        btn.innerText = '📻 Rendering Vintage Dynamics...';
+      }
+      if (st) {
+        st.innerText = 'Modeling ' + (mode === 'fairchild' ? 'Fairchild 670 variable-mu dual-triode tube' : 'Teletronix LA-2A T4 electro-optical cell') + ' dynamics...';
+        st.style.color = 'var(--cyan)';
+      }
+      if (outCard) outCard.innerText = 'Executing non-linear optical photoresistor ballistics, sidechain filtering, and tube harmonic saturation...';
+
+      if (window.pywebview && window.pywebview.api && window.pywebview.api.render_vintage_compressor) {
+        window.pywebview.api.render_vintage_compressor(
+          inp, out, 'custom', mode, reduction, hpf, hf, tc, drive, makeup, mix, link
+        ).then(res => {
+          if (btn) {
+            btn.disabled = false;
+            btn.innerText = '📻 Render Vintage Master';
+          }
+          if (res) {
+            if (st) {
+              st.innerText = '✓ Vintage compressor master rendered successfully!';
+              st.style.color = 'var(--emerald)';
+            }
+            const s = res.settings;
+            let card = `VINTAGE MASTER COMPRESSOR REPORT\n`;
+            card += `Input Source     : ${res.input_path}\n`;
+            card += `Output Master    : ${res.output_path}\n`;
+            card += `Model Emulation  : ${res.telemetry.model}\n`;
+            card += `Master Format    : 24-bit Linear PCM WAV @ ${res.sample_rate} Hz (${res.duration_sec}s)\n`;
+            card += `Peak Gain Reduct : ${res.max_gain_reduction_db} dB (Average: ${res.avg_gain_reduction_db} dB)\n`;
+            card += `Peak / RMS Level : ${res.out_peak_dbfs} dBFS / ${res.out_rms_dbfs} dBFS (Input: ${res.in_peak_dbfs} / ${res.in_rms_dbfs} dBFS)\n`;
+            card += `Crest Factor     : ${res.crest_factor_in_db} dB -> ${res.crest_factor_out_db} dB (Dynamic Density: ${(res.crest_factor_in_db - res.crest_factor_out_db).toFixed(2)} dB added)\n`;
+            card += `Hardware Drive   : Tube Saturation ${s.tube_drive.toFixed(2)}x | Makeup Gain ${s.makeup_gain_db >= 0 ? '+' : ''}${s.makeup_gain_db.toFixed(1)} dB | Dry/Wet: ${(s.dry_wet * 100).toFixed(0)}%\n`;
+            card += `Sidechain Config : HPF ${s.sidechain_hpf_hz.toFixed(0)} Hz | R37 HF Emphasis: ${s.hf_emphasis ? 'ON' : 'OFF'} | Stereo Link: ${s.stereo_link ? 'LINKED' : 'DUAL-MONO'}\n`;
+            if (res.telemetry.optical_memory_seconds) {
+              card += `T4 Optical Decay : Memory-dependent release tail: ${res.telemetry.optical_memory_seconds}s\n`;
+            }
+            if (res.telemetry.time_constant_desc) {
+              card += `Fairchild Switch : Time Constant Pos ${res.telemetry.time_constant_pos} (${res.telemetry.time_constant_desc})\n`;
+            }
+            if (outCard) outCard.innerText = card;
+            showToast('Vintage compressor master rendered successfully!');
+          }
+        }).catch(err => {
+          if (btn) {
+            btn.disabled = false;
+            btn.innerText = '📻 Render Vintage Master';
+          }
+          if (st) {
+            st.innerText = 'Error processing vintage compressor';
             st.style.color = 'var(--rose)';
           }
           if (outCard) outCard.innerText = '✕ Error: ' + (err.message || err);

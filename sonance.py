@@ -521,6 +521,14 @@ Examples:
       help="Dynamic spectral resonance suppressor & de-resonator: --soothe <audio_file> [output_file] [--preset tame_harshness|vocal_de_boxer|muddy_low_mid|cymbal_silencer|extreme_surgical] [--depth 0.55] [--threshold 3.5] [--sharpness 2.5] [--low-cut 1200] [--high-cut 9000] [--listen]",
   )
   parser.add_argument(
+      "--vintage-compressor",
+      "--la2a",
+      "--fairchild",
+      nargs="*",
+      metavar="PARAM",
+      help="Vintage optical & variable-mu compressor: --la2a <audio_file> [output_file] [--mode la2a|fairchild] [--preset la2a_smooth_vocal|la2a_acoustic_warmth|fairchild_master_bus|fairchild_drum_crush|vintage_warm_glue] [--reduction 50] [--hpf 90] [--hf-emphasis] [--tc 1-6] [--drive 1.25] [--makeup 2.0] [--mix 1.0]",
+  )
+  parser.add_argument(
       "--version",
       action="version",
       version=f"Sonance v{modern_lyrics_downloader.APP_VERSION}",
@@ -3128,6 +3136,99 @@ Examples:
     if res["top_resonances"]:
       res_str = ", ".join([f"{r['freq_hz']} Hz ({r['intensity_score']})" for r in res["top_resonances"]])
       print(f"[+] Detected Resonances: {res_str}")
+    print("=" * 70)
+    return
+
+  if args.vintage_compressor is not None:
+    import vintage_compressor
+    params = list(args.vintage_compressor) + list(unknown)
+    if not params:
+      print("[-] Error: --vintage-compressor requires an input audio file.")
+      print("    Usage: python sonance.py --vintage-compressor <audio_file> [output_file] [--mode la2a|fairchild] [--preset <name>] [--reduction <0-100>] [--drive <1.0-2.5>]")
+      return
+
+    inp = params[0]
+    out = None
+    preset = "la2a_smooth_vocal"
+    mode = None
+    reduction = None
+    hpf = None
+    hf_emphasis = None
+    tc = None
+    drive = None
+    makeup = None
+    mix = None
+    dual_mono = False
+
+    idx = 1
+    while idx < len(params):
+      item = params[idx]
+      if item == "--preset" and idx + 1 < len(params):
+        preset = params[idx + 1]
+        idx += 2
+      elif item == "--mode" and idx + 1 < len(params):
+        mode = params[idx + 1]
+        idx += 2
+      elif item in ("--reduction", "--pr") and idx + 1 < len(params):
+        reduction = float(params[idx + 1])
+        idx += 2
+      elif item == "--hpf" and idx + 1 < len(params):
+        hpf = float(params[idx + 1])
+        idx += 2
+      elif item in ("--hf-emphasis", "--r37"):
+        hf_emphasis = True
+        idx += 1
+      elif item in ("--tc", "--time-constant") and idx + 1 < len(params):
+        tc = int(params[idx + 1])
+        idx += 2
+      elif item in ("--drive", "--tube-drive") and idx + 1 < len(params):
+        drive = float(params[idx + 1])
+        idx += 2
+      elif item in ("--makeup", "--gain") and idx + 1 < len(params):
+        makeup = float(params[idx + 1])
+        idx += 2
+      elif item in ("--mix", "--dry-wet") and idx + 1 < len(params):
+        mix = float(params[idx + 1])
+        idx += 2
+      elif item in ("--dual-mono", "--split"):
+        dual_mono = True
+        idx += 1
+      elif not item.startswith("-") and out is None:
+        out = item
+        idx += 1
+      else:
+        idx += 1
+
+    print("=" * 70)
+    print("  SONANCE AUDIOPHILE WORKSTATION v3.4.0")
+    print("  Phase 34: Vintage Optical & Variable-Mu Master Compressor Studio")
+    print("=" * 70)
+    print(f"[*] Input Source     : {inp}")
+    print(f"[*] Preset Selected  : {preset.upper()}")
+
+    stereo_link = not dual_mono
+    res = vintage_compressor.render_vintage_compressor(
+        input_path=inp,
+        output_path=out,
+        preset=preset,
+        mode=mode,
+        peak_reduction=reduction,
+        sidechain_hpf_hz=hpf,
+        hf_emphasis=hf_emphasis,
+        time_constant=tc,
+        tube_drive=drive,
+        makeup_gain_db=makeup,
+        dry_wet=mix,
+        stereo_link=stereo_link,
+    )
+
+    s = res["settings"]
+    print(f"[+] Output Master    : {res['output_path']}")
+    print(f"[+] Audio Format     : 24-bit Linear PCM WAV @ {res['sample_rate']} Hz ({res['duration_sec']}s)")
+    print(f"[+] Model Emulation  : {res['telemetry']['model']}")
+    print(f"[+] Peak Gain Reduct : {res['max_gain_reduction_db']:.2f} dB (Avg: {res['avg_gain_reduction_db']:.2f} dB)")
+    print(f"[+] Dynamics Crest   : {res['crest_factor_in_db']:.2f} dB -> {res['crest_factor_out_db']:.2f} dB")
+    print(f"[+] Tube Drive Stage : {s['tube_drive']:.2f}x | Makeup: {s['makeup_gain_db']:+.1f} dB | Mix: {int(s['dry_wet']*100)}%")
     print("=" * 70)
     return
 

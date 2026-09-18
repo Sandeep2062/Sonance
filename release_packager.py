@@ -17,7 +17,7 @@ import importlib
 from pathlib import Path
 from typing import Dict, Any, List, Optional, Tuple
 
-APP_VERSION = "3.3.0"
+APP_VERSION = "3.4.0"
 WORKSTATION_NAME = "Sonance Audiophile Workstation"
 ROOT_DIR = Path(__file__).parent.resolve()
 
@@ -98,6 +98,9 @@ CORE_PHASE_MODULES = [
 
     # Phase 33: Dynamic Spectral Resonance Suppressor & Surgical De-Resonator Studio
     ("resonance_suppressor", "Phase 33: Dynamic Spectral Resonance Suppressor & Surgical De-Resonator Studio"),
+
+    # Phase 34: Vintage Optical & Variable-Mu Master Compressor Studio
+    ("vintage_compressor", "Phase 34: Vintage Optical & Variable-Mu Master Compressor Studio"),
 ]
 
 # File classification patterns
