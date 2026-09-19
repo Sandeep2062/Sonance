@@ -3,7 +3,7 @@
 
 #define MyAppName "Sonance"
 #ifndef MyAppVersion
-#define MyAppVersion "4.2.0"
+#define MyAppVersion "4.3.0"
 #endif
 #define MyAppPublisher "Sandeep Khadka"
 #define MyAppURL "https://github.com/Sandeep2062/Sonance"

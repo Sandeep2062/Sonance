@@ -56,14 +56,32 @@ class _LyricsViewState extends ConsumerState<LyricsView> {
       );
     }
 
-    if (lyrics == null || !lyrics.hasLyrics) {
+    if (player.isLyricsLoading) {
       return Center(
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
             CircularProgressIndicator(color: Theme.of(context).colorScheme.primary),
             const SizedBox(height: 16),
-            Text('Fetching verified synced lyrics for "${player.currentTrack!.title}"...', style: TextStyle(color: Theme.of(context).colorScheme.onSurface.withOpacity(0.6))),
+            Text('Fetching verified synced lyrics for "${player.currentTrack!.title}"...',
+                style: TextStyle(color: Theme.of(context).colorScheme.onSurface.withOpacity(0.6))),
+          ],
+        ),
+      );
+    }
+
+    if (lyrics == null || !lyrics.hasLyrics) {
+      return Center(
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Icon(Icons.lyrics_outlined, size: 64, color: Theme.of(context).colorScheme.onSurface.withOpacity(0.4)),
+            const SizedBox(height: 16),
+            Text('No synchronized lyrics found for "${player.currentTrack!.title}"',
+                style: TextStyle(color: Theme.of(context).colorScheme.onSurface.withOpacity(0.7), fontWeight: FontWeight.w600)),
+            const SizedBox(height: 6),
+            Text('You can add companion .lrc files in your local music directory.',
+                style: TextStyle(fontSize: 12, color: Theme.of(context).colorScheme.onSurface.withOpacity(0.4))),
           ],
         ),
       );

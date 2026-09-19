@@ -5,6 +5,7 @@ import '../../core/services/spotify_importer.dart';
 import '../../features/downloader/download_queue_provider.dart';
 import '../../features/player/player_provider.dart';
 import '../../features/search/search_provider.dart';
+import '../widgets/track_artwork.dart';
 
 class SearchView extends ConsumerStatefulWidget {
   const SearchView({super.key});
@@ -167,11 +168,12 @@ class _SearchViewState extends ConsumerState<SearchView> {
                         padding: const EdgeInsets.all(10),
                         child: Row(
                           children: [
-                            ClipRRect(
-                              borderRadius: BorderRadius.circular(8),
-                              child: track.coverUrl != null
-                                  ? Image.network(track.coverUrl!, width: 64, height: 64, fit: BoxFit.cover, errorBuilder: (_, __, ___) => Container(width: 64, height: 64, color: Colors.black))
-                                  : Container(width: 64, height: 64, color: Colors.black, child: const Icon(Icons.music_note)),
+                            SonanceArtwork(
+                              coverUrl: track.coverUrl,
+                              width: 64,
+                              height: 64,
+                              borderRadius: 8,
+                              fallbackIcon: Icons.music_note,
                             ),
                             const SizedBox(width: 10),
                             Expanded(

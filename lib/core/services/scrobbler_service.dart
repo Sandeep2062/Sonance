@@ -209,6 +209,80 @@ class ScrobblerService {
     }
   }
 
+  // ------------------ Authentication & Session Linking ------------------
+
+  static Future<Map<String, dynamic>> authenticateLastFm({
+    required String username,
+    required String password,
+  }) async {
+    final cfg = await loadConfig();
+    final params = <String, String>{
+      'method': 'auth.getMobileSession',
+      'username': username.trim(),
+      'password': password.trim(),
+      'api_key': cfg.lastfmApiKey,
+    };
+    params['api_sig'] = _generateLastFmSig(params, cfg.lastfmSecret);
+    params['format'] = 'json';
+
+    try {
+      final res = await http.post(Uri.parse(_lastfmUrl), body: params).timeout(const Duration(seconds: 10));
+      final data = jsonDecode(res.body) as Map<String, dynamic>;
+
+      if (data.containsKey('session')) {
+        final session = data['session'] as Map<String, dynamic>;
+        final sk = session['key'] as String? ?? '';
+        final name = session['name'] as String? ?? username;
+
+        final updated = cfg.copyWith(
+          lastfmEnabled: true,
+          lastfmSessionKey: sk,
+          lastfmUsername: name,
+        );
+        await saveConfig(updated);
+        return {'success': true, 'username': name};
+      } else {
+        return {'success': false, 'error': data['message'] ?? 'Authentication failed'};
+      }
+    } catch (e) {
+      return {'success': false, 'error': e.toString()};
+    }
+  }
+
+  static Future<void> disconnectLastFm() async {
+    final cfg = await loadConfig();
+    final updated = cfg.copyWith(
+      lastfmEnabled: false,
+      lastfmSessionKey: '',
+      lastfmUsername: '',
+    );
+    await saveConfig(updated);
+  }
+
+  static Future<void> saveListenBrainz({
+    required String token,
+    required String username,
+    bool enabled = true,
+  }) async {
+    final cfg = await loadConfig();
+    final updated = cfg.copyWith(
+      listenbrainzEnabled: enabled,
+      listenbrainzToken: token.trim(),
+      listenbrainzUsername: username.trim(),
+    );
+    await saveConfig(updated);
+  }
+
+  static Future<void> disconnectListenBrainz() async {
+    final cfg = await loadConfig();
+    final updated = cfg.copyWith(
+      listenbrainzEnabled: false,
+      listenbrainzToken: '',
+      listenbrainzUsername: '',
+    );
+    await saveConfig(updated);
+  }
+
   // ------------------ Unified Dispatcher ------------------
 
   static void nowPlaying({

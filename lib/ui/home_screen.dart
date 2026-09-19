@@ -11,6 +11,7 @@ import 'views/settings_view.dart';
 import 'views/equalizer_view.dart';
 import 'views/mini_player_view.dart';
 import 'views/studios/studios_view.dart';
+import 'widgets/track_artwork.dart';
 
 class HomeScreen extends ConsumerStatefulWidget {
   const HomeScreen({super.key});
@@ -132,17 +133,12 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                           width: 240,
                           child: Row(
                             children: [
-                              ClipRRect(
-                                borderRadius: BorderRadius.circular(8),
-                                child: track.coverUrl != null
-                                    ? Image.network(
-                                        track.coverUrl!,
-                                        width: 52,
-                                        height: 52,
-                                        fit: BoxFit.cover,
-                                        errorBuilder: (_, __, ___) => _buildPlaceholder(),
-                                      )
-                                    : _buildPlaceholder(),
+                              SonanceArtwork(
+                                coverUrl: track.coverUrl,
+                                width: 52,
+                                height: 52,
+                                borderRadius: 8,
+                                fallbackIcon: Icons.music_note,
                               ),
                               const SizedBox(width: 12),
                               Expanded(

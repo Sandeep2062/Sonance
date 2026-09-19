@@ -4,6 +4,7 @@ import '../../core/theme/app_theme.dart';
 import '../../core/theme/theme_provider.dart';
 import '../../core/services/update_service.dart';
 import '../../core/services/discord_rpc_service.dart';
+import '../../core/services/scrobbler_service.dart';
 import '../../features/auth/auth_provider.dart';
 import '../../features/player/equalizer_provider.dart';
 import 'equalizer_view.dart';
@@ -23,7 +24,14 @@ class _SettingsViewState extends ConsumerState<SettingsView> {
   late TextEditingController _qobuzAppSecretCtrl;
   late TextEditingController _spotifyClientCtrl;
   late TextEditingController _spotifySecretCtrl;
+  late TextEditingController _lastfmUserCtrl;
+  late TextEditingController _lastfmPassCtrl;
+  late TextEditingController _listenbrainzTokenCtrl;
+
   bool _discordRpcEnabled = true;
+  ScrobblerConfig? _scrobblerConfig;
+  bool _isLastFmLoading = false;
+  bool _isListenBrainzLoading = false;
 
   @override
   void initState() {
@@ -36,7 +44,23 @@ class _SettingsViewState extends ConsumerState<SettingsView> {
     _qobuzAppSecretCtrl = TextEditingController(text: auth.qobuzAppSecret);
     _spotifyClientCtrl = TextEditingController(text: auth.spotifyClientId);
     _spotifySecretCtrl = TextEditingController(text: auth.spotifyClientSecret);
+    _lastfmUserCtrl = TextEditingController();
+    _lastfmPassCtrl = TextEditingController();
+    _listenbrainzTokenCtrl = TextEditingController();
     _discordRpcEnabled = discordRpcService.isEnabled;
+
+    _loadScrobblerSettings();
+  }
+
+  Future<void> _loadScrobblerSettings() async {
+    final cfg = await ScrobblerService.loadConfig();
+    if (mounted) {
+      setState(() {
+        _scrobblerConfig = cfg;
+        _lastfmUserCtrl.text = cfg.lastfmUsername;
+        _listenbrainzTokenCtrl.text = cfg.listenbrainzToken;
+      });
+    }
   }
 
   @override
@@ -48,6 +72,9 @@ class _SettingsViewState extends ConsumerState<SettingsView> {
     _qobuzAppSecretCtrl.dispose();
     _spotifyClientCtrl.dispose();
     _spotifySecretCtrl.dispose();
+    _lastfmUserCtrl.dispose();
+    _lastfmPassCtrl.dispose();
+    _listenbrainzTokenCtrl.dispose();
     super.dispose();
   }
 
@@ -212,6 +239,30 @@ class _SettingsViewState extends ConsumerState<SettingsView> {
                   status: _discordRpcEnabled ? 'Enabled' : 'Disabled',
                   isLoggedIn: _discordRpcEnabled,
                   children: [
+                    Container(
+                      padding: const EdgeInsets.all(12),
+                      margin: const EdgeInsets.only(bottom: 14),
+                      decoration: BoxDecoration(
+                        color: Theme.of(context).colorScheme.primary.withOpacity(0.08),
+                        borderRadius: BorderRadius.circular(8),
+                        border: Border.all(color: Theme.of(context).colorScheme.primary.withOpacity(0.2)),
+                      ),
+                      child: Row(
+                        children: [
+                          Icon(Icons.info_outline, size: 20, color: Theme.of(context).colorScheme.primary),
+                          const SizedBox(width: 10),
+                          Expanded(
+                            child: Text(
+                              'No account login or linking required! Discord Rich Presence links directly to the Discord desktop app running on your computer via local IPC. Simply ensure Discord is running on your PC.',
+                              style: TextStyle(
+                                fontSize: 11,
+                                color: Theme.of(context).colorScheme.onSurface.withOpacity(0.85),
+                              ),
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
                     Row(
                       mainAxisAlignment: MainAxisAlignment.spaceBetween,
                       children: [
@@ -226,6 +277,241 @@ class _SettingsViewState extends ConsumerState<SettingsView> {
                         ),
                       ],
                     ),
+                  ],
+                ),
+                const SizedBox(height: 20),
+
+                // Last.fm Scrobbler Card
+                _buildCard(
+                  title: 'Last.fm Scrobbler',
+                  subtitle: 'Live "Now Playing" status and automatic scrobbles to your Last.fm profile.',
+                  status: _scrobblerConfig?.lastfmEnabled == true && _scrobblerConfig?.lastfmSessionKey.isNotEmpty == true
+                      ? 'Connected (${_scrobblerConfig?.lastfmUsername})'
+                      : 'Not Connected',
+                  isLoggedIn: _scrobblerConfig?.lastfmEnabled == true && _scrobblerConfig?.lastfmSessionKey.isNotEmpty == true,
+                  children: [
+                    if (_scrobblerConfig?.lastfmEnabled == true && _scrobblerConfig?.lastfmSessionKey.isNotEmpty == true) ...[
+                      Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                        children: [
+                          Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Text(
+                                'Logged in as: ${_scrobblerConfig?.lastfmUsername}',
+                                style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 13),
+                              ),
+                              const SizedBox(height: 2),
+                              const Text(
+                                'Sonance updates "Now Playing" and submits scrobbles automatically.',
+                                style: TextStyle(fontSize: 11, color: Colors.grey),
+                              ),
+                            ],
+                          ),
+                          OutlinedButton.icon(
+                            icon: const Icon(Icons.link_off, size: 16),
+                            label: const Text('Disconnect'),
+                            onPressed: () async {
+                              await ScrobblerService.disconnectLastFm();
+                              await _loadScrobblerSettings();
+                              if (context.mounted) {
+                                ScaffoldMessenger.of(context).showSnackBar(
+                                  const SnackBar(content: Text('Disconnected from Last.fm')),
+                                );
+                              }
+                            },
+                          ),
+                        ],
+                      ),
+                    ] else ...[
+                      Row(
+                        children: [
+                          Expanded(
+                            child: TextField(
+                              controller: _lastfmUserCtrl,
+                              decoration: const InputDecoration(
+                                labelText: 'Last.fm Username',
+                                border: OutlineInputBorder(),
+                                isDense: true,
+                              ),
+                            ),
+                          ),
+                          const SizedBox(width: 12),
+                          Expanded(
+                            child: TextField(
+                              controller: _lastfmPassCtrl,
+                              obscureText: true,
+                              decoration: const InputDecoration(
+                                labelText: 'Password',
+                                border: OutlineInputBorder(),
+                                isDense: true,
+                              ),
+                            ),
+                          ),
+                        ],
+                      ),
+                      const SizedBox(height: 12),
+                      Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                        children: [
+                          const Text(
+                            'Connects securely via Last.fm Mobile Session API',
+                            style: TextStyle(fontSize: 11, color: Colors.grey),
+                          ),
+                          ElevatedButton.icon(
+                            style: ElevatedButton.styleFrom(
+                              backgroundColor: SonanceTheme.emerald,
+                              foregroundColor: Colors.white,
+                            ),
+                            icon: _isLastFmLoading
+                                ? const SizedBox(width: 14, height: 14, child: CircularProgressIndicator(strokeWidth: 2, color: Colors.white))
+                                : const Icon(Icons.link, size: 16),
+                            label: const Text('Connect to Last.fm'),
+                            onPressed: _isLastFmLoading
+                                ? null
+                                : () async {
+                                    if (_lastfmUserCtrl.text.trim().isEmpty || _lastfmPassCtrl.text.trim().isEmpty) {
+                                      ScaffoldMessenger.of(context).showSnackBar(
+                                        const SnackBar(content: Text('Please enter Last.fm username and password')),
+                                      );
+                                      return;
+                                    }
+                                    setState(() => _isLastFmLoading = true);
+                                    final res = await ScrobblerService.authenticateLastFm(
+                                      username: _lastfmUserCtrl.text,
+                                      password: _lastfmPassCtrl.text,
+                                    );
+                                    setState(() => _isLastFmLoading = false);
+                                    await _loadScrobblerSettings();
+
+                                    if (context.mounted) {
+                                      if (res['success'] == true) {
+                                        _lastfmPassCtrl.clear();
+                                        ScaffoldMessenger.of(context).showSnackBar(
+                                          SnackBar(content: Text('Connected to Last.fm as ${res["username"]}!')),
+                                        );
+                                      } else {
+                                        ScaffoldMessenger.of(context).showSnackBar(
+                                          SnackBar(content: Text('Last.fm error: ${res["error"]}')),
+                                        );
+                                      }
+                                    }
+                                  },
+                          ),
+                        ],
+                      ),
+                    ],
+                  ],
+                ),
+                const SizedBox(height: 20),
+
+                // ListenBrainz Card
+                _buildCard(
+                  title: 'ListenBrainz Scrobbler',
+                  subtitle: 'Open-source decentralized music scrobbling by MetaBrainz.',
+                  status: _scrobblerConfig?.listenbrainzEnabled == true && _scrobblerConfig?.listenbrainzToken.isNotEmpty == true
+                      ? 'Connected (${_scrobblerConfig?.listenbrainzUsername})'
+                      : 'Not Connected',
+                  isLoggedIn: _scrobblerConfig?.listenbrainzEnabled == true && _scrobblerConfig?.listenbrainzToken.isNotEmpty == true,
+                  children: [
+                    if (_scrobblerConfig?.listenbrainzEnabled == true && _scrobblerConfig?.listenbrainzToken.isNotEmpty == true) ...[
+                      Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                        children: [
+                          Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Text(
+                                'User: ${_scrobblerConfig?.listenbrainzUsername}',
+                                style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 13),
+                              ),
+                              const SizedBox(height: 2),
+                              const Text(
+                                'Broadcasting listens to MetaBrainz / ListenBrainz open database.',
+                                style: TextStyle(fontSize: 11, color: Colors.grey),
+                              ),
+                            ],
+                          ),
+                          OutlinedButton.icon(
+                            icon: const Icon(Icons.link_off, size: 16),
+                            label: const Text('Disconnect'),
+                            onPressed: () async {
+                              await ScrobblerService.disconnectListenBrainz();
+                              await _loadScrobblerSettings();
+                              if (context.mounted) {
+                                ScaffoldMessenger.of(context).showSnackBar(
+                                  const SnackBar(content: Text('Disconnected from ListenBrainz')),
+                                );
+                              }
+                            },
+                          ),
+                        ],
+                      ),
+                    ] else ...[
+                      TextField(
+                        controller: _listenbrainzTokenCtrl,
+                        obscureText: true,
+                        decoration: const InputDecoration(
+                          labelText: 'User Token',
+                          hintText: 'Enter your ListenBrainz user token (from listenbrainz.org/profile/)',
+                          border: OutlineInputBorder(),
+                          isDense: true,
+                        ),
+                      ),
+                      const SizedBox(height: 12),
+                      Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                        children: [
+                          const Text(
+                            'Find your token at: listenbrainz.org/profile/',
+                            style: TextStyle(fontSize: 11, color: Colors.grey),
+                          ),
+                          ElevatedButton.icon(
+                            style: ElevatedButton.styleFrom(
+                              backgroundColor: SonanceTheme.emerald,
+                              foregroundColor: Colors.white,
+                            ),
+                            icon: _isListenBrainzLoading
+                                ? const SizedBox(width: 14, height: 14, child: CircularProgressIndicator(strokeWidth: 2, color: Colors.white))
+                                : const Icon(Icons.check_circle_outline, size: 16),
+                            label: const Text('Connect & Validate'),
+                            onPressed: _isListenBrainzLoading
+                                ? null
+                                : () async {
+                                    final token = _listenbrainzTokenCtrl.text.trim();
+                                    if (token.isEmpty) {
+                                      ScaffoldMessenger.of(context).showSnackBar(
+                                        const SnackBar(content: Text('Please enter your ListenBrainz token')),
+                                      );
+                                      return;
+                                    }
+                                    setState(() => _isListenBrainzLoading = true);
+                                    final res = await ScrobblerService.validateListenBrainzToken(token);
+                                    setState(() => _isListenBrainzLoading = false);
+
+                                    if (res['valid'] == true) {
+                                      await ScrobblerService.saveListenBrainz(
+                                        token: token,
+                                        username: res['username'] ?? '',
+                                      );
+                                      await _loadScrobblerSettings();
+                                      if (context.mounted) {
+                                        ScaffoldMessenger.of(context).showSnackBar(
+                                          SnackBar(content: Text('Connected to ListenBrainz as ${res["username"]}!')),
+                                        );
+                                      }
+                                    } else {
+                                      if (context.mounted) {
+                                        ScaffoldMessenger.of(context).showSnackBar(
+                                          SnackBar(content: Text('Invalid token: ${res["error"] ?? "Token verification failed"}')),
+                                        );
+                                      }
+                                    }
+                                  },
+                          ),
+                        ],
+                      ),
+                    ],
                   ],
                 ),
                 const SizedBox(height: 20),
@@ -371,7 +657,7 @@ class _SettingsViewState extends ConsumerState<SettingsView> {
 
                 // Updates & About Card
                 _buildCard(
-                  title: 'Sonance v4.2.0',
+                  title: 'Sonance v4.3.0',
                   subtitle: 'The ultimate unified music suite — GPLv3 with Commons Clause by Sandeep Khadka.',
                   status: 'Latest',
                   isLoggedIn: true,

@@ -4,8 +4,10 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:path/path.dart' as p;
 import '../../core/models/track.dart';
+import '../../core/services/local_audio_service.dart';
 import '../../core/theme/app_theme.dart';
 import '../../features/player/player_provider.dart';
+import '../widgets/track_artwork.dart';
 import 'artist_browser_view.dart';
 import 'album_view.dart';
 
@@ -44,42 +46,7 @@ class _LocalViewState extends ConsumerState<LocalView>
         _isScanning = true;
       });
 
-      final tracks = <SonanceTrack>[];
-      final dir = Directory(folder);
-
-      try {
-        await for (final entity
-            in dir.list(recursive: true, followLinks: false)) {
-          if (entity is File) {
-            final ext = p.extension(entity.path).toLowerCase();
-            if (['.mp3', '.flac', '.m4a', '.ogg', '.wav'].contains(ext)) {
-              final filename = p.basenameWithoutExtension(entity.path);
-              final parts = filename.split(' - ');
-              final artist =
-                  parts.length > 1 ? parts[0].trim() : 'Unknown Artist';
-              final title = parts.length > 1
-                  ? parts.sublist(1).join(' - ').trim()
-                  : filename;
-
-              final lrcFile = File('${p.withoutExtension(entity.path)}.lrc');
-              final hasLrc = await lrcFile.exists();
-
-              tracks.add(SonanceTrack(
-                id: entity.path,
-                title: title,
-                artist: artist,
-                album: 'Local Library',
-                duration: Duration.zero,
-                localFilePath: entity.path,
-                lyricsFilePath: hasLrc ? lrcFile.path : null,
-                source: 'Local',
-                qualityBadge: ext.replaceAll('.', '').toUpperCase(),
-                isLossless: ext == '.flac',
-              ));
-            }
-          }
-        }
-      } catch (_) {}
+      final tracks = await LocalAudioService.scanDirectory(folder);
 
       setState(() {
         _localTracks = tracks;
@@ -254,26 +221,20 @@ class _LocalViewState extends ConsumerState<LocalView>
 
                               return Card(
                                 child: ListTile(
-                                  leading: Container(
+                                  leading: SonanceArtwork(
+                                    coverUrl: track.coverUrl,
                                     width: 44,
                                     height: 44,
-                                    decoration: BoxDecoration(
-                                      color: Theme.of(context)
-                                          .colorScheme
-                                          .outlineVariant
-                                          .withOpacity(0.2),
-                                      borderRadius: BorderRadius.circular(8),
-                                    ),
-                                    child: Icon(Icons.music_note,
-                                        color: Theme.of(context)
-                                            .colorScheme
-                                            .primary),
+                                    borderRadius: 8,
+                                    fallbackIcon: Icons.music_note,
                                   ),
                                   title: Text(track.title,
                                       style: const TextStyle(
                                           fontWeight: FontWeight.bold,
                                           fontSize: 13)),
-                                  subtitle: Text(track.artist,
+                                  subtitle: Text('${track.artist} · ${track.album}',
+                                      maxLines: 1,
+                                      overflow: TextOverflow.ellipsis,
                                       style: TextStyle(
                                           color: Theme.of(context)
                                               .colorScheme

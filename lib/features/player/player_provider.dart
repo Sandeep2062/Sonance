@@ -2,9 +2,11 @@ import 'dart:io';
 import 'dart:math';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:just_audio/just_audio.dart';
+import 'package:youtube_explode_dart/youtube_explode_dart.dart';
 import '../../core/models/lyrics.dart';
 import '../../core/models/track.dart';
 import '../../core/services/discord_rpc_service.dart';
+import '../../core/services/scrobbler_service.dart';
 import '../lyrics/lyrics_engine.dart';
 
 class PlayerState {
@@ -21,6 +23,8 @@ class PlayerState {
   final LoopMode loopMode;
   final List<SonanceTrack> queue;
   final int queueIndex;
+  final bool isLyricsLoading;
+  final String? playbackError;
 
   const PlayerState({
     this.currentTrack,
@@ -36,6 +40,8 @@ class PlayerState {
     this.loopMode = LoopMode.off,
     this.queue = const [],
     this.queueIndex = 0,
+    this.isLyricsLoading = false,
+    this.playbackError,
   });
 
   PlayerState copyWith({
@@ -52,6 +58,8 @@ class PlayerState {
     LoopMode? loopMode,
     List<SonanceTrack>? queue,
     int? queueIndex,
+    bool? isLyricsLoading,
+    String? playbackError,
   }) {
     return PlayerState(
       currentTrack: currentTrack ?? this.currentTrack,
@@ -67,6 +75,8 @@ class PlayerState {
       loopMode: loopMode ?? this.loopMode,
       queue: queue ?? this.queue,
       queueIndex: queueIndex ?? this.queueIndex,
+      isLyricsLoading: isLyricsLoading ?? this.isLyricsLoading,
+      playbackError: playbackError,
     );
   }
 }
@@ -85,6 +95,15 @@ class PlayerNotifier extends StateNotifier<PlayerState> {
 
       // Handle auto-advancing to next track when song finishes
       if (ps.processingState == ProcessingState.completed) {
+        if (state.currentTrack != null) {
+          ScrobblerService.scrobble(
+            artist: state.currentTrack!.artist,
+            track: state.currentTrack!.title,
+            album: state.currentTrack!.album,
+            duration: state.duration.inSeconds,
+          );
+        }
+
         if (state.loopMode == LoopMode.one) {
           _player.seek(Duration.zero);
           _player.play();
@@ -131,17 +150,62 @@ class PlayerNotifier extends StateNotifier<PlayerState> {
       activeLyricIndex: -1,
       queue: newQueue,
       queueIndex: newIndex,
+      isLyricsLoading: true,
+      playbackError: null,
     );
 
     // 1. Play audio
     try {
       if (track.localFilePath != null && File(track.localFilePath!).existsSync()) {
         await _player.setFilePath(track.localFilePath!);
-      } else if (track.streamUrl != null) {
-        await _player.setUrl(track.streamUrl!);
+        await _player.play();
+      } else {
+        String? streamUrl = track.streamUrl;
+
+        // Extract direct audio stream for YouTube videos
+        if (streamUrl != null &&
+            (streamUrl.contains('youtube.com') || streamUrl.contains('youtu.be') || track.source == 'YouTube')) {
+          final yt = YoutubeExplode();
+          try {
+            final rawId = track.id.startsWith('yt_') ? track.id.replaceFirst('yt_', '') : streamUrl;
+            final videoId = VideoId(rawId);
+            final manifest = await yt.videos.streamsClient.getManifest(videoId);
+            final audioStreamInfo = manifest.audioOnly.withHighestBitrate();
+            streamUrl = audioStreamInfo.url.toString();
+          } catch (_) {
+            // Keep original streamUrl if manifest extraction fails
+          } finally {
+            yt.close();
+          }
+        }
+
+        if (streamUrl != null && streamUrl.isNotEmpty) {
+          await _player.setUrl(streamUrl);
+          await _player.play();
+        } else {
+          state = state.copyWith(playbackError: 'No playable audio stream available.');
+        }
       }
-      _player.play();
-    } catch (_) {}
+    } catch (e) {
+      state = state.copyWith(playbackError: 'Playback error: $e');
+    }
+
+    // Update Discord Presence
+    discordRpcService.updatePresence(
+      title: track.title,
+      artist: track.artist,
+      album: track.album,
+      duration: track.duration,
+      isPlaying: true,
+    );
+
+    // Update Last.fm / ListenBrainz Now Playing
+    ScrobblerService.nowPlaying(
+      artist: track.artist,
+      track: track.title,
+      album: track.album,
+      duration: track.duration.inSeconds,
+    );
 
     // 2. Resolve lyrics (check local companion .lrc first, fallback to LRCLIB)
     SyncedLyrics? resolvedLyrics;
@@ -169,15 +233,9 @@ class PlayerNotifier extends StateNotifier<PlayerState> {
       );
     }
 
-    state = state.copyWith(lyrics: resolvedLyrics);
-
-    // Update Discord Presence
-    discordRpcService.updatePresence(
-      title: track.title,
-      artist: track.artist,
-      album: track.album,
-      duration: track.duration,
-      isPlaying: true,
+    state = state.copyWith(
+      lyrics: resolvedLyrics,
+      isLyricsLoading: false,
     );
   }
 

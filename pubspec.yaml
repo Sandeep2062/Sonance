@@ -1,7 +1,7 @@
 name: sonance
 description: "The ultimate unified music suite — Stream, download Hi-Res lossless, and sing along with real-time synced lyrics."
 publish_to: 'none'
-version: 4.2.0+1
+version: 4.3.0+1
 
 environment:
   sdk: '>=3.0.0 <4.0.0'
@@ -15,6 +15,7 @@ dependencies:
 
   # Audio Playback & Background Media
   just_audio: ^0.9.38
+  just_audio_windows: ^0.2.1
   audio_service: ^0.18.15
   audio_session: ^0.1.19
 

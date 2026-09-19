@@ -72,13 +72,19 @@ class SearchNotifier extends StateNotifier<SearchState> {
       if (effectiveSource == 'all' || effectiveSource == 'youtube' || results.length < 5) {
         final ytResults = await _yt.search.search(query);
         for (final video in ytResults.take(15)) {
+          final ytCover = video.thumbnails.standardResUrl.isNotEmpty
+              ? video.thumbnails.standardResUrl
+              : (video.thumbnails.mediumResUrl.isNotEmpty
+                  ? video.thumbnails.mediumResUrl
+                  : 'https://i.ytimg.com/vi/${video.id.value}/hqdefault.jpg');
+
           results.add(SonanceTrack(
             id: 'yt_${video.id.value}',
             title: video.title,
             artist: video.author,
             album: 'Single',
             duration: video.duration ?? Duration.zero,
-            coverUrl: video.thumbnails.highResUrl,
+            coverUrl: ytCover,
             streamUrl: 'https://www.youtube.com/watch?v=${video.id.value}',
             source: 'YouTube',
             qualityBadge: 'HQ Audio',

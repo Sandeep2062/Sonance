@@ -33,7 +33,7 @@ class UpdateService {
   static Future<UpdateInfo> checkForUpdates() async {
     try {
       final pkgInfo = await PackageInfo.fromPlatform();
-      final currentVersion = pkgInfo.version.isNotEmpty ? pkgInfo.version : '4.2.0';
+      final currentVersion = pkgInfo.version.isNotEmpty ? pkgInfo.version : '4.3.0';
 
       final res = await http.get(
         Uri.parse(_apiUrl),
@@ -111,8 +111,8 @@ class UpdateService {
     } catch (_) {
       return const UpdateInfo(
         updateAvailable: false,
-        currentVersion: '4.2.0',
-        latestVersion: '4.2.0',
+        currentVersion: '4.3.0',
+        latestVersion: '4.3.0',
       );
     }
   }

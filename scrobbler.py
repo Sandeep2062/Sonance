@@ -70,7 +70,7 @@ def save_config(cfg: Dict[str, Any]):
 class LastFmClient:
     def __init__(self):
         self.session = requests.Session()
-        self.session.headers.update({"User-Agent": "Sonance/4.2.0 (https://github.com/Sandeep2062/Sonance)"})
+        self.session.headers.update({"User-Agent": "Sonance/4.3.0 (https://github.com/Sandeep2062/Sonance)"})
 
     def _generate_signature(self, params: Dict[str, Any], secret: str) -> str:
         """Generates MD5 api_sig required by Last.fm write APIs."""
@@ -394,7 +394,7 @@ class LastFmClient:
 class ListenBrainzClient:
     def __init__(self):
         self.session = requests.Session()
-        self.session.headers.update({"User-Agent": "Sonance/4.2.0 (https://github.com/Sandeep2062/Sonance)"})
+        self.session.headers.update({"User-Agent": "Sonance/4.3.0 (https://github.com/Sandeep2062/Sonance)"})
 
     def validate_token(self, token: str) -> Dict[str, Any]:
         """Validates a ListenBrainz user token."""

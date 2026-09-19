@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../core/models/track.dart';
 import '../../core/theme/app_theme.dart';
 import '../../features/player/player_provider.dart';
+import '../widgets/track_artwork.dart';
 
 class AlbumBrowserView extends ConsumerStatefulWidget {
   final List<SonanceTrack> tracks;
@@ -69,6 +70,10 @@ class _AlbumBrowserViewState extends ConsumerState<AlbumBrowserView> {
                     final albumTracks = albumMap[albumName] ?? [];
                     final artist = albumTracks.isNotEmpty ? albumTracks.first.artist : 'Various Artists';
                     final hasFlac = albumTracks.any((t) => t.isLossless);
+                    final albumCover = albumTracks.firstWhere(
+                      (t) => t.coverUrl != null && t.coverUrl!.isNotEmpty,
+                      orElse: () => albumTracks.first,
+                    ).coverUrl;
 
                     return Card(
                       clipBehavior: Clip.antiAlias,
@@ -79,39 +84,35 @@ class _AlbumBrowserViewState extends ConsumerState<AlbumBrowserView> {
                           children: [
                             AspectRatio(
                               aspectRatio: 1.0,
-                              child: Container(
-                                color: Theme.of(context).colorScheme.surface,
-                                child: Stack(
-                                  children: [
-                                    Center(
-                                      child: Icon(
-                                        Icons.album_rounded,
-                                        size: 64,
-                                        color: SonanceTheme.emerald.withOpacity(0.5),
-                                      ),
-                                    ),
-                                    if (hasFlac)
-                                      Positioned(
-                                        top: 8,
-                                        right: 8,
-                                        child: Container(
-                                          padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
-                                          decoration: BoxDecoration(
-                                            color: SonanceTheme.emerald,
-                                            borderRadius: BorderRadius.circular(4),
-                                          ),
-                                          child: const Text(
-                                            'FLAC',
-                                            style: TextStyle(
-                                              fontSize: 9,
-                                              fontWeight: FontWeight.bold,
-                                              color: Colors.white,
-                                            ),
+                              child: Stack(
+                                fit: StackFit.expand,
+                                children: [
+                                  SonanceArtwork(
+                                    coverUrl: albumCover,
+                                    borderRadius: 0,
+                                    fallbackIcon: Icons.album_rounded,
+                                  ),
+                                  if (hasFlac)
+                                    Positioned(
+                                      top: 8,
+                                      right: 8,
+                                      child: Container(
+                                        padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+                                        decoration: BoxDecoration(
+                                          color: SonanceTheme.emerald,
+                                          borderRadius: BorderRadius.circular(4),
+                                        ),
+                                        child: const Text(
+                                          'FLAC',
+                                          style: TextStyle(
+                                            fontSize: 9,
+                                            fontWeight: FontWeight.bold,
+                                            color: Colors.white,
                                           ),
                                         ),
                                       ),
-                                  ],
-                                ),
+                                    ),
+                                ],
                               ),
                             ),
                             Padding(
@@ -177,15 +178,12 @@ class _AlbumBrowserViewState extends ConsumerState<AlbumBrowserView> {
                 tooltip: 'Back to Albums',
               ),
               const SizedBox(width: 8),
-              Container(
-                width: 44,
-                height: 44,
-                decoration: BoxDecoration(
-                  color: Theme.of(context).colorScheme.surface,
-                  borderRadius: BorderRadius.circular(6),
-                  border: Border.all(color: Theme.of(context).colorScheme.outline),
-                ),
-                child: const Icon(Icons.album, color: SonanceTheme.emerald),
+              SonanceArtwork(
+                coverUrl: tracks.firstWhere((t) => t.coverUrl != null && t.coverUrl!.isNotEmpty, orElse: () => tracks.first).coverUrl,
+                width: 48,
+                height: 48,
+                borderRadius: 6,
+                fallbackIcon: Icons.album,
               ),
               const SizedBox(width: 12),
               Expanded(

@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../core/theme/app_theme.dart';
 import '../../features/player/player_provider.dart';
+import '../widgets/track_artwork.dart';
 
 class MiniPlayerDialog extends ConsumerWidget {
   const MiniPlayerDialog({super.key});
@@ -78,17 +79,12 @@ class MiniPlayerDialog extends ConsumerWidget {
               const SizedBox(height: 12),
 
               // Album Art
-              ClipRRect(
-                borderRadius: BorderRadius.circular(12),
-                child: track.coverUrl != null
-                    ? Image.network(
-                        track.coverUrl!,
-                        width: 180,
-                        height: 180,
-                        fit: BoxFit.cover,
-                        errorBuilder: (_, __, ___) => _buildPlaceholder(context),
-                      )
-                    : _buildPlaceholder(context),
+              SonanceArtwork(
+                coverUrl: track.coverUrl,
+                width: 180,
+                height: 180,
+                borderRadius: 12,
+                fallbackIcon: Icons.album_rounded,
               ),
               const SizedBox(height: 16),
 
