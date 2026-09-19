@@ -371,7 +371,7 @@ class _SettingsViewState extends ConsumerState<SettingsView> {
 
                 // Updates & About Card
                 _buildCard(
-                  title: 'Sonance v4.1.0',
+                  title: 'Sonance v4.2.0',
                   subtitle: 'The ultimate unified music suite — GPLv3 with Commons Clause by Sandeep Khadka.',
                   status: 'Latest',
                   isLoggedIn: true,
