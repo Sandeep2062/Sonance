@@ -13,6 +13,9 @@ jobs:
   build-windows:
     name: Build Windows Installer & Portable (Native Flutter)
     runs-on: windows-latest
+    env:
+      CL: "/D_SILENCE_EXPERIMENTAL_COROUTINE_DEPRECATION_WARNINGS"
+      _CL_: "/D_SILENCE_EXPERIMENTAL_COROUTINE_DEPRECATION_WARNINGS"
     steps:
       - name: Checkout Code
         uses: actions/checkout@v6
@@ -41,11 +44,27 @@ jobs:
           if (Test-Path assets/icon.ico) {
             Copy-Item assets/icon.ico -Destination windows/runner/resources/app_icon.ico -Force
           }
+          Get-ChildItem -Path windows -Filter "CMakeLists.txt" -Recurse | ForEach-Object {
+            $content = Get-Content $_.FullName -Raw
+            if (-not $content.Contains("_SILENCE_EXPERIMENTAL_COROUTINE_DEPRECATION_WARNINGS")) {
+              Set-Content -Path $_.FullName -Value ("add_definitions(-D_SILENCE_EXPERIMENTAL_COROUTINE_DEPRECATION_WARNINGS)`n" + $content) -Force
+            }
+          }
 
       - name: Install Flutter Dependencies
-        run: flutter pub get
+        run: |
+          flutter pub get
+          Get-ChildItem -Path windows -Filter "CMakeLists.txt" -Recurse -ErrorAction SilentlyContinue | ForEach-Object {
+            $content = Get-Content $_.FullName -Raw
+            if (-not $content.Contains("_SILENCE_EXPERIMENTAL_COROUTINE_DEPRECATION_WARNINGS")) {
+              Set-Content -Path $_.FullName -Value ("add_definitions(-D_SILENCE_EXPERIMENTAL_COROUTINE_DEPRECATION_WARNINGS)`n" + $content) -Force
+            }
+          }
 
       - name: Build Flutter Windows Native Release
+        env:
+          CL: "/D_SILENCE_EXPERIMENTAL_COROUTINE_DEPRECATION_WARNINGS"
+          _CL_: "/D_SILENCE_EXPERIMENTAL_COROUTINE_DEPRECATION_WARNINGS"
         run: flutter build windows --release
 
       - name: Stage Native Release Files
